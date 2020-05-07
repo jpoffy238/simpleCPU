@@ -10,21 +10,26 @@ public class basicMemory implements MemoryDriver {
 	public basicMemory() {
 		memory = new byte[maxMemorySize];
 		int i = 0;
-		memory[i++] = OpCodes.NOP.code()	;
-		memory[i++] = OpCodes.LDA.code();		
-		memory[i++] = 0x0a;   		
-		memory[i++] = OpCodes.LDB.code();			
-		memory[i++] = 0x0c;			
-		memory[i++] = OpCodes.ADDB.code();    
-		memory[i++] = OpCodes.PUSHA.code();
-		memory[i++] = OpCodes.LDA.code(); 
-		memory[i++] = (byte) 0x0ff;   			
-		memory[i++] = OpCodes.POPA.code();  		
-		memory[i++] = OpCodes.PUSHB.code();
-		memory[i++] = OpCodes.POPA.code();
-		memory[i++] = OpCodes.JMP.code();
-		memory[i++] = 8;
-		memory[i++] = (byte) 0xff; 	 //  0a HLT
+		memory[i++] = OpCodes.NOP.code()	;      //   0
+		memory[i++] = OpCodes.LDA.code();		   //   1
+		memory[i++] = 0x0a;   		                       //   2
+		memory[i++] = OpCodes.LDB.code();		   //   3
+		memory[i++] = 0x0c;			                       //   4
+		memory[i++] = OpCodes.ADDB.code();     //   5
+		memory[i++] = OpCodes.PUSHA.code();   //   6
+		memory[i++] = OpCodes.LDA.code();        //   7
+		memory[i++] = (byte) 0x0ff;   			       //   8
+		memory[i++] = OpCodes.POPA.code();  	   //   9 	
+		memory[i++] = OpCodes.PUSHB.code();   //  10
+		memory[i++] = OpCodes.POPA.code();     //  11
+		memory[i++] = OpCodes.JSR.code();         // 12
+		memory[i++] = 0x00;                                 //  13
+		memory[i++] = 0x04;                                 // 14
+		memory[i++] = (byte) 0xff; 	                  //  15  
+		i = 0x0400;
+		memory[i++] = OpCodes.LDX.code();      // 0x0400
+		memory[i++] = 0x02;                               // 0x0401
+		memory[i++] = OpCodes.RTN.code();      // 0x0402
 	}
 	
 	public byte read(int address) {
@@ -34,7 +39,7 @@ public class basicMemory implements MemoryDriver {
 			value = memory[address];
 		}
 		try {
-			Thread.sleep(100);
+			Thread.sleep(1);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -48,7 +53,7 @@ public class basicMemory implements MemoryDriver {
 			 memory[address] = data;
 		}
 		try {
-			Thread.sleep(100);
+			Thread.sleep(1);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

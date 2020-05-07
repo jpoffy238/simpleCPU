@@ -10,7 +10,7 @@ public class JRZ extends Instruction {
 		// TODO Auto-generated method stub
 		if (c.flags.ZFLAG.isSet()) {
 			byte offset = c.memory.read(c.pc);
-			c.pc = (int)(c.pc+offset)&0xff;
+			c.pc = (int)(c.pc+offset);
 		}
 	}
 

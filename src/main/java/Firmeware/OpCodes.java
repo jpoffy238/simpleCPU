@@ -26,7 +26,9 @@ public  enum OpCodes {
 	CMP(getOpcode(), new CMP()),
 	JMP(getOpcode(), new JMP()),
 	JRZ(getOpcode(), new JRZ()),
-	//JSR(getOpcode(), new JSR()),
+	
+	JSR(getOpcode(), new JSR()),
+	RTN(getOpcode(), new RTN()),
 	ADDB(getOpcode(), new ADDB()),
 	PUSHB( getOpcode(), new PUSHB()),
 	POPB(getOpcode(), new POPB()),

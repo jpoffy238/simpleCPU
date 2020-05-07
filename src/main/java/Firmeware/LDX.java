@@ -9,6 +9,6 @@ public class LDX extends Instruction {
 		byte m = c.memory.read(c.pc);
 		c.x.set(m);
 	
-		c.pc = (++c.pc)&0x00ff;
+		c.pc = (++c.pc);
 	}
 }

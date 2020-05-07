@@ -14,7 +14,7 @@ public class LDB extends Instruction {
 		if ( m == 0) {
 			registerFlags.ZFLAG.set();
 		}
-		c.pc = (++c.pc)&0x00ff;
+		c.pc = (++c.pc);
 	}
 
 	public void setFlags(CPU u) {

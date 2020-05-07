@@ -27,7 +27,7 @@ public class CPU {
 	
 	public  CPU()
 	{
-		sp.set(255);
+		sp.set(0x01ff);
 		clockState=0;
 	}
 	
@@ -35,9 +35,11 @@ public class CPU {
 		registerFlags.reset();
 		a.reset();
 		b.reset();
+		x.reset();
+		y.reset();
 		pc= 0;
 		sp.reset();
-		sp.set((byte)0xFF); // set to top of memory
+		sp.set(0x01ff); // set to top of memory
 		clockState=0;
 		
 			
@@ -65,6 +67,8 @@ public class CPU {
 		System.out.println ("FLAGS: " + flags.dump());	
 		System.out.println("A         : " + String.format("%8s", Integer.toHexString(a.get())));
 		System.out.println("B         : " + String.format("%8s", Integer.toHexString(b.get())));
+		System.out.println("X         : " + String.format("%8s", Integer.toHexString(x.get())));
+		System.out.println("Y         : " + String.format("%8s", Integer.toHexString(y.get())));
 		System.out.println("PC      : " + String.format("%8s", Integer.toHexString((int)pc)));
 		System.out.println("SP      : " + String.format("%8s", Integer.toHexString((int)sp.get())));
 	  

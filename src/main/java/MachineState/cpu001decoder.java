@@ -34,7 +34,7 @@ public class cpu001decoder implements Decoder {
 			e.printStackTrace();
 		}
 		System.out.println("Fetched Instruction  " + Integer.toHexString(value) + " at location " + Integer.toHexString(c.pc));
-		c.pc = (++c.pc)&0x00ff;
+		c.pc = (++c.pc);
 		return (byte)value;
 	}
 
