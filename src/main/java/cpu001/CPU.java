@@ -9,7 +9,7 @@ import Registers.registerFlags;
 import memoryInterface.MemoryDriver;
 import memoryInterface.basicMemory;
 
-public class CPU {
+public class CPU extends Thread  {
 	private OpCodes op = OpCodes.ADDB;
 	public registerFlags flags = registerFlags.CFLAG;
 	public generalPurpose a = new gpregister();
@@ -45,8 +45,19 @@ public class CPU {
 			
 		
 	}
-	public void start() {
-		
+	
+	public void dump() {
+		System.out.println ("FLAGS: " + flags.dump());	
+		System.out.println("A         : " + String.format("%8s", Integer.toHexString(a.get())));
+		System.out.println("B         : " + String.format("%8s", Integer.toHexString(b.get())));
+		System.out.println("X         : " + String.format("%8s", Integer.toHexString(x.get())));
+		System.out.println("Y         : " + String.format("%8s", Integer.toHexString(y.get())));
+		System.out.println("PC      : " + String.format("%8s", Integer.toHexString((int)pc)));
+		System.out.println("SP      : " + String.format("%8s", Integer.toHexString((int)sp.get())));
+	  
+	}
+
+	public void run() {
 		while (true) {
 			clockState=0;
 			byte opcode = decoder.fetchInstruction(this);
@@ -59,16 +70,5 @@ public class CPU {
 			dump();
 		}
 		
-		
-	}
-	public void dump() {
-		System.out.println ("FLAGS: " + flags.dump());	
-		System.out.println("A         : " + String.format("%8s", Integer.toHexString(a.get())));
-		System.out.println("B         : " + String.format("%8s", Integer.toHexString(b.get())));
-		System.out.println("X         : " + String.format("%8s", Integer.toHexString(x.get())));
-		System.out.println("Y         : " + String.format("%8s", Integer.toHexString(y.get())));
-		System.out.println("PC      : " + String.format("%8s", Integer.toHexString((int)pc)));
-		System.out.println("SP      : " + String.format("%8s", Integer.toHexString((int)sp.get())));
-	  
 	}
 }
