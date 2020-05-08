@@ -8,52 +8,41 @@ public class gpregister implements generalPurpose {
 	char name;
 	public int get() {
 		// TODO Auto-generated method stub
-		try {
-			Thread.sleep(1);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		return (value & 0xff);
 	}
 
 	public void set(int  value) {
 		// TODO Auto-generated method stub
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		
+		this.value = value & 0x00ff;
+		if (this.value == 0) {
+			registerFlags.ZFLAG.set();
+		} else {
+			registerFlags.ZFLAG.clear();
+		} 
+		if ((value & 0x40) != 0) {
+			registerFlags.NFLAG.set();
 		}
-		this.value = value & 0xff;
 	}
 
-	public void inc() throws cflagException {
+	public void inc() { 
 		// TODO Auto-generated method stub
-		if (value > 255) {
-			throw new cflagException();
-		}
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		this.value++;
+	this.value++;
+	if (value > 255) {
+			registerFlags.CFLAG.set();
+			value = 0;
+		}		
 	}
 
-	public void dec() throws oflagException {
+	public void dec()  {
 		// TODO Auto-generated method stub
 		if (value == 0) {
-			throw new oflagException();
-		}
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			registerFlags.CFLAG.set();
+			registerFlags.NFLAG.set();
 		}
 		this.value--;
+		this.value&=0x00ff;
 		}
 	
 
@@ -66,6 +55,8 @@ public class gpregister implements generalPurpose {
 	public void reset() {
 		// TODO Auto-generated method stub
 		value = 0;
+		registerFlags.reset();
+		registerFlags.ZFLAG.set();
 	}
 
 }

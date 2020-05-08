@@ -13,12 +13,9 @@ public class POPA extends Instruction {
 			int madd = (int)(c.sp.get()) ;
 			
 		c.a.set(c.memory.read(madd));
-		try {
+		
 			c.sp.inc();
-		} catch (cflagException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		
 	
 

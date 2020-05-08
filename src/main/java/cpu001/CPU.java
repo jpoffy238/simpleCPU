@@ -46,8 +46,7 @@ public class CPU {
 		
 	}
 	public void start() {
-		long time = System.currentTimeMillis();
-		long ptime = time;
+		
 		while (true) {
 			clockState=0;
 			byte opcode = decoder.fetchInstruction(this);
@@ -55,9 +54,8 @@ public class CPU {
 			state = decoder.decode(this,  opcode);
 			clockState++;
 			state.exeute(this);
-			time = System.currentTimeMillis();
-			System.out.println("Time in Millis: " + (time - ptime));
-			ptime = time;
+		
+		
 			dump();
 		}
 		

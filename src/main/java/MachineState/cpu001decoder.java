@@ -21,33 +21,23 @@ public class cpu001decoder implements Decoder {
 	public static Map<Integer, machineState> decoder = new HashMap<Integer, machineState>();
 	
 	public static void AddInstruction(Integer opcode, machineState m) {
+		System.out.println("Adding : " + m.getClass().getCanonicalName());
 		decoder.put(opcode, m);
 	}
 	public byte fetchInstruction(CPU c) {
 		// TODO Auto-generated method stub
 		MemoryDriver  m = c.memory;
 		int value = (int)(m.read(c.pc) &0xff);
-		try {
-			Thread.sleep(10);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println("Fetched Instruction  " + Integer.toHexString(value) + " at location " + Integer.toHexString(c.pc));
+		
 		c.pc = (++c.pc);
 		return (byte)value;
 	}
 
 	public machineState decode(CPU c, byte instruction) {
 		// TODO Auto-generated method stub
-		System.out.println("Decoding " + (int)(instruction&0x00ff));
+	
 		machineState m = decoder.get(new Integer((int)(instruction&0xff)));
-		try {
-			Thread.sleep(10);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		if (null == m) {
 			System.out.println(" Illegal instruction - exit");
 			m = new HLT();
