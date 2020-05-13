@@ -44,11 +44,13 @@ public enum registerFlags {
 			}
 		}
 		public final void clear() {
+			if (isSet()) {
 			lock.writeLock().lock();
 			try { 
 			flags^=this.mask;
 			} finally {
 				lock.writeLock().unlock();
+			}
 			}
 		}
 		public final static void clear(List<registerFlags> flagList) {
@@ -62,8 +64,16 @@ public enum registerFlags {
 		}
 		public final  String  dump() {
 			
+			String state;
+			state  = (CFLAG.isSet()		? "C" : "c");
+			state += (ZFLAG.isSet()		? "Z" : "z");
+			state += (IDFLAG.isSet()		? "I" : "i" );
+			state += (DCFLAG.isSet()		? "D" : "d" );
+			state += (BFLAG.isSet()		? "B" : "b");
+			state += (OVFLAG.isSet()		? "O" : "o");
+			state += (NFLAG.isSet()		? "N" : "n");
+			return state;
 			
-			return String.format("%8s", Integer.toBinaryString(flags)).replace(" ", "0");
 		}
 		
 }

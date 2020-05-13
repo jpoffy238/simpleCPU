@@ -4,6 +4,7 @@ import Registers.registerFlags;
 import cpu001.CPU;
 
 public class LDAZX extends Instruction {
+	// Zero Page reference (X)
 	public void exeute(CPU c) {
 		// TODO Auto-generated method stub
 		byte m = c.memory.read(c.x.get() &0x00ff);

@@ -58,6 +58,7 @@ public class CPU extends Thread  {
 	}
 
 	public void run() {
+		reset();
 		while (true) {
 			clockState=0;
 			byte opcode = decoder.fetchInstruction(this);

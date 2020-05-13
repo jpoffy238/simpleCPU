@@ -4,7 +4,8 @@ import Registers.registerFlags;
 import cpu001.CPU;
 
 public class LDA extends Instruction {
-
+// Load from Immediate on byte following
+// instructions.
 	public LDA () {
 		
 	}

@@ -33,6 +33,7 @@ public  enum OpCodes {
 	PUSHB( getOpcode(), new PUSHB()),
 	POPB(getOpcode(), new POPB()),
 	PRTW(getOpcode(), new PRTW()),
+	ADCI(getOpcode(), new ADCI()),
 	HLT(255, new HLT());
 	
 	public final  Integer  instructionOpcode ;

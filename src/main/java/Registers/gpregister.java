@@ -15,14 +15,16 @@ public class gpregister implements generalPurpose {
 	public void set(int  value) {
 		// TODO Auto-generated method stub
 		
-		this.value = value & 0x00ff;
+		this.value = value & 0xff;
 		if (this.value == 0) {
 			registerFlags.ZFLAG.set();
 		} else {
 			registerFlags.ZFLAG.clear();
 		} 
-		if ((value & 0x40) != 0) {
+		if ((value & 0x80) != 0) {
 			registerFlags.NFLAG.set();
+		} else {
+			registerFlags.NFLAG.clear();
 		}
 	}
 
