@@ -15,6 +15,9 @@ import Firmeware.Math.ADDB;
 import Firmeware.Stack.POPA;
 import Firmeware.Stack.PUSHA;
 import cpu001.CPU;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
+import exceptions.illegalOpCodeException;
 import memoryInterface.MemoryDriver;
 
 public class cpu001decoder implements Decoder {
@@ -31,25 +34,25 @@ public class cpu001decoder implements Decoder {
 		}
 		decoder.put(opcode, m);
 	}
-	public byte fetchInstruction(CPU c) {
+	public byte fetchInstruction(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		MemoryDriver  m = c.memory;
-		int value = (int)(m.read(c.pc) &0xff);
+		int value;
+	
+			value = (int)(m.read(c.pc) &0xff);
+	
 		
 		c.pc = (++c.pc);
 		return (byte)value;
 	}
 
-	public machineState decode( byte instruction) {
-		// TODO Auto-generated method stub
+	public machineState decode( byte instruction) throws illegalOpCodeException {
 	
 		machineState m = decoder.get(new Integer((int)(instruction&0xff)));
 		
 		if (null == m) {
-			System.out.println(" Illegal instruction - exit");
-			m = new HLT();
+			throw new illegalOpCodeException();
 		}
-		System.out.println("Executing : " + m.getClass().getCanonicalName());
 		return m;
 	}
 

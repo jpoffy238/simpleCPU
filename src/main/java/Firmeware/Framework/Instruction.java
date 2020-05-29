@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cpu001.CPU;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
 
 public abstract class Instruction implements machineState {
 	
@@ -13,6 +15,7 @@ public abstract class Instruction implements machineState {
 	public final String KEY_MNEMONIC = "Mnemonic";
 	public final String KEY_INSTRUCTION_SIZE = "InstructionSize";
 	public final String KEY_CYCLES = "Cycles";
+	public final String KEY_FLAGS_EFFECTED = "Flags";
 	public final String KEY_WEB ="Web Reference";
 	public final String KEY_DESCRIPTION = "Description";
 	public final String KEY_ADDRESSING_MODE = "AddressingMode";
@@ -37,10 +40,10 @@ Indirect,X    LDA ($44,X)   $A1  2   6
 Indirect,Y    LDA ($44),Y   $B1  2   5+
 */
 	private Map<String, String>  OpCodeProperties = new HashMap<String, String>();
-	public Instruction(byte op) {
+	public Instruction(byte op)  {
 		opCode = op;
 	}
-	public void exeute(CPU c) {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable{
 		// TODO Auto-generated method stub
 	}
 	public byte getOpCode() {
