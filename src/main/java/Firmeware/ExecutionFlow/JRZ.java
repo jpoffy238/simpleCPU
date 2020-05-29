@@ -2,7 +2,7 @@ package Firmeware.ExecutionFlow;
 
 import Firmeware.Framework.Instruction;
 import cpu001.CPU;
-
+//TODO update with true 6502 opcode
 public class JRZ extends Instruction {
 
 	public JRZ() {
@@ -16,9 +16,6 @@ public class JRZ extends Instruction {
 		}
 	}
 
-	public void setFlags(CPU u) {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 }

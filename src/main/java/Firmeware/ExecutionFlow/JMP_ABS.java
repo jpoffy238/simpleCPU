@@ -45,9 +45,6 @@ rather than $5080 as you intended i.e. the 6502
 		c.pc = (upper & 0x00ff ) << 8 + (lower & 0xff);
 	}
 
-	public void setFlags(CPU u) {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 }
