@@ -1,25 +1,24 @@
-package Firmeware;
+package Firmeware.Load;
 
+import Firmeware.Framework.Instruction;
 import Registers.registerFlags;
 import cpu001.CPU;
 
-public class LDA extends Instruction {
-// Load from Immediate on byte following
-// instructions.
-	public LDA () {
-		
+public class LDB extends Instruction {
+	public LDB () {
+	 super((byte)0x3E);
 	}
 	public void exeute(CPU c) {
 		// TODO Auto-generated method stub
 		byte m = c.memory.read(c.pc);
-		c.a.set(m);
+		c.b.set(m);
 		if ( m == 0) {
 			registerFlags.ZFLAG.set();
 		}
-		c.pc = (++c.pc)&0x00ff;
+		c.pc = (++c.pc);
 	}
 
-	public void setFlags(CPU c) {
+	public void setFlags(CPU u) {
 		// TODO Auto-generated method stub
 
 	}

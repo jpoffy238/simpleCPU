@@ -1,12 +1,13 @@
-package Firmeware;
+package Firmeware.Stack;
 
+import Firmeware.Framework.Instruction;
 import cpu001.CPU;
 import exceptions.cflagException;
 
 public class POPB extends Instruction {
 
 	public POPB() {
-		
+		super((byte)(0x00));
 	}
 	public void exeute(CPU c) {
 		// TODO Auto-generated method stub

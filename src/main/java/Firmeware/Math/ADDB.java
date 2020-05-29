@@ -1,11 +1,13 @@
-package Firmeware;
+package Firmeware.Math;
 
+import Firmeware.Framework.Instruction;
 import Registers.registerFlags;
 import cpu001.CPU;
 
 public class ADDB extends Instruction  {
 
 public ADDB () {	
+	super((byte)0x30);
 }
 	public void exeute(CPU c) {
 		// TODO Auto-generated method stub

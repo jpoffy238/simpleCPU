@@ -1,10 +1,12 @@
-package Firmeware;
+package Firmeware.ExecutionFlow;
 
+import Firmeware.Framework.Instruction;
 import cpu001.CPU;
 
 public class HLT extends Instruction {
 
 	public HLT() {
+		super((byte) 0x3f);
 		
 	}
 	public void exeute(CPU c) {

@@ -1,11 +1,11 @@
 package MachineState;
 
-import Firmeware.machineState;
+import Firmeware.Framework.machineState;
 import cpu001.CPU;
 
 public interface Decoder {
-	public byte  fetchInstruction(CPU c);
-	public machineState decode(CPU c, byte instruction);
+	public byte  fetchInstruction(CPU c) ;
+	public machineState decode( byte instruction);
 	
 
 

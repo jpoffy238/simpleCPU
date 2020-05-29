@@ -1,6 +1,6 @@
 package cpu001;
-import Firmeware.OpCodes;
-import Firmeware.machineState;
+import Firmeware.Framework.OpCodes;
+import Firmeware.Framework.machineState;
 import MachineState.Decoder;
 import MachineState.cpu001decoder;
 import Registers.generalPurpose;
@@ -10,7 +10,7 @@ import memoryInterface.MemoryDriver;
 import memoryInterface.basicMemory;
 
 public class CPU extends Thread  {
-	private OpCodes op = OpCodes.ADDB;
+	private OpCodes op = OpCodes.NOP;
 	public registerFlags flags = registerFlags.CFLAG;
 	public generalPurpose a = new gpregister();
 	public generalPurpose b = new gpregister();
@@ -63,7 +63,7 @@ public class CPU extends Thread  {
 			clockState=0;
 			byte opcode = decoder.fetchInstruction(this);
 			clockState++;
-			state = decoder.decode(this,  opcode);
+			state = decoder.decode(opcode);
 			clockState++;
 			state.exeute(this);
 		

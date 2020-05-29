@@ -1,6 +1,6 @@
 package memoryInterface;
 
-import Firmeware.OpCodes;
+import Firmeware.Framework.OpCodes;
 
 public class basicMemory implements MemoryDriver {
 	public final static int  maxMemorySize = 4*1024;
@@ -10,12 +10,7 @@ public class basicMemory implements MemoryDriver {
 	public basicMemory() {
 		memory = new byte[maxMemorySize];
 		int i = 0;
-		memory[i++] = OpCodes.ADCI.code();
-		memory[i++] = 0x01;
-		memory[i++] = OpCodes.ADCI.code();
-		memory[i++] = 0x22;
-		memory[i++] = OpCodes.ADCI.code();
-		memory[i++] = 0x7f;
+
 		memory[i++] = OpCodes.HLT.code();
 	}
 	

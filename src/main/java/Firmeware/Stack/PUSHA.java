@@ -1,11 +1,12 @@
-package Firmeware;
+package Firmeware.Stack;
 
+import Firmeware.Framework.Instruction;
 import cpu001.CPU;
 
-public class PUSHB extends Instruction {
+public class PUSHA extends Instruction {
 
-	public PUSHB () {
-		
+	public PUSHA () {
+		super((byte)0x00);
 	}
 	public void exeute(CPU c) {
 		// TODO Auto-generated method stub
@@ -13,7 +14,7 @@ public class PUSHB extends Instruction {
 		
 		int  sp = c.sp.get();
 		sp--;
-		byte data = (byte)(c.b.get() & 0xff);
+		byte data = (byte)(c.a.get() & 0xff);
 		
 		c.memory.write(sp, data);
 		c.sp.set(sp);		

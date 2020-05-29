@@ -1,8 +1,13 @@
-package Firmeware;
+package Firmeware.ExecutionFlow;
 
+import Firmeware.Framework.Instruction;
 import cpu001.CPU;
 
 public class RTN extends Instruction {
+	
+	public RTN( ) {
+		super((byte)0x00);
+	}
 	public void exeute(CPU c) {
 		// return from  Subroutine  
 		// pop the lower  order PC from  stack 

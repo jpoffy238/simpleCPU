@@ -1,10 +1,10 @@
-package Firmeware;
+package Firmeware.Framework;
 
 import cpu001.CPU;
 
 public interface machineState {
 		public void exeute(CPU c);
-		public void setFlags(CPU u);
+		public byte getOpCode();
 }
 
 /*  Machine States

@@ -1,8 +1,12 @@
-package Firmeware;
+package Firmeware.ExecutionFlow;
 
+import Firmeware.Framework.Instruction;
 import cpu001.CPU;
 
 public class JSR extends Instruction {
+	public JSR() {
+		super((byte)(0x00));
+	}
 	public void exeute(CPU c) {
 		// Jump to Subroutine  
 		// Push the high order PC+2 to stack 

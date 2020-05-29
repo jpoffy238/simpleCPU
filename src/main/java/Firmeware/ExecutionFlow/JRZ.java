@@ -1,10 +1,12 @@
-package Firmeware;
+package Firmeware.ExecutionFlow;
 
+import Firmeware.Framework.Instruction;
 import cpu001.CPU;
 
 public class JRZ extends Instruction {
 
 	public JRZ() {
+		super((byte)(0x00));
 	}
 	public void exeute(CPU c) {
 		// TODO Auto-generated method stub
