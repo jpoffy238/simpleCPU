@@ -26,10 +26,10 @@ public class LDAZX extends Instruction {
 		try {
 			c.a.set(m);
 		} catch (zflagException e) {
-		
+			c.NFLAG.clear();
 			c.ZFLAG.set();
 		} catch (nflagException e) {
-		
+			c.ZFLAG.clear();
 			c.NFLAG.set();
 		}
 		c.pc = (++c.pc);

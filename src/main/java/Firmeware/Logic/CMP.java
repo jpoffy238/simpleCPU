@@ -50,11 +50,14 @@ of and the sign (i.e. A>=$80) of the accumulator.
 		int result = a - m;
 		if (result == 0) {
 			c.ZFLAG.set();
+			c.NFLAG.clear();
 		} else {
 			if (result < 0) {
 				c.NFLAG.set();
+				c.ZFLAG.clear();
 			}  else {
 				c.NFLAG.clear();
+				c.ZFLAG.clear();
 			}
 		}
 	}

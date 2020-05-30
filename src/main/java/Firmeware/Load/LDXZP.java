@@ -31,8 +31,10 @@ public class LDXZP extends Instruction {
 			c.x.set(value);
 		} catch (zflagException e) {
 			c.ZFLAG.set();
+			c.NFLAG.clear();
 		} catch (nflagException e) {
 			c.NFLAG.set();
+			c.ZFLAG.clear();
 		}
 	
 		c.pc++;

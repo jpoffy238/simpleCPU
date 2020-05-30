@@ -27,9 +27,11 @@ public ADDB () {
 		} catch (zflagException e) {
 			// TODO Auto-generated catch block
 			c.ZFLAG.set();
+			c.NFLAG.clear();
 		} catch (nflagException e) {
 			// TODO Auto-generated catch block
 			c.NFLAG.set();
+			c.ZFLAG.clear();
 		}
 
 	}

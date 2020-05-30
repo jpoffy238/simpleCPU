@@ -34,8 +34,10 @@ public LDXI() {
 			c.x.set(m);
 		} catch (zflagException e) {
 			c.ZFLAG.set();
+			c.NFLAG.clear();
 		} catch (nflagException e) {
 			c.NFLAG.set();
+			c.ZFLAG.clear();
 		}
 	
 		c.pc = (++c.pc);
