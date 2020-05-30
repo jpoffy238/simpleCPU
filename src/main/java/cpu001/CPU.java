@@ -14,7 +14,11 @@ import memoryInterface.MemoryDriver;
 import memoryInterface.basicMemory;
 
 public class CPU extends Thread {
-	private OpCodes op = OpCodes.NOP;
+	public CPU(MemoryDriver memdrv,Decoder dcd ) {
+		memory = memdrv;
+		decoder = dcd;
+	}
+
 	public registerFlags CFLAG = new registerFlags("C");
 	public registerFlags ZFLAG = new registerFlags("Z");
 	public registerFlags IFLAG = new registerFlags("I");
@@ -30,8 +34,8 @@ public class CPU extends Thread {
 
 	public int pc;
 	public int sp;
-	public MemoryDriver memory = new basicMemory();
-
+	public MemoryDriver memory;
+	Decoder decoder;
 	public int clockState;
 
 	public CPU() {
@@ -69,29 +73,29 @@ public class CPU extends Thread {
 	}
 
 	public String dump() {
-		String flagStatus = CFLAG.toString() + NFLAG.toString() + ZFLAG.toString() + VFLAG.toString() + DFLAG.toString()
+		String flagStatus = "\t\t[" + CFLAG.toString() + NFLAG.toString() + ZFLAG.toString() + VFLAG.toString() + DFLAG.toString()
 				+ IFLAG.toString() + BFLAG.toString() +
-
-				"A         : " + String.format("%8s", Integer.toHexString(a.get())) + "B         : "
-				+ String.format("%8s", Integer.toHexString(b.get())) + "X         : "
-				+ String.format("%8s", Integer.toHexString(x.get())) + "Y         : "
-				+ String.format("%8s", Integer.toHexString(y.get())) + "PC      : "
-				+ String.format("%8s", Integer.toHexString((int) pc)) + "SP      : "
-				+ String.format("%8s", Integer.toHexString((int) sp));
+				"]\tA[ " + String.format("%8s", Integer.toHexString(a.get())) + "]\tB["
+				+ String.format("%8s", Integer.toHexString(b.get())) + "]\tX["
+				+ String.format("%8s", Integer.toHexString(x.get())) + "]\tY[ "
+				+ String.format("%8s", Integer.toHexString(y.get())) + "]\tPC["
+				+ String.format("%8s", Integer.toHexString((int) pc)) + "]\tSP["
+				+ String.format("%8s", Integer.toHexString((int) sp)) + "]";
 		return flagStatus;
 
 	}
 
 	public void run() {
 		reset();
-		Decoder decoder = new cpu001decoder();
+		
 		machineState state;
 		while (true) {
 			clockState = 0;
-			byte opcode ;
+			byte opcode = 0;
 			clockState++;
 			try {
-				opcode = decoder.fetchInstruction(this);
+				opcode = 0;
+				opcode =fetchInstruction();
 				state = decoder.decode(opcode);
 				clockState++;
 				state.exeute(this);
@@ -99,7 +103,7 @@ public class CPU extends Thread {
 				System.out.println(currentState);
 			} catch (illegalOpCodeException e) {
 				// TODO Auto-generated catch block
-				System.err.println("BAD OPCODE : " + dump());
+				System.err.println("["+ (int)(opcode&0xff) + "] BAD OPCODE : " + dump());
 				System.exit(8);
 			} catch (illegalAddressException e) {
 				System.err.println("Bad address: " + dump());
@@ -109,5 +113,15 @@ public class CPU extends Thread {
 				System.exit(8);
 			}
 		}
+	}
+	public byte fetchInstruction() throws illegalAddressException, DeviceUnavailable {
+		// TODO Auto-generated method stub
+		MemoryDriver m = memory;
+		int value;
+
+		value = (int) (m.read(pc) & 0xff);
+
+		pc++;
+		return (byte) value;
 	}
 }

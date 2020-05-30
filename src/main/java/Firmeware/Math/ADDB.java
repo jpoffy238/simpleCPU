@@ -3,6 +3,8 @@ package Firmeware.Math;
 import Firmeware.Framework.Instruction;
 import Registers.registerFlags;
 import cpu001.CPU;
+import exceptions.nflagException;
+import exceptions.zflagException;
 
 public class ADDB extends Instruction  {
 
@@ -17,16 +19,21 @@ public ADDB () {
 		int value = a + b;
 		if (value > 255 ) {
 			value = value & 0xff;
-			registerFlags.CFLAG.isSet();
+			c.CFLAG.set();
 		}
 		c.clockState++;
-		c.a.set((byte)value & 0xff);
+		try {
+			c.a.set((byte)value & 0xff);
+		} catch (zflagException e) {
+			// TODO Auto-generated catch block
+			c.ZFLAG.set();
+		} catch (nflagException e) {
+			// TODO Auto-generated catch block
+			c.NFLAG.set();
+		}
 
 	}
 
-	public void setFlags(CPU u) {
-		// TODO Auto-generated method stub
 
-	}
 
 }

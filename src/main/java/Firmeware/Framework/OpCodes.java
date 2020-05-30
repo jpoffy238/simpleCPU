@@ -1,5 +1,8 @@
 package Firmeware.Framework;
 
+
+import java.util.Map;
+
 import Firmeware.ExecutionFlow.BEQ;
 import Firmeware.ExecutionFlow.HLT;
 import Firmeware.ExecutionFlow.JMP_ABS;
@@ -8,15 +11,16 @@ import Firmeware.ExecutionFlow.NOP;
 import Firmeware.ExecutionFlow.RTS;
 import Firmeware.Load.LDAZX;
 import Firmeware.Load.LDA_IMM;
-import Firmeware.Stack.PLA;
-import Firmeware.store.STAX;
-import Firmeware.store.STAZ;
-import MachineState.cpu001decoder;
+import Firmeware.Load.LDXABS;
+import Firmeware.Load.LDXABSY;
 import Firmeware.Load.LDXI;
 import Firmeware.Load.LDXZP;
 import Firmeware.Load.LDXZPY;
-import Firmeware.Load.LDXABS;
-import Firmeware.Load.LDXABSY;
+import Firmeware.Stack.PHA;
+import Firmeware.Stack.PLA;
+import Firmeware.store.STAX;
+import Firmeware.store.STAZ;
+import MachineState.DecoderMap;
 
 /*
  * 
@@ -39,6 +43,7 @@ public  enum OpCodes {
 	LDXZPY(new LDXZPY()),
 	LDXABS(new LDXABS()),
 	LDXABSY(new LDXABSY()),
+	PHA(new PHA()),
 HLT( new HLT());
 	
 	public final  Integer  instructionOpcode ;
@@ -47,9 +52,27 @@ HLT( new HLT());
 	private   OpCodes ( machineState m) {
 		instructionOpcode = new Integer( (int)(m.getOpCode() & 0x00ff ));
 		microcode = m;
-		cpu001decoder.AddInstruction(instructionOpcode, microcode);
+		//cpu001decoder.AddInstruction(instructionOpcode, microcode);
+		AddInstruction(instructionOpcode, microcode);
 	}
 	public byte code ( ) {
 		return instructionOpcode.byteValue();
+	}
+	private static  void AddInstruction(Integer opcode, machineState m) {
+		
+		System.out.println("Adding : " + m.getClass().getCanonicalName());
+		if (getMap().containsKey(opcode)) {
+			machineState tmp = getMap().get(opcode);
+			System.err.println("Error duplicate opcode" + opcode.toString());
+			System.err.println("Failed to add  : " + m.getClass().getCanonicalName());
+			System.err.println("Failed dulicate: " + tmp.getClass().getCanonicalName());
+			System.exit(8);
+		}
+		getMap().put(opcode, m);
+	}
+	public static Map<Integer, machineState>  getMap() {
+		 
+		return DecoderMap.getMap();
+			 
 	}
 }
