@@ -22,24 +22,17 @@ public class LDXABS extends Instruction {
 
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub
-		byte opperand_lower = c.memory.read(c.pc); 
-		c.pc++;
-		byte opperand_upper = c.memory.read(c.pc); 
-		c.pc++;
-		int loadAddress = opperand_upper << 8 + opperand_lower;
-		
+		// TODO Auto-generated method stub	
+		int loadAddress = getAbsoluteAddress(c);		
 		byte value = c.memory.read((int)(loadAddress));
 		try {
 			c.x.set(value);
 		} catch (zflagException e) {
-			c.ZFLAG.set();
-			c.NFLAG.clear();
+			handleZException(c);
 		} catch (nflagException e) {
-			c.NFLAG.set();
-			c.ZFLAG.clear();
+			handleNException(c);
 		}
 	
-		
+		c.pc+=2;
 	}
 }

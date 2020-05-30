@@ -18,13 +18,11 @@ public class LDB extends Instruction {
 		try {
 			c.b.set(m);
 		} catch (zflagException e) {
-			c.ZFLAG.set();
-			c.NFLAG.clear();
+			handleZException(c);
 		} catch (nflagException e) {
-			c.NFLAG.set();
-			c.ZFLAG.clear();
+			handleNException(c);
 		}
-		c.pc = (++c.pc);
+		c.pc++;
 	}
 
 }

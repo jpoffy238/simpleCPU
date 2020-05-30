@@ -58,5 +58,30 @@ public void  setProperty (String propertyName, String value) {
 public String getProperty(String propertyName ) {
 	return OpCodeProperties.get(propertyName);
 }
-
+public int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+	byte opperand_lower = c.memory.read(c.pc); 
+	
+	byte opperand_upper = c.memory.read(c.pc+1); 
+	
+	int loadAddress = opperand_upper << 8 + opperand_lower;
+	return loadAddress;
+}
+public int getAbsoluteAddressInxY(CPU c) throws illegalAddressException, DeviceUnavailable {
+	int loadAddress = getAbsoluteAddress(c);
+	loadAddress += c.y.get();
+	return loadAddress;
+}
+public int getAbsoluteAddressInxX(CPU c) throws illegalAddressException, DeviceUnavailable {
+	int loadAddress = getAbsoluteAddress(c);
+	loadAddress += c.x.get();
+	return loadAddress;
+}
+public void handleZException (CPU c) {
+	c.ZFLAG.set();
+	c.NFLAG.clear();
+}
+public void handleNException(CPU c) {
+	c.NFLAG.set();
+	c.ZFLAG.clear();
+}
 }
