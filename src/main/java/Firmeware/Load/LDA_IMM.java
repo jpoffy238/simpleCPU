@@ -39,9 +39,11 @@ public class LDA_IMM extends Instruction {
 		try {
 			c.a.set(m);
 		} catch (zflagException z) {
-			c.CFLAG.isSet();
+			c.ZFLAG.set();
+			c.NFLAG.clear();
 		} catch (nflagException n) {
 			c.NFLAG.set();
+			c.ZFLAG.clear();
 		}
 		
 	}

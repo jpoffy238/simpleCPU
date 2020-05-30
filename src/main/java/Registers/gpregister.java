@@ -12,10 +12,16 @@ public class gpregister implements generalPurpose {
 		return (value & 0xff);
 	}
 
-	public void set(int  value) {
+	public void set(int  value) throws zflagException, nflagException {
 		// TODO Auto-generated method stub
 		
 		this.value = value & 0xff;
+		if (0 == this.value ) {
+			throw new zflagException();
+		}
+		if ( (0x80 & this.value )!= 0 ) {
+			throw new nflagException();
+		}
 	
 	}
 

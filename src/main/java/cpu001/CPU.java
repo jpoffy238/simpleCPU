@@ -75,12 +75,12 @@ public class CPU extends Thread {
 	public String dump() {
 		String flagStatus = "\t\t[" + CFLAG.toString() + NFLAG.toString() + ZFLAG.toString() + VFLAG.toString() + DFLAG.toString()
 				+ IFLAG.toString() + BFLAG.toString() +
-				"]\tA[ " + String.format("%8s", Integer.toHexString(a.get())) + "]\tB["
-				+ String.format("%8s", Integer.toHexString(b.get())) + "]\tX["
-				+ String.format("%8s", Integer.toHexString(x.get())) + "]\tY[ "
-				+ String.format("%8s", Integer.toHexString(y.get())) + "]\tPC["
-				+ String.format("%8s", Integer.toHexString((int) pc)) + "]\tSP["
-				+ String.format("%8s", Integer.toHexString((int) sp)) + "]";
+				"]\tA[ " + String.format("%02x", a.get()) + "]\tB["
+				+ String.format("%02xs", b.get()) + "]\tX["
+				+ String.format("%02x", x.get()) + "]\tY[ "
+				+ String.format("%02x", y.get()) + "]\tPC["
+				+ String.format("%04x", pc )+ "]\tSP["
+				+ String.format("%04x", sp) + "]";
 		return flagStatus;
 
 	}
@@ -99,7 +99,8 @@ public class CPU extends Thread {
 				state = decoder.decode(opcode);
 				clockState++;
 				state.exeute(this);
-				String currentState = "[" + state.getClass().getName() + "] " + dump();
+				String currentState = String.format("%-40s", "[" +  state.getClass().getName() + "]" );
+				currentState += dump();
 				System.out.println(currentState);
 			} catch (illegalOpCodeException e) {
 				// TODO Auto-generated catch block
