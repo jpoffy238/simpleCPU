@@ -1,4 +1,4 @@
-package Firmeware.Load;
+package Firmeware.Load.IndexX;
 
 import Firmeware.Framework.Instruction;
 import cpu001.CPU;
@@ -7,12 +7,12 @@ import exceptions.illegalAddressException;
 import exceptions.nflagException;
 import exceptions.zflagException;
 
-public class LDXABS extends Instruction {
-	public LDXABS() {
-		super((byte) 0xae);
+public class LDX_ABSY extends Instruction {
+	public LDX_ABSY() {
+		super((byte) 0xbe);
 		setProperty(KEY_MNEMONIC, "LDX");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABS);
-		setProperty(KEY_OPCODE, "0xae");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABY);
+		setProperty(KEY_OPCODE, "0xbe");
 		setProperty(KEY_INSTRUCTION_SIZE, "3");
 		setProperty(KEY_CYCLES, "4");
 		setProperty(KEY_FLAGS_EFFECTED, "Z,N");
@@ -22,8 +22,8 @@ public class LDXABS extends Instruction {
 
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub	
-		int loadAddress = getAbsoluteAddress(c);		
+		// TODO Auto-generated method stub
+		int loadAddress = getAbsoluteAddressY(c);				
 		byte value = c.memory.read((int)(loadAddress));
 		try {
 			c.x.set(value);
@@ -32,7 +32,7 @@ public class LDXABS extends Instruction {
 		} catch (nflagException e) {
 			handleNException(c);
 		}
-	
 		c.pc+=2;
-	}
+	
+}
 }

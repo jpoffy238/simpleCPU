@@ -1,13 +1,13 @@
-package Firmeware.store;
+package Firmeware.store.Accumulator;
 
 import Firmeware.Framework.Instruction;
 import cpu001.CPU;
 import exceptions.DeviceUnavailable;
 import exceptions.illegalAddressException;
 
-public class STAX extends Instruction {
+public class STA_ZPX extends Instruction {
 	
-	public STAX() {
+	public STA_ZPX() {
 		super((byte)0x95);
 		setProperty(KEY_MNEMONIC, "STA");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZPX);
@@ -32,9 +32,9 @@ public class STAX extends Instruction {
 		 * $008F (e.g. $80 + $0F => $8F).
 		 */
 
-		byte m = c.memory.read(c.pc); 
-		int  zeroPageAddress =(m + c.x.get())& 0xff;
+		
+		int  zeroPageAddress = getZeroPageXAddress(c);
 		c.memory.write(zeroPageAddress, (byte)(c.a.get() & 0xff));
-		c.pc = (++c.pc);
+		c.pc++;
 	}
 }

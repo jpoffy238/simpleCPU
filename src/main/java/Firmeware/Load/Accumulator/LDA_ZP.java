@@ -1,4 +1,4 @@
-package Firmeware.Load;
+package Firmeware.Load.Accumulator;
 
 import Firmeware.Framework.Instruction;
 import cpu001.CPU;
@@ -7,9 +7,9 @@ import exceptions.illegalAddressException;
 import exceptions.nflagException;
 import exceptions.zflagException;
 
-public class LDAZX extends Instruction {
+public class LDA_ZP extends Instruction {
 	// Zero Page reference (X)
-	public LDAZX() {
+	public LDA_ZP() {
 		super ((byte)0xa5);
 		setProperty(KEY_MNEMONIC, "LDA");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZP);
@@ -22,17 +22,15 @@ public class LDAZX extends Instruction {
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int address = getZeroPageXAddress(c);
+		int address = getZeroPageAddress(c);
 		byte m = c.memory.read(address);
 		try {
 			c.a.set(m);
 		} catch (zflagException e) {
-			c.NFLAG.clear();
-			c.ZFLAG.set();
+			handleZException(c);
 		} catch (nflagException e) {
-			c.ZFLAG.clear();
-			c.NFLAG.set();
+			handleNException(c);
 		}
-		c.pc = (++c.pc);
+		c.pc++;
 	}
 }

@@ -1,4 +1,4 @@
-package Firmeware.Load;
+package Firmeware.Load.Accumulator;
 
 import Firmeware.Framework.Instruction;
 import cpu001.CPU;

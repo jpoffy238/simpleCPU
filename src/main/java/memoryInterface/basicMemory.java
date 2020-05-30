@@ -12,21 +12,18 @@ public class basicMemory implements MemoryDriver {
 	public basicMemory() {
 		memory = new byte[maxMemorySize];
 		int i = 0;
-		memory[i++] = OpCodes.LDA.code();
+		memory[i++] = OpCodes.LDA_IMM.code();
 		memory[i++] = 0x00;
-		memory[i++] = OpCodes.LDA.code();        //   7
+		memory[i++] = OpCodes.LDA_IMM.code();        //   7
 		memory[i++] = (byte) 0x0ff;   			       //   8
-		memory[i++] = OpCodes.LDA.code();
+		memory[i++] = OpCodes.LDA_IMM.code();
 		memory[i++] = 0x00;
 		memory[i++] = OpCodes.HLT.code()	;                  //  15  
 		
 		  	memory[i++] = OpCodes.NOP.code()	;      //   0
-				memory[i++] = OpCodes.LDA.code();		   //   1
-				memory[i++] = 0x0a;   		                       //   2
-				memory[i++] = OpCodes.LDB.code();		   //   3
-				memory[i++] = 0x0c;			                       //   4
+				memory[i++] = OpCodes.LDA_IMM.code();		   //   1
 				memory[i++] = OpCodes.PHA.code();   //   6
-				memory[i++] = OpCodes.LDA.code();        //   7
+				memory[i++] = OpCodes.LDA_IMM.code();        //   7
 				memory[i++] = (byte) 0x0ff;   			       //   8
 				memory[i++] = OpCodes.PHA.code();  	   //   9 	
 		
@@ -38,7 +35,7 @@ public class basicMemory implements MemoryDriver {
 				i = 0x0400;
 				memory[i++] = OpCodes.LDXI.code();      // 0x0400
 				memory[i++] = 0x02;                               // 0x0401
-				memory[i++] = OpCodes.LDA.code();
+				memory[i++] = OpCodes.LDA_IMM.code();
 				memory[i++] = 0x00;
 				memory[i++] = OpCodes.RTS.code();      // 0x0402
 		 

@@ -76,6 +76,11 @@ public int getAbsoluteAddressX(CPU c) throws illegalAddressException, DeviceUnav
 	loadAddress += c.x.get();
 	return loadAddress;
 }
+public int getZeroPageAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+	int operand = c.memory.read(c.pc);
+	int address  = (int)(operand) & 0x00ff;
+	return address;
+}
 public int getZeroPageXAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
 	int operand = c.memory.read(c.pc);
 	int address  = (int)(operand + c.x.get()) & 0x00ff;

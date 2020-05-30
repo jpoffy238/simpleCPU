@@ -1,4 +1,4 @@
-package Firmeware.Load;
+package Firmeware.Load.IndexY;
 
 import Firmeware.Framework.Instruction;
 import Registers.registerFlags;
@@ -14,13 +14,13 @@ import exceptions.zflagException;
 Loads a byte of memory into the X register setting the zero and negative flags as appropriate.
  */
 
-public class LDXI extends Instruction {
+public class LDY_IMM extends Instruction {
 	//TODO Setup correct opcode - using default
-public LDXI() {
-	super((byte)0xa2);
-	setProperty(KEY_MNEMONIC, "LDX");
+public LDY_IMM() {
+	super((byte)0xa0);
+	setProperty(KEY_MNEMONIC, "LDY");
 	setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_IMM);
-	setProperty(KEY_OPCODE, "0xa2");
+	setProperty(KEY_OPCODE, "0xa0");
 	setProperty(KEY_INSTRUCTION_SIZE, "2");
 	setProperty(KEY_CYCLES, "2");
 	setProperty(KEY_FLAGS_EFFECTED, "Z,N");
@@ -31,15 +31,13 @@ public LDXI() {
 		// TODO Auto-generated method stub
 		byte m = c.memory.read(c.pc);
 		try {
-			c.x.set(m);
+			c.y.set(m);
 		} catch (zflagException e) {
-			c.ZFLAG.set();
-			c.NFLAG.clear();
+			handleZException(c);
 		} catch (nflagException e) {
-			c.NFLAG.set();
-			c.ZFLAG.clear();
+			handleNException(c);
 		}
 	
-		c.pc = (++c.pc);
+		c.pc++;
 	}
 }

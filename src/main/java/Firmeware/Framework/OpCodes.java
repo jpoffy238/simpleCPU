@@ -9,17 +9,17 @@ import Firmeware.ExecutionFlow.JMP_ABS;
 import Firmeware.ExecutionFlow.JSR;
 import Firmeware.ExecutionFlow.NOP;
 import Firmeware.ExecutionFlow.RTS;
-import Firmeware.Load.LDAZX;
-import Firmeware.Load.LDA_IMM;
-import Firmeware.Load.LDXABS;
-import Firmeware.Load.LDXABSY;
-import Firmeware.Load.LDXI;
-import Firmeware.Load.LDXZP;
-import Firmeware.Load.LDXZPY;
+import Firmeware.Load.Accumulator.LDA_IMM;
+import Firmeware.Load.Accumulator.LDA_ZX;
+import Firmeware.Load.IndexX.LDX_ABS;
+import Firmeware.Load.IndexX.LDX_IMM;
+import Firmeware.Load.IndexX.LDX_ZP;
+import Firmeware.Load.IndexX.LDX_ZPY;
+import Firmeware.Load.IndexX.LDX_ABSY;
 import Firmeware.Stack.PHA;
 import Firmeware.Stack.PLA;
-import Firmeware.store.STAX;
-import Firmeware.store.STAZ;
+import Firmeware.store.Accumulator.STA_ZPX;
+import Firmeware.store.Accumulator.STA_ZP;
 import MachineState.DecoderMap;
 
 /*
@@ -28,21 +28,20 @@ import MachineState.DecoderMap;
 public  enum OpCodes {
 	
 	NOP( new NOP()),
-	LDA( new LDA_IMM()), // Immediate 
-	LDAX( new LDAZX()), // load a from 0 page index x
+	LDA_IMM( new LDA_IMM()), // Immediate 
+	LDAX( new LDA_ZX()), // load a from 0 page index x
 	BEQ(new BEQ()),
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),
 	RTS(new RTS()),
-	STAZ(new STAZ()), 
-	STAX(new STAX()),
+	STAZ(new STA_ZP()), 
+	STAX(new STA_ZPX()),
 	PLA(new PLA()),
-	LDB(new Firmeware.Load.LDB()),
-	LDXI(new LDXI()),
-	LDXZP(new LDXZP()),
-	LDXZPY(new LDXZPY()),
-	LDXABS(new LDXABS()),
-	LDXABSY(new LDXABSY()),
+	LDXI(new LDX_IMM()),
+	LDXZP(new LDX_ZP()),
+	LDXZPY(new LDX_ZPY()),
+	LDXABS(new LDX_ABS()),
+	LDXABSY(new LDX_ABSY()),
 	PHA(new PHA()),
 HLT( new HLT());
 	
@@ -59,8 +58,10 @@ HLT( new HLT());
 		return instructionOpcode.byteValue();
 	}
 	private static  void AddInstruction(Integer opcode, machineState m) {
+		String startup = String.format("%-40s",m.getClass().getCanonicalName() );
+		startup += String.format("Opcode [%02x]" , opcode);
 		
-		System.out.println("Adding : " + m.getClass().getCanonicalName());
+		System.out.println("Adding : " + startup);
 		if (getMap().containsKey(opcode)) {
 			machineState tmp = getMap().get(opcode);
 			System.err.println("Error duplicate opcode" + opcode.toString());

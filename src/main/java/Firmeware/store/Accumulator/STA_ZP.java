@@ -1,12 +1,12 @@
-package Firmeware.store;
+package Firmeware.store.Accumulator;
 
 import Firmeware.Framework.Instruction;
 import cpu001.CPU;
 import exceptions.DeviceUnavailable;
 import exceptions.illegalAddressException;
 
-public class STAZ extends Instruction {
-public STAZ() {
+public class STA_ZP extends Instruction {
+public STA_ZP() {
 	super((byte)0x85);
 	setProperty(KEY_MNEMONIC, "STA");
 	setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZP);
@@ -32,9 +32,9 @@ public STAZ() {
 		 *  if the operand evaluates to a zero page address and the 
 		 *  instruction supports the mode (not all do).
 		 */
-		byte zeroPageAddress = c.memory.read(c.pc);
+		int zeroPageAddress = getZeroPageAddress(c);
 		
 		c.memory.write(zeroPageAddress, (byte)(c.a.get() & 0xff));
-		c.pc = (++c.pc);
+		c.pc++;
 	}
 }

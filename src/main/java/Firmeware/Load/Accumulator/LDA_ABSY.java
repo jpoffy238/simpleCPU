@@ -1,4 +1,4 @@
-package Firmeware.Load;
+package Firmeware.Load.Accumulator;
 
 import Firmeware.Framework.Instruction;
 import cpu001.CPU;
@@ -7,32 +7,32 @@ import exceptions.illegalAddressException;
 import exceptions.nflagException;
 import exceptions.zflagException;
 
-public class LDXABSY extends Instruction {
-	public LDXABSY() {
-		super((byte) 0xbe);
-		setProperty(KEY_MNEMONIC, "LDX");
+public class LDA_ABSY extends Instruction {
+	// Zero Page reference (X)
+	public LDA_ABSY() {
+		super ((byte)0xb9);
+		setProperty(KEY_MNEMONIC, "LDA");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABY);
-		setProperty(KEY_OPCODE, "0xbe");
+		setProperty(KEY_OPCODE, "0xb9");
 		setProperty(KEY_INSTRUCTION_SIZE, "3");
 		setProperty(KEY_CYCLES, "4");
 		setProperty(KEY_FLAGS_EFFECTED, "Z,N");
-		setProperty(KEY_WEB,"http://www.obelisk.me.uk/index.html" );
-		setProperty(KEY_DESCRIPTION, "Loads a byte of memory from opperand"
-				+ " into the X register setting the zero and negative flags as appropriate.");
-
+		setProperty(KEY_WEB,"http://www.obelisk.me.uk/6502/reference.html#LDA" );
+		setProperty(KEY_DESCRIPTION, "A,Z,N = M - Loads a byte of memory from "
+				+ "absolute memory operand +Y into the accumulator setting the zero and negative flags as appropriate.");
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int loadAddress = getAbsoluteAddressY(c);				
-		byte value = c.memory.read((int)(loadAddress));
+		int address = getAbsoluteAddressY(c);
+		byte m = c.memory.read(address);
 		try {
-			c.x.set(value);
+			c.a.set(m);
 		} catch (zflagException e) {
 			handleZException(c);
 		} catch (nflagException e) {
 			handleNException(c);
 		}
-		c.pc+=2;
-	
-}
+		c.pc +=2;
+		
+	}
 }
