@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cpu001.CPU;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
 
 public abstract class Instruction implements machineState {
 	
@@ -13,6 +15,7 @@ public abstract class Instruction implements machineState {
 	public final String KEY_MNEMONIC = "Mnemonic";
 	public final String KEY_INSTRUCTION_SIZE = "InstructionSize";
 	public final String KEY_CYCLES = "Cycles";
+	public final String KEY_FLAGS_EFFECTED = "Flags";
 	public final String KEY_WEB ="Web Reference";
 	public final String KEY_DESCRIPTION = "Description";
 	public final String KEY_ADDRESSING_MODE = "AddressingMode";
@@ -20,12 +23,15 @@ public abstract class Instruction implements machineState {
 	public final String VALUE_ADDM_IMP = "Implied";
 	public final String VALUE_ADDM_ZP = "Zero Page";
 	public final String VALUE_ADDM_ZPX = "Zero Page,X";
+	public final String VALUE_ADDM_ZPY = "Zero Page,Y";
 	public final String VALUE_ADDM_ABS = "Absolute";
 	public final String VALUE_ADDM_ABX = "Absolute,X";
 	public final String VALUE_ADDM_ABY = "Absolute,Y";
 
 	public final String VALUE_ADDM_IDX = "Indirect,X";
 	public final String VALUE_ADDM_IDY = "Indirect,Y";
+	public final String VALUE_ADDM_REL = "Relative offset";
+	public final String VALUE_ADDM_STK = "From Stack";
 	
 			/* Immediate     LDA #$44      $A9  2   2
 * 	Zero Page     LDA $44       $A5  2   3
@@ -37,10 +43,10 @@ Indirect,X    LDA ($44,X)   $A1  2   6
 Indirect,Y    LDA ($44),Y   $B1  2   5+
 */
 	private Map<String, String>  OpCodeProperties = new HashMap<String, String>();
-	public Instruction(byte op) {
+	public Instruction(byte op)  {
 		opCode = op;
 	}
-	public void exeute(CPU c) {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable{
 		// TODO Auto-generated method stub
 	}
 	public byte getOpCode() {

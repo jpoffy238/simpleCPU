@@ -2,6 +2,8 @@ package Firmeware.Logic;
 
 import Firmeware.Framework.Instruction;
 import cpu001.CPU;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
 
 public class CMP extends Instruction {
 /*
@@ -39,7 +41,7 @@ of and the sign (i.e. A>=$80) of the accumulator.
 	}
 	
 	
-	public void exeute(CPU c) {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int m = c.memory.read(c.pc);
 		c.pc = (++c.pc);
@@ -47,12 +49,12 @@ of and the sign (i.e. A>=$80) of the accumulator.
 		
 		int result = a - m;
 		if (result == 0) {
-			c.flags.ZFLAG.isSet();
+			c.ZFLAG.set();
 		} else {
 			if (result < 0) {
-				c.flags.NFLAG.set();
+				c.NFLAG.set();
 			}  else {
-				c.flags.NFLAG.clear();
+				c.NFLAG.clear();
 			}
 		}
 	}

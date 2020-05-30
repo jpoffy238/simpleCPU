@@ -7,31 +7,34 @@ import exceptions.illegalAddressException;
 import exceptions.nflagException;
 import exceptions.zflagException;
 
-public class LDAZX extends Instruction {
-	// Zero Page reference (X)
-	public LDAZX() {
-		super ((byte)0xa5);
-		setProperty(KEY_MNEMONIC, "LDA");
+public class LDXZP extends Instruction {
+/*
+ *  Loads X register from zero page
+ */
+	public LDXZP() {
+		super((byte) 0xa6);
+		setProperty(KEY_MNEMONIC, "LDX");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZP);
-		setProperty(KEY_OPCODE, "0xa5");
+		setProperty(KEY_OPCODE, "0xa6");
 		setProperty(KEY_INSTRUCTION_SIZE, "2");
-		setProperty(KEY_CYCLES, "2");
+		setProperty(KEY_CYCLES, "3");
 		setProperty(KEY_FLAGS_EFFECTED, "Z,N");
-		setProperty(KEY_WEB,"http://www.obelisk.me.uk/6502/reference.html#LDA" );
-		setProperty(KEY_DESCRIPTION, "A,Z,N = M - Loads a byte of memory (zeropage) into the accumulator setting the zero and negative flags as appropriate.");
+		setProperty(KEY_WEB,"http://www.obelisk.me.uk/index.html" );
+		setProperty(KEY_DESCRIPTION, "Loads a byte of memory from zero page into the X register setting the zero and negative flags as appropriate.");
+
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		byte m = c.memory.read(c.x.get() &0x00ff);
+		byte m = c.memory.read(c.pc); // read the zero page address - operand 
+		byte value = c.memory.read((int)(m &0x00ff));
 		try {
-			c.a.set(m);
+			c.x.set(value);
 		} catch (zflagException e) {
-		
 			c.ZFLAG.set();
 		} catch (nflagException e) {
-		
 			c.NFLAG.set();
 		}
-		c.pc = (++c.pc);
+	
+		c.pc++;
 	}
 }

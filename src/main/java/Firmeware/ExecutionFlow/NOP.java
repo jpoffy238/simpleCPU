@@ -26,13 +26,10 @@ NOP is used to reserve space for future modifications or effectively REM out exi
 		setProperty(KEY_DESCRIPTION ,"NOP is used to reserve space for future modifications or effectively REM out existing code");
 	}
 		public void exeute(CPU c) {
-		// TODO Auto-generated method stub
+		
 	
 	}
 
-	public void setFlags(CPU u) {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 }

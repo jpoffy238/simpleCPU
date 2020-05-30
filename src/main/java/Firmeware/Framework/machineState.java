@@ -1,9 +1,11 @@
 package Firmeware.Framework;
 
 import cpu001.CPU;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
 
 public interface machineState {
-		public void exeute(CPU c);
+		public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable;
 		public byte getOpCode();
 }
 

@@ -1,6 +1,8 @@
 package memoryInterface;
 
 import Firmeware.Framework.OpCodes;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
 
 public class basicMemory implements MemoryDriver {
 	public final static int  maxMemorySize = 4*1024;
@@ -10,36 +12,50 @@ public class basicMemory implements MemoryDriver {
 	public basicMemory() {
 		memory = new byte[maxMemorySize];
 		int i = 0;
-
-		memory[i++] = OpCodes.HLT.code();
+		  	memory[i++] = OpCodes.NOP.code()	;      //   0
+				memory[i++] = OpCodes.LDA.code();		   //   1
+				memory[i++] = 0x0a;   		                       //   2
+				memory[i++] = OpCodes.LDB.code();		   //   3
+				memory[i++] = 0x0c;			                       //   4
+				memory[i++] = OpCodes.PHA.code();   //   6
+				memory[i++] = OpCodes.LDA.code();        //   7
+				memory[i++] = (byte) 0x0ff;   			       //   8
+				memory[i++] = OpCodes.PHA.code();  	   //   9 	
+		
+				memory[i++] = OpCodes.PHA.code();     //  11
+				memory[i++] = OpCodes.JSR.code();         // 12
+				memory[i++] = 0x00;                                 //  13
+				memory[i++] = 0x04;                                 // 14
+				memory[i++] = (byte) 0xff; 	                  //  15  
+				i = 0x0400;
+				memory[i++] = OpCodes.LDXI.code();      // 0x0400
+				memory[i++] = 0x02;                               // 0x0401
+				memory[i++] = OpCodes.RTS.code();      // 0x0402
+		 
+			
 	}
 	
-	public byte read(int address) {
+	public byte read(int address) throws DeviceUnavailable,illegalAddressException {
 		// TODO Auto-generated method stub
 		int value = 0;
 		if (address < maxMemorySize && address >= 0) {
-			value = memory[address];
+			value = (int)(memory[address] & 0xff);
+		} else {
+			throw new illegalAddressException();
 		}
-		try {
-			Thread.sleep(1);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
 			return (byte)(value &0xff);
 	}
 
-	public void write(int address, byte data) {
+	public void write(int address, byte data) throws illegalAddressException {
 		// TODO Auto-generated method stub
 		if (address < maxMemorySize && address > 0) {
 			 memory[address] = data;
+		} else {
+			throw new illegalAddressException();
 		}
-		try {
-			Thread.sleep(1);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
+
 	}
 
 	public void blockWrite(int startAddress, int length, byte[] data) {
@@ -58,6 +74,21 @@ public class basicMemory implements MemoryDriver {
 	}
 
 	public int getIOPage() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public void setIOPage(int address, int length) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public int getIOStartPage() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public int getLenIOPage() {
 		// TODO Auto-generated method stub
 		return 0;
 	}

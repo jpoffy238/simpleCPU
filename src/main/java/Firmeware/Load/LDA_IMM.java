@@ -1,8 +1,11 @@
 package Firmeware.Load;
 
 import Firmeware.Framework.Instruction;
-import Registers.registerFlags;
 import cpu001.CPU;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
+import exceptions.nflagException;
+import exceptions.zflagException;
 
 public class LDA_IMM extends Instruction {
 // Load from Immediate on byte following
@@ -14,10 +17,11 @@ public class LDA_IMM extends Instruction {
 		setProperty(KEY_OPCODE, "0xa9");
 		setProperty(KEY_INSTRUCTION_SIZE, "2");
 		setProperty(KEY_CYCLES, "2");
+		setProperty(KEY_FLAGS_EFFECTED, "Z,N");
 		setProperty(KEY_WEB,"http://www.obelisk.me.uk/6502/reference.html#LDA" );
 		setProperty(KEY_DESCRIPTION, "A,Z,N = M - Loads a byte of memory into the accumulator setting the zero and negative flags as appropriate.");
 	}
-	public void exeute(CPU c) {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		/*
 		 *  Immediate
@@ -31,14 +35,15 @@ public class LDA_IMM extends Instruction {
 		 *         LDY #HI LABEL   ;Load the MSB of a 16 bit address into Y
 		 */
 		byte m = c.memory.read(c.pc);
-		c.a.set(m);
-		if ( m == 0) {
-			registerFlags.ZFLAG.set();
-		} 
-		if (m < 0) {
-			registerFlags.NFLAG.set();
-		}
 		c.pc = (++c.pc);
+		try {
+			c.a.set(m);
+		} catch (zflagException z) {
+			c.CFLAG.isSet();
+		} catch (nflagException n) {
+			c.NFLAG.set();
+		}
+		
 	}
 
 	

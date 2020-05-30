@@ -5,10 +5,10 @@ import cpu001.CPU;
 import exceptions.DeviceUnavailable;
 import exceptions.illegalAddressException;
 
-public class PUSHB extends Instruction {
+public class PHA extends Instruction {
 
-	public PUSHB () {
-		super((byte)0x32);
+	public PHA () {
+		super((byte)0x48);
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
@@ -16,12 +16,11 @@ public class PUSHB extends Instruction {
 		
 		
 		c.sp--;
-		byte data = (byte)(c.b.get() & 0xff);
+		byte data = (byte)(c.a.get() & 0xff);
 		
 		c.memory.write(c.sp, data);
-		
+			
 	}
 
-	
 
 }

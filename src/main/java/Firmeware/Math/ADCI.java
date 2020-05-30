@@ -2,6 +2,10 @@ package Firmeware.Math;
 
 import Firmeware.Framework.Instruction;
 import cpu001.CPU;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
+import exceptions.nflagException;
+import exceptions.zflagException;
 
 public class ADCI extends Instruction {
 	public ADCI() {
@@ -16,7 +20,7 @@ public class ADCI extends Instruction {
 		setProperty(KEY_DESCRIPTION, "DC - Add with Carry\r A,Z,C,N = A+M+C");
 	}
 
-	public void exeute(CPU c) {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		// http://www.obelisk.me.uk/6502/reference.html#ADC
      	//
@@ -48,23 +52,31 @@ public class ADCI extends Instruction {
 		boolean  mnegative  = (m & 0x80) > 0;
 		
 		int carryValue  = 0;
-		if (c.flags.CFLAG.isSet() ) {
+		if (c.CFLAG.isSet() ) {
 			carryValue = 1;
 		}
 		
 		int result = m + c.a.get() + carryValue;
 		if (result > 255 ) {
-			c.flags.CFLAG.set();
+			c.CFLAG.set();
 		} else {
 			if ((result & 0x80) != 0) {
-				c.flags.OVFLAG.set();
+				c.VFLAG.set();
 			}
 		}
 		
 			
-		c.a.set(result & 0xff);
+		try {
+			c.a.set(result & 0xff);
+		} catch (zflagException e) {
+			// TODO Auto-generated catch block
+			c.ZFLAG.set();
+		} catch (nflagException e) {
+			// TODO Auto-generated catch block
+			c.NFLAG.set();
+		}
 		if ( !anegative && !mnegative ) {
-			c.flags.NFLAG.clear();
+			c.NFLAG.clear();
 		}
 		
 	}

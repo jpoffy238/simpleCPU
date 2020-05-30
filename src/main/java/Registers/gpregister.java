@@ -1,7 +1,7 @@
 package Registers;
 
-import exceptions.cflagException;
-import exceptions.oflagException;
+import exceptions.nflagException;
+import exceptions.zflagException;
 
 public class gpregister implements generalPurpose {
 	int value;
@@ -16,35 +16,34 @@ public class gpregister implements generalPurpose {
 		// TODO Auto-generated method stub
 		
 		this.value = value & 0xff;
-		if (this.value == 0) {
-			registerFlags.ZFLAG.set();
-		} else {
-			registerFlags.ZFLAG.clear();
-		} 
-		if ((value & 0x80) != 0) {
-			registerFlags.NFLAG.set();
-		} else {
-			registerFlags.NFLAG.clear();
-		}
+	
 	}
 
-	public void inc() { 
+	public void inc() throws zflagException, nflagException { 
 		// TODO Auto-generated method stub
-	this.value++;
-	if (value > 255) {
-			registerFlags.CFLAG.set();
-			value = 0;
-		}		
+	value++;
+	if (value == 0) {
+		throw new zflagException();
+	} 
+	
+	if ( value < 0 ) {
+		throw new nflagException();
+	}
+		
 	}
 
-	public void dec()  {
-		// TODO Auto-generated method stub
+	public void dec() throws nflagException, zflagException  {
+		
+		value--;
+		value&=0x00ff;
+		
 		if (value == 0) {
-			registerFlags.CFLAG.set();
-			registerFlags.NFLAG.set();
+			throw new zflagException();
+		} 
+		if ( value < 0 ) {
+			throw new nflagException();
 		}
-		this.value--;
-		this.value&=0x00ff;
+		
 		}
 	
 
@@ -57,8 +56,7 @@ public class gpregister implements generalPurpose {
 	public void reset() {
 		// TODO Auto-generated method stub
 		value = 0;
-		registerFlags.reset();
-		registerFlags.ZFLAG.set();
+		
 	}
 
 }

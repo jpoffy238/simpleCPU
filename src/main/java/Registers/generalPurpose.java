@@ -1,13 +1,13 @@
 package Registers;
 
-import exceptions.cflagException;
-import exceptions.oflagException;
+import exceptions.nflagException;
+import exceptions.zflagException;
 
 public interface generalPurpose {
 	public  int get();
-	public void set (int  value);
-	public void inc() ;
-	public void dec();
+	public void set (int  value) throws zflagException, nflagException ;
+	public void inc()  throws  nflagException,  zflagException;
+	public void dec()  throws zflagException, nflagException;
 	public char name();
-	public void reset();
+	public void reset() ;
 }
