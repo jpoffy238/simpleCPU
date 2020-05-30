@@ -33,7 +33,7 @@ public class basicMemory implements MemoryDriver {
 				memory[i++] = 0x04;                                 // 14
 				memory[i++] = OpCodes.HLT.code()	;                  //  15  
 				i = 0x0400;
-				memory[i++] = OpCodes.LDXI.code();      // 0x0400
+				memory[i++] = OpCodes.LDX_ZP.code();      // 0x0400
 				memory[i++] = 0x02;                               // 0x0401
 				memory[i++] = OpCodes.LDA_IMM.code();
 				memory[i++] = 0x00;

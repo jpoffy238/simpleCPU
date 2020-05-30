@@ -9,8 +9,12 @@ import Firmeware.ExecutionFlow.JMP_ABS;
 import Firmeware.ExecutionFlow.JSR;
 import Firmeware.ExecutionFlow.NOP;
 import Firmeware.ExecutionFlow.RTS;
-import Firmeware.Load.Accumulator.LDA_IMM;
-import Firmeware.Load.Accumulator.LDA_ZX;
+import Firmeware.Load.Accumulator.*;
+import Firmeware.store.Accumulator.*;
+import Firmeware.Load.IndexY.*;
+import Firmeware.store.IndexX.*;
+import Firmeware.store.IndexY.*;
+
 import Firmeware.Load.IndexX.LDX_ABS;
 import Firmeware.Load.IndexX.LDX_IMM;
 import Firmeware.Load.IndexX.LDX_ZP;
@@ -29,19 +33,49 @@ public  enum OpCodes {
 	
 	NOP( new NOP()),
 	LDA_IMM( new LDA_IMM()), // Immediate 
-	LDAX( new LDA_ZX()), // load a from 0 page index x
+	LDA_ABS(new LDA_ABS()),
+	LDA_ABSX(new LDA_ABSX()),
+	LDA_ABSY(new LDA_ABSY()),
+	LDA_INDX(new LDA_INDX()),
+	LDA_INDY(new LDA_INDY()),
+	LDA_ZP(new LDA_ZP()),
+	LDA_ZX(new LDA_ZX()),
+	
+	LDX_ABS(new LDX_ABS()),
+	LDX_ABSY(new LDX_ABSY()),
+	LDX_IMM(new LDX_IMM()),
+	LDX_ZP(new LDX_ZP()),
+	LDX_ZPY(new LDX_ZPY()),
+	
+	LDY_ABS(new LDY_ABS()),
+	LDY_ABSX(new LDY_ABSX()),
+	LDY_IMM(new LDY_IMM()),
+	LDY_ZP(new LDY_ZP()),
+	LDY_ZPX(new LDY_ZPX()),
+	
+	STA_ABS(new STA_ABS()),
+	STA_ABX(new STA_ABX()),
+	STA_ABY(new STA_ABY()),
+	STA_INX(new STA_INX()),
+	STA_INY(new STA_INY()),
+	STA_ZP(new STA_ZP()),
+	STA_ZPX(new STA_ZPX()),
+
+	STX_ABS(new STX_ABS()),
+	STX_ZP(new STX_ZP()),
+	STX_ZPY(new STX_ZPY()),
+	
+	STY_ABS(new STY_ABS()),
+	STY_ZP(new STY_ZP()),
+	STY_ZPX(new STY_ZPX()),
+	
 	BEQ(new BEQ()),
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),
 	RTS(new RTS()),
-	STAZ(new STA_ZP()), 
-	STAX(new STA_ZPX()),
+
 	PLA(new PLA()),
-	LDXI(new LDX_IMM()),
-	LDXZP(new LDX_ZP()),
-	LDXZPY(new LDX_ZPY()),
-	LDXABS(new LDX_ABS()),
-	LDXABSY(new LDX_ABSY()),
+
 	PHA(new PHA()),
 HLT( new HLT());
 	
