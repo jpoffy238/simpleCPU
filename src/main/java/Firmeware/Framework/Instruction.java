@@ -23,6 +23,7 @@ public abstract class Instruction implements machineState {
 	public final String VALUE_ADDM_IMP = "Implied";
 	public final String VALUE_ADDM_ZP = "Zero Page";
 	public final String VALUE_ADDM_ZPX = "Zero Page,X";
+	public final String VALUE_ADDM_ZPY = "Zero Page,Y";
 	public final String VALUE_ADDM_ABS = "Absolute";
 	public final String VALUE_ADDM_ABX = "Absolute,X";
 	public final String VALUE_ADDM_ABY = "Absolute,Y";

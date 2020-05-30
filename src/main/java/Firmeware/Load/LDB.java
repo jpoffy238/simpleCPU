@@ -1,26 +1,28 @@
 package Firmeware.Load;
 
 import Firmeware.Framework.Instruction;
-import Registers.registerFlags;
 import cpu001.CPU;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
+import exceptions.nflagException;
+import exceptions.zflagException;
 
 public class LDB extends Instruction {
 	public LDB () {
 	 super((byte)0x3E);
+	 //  NON-6502 Instruction 
 	}
-	public void exeute(CPU c) {
-		// TODO Auto-generated method stub
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	
 		byte m = c.memory.read(c.pc);
-		c.b.set(m);
-		if ( m == 0) {
-			registerFlags.ZFLAG.set();
+		try {
+			c.b.set(m);
+		} catch (zflagException e) {
+			c.ZFLAG.set();
+		} catch (nflagException e) {
+			c.NFLAG.set();
 		}
 		c.pc = (++c.pc);
-	}
-
-	public void setFlags(CPU u) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

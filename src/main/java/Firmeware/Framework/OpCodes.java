@@ -12,6 +12,11 @@ import Firmeware.Stack.PLA;
 import Firmeware.store.STAX;
 import Firmeware.store.STAZ;
 import MachineState.cpu001decoder;
+import Firmeware.Load.LDXI;
+import Firmeware.Load.LDXZP;
+import Firmeware.Load.LDXZPY;
+import Firmeware.Load.LDXABS;
+import Firmeware.Load.LDXABSY;
 
 /*
  * 
@@ -28,6 +33,12 @@ public  enum OpCodes {
 	STAZ(new STAZ()), 
 	STAX(new STAX()),
 	PLA(new PLA()),
+	LDB(new Firmeware.Load.LDB()),
+	LDXI(new LDXI()),
+	LDXZP(new LDXZP()),
+	LDXZPY(new LDXZPY()),
+	LDXABS(new LDXABS()),
+	LDXABSY(new LDXABSY()),
 HLT( new HLT());
 	
 	public final  Integer  instructionOpcode ;
