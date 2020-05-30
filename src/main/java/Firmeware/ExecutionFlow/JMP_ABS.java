@@ -2,6 +2,8 @@ package Firmeware.ExecutionFlow;
 
 import Firmeware.Framework.Instruction;
 import cpu001.CPU;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
 
 public class JMP_ABS extends Instruction {
 /*
@@ -38,16 +40,13 @@ rather than $5080 as you intended i.e. the 6502
 		setProperty(KEY_WEB,"http://6502.org/tutorials/6502opcodes.html#JMP" );
 		setProperty(KEY_DESCRIPTION, "MP transfers program execution to the following address (absolute) . ");
 	}
-	public void exeute(CPU c) {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int lower  = c.memory.read(c.pc++);
 		int upper = c.memory.read(c.pc++);
 		c.pc = (upper & 0x00ff ) << 8 + (lower & 0xff);
 	}
 
-	public void setFlags(CPU u) {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 }

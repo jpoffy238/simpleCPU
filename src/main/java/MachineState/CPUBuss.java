@@ -1,8 +1,9 @@
 package MachineState;
 
 import MachineCycle.PBus;
-import Registers.generalPurpose;
 import cpu001.CPU;
+import exceptions.DeviceUnavailable;
+import exceptions.illegalAddressException;
 import memoryInterface.MemoryDriver;
 
 public class CPUBuss implements PBus {
@@ -12,10 +13,10 @@ public class CPUBuss implements PBus {
 		cpu = c;
 	}
 	
-	public void access(BussId srcBus, BussId destBus, int srcAddress, int destAddress) {
+	public void access(BussId srcBus, BussId destBus, int srcAddress, int destAddress) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int data;
 		
+		int data;
 		switch (srcBus) {
 		case MEMROY : 		MemoryDriver m = cpu.memory;
 				data = m.read(srcAddress);
@@ -24,6 +25,8 @@ public class CPUBuss implements PBus {
 		case REGISTER :
 		////	generalPurpose r = cpu.registerFile.get(srcAddress);
 			data = 5;
+		default:
+			throw new DeviceUnavailable();
 		}
 			
 	}

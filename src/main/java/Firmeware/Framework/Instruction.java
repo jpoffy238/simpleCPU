@@ -29,6 +29,8 @@ public abstract class Instruction implements machineState {
 
 	public final String VALUE_ADDM_IDX = "Indirect,X";
 	public final String VALUE_ADDM_IDY = "Indirect,Y";
+	public final String VALUE_ADDM_REL = "Relative offset";
+	public final String VALUE_ADDM_STK = "From Stack";
 	
 			/* Immediate     LDA #$44      $A9  2   2
 * 	Zero Page     LDA $44       $A5  2   3

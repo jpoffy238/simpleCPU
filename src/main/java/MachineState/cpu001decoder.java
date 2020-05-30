@@ -5,14 +5,14 @@ import java.util.Map;
 
 import Firmeware.ExecutionFlow.HLT;
 import Firmeware.ExecutionFlow.JMP_ABS;
-import Firmeware.ExecutionFlow.JRZ;
+import Firmeware.ExecutionFlow.BEQ;
 import Firmeware.ExecutionFlow.NOP;
 import Firmeware.Framework.machineState;
 import Firmeware.Load.LDA_IMM;
 import Firmeware.Load.LDB;
 import Firmeware.Logic.CMP;
 import Firmeware.Math.ADDB;
-import Firmeware.Stack.POPA;
+import Firmeware.Stack.PLA;
 import Firmeware.Stack.PUSHA;
 import cpu001.CPU;
 import exceptions.DeviceUnavailable;
