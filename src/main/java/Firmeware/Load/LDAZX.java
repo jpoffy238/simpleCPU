@@ -22,7 +22,8 @@ public class LDAZX extends Instruction {
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		byte m = c.memory.read(c.x.get() &0x00ff);
+		int address = getZeroPageXAddress(c);
+		byte m = c.memory.read(address);
 		try {
 			c.a.set(m);
 		} catch (zflagException e) {

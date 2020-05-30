@@ -66,15 +66,51 @@ public int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnava
 	int loadAddress = opperand_upper << 8 + opperand_lower;
 	return loadAddress;
 }
-public int getAbsoluteAddressInxY(CPU c) throws illegalAddressException, DeviceUnavailable {
+public int getAbsoluteAddressY(CPU c) throws illegalAddressException, DeviceUnavailable {
 	int loadAddress = getAbsoluteAddress(c);
 	loadAddress += c.y.get();
 	return loadAddress;
 }
-public int getAbsoluteAddressInxX(CPU c) throws illegalAddressException, DeviceUnavailable {
+public int getAbsoluteAddressX(CPU c) throws illegalAddressException, DeviceUnavailable {
 	int loadAddress = getAbsoluteAddress(c);
 	loadAddress += c.x.get();
 	return loadAddress;
+}
+public int getZeroPageXAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+	int operand = c.memory.read(c.pc);
+	int address  = (int)(operand + c.x.get()) & 0x00ff;
+	return address;
+}
+public int getZeroPageYAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+	int operand = c.memory.read(c.pc);
+	int address  = (int)(operand + c.y.get()) & 0x00ff;
+	return address;
+}
+public int getIndirect(CPU c) throws illegalAddressException, DeviceUnavailable {
+	int lower = c.memory.read(c.pc);
+	int upper = c.memory.read(c.pc+1);
+	int lookupAddress = (upper&0x00ff) << 8  + (lower + 0x00ff);
+	lower = c.memory.read(lookupAddress) ;
+	upper = c.memory.read(lookupAddress+1) ;
+	lookupAddress = (upper&0x00ff) << 8  + (lower + 0x00ff);
+	return lookupAddress;
+}
+public int getIndexX (CPU c) throws illegalAddressException, DeviceUnavailable {
+	int address;
+	int operand = c.memory.read(c.pc);
+	int pageZero = (operand + c.x.get()) & 0x00ff;
+	int lower = c.memory.read(pageZero);
+	int upper = c.memory.read(pageZero+1);
+	address =   (upper&0x00ff) << 8  + (lower + 0x00ff);
+	return address;
+}public int getIndexY (CPU c) throws illegalAddressException, DeviceUnavailable {
+	int address;
+	int operand = c.memory.read(c.pc);
+	int pageZero = (operand + c.y.get()) & 0x00ff;
+	int lower = c.memory.read(pageZero);
+	int upper = c.memory.read(pageZero+1);
+	address =   (upper&0x00ff) << 8  + (lower + 0x00ff);
+	return address;
 }
 public void handleZException (CPU c) {
 	c.ZFLAG.set();

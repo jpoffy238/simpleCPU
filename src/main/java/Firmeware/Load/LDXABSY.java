@@ -23,7 +23,7 @@ public class LDXABSY extends Instruction {
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int loadAddress = getAbsoluteAddressInxY(c);				
+		int loadAddress = getAbsoluteAddressY(c);				
 		byte value = c.memory.read((int)(loadAddress));
 		try {
 			c.x.set(value);
