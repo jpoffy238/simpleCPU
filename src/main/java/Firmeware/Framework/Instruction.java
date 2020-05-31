@@ -58,7 +58,7 @@ public void  setProperty (String propertyName, String value) {
 public String getProperty(String propertyName ) {
 	return OpCodeProperties.get(propertyName);
 }
-public int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+protected int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
 	byte opperand_lower = c.memory.read(c.pc); 
 	
 	byte opperand_upper = c.memory.read(c.pc+1); 
@@ -66,32 +66,32 @@ public int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnava
 	int loadAddress = opperand_upper << 8 + opperand_lower;
 	return loadAddress;
 }
-public int getAbsoluteAddressY(CPU c) throws illegalAddressException, DeviceUnavailable {
+protected int getAbsoluteAddressY(CPU c) throws illegalAddressException, DeviceUnavailable {
 	int loadAddress = getAbsoluteAddress(c);
 	loadAddress += c.y.get();
 	return loadAddress;
 }
-public int getAbsoluteAddressX(CPU c) throws illegalAddressException, DeviceUnavailable {
+protected int getAbsoluteAddressX(CPU c) throws illegalAddressException, DeviceUnavailable {
 	int loadAddress = getAbsoluteAddress(c);
 	loadAddress += c.x.get();
 	return loadAddress;
 }
-public int getZeroPageAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+protected int getZeroPageAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
 	int operand = c.memory.read(c.pc);
 	int address  = (int)(operand) & 0x00ff;
 	return address;
 }
-public int getZeroPageXAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+protected int getZeroPageXAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
 	int operand = c.memory.read(c.pc);
 	int address  = (int)(operand + c.x.get()) & 0x00ff;
 	return address;
 }
-public int getZeroPageYAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+protected int getZeroPageYAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
 	int operand = c.memory.read(c.pc);
 	int address  = (int)(operand + c.y.get()) & 0x00ff;
 	return address;
 }
-public int getIndirect(CPU c) throws illegalAddressException, DeviceUnavailable {
+protected int getIndirect(CPU c) throws illegalAddressException, DeviceUnavailable {
 	int lower = c.memory.read(c.pc);
 	int upper = c.memory.read(c.pc+1);
 	int lookupAddress = (upper&0x00ff) << 8  + (lower + 0x00ff);
@@ -100,7 +100,7 @@ public int getIndirect(CPU c) throws illegalAddressException, DeviceUnavailable 
 	lookupAddress = (upper&0x00ff) << 8  + (lower + 0x00ff);
 	return lookupAddress;
 }
-public int getIndexX (CPU c) throws illegalAddressException, DeviceUnavailable {
+protected int getIndexX (CPU c) throws illegalAddressException, DeviceUnavailable {
 	int address;
 	int operand = c.memory.read(c.pc);
 	int pageZero = (operand + c.x.get()) & 0x00ff;
@@ -108,7 +108,7 @@ public int getIndexX (CPU c) throws illegalAddressException, DeviceUnavailable {
 	int upper = c.memory.read(pageZero+1);
 	address =   (upper&0x00ff) << 8  + (lower + 0x00ff);
 	return address;
-}public int getIndexY (CPU c) throws illegalAddressException, DeviceUnavailable {
+}protected int getIndexY (CPU c) throws illegalAddressException, DeviceUnavailable {
 	int address;
 	int operand = c.memory.read(c.pc);
 	int pageZero = (operand + c.y.get()) & 0x00ff;
@@ -117,12 +117,90 @@ public int getIndexX (CPU c) throws illegalAddressException, DeviceUnavailable {
 	address =   (upper&0x00ff) << 8  + (lower + 0x00ff);
 	return address;
 }
-public void handleZException (CPU c) {
+protected void handleZException (CPU c) {
 	c.ZFLAG.set();
 	c.NFLAG.clear();
 }
-public void handleNException(CPU c) {
+protected void handleNException(CPU c) {
 	c.NFLAG.set();
 	c.ZFLAG.clear();
+}
+protected byte psr(CPU c) {
+	int status = 0;
+	if (c.CFLAG.isSet()) {
+		status = 1;
+	}
+	status <<= 1;
+	if (c.ZFLAG.isSet()) {
+		status+= 1;
+	} 
+	status <<= 1;
+	if (c.IFLAG.isSet()) {
+		status += 1;
+	}
+	status <<= 1;
+	if (c.DFLAG.isSet()) {
+		status += 1;
+	}
+	status <<= 1;
+	if (c.BFLAG.isSet()) {
+		status += 1;
+	}
+	status <<= 1;
+	if (c.OFLAG.isSet()) {
+		status += 1;
+	}
+	status <<= 1;
+	if (c.NFLAG.isSet()) {
+		status += 1;
+	}
+		
+	return (byte)(status & 0xff);
+}
+protected void setFlags(CPU c, byte sr) {
+	int tmpsr = (int)(sr & 0xff);
+	int mask = 1;
+	
+	if ((tmpsr & mask) == 0) {
+		c.NFLAG.clear();
+	} else {
+		c.NFLAG.set();
+	}
+	mask <<= 1;
+	if ((tmpsr & mask) == 0) {
+		c.OFLAG.clear();
+	} else {
+		c.OFLAG.set();
+	}
+	mask <<= 1;
+	if ((tmpsr & mask) == 0) {
+		c.BFLAG.clear();
+	} else {
+		c.BFLAG.set();
+	}
+	mask <<= 1;
+	if ((tmpsr & mask) == 0) {
+		c.DFLAG.clear();
+	} else {
+		c.DFLAG.set();
+	}
+	mask <<= 1;
+	if ((tmpsr & mask) == 0) {
+		c.IFLAG.clear();
+	} else {
+		c.IFLAG.set();
+	}
+	mask <<= 1;
+	if ((tmpsr & mask) == 0) {
+		c.ZFLAG.clear();
+	} else {
+		c.ZFLAG.set();
+	}
+	mask <<= 1;
+	if ((tmpsr & mask) == 0) {
+		c.CFLAG.clear();
+	} else {
+		c.CFLAG.set();
+	}
 }
 }

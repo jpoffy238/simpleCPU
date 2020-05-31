@@ -1,9 +1,7 @@
 package cpu001;
 
-import Firmeware.Framework.OpCodes;
 import Firmeware.Framework.machineState;
 import MachineState.Decoder;
-import MachineState.cpu001decoder;
 import Registers.generalPurpose;
 import Registers.gpregister;
 import Registers.registerFlags;
@@ -11,10 +9,9 @@ import exceptions.DeviceUnavailable;
 import exceptions.illegalAddressException;
 import exceptions.illegalOpCodeException;
 import memoryInterface.MemoryDriver;
-import memoryInterface.basicMemory;
 
 public class CPU extends Thread {
-	public CPU(MemoryDriver memdrv,Decoder dcd ) {
+	public CPU(MemoryDriver memdrv, Decoder dcd) {
 		memory = memdrv;
 		decoder = dcd;
 	}
@@ -24,7 +21,7 @@ public class CPU extends Thread {
 	public registerFlags IFLAG = new registerFlags("I");
 	public registerFlags DFLAG = new registerFlags("D");
 	public registerFlags BFLAG = new registerFlags("B");
-	public registerFlags VFLAG = new registerFlags("V");
+	public registerFlags OFLAG = new registerFlags("O");
 	public registerFlags NFLAG = new registerFlags("N");
 	public generalPurpose a = new gpregister();
 	public generalPurpose b = new gpregister();
@@ -37,19 +34,30 @@ public class CPU extends Thread {
 	public MemoryDriver memory;
 	Decoder decoder;
 	public int clockState;
+	machineState state;
 
 	public CPU() {
 
 		sp = 0x01ff;
-
+		pc = 0xfffb;
 		CFLAG.reset();
 		ZFLAG.reset();
 		IFLAG.reset();
 		DFLAG.reset();
 		NFLAG.reset();
-		VFLAG.reset();
+		OFLAG.reset();
 		BFLAG.reset();
 		clockState = 0;
+		try {
+			memory.write(0xfffc, (byte) 0x00);
+			memory.write(0xfffd, (byte) 0x10);
+		} catch (illegalAddressException e) {
+			System.err.println("ERROR ILLAddress: Unable to set poweron/reset just address");
+			System.exit(8);
+		} catch (DeviceUnavailable e) {
+			System.err.println("ERROR DEVUN : Unable to set poweron/reset just address");
+			System.exit(8);
+		}
 	}
 
 	public void reset() {
@@ -58,28 +66,26 @@ public class CPU extends Thread {
 		IFLAG.reset();
 		DFLAG.reset();
 		NFLAG.reset();
-		VFLAG.reset();
+		OFLAG.reset();
 		BFLAG.reset();
 
 		a.reset();
 		b.reset();
 		x.reset();
 		y.reset();
-		pc = 0;
+		pc = 0xfffc;
 		sp = (0x01ff);
 
 		clockState = 0;
-
+		state = new Firmeware.ExecutionFlow.JMP_ABS(); // power on reset - start location
+		System.out.println (dump());
 	}
 
 	public String dump() {
-		String flagStatus = "\t\t[" + CFLAG.toString() + NFLAG.toString() + ZFLAG.toString() + VFLAG.toString() + DFLAG.toString()
-				+ IFLAG.toString() + BFLAG.toString() +
-				"]\tA[ " + String.format("%02x", a.get()) + "]\tB["
-				+ String.format("%02xs", b.get()) + "]\tX["
-				+ String.format("%02x", x.get()) + "]\tY[ "
-				+ String.format("%02x", y.get()) + "]\tPC["
-				+ String.format("%04x", pc )+ "]\tSP["
+		String flagStatus = "\t\t[" + CFLAG.toString() + NFLAG.toString() + ZFLAG.toString() + OFLAG.toString()
+				+ DFLAG.toString() + IFLAG.toString() + BFLAG.toString() + "]\tA[ " + String.format("%02x", a.get())
+				+ "]\tB[" + String.format("%02xs", b.get()) + "]\tX[" + String.format("%02x", x.get()) + "]\tY[ "
+				+ String.format("%02x", y.get()) + "]\tPC[" + String.format("%04x", pc) + "]\tSP["
 				+ String.format("%04x", sp) + "]";
 		return flagStatus;
 
@@ -87,24 +93,33 @@ public class CPU extends Thread {
 
 	public void run() {
 		reset();
-		
-		machineState state;
+		try {
+			state.exeute(this);
+			System.out.println(dump());
+		} catch (illegalAddressException e) {
+			System.err.println("Bad address: " + dump());
+			System.exit(8);
+		} catch (DeviceUnavailable e) {
+			System.err.println("Device Unavailable : " + dump());
+			System.exit(8);
+		}
+
 		while (true) {
 			clockState = 0;
 			byte opcode = 0;
 			clockState++;
 			try {
 				opcode = 0;
-				opcode =fetchInstruction();
+				opcode = fetchInstruction();
 				state = decoder.decode(opcode);
 				clockState++;
 				state.exeute(this);
-				String currentState = String.format("%-40s", "[" +  state.getClass().getName() + "]" );
+				String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
 				currentState += dump();
 				System.out.println(currentState);
 			} catch (illegalOpCodeException e) {
 				// TODO Auto-generated catch block
-				System.err.println("["+ (int)(opcode&0xff) + "] BAD OPCODE : " + dump());
+				System.err.println("[" + (int) (opcode & 0xff) + "] BAD OPCODE : " + dump());
 				System.exit(8);
 			} catch (illegalAddressException e) {
 				System.err.println("Bad address: " + dump());
@@ -115,6 +130,7 @@ public class CPU extends Thread {
 			}
 		}
 	}
+
 	public byte fetchInstruction() throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		MemoryDriver m = memory;
@@ -125,4 +141,5 @@ public class CPU extends Thread {
 		pc++;
 		return (byte) value;
 	}
+	
 }

@@ -5,10 +5,10 @@ import cpu001.CPU;
 import exceptions.DeviceUnavailable;
 import exceptions.illegalAddressException;
 
-public class PUSHB extends Instruction {
+public class PHP extends Instruction {
 
-	public PUSHB () {
-		super((byte)0x32);
+	public PHP () {
+		super((byte)0x08);
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
@@ -16,12 +16,11 @@ public class PUSHB extends Instruction {
 		
 		
 		c.sp--;
-		byte data = (byte)(c.b.get() & 0xff);
+		byte data = (byte)( psr(c)& 0xff);
 		
 		c.memory.write(c.sp, data);
-		
+			
 	}
 
-	
 
 }

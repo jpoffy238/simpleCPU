@@ -14,7 +14,8 @@ import Firmeware.store.Accumulator.*;
 import Firmeware.Load.IndexY.*;
 import Firmeware.store.IndexX.*;
 import Firmeware.store.IndexY.*;
-
+import Firmeware.Transfers.*;
+import Firmeware.incdec.*;
 import Firmeware.Load.IndexX.LDX_ABS;
 import Firmeware.Load.IndexX.LDX_IMM;
 import Firmeware.Load.IndexX.LDX_ZP;
@@ -69,6 +70,26 @@ public  enum OpCodes {
 	STY_ZP(new STY_ZP()),
 	STY_ZPX(new STY_ZPX()),
 	
+	TAX(new TAX()),
+	TAY(new TAY()),
+	TSX(new TSX()),
+	TXA(new TXA()),
+	TXS(new TXS()),
+	TYA(new TYA()),
+
+	DEC_ABS(new DEC_ABS()),
+	DEC_ABX(new DEC_ABX()),
+	DEC_ZP(new DEC_ZP()),
+	DEC_ZPX(new DEC_ZPX()),
+	INC_ABS(new INC_ABS()),
+	INC_ABX(new INC_ABX()),
+	INC_ZP(new INC_ZP()),
+	INC_ZPX(new INC_ZPX()),
+	DEX(new DEX()),
+	DEY(new DEY()),
+	INX(new INX()),
+	INY(new INY()),
+	
 	BEQ(new BEQ()),
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),
@@ -77,6 +98,9 @@ public  enum OpCodes {
 	PLA(new PLA()),
 
 	PHA(new PHA()),
+	
+	TEST(new TEST()),
+	
 HLT( new HLT());
 	
 	public final  Integer  instructionOpcode ;

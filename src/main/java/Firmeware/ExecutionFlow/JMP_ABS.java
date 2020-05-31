@@ -42,9 +42,9 @@ rather than $5080 as you intended i.e. the 6502
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int lower  = c.memory.read(c.pc++);
-		int upper = c.memory.read(c.pc++);
-		c.pc = (upper & 0x00ff ) << 8 + (lower & 0xff);
+		int address = getAbsoluteAddress(c);
+		
+		c.pc =address;
 	}
 
 	

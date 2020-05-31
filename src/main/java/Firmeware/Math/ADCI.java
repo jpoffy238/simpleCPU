@@ -61,7 +61,7 @@ public class ADCI extends Instruction {
 			c.CFLAG.set();
 		} else {
 			if ((result & 0x80) != 0) {
-				c.VFLAG.set();
+				c.OFLAG.set();
 			}
 		}
 		
