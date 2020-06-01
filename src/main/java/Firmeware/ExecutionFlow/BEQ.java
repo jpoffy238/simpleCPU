@@ -50,7 +50,7 @@ the BVC instruction will take 3 cycles no matter what address it is located at.
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		if (c.ZFLAG.isSet()) {
-			byte offset = c.memory.read(c.pc);
+			byte offset = (byte) (c.memory.read(c.pc) & 0x00ff);
 			c.pc = (int)(c.pc+offset);
 		} else {
 			c.pc++;

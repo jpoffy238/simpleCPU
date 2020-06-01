@@ -3,9 +3,9 @@ package Devices;
 import exceptions.DeviceUnavailable;
 
 public interface Device {
-	public void write(byte data) throws DeviceUnavailable;
-	public byte read()throws DeviceUnavailable;
-	public byte status() throws DeviceUnavailable;
-	public void status (byte controlWord) throws DeviceUnavailable;
+	public void write(int data) throws DeviceUnavailable;
+	public int read()throws DeviceUnavailable;
+	public int status() throws DeviceUnavailable;
+	public void status (int data) throws DeviceUnavailable;
 
 }

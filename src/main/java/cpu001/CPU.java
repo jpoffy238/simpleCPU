@@ -123,6 +123,8 @@ public class CPU extends Thread {
 				System.exit(8);
 			} catch (illegalAddressException e) {
 				System.err.println("Bad address: " + dump());
+				e.printStackTrace(System.err);
+				
 				System.exit(8);
 			} catch (DeviceUnavailable e) {
 				System.err.println("Device Unavailable : " + dump());

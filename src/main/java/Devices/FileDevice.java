@@ -4,24 +4,31 @@ import exceptions.DeviceUnavailable;
 
 public class FileDevice implements Device {
 
-	public void write(byte data) throws DeviceUnavailable {
+	public void write(int data) throws DeviceUnavailable {
 		// TODO Auto-generated method stub
-
+		System.out.print((char)data);
 	}
 
-	public byte read() throws DeviceUnavailable {
+	public int read() throws DeviceUnavailable {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	public byte status() throws DeviceUnavailable {
+	public int status() throws DeviceUnavailable {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public void status(byte controlWord) throws DeviceUnavailable {
 		// TODO Auto-generated method stub
+		System.out.println("STatus control Word = " + controlWord);
+	}
 
+	
+
+	public void status(int data) throws DeviceUnavailable {
+		// TODO Auto-generated method stub
+		System.out.println("STatus control Word = " + data);
 	}
 
 }

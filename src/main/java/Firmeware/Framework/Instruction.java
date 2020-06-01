@@ -59,11 +59,14 @@ public String getProperty(String propertyName ) {
 	return OpCodeProperties.get(propertyName);
 }
 protected int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-	byte opperand_lower = c.memory.read(c.pc); 
+	int  opperand_lower = c.memory.read(c.pc); 
+	System.out.println(String.format("ADDR: %04x Lower Operand = %02x" ,c.pc,  opperand_lower));
 	
-	byte opperand_upper = c.memory.read(c.pc+1); 
+	int opperand_upper = (int)(c.memory.read(c.pc+1) & 0x00ff);
+	System.out.println(String.format("ADDR: %04x Upper Operand = %02x" ,(c.pc+1), opperand_upper));
 	
-	int loadAddress = opperand_upper << 8 + opperand_lower;
+	int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
+	System.out.println (String.format("Final Address %04x ", loadAddress));
 	return loadAddress;
 }
 protected int getAbsoluteAddressY(CPU c) throws illegalAddressException, DeviceUnavailable {

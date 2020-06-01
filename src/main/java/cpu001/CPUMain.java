@@ -1,5 +1,7 @@
 package cpu001;
 
+import Devices.Device;
+import Devices.FileDevice;
 import MachineState.cpu001decoder;
 import exceptions.DeviceUnavailable;
 import exceptions.illegalAddressException;
@@ -11,6 +13,8 @@ public class CPUMain {
 	public static void main(String[] args) {
 		MemoryDriver mem = new basicMemory();
 			mem.setIOPage(0xfe00);
+			Device fd = new FileDevice();
+			mem.registerDevice(0xfe00, fd);
 			try {
 				mem.write(0xfffc, (byte)0x00);
 				mem.write(0xfffd, (byte)0x10);

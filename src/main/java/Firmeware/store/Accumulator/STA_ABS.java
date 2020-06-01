@@ -33,7 +33,7 @@ public STA_ABS() {
 		 *  instruction supports the mode (not all do).
 		 */
 		int address = getAbsoluteAddress(c);
-		
+		System.out.println(String.format("Abs Addr : %04x: ", address));
 		c.memory.write(address, (byte)(c.a.get() & 0xff));
 		c.pc +=2;
 	}

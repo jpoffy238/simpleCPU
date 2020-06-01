@@ -17,7 +17,7 @@ public class basicMemory implements MemoryDriver {
 	public basicMemory() {
 		memory = new byte[maxMemorySize];
 		int i = 0x1000;
-
+/*
 		memory[i++] = OpCodes.TEST.code();
 		memory[i++] = 0x40;
 		memory[i++] = OpCodes.TEST.code();
@@ -56,6 +56,35 @@ public class basicMemory implements MemoryDriver {
 		memory[i++] = (byte) 0x00;
 		memory[i++] = OpCodes.TEST.code();
 		memory[i++] = (byte) 0x80;
+		*/
+		// 0xfe00
+		/*
+		memory[i++] = OpCodes.LDA_IMM.code();
+		memory[i++] = 0x41;
+		memory[i++] = OpCodes.STA_ABS.code();
+		memory[i++] = 0x00;
+		memory[i++] = (byte)0xfe;
+		memory[i++] = OpCodes.LDA_IMM.code();
+		memory[i++] = 0x42;
+		memory[i++] = OpCodes.STA_ABS.code();
+		memory[i++] = 0x00;
+		memory[i++] = (byte)0xfe;		
+		memory[i++] = OpCodes.LDA_IMM.code();
+		memory[i++] = 0x43;
+		memory[i++] = OpCodes.STA_ABS.code();
+		memory[i++] = 0x00;
+		memory[i++] = (byte)0xfe;	
+		memory[i++] = OpCodes.LDA_IMM.code();
+		memory[i++] = 0x0a;
+		memory[i++] = OpCodes.STA_ABS.code();
+		memory[i++] = 0x00;
+		memory[i++] = (byte)0xfe;
+		*/
+		memory[i++] = OpCodes.LDA_IMM.code();
+		memory[i++] = 0x0a;
+		memory[i++] = OpCodes.STA_ABS.code();
+		memory[i++] = 0x01;
+		memory[i++] = (byte)0xfe;
 		memory[i++] = OpCodes.HLT.code(); // 15
 
 	}
@@ -69,7 +98,7 @@ public class basicMemory implements MemoryDriver {
 			if (null == d) {
 				throw new DeviceUnavailable();
 			} else {
-					if ((address & 0x01) == 1) {
+					if ((address & 0x0001) == 1) {
 						value = d.status();
 					} else {
 						value = d.read();
@@ -91,12 +120,14 @@ public class basicMemory implements MemoryDriver {
 		// TODO Auto-generated method stub
 		// For devices the odd address is control while even is data.
 		if ((address & 0xfff0) == ioPage) {
-			int pageAddress = address & 0x00ff;
+			System.out.println("In Device Page ");
+			int pageAddress = address & 0x00fe; // ensure even address
+			System.out.println(String.format("Address Requested %04x ", pageAddress));
 			Device d = devices.get(new Integer(pageAddress));
 			if (null == d) {
 				throw new DeviceUnavailable();
 			} else {
-				if ((address & 0x01) == 1) {
+				if ((address & 0x0001) == 1) {
 					d.status(data);
 				} else {
 					d.write(data);
@@ -104,7 +135,7 @@ public class basicMemory implements MemoryDriver {
 			}
 		} else {
 			if (address <= maxMemorySize && address > 0) {
-				memory[address] = data;
+				memory[address] = (byte) (data & 0x00ff);
 			} else {
 				throw new illegalAddressException();
 			}
