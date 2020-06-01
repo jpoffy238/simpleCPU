@@ -1,5 +1,5 @@
 package exceptions;
 
-public class illegalAddressException extends Exception {
+public class illegalAddressException extends SoCException {
 
 }

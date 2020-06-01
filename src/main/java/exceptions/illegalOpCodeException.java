@@ -1,5 +1,5 @@
 package exceptions;
 
-public class illegalOpCodeException extends Exception {
+public class illegalOpCodeException extends SoCException {
 
 }

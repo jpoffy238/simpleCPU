@@ -1,5 +1,5 @@
 package exceptions;
 
-public class DeviceUnavailable extends Exception {
+public class DeviceUnavailable extends SoCException {
 
 }
