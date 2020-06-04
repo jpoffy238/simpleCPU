@@ -2,7 +2,7 @@ package Firmeware.Framework;
 
 
 import java.util.Map;
-
+import Firmeware.Framework.*;
 import Firmeware.ExecutionFlow.BEQ;
 import Firmeware.ExecutionFlow.HLT;
 import Firmeware.ExecutionFlow.JMP_ABS;
@@ -100,6 +100,7 @@ public  enum OpCodes {
 	PHA(new PHA()),
 	
 	TEST(new TEST()),
+	MIH(new MIH()),
 	
 HLT( new HLT());
 	

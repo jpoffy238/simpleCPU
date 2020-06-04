@@ -18,6 +18,10 @@ public class CPUMain {
 			try {
 				mem.write(0xfffc, (byte)0x00);
 				mem.write(0xfffd, (byte)0x10);
+				mem.write(0xfffe,(byte)0x00);
+				mem.write(0xffff,(byte)0x10);
+				mem.write(0xfffa,(byte)0x00);
+				mem.write(0xfffb, (byte)0x10);
 			} catch (illegalAddressException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -61,6 +61,39 @@ public abstract class Instruction implements machineState {
 		return OpCodeProperties.get(propertyName);
 	}
 
+	protected int getInterruptHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+		int opperand_lower =  (int)(c.memory.read(0x00fffe) & 0x00ff);                     
+		System.out.println(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
+
+		int opperand_upper = (int) (c.memory.read (0x00ffff) & 0x00ff);
+		System.out.println(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
+
+		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
+		System.out.println(String.format("Final Address %04x ", loadAddress));
+		return loadAddress;
+	}
+	protected int getNMInterruptHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+		int opperand_lower =  (int)(c.memory.read(0x00fffa) & 0x00ff);                     
+		System.out.println(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
+
+		int opperand_upper = (int) (c.memory.read (0x00fffb) & 0x00ff);
+		System.out.println(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
+
+		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
+		System.out.println(String.format("Final Address %04x ", loadAddress));
+		return loadAddress;
+	}
+	protected int getResetHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
+		int opperand_lower =  (int)(c.memory.read(0x00fffc) & 0x00ff);                     
+		System.out.println(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
+
+		int opperand_upper = (int) (c.memory.read (0x00fffd) & 0x00ff);
+		System.out.println(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
+
+		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
+		System.out.println(String.format("Final Address %04x ", loadAddress));
+		return loadAddress;
+	}
 	protected int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
 		int opperand_lower = c.memory.read(c.pc);
 		System.out.println(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
