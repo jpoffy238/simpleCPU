@@ -2,29 +2,68 @@ package Firmeware.Framework;
 
 
 import java.util.Map;
-import Firmeware.Framework.*;
+
+import Firmeware.ExecutionFlow.BCC;
 import Firmeware.ExecutionFlow.BEQ;
+import Firmeware.ExecutionFlow.*;
 import Firmeware.ExecutionFlow.HLT;
 import Firmeware.ExecutionFlow.JMP_ABS;
 import Firmeware.ExecutionFlow.JSR;
 import Firmeware.ExecutionFlow.NOP;
 import Firmeware.ExecutionFlow.RTS;
-import Firmeware.Load.Accumulator.*;
-import Firmeware.store.Accumulator.*;
-import Firmeware.Load.IndexY.*;
-import Firmeware.store.IndexX.*;
-import Firmeware.store.IndexY.*;
-import Firmeware.Transfers.*;
-import Firmeware.incdec.*;
+import Firmeware.Load.Accumulator.LDA_ABS;
+import Firmeware.Load.Accumulator.LDA_ABSX;
+import Firmeware.Load.Accumulator.LDA_ABSY;
+import Firmeware.Load.Accumulator.LDA_IMM;
+import Firmeware.Load.Accumulator.LDA_INDX;
+import Firmeware.Load.Accumulator.LDA_INDY;
+import Firmeware.Load.Accumulator.LDA_ZP;
+import Firmeware.Load.Accumulator.LDA_ZX;
 import Firmeware.Load.IndexX.LDX_ABS;
+import Firmeware.Load.IndexX.LDX_ABSY;
 import Firmeware.Load.IndexX.LDX_IMM;
 import Firmeware.Load.IndexX.LDX_ZP;
 import Firmeware.Load.IndexX.LDX_ZPY;
-import Firmeware.Load.IndexX.LDX_ABSY;
+import Firmeware.Load.IndexY.LDY_ABS;
+import Firmeware.Load.IndexY.LDY_ABSX;
+import Firmeware.Load.IndexY.LDY_IMM;
+import Firmeware.Load.IndexY.LDY_ZP;
+import Firmeware.Load.IndexY.LDY_ZPX;
 import Firmeware.Stack.PHA;
 import Firmeware.Stack.PLA;
-import Firmeware.store.Accumulator.STA_ZPX;
+import Firmeware.Transfers.TAX;
+import Firmeware.Transfers.TAY;
+import Firmeware.Transfers.TSX;
+import Firmeware.Transfers.TXA;
+import Firmeware.Transfers.TXS;
+import Firmeware.Transfers.TYA;
+import Firmeware.incdec.DEC_ABS;
+import Firmeware.incdec.DEC_ABX;
+import Firmeware.incdec.DEC_ZP;
+import Firmeware.incdec.DEC_ZPX;
+import Firmeware.incdec.DEX;
+import Firmeware.incdec.DEY;
+import Firmeware.incdec.INC_ABS;
+import Firmeware.incdec.INC_ABX;
+import Firmeware.incdec.INC_ZP;
+import Firmeware.incdec.INC_ZPX;
+import Firmeware.incdec.INX;
+import Firmeware.incdec.INY;
+import Firmeware.store.Accumulator.STA_ABS;
+import Firmeware.store.Accumulator.STA_ABX;
+import Firmeware.store.Accumulator.STA_ABY;
+import Firmeware.store.Accumulator.STA_INX;
+import Firmeware.store.Accumulator.STA_INY;
 import Firmeware.store.Accumulator.STA_ZP;
+import Firmeware.store.Accumulator.STA_ZPX;
+import Firmeware.store.IndexX.STX_ABS;
+import Firmeware.store.IndexX.STX_ZP;
+import Firmeware.store.IndexX.STX_ZPY;
+import Firmeware.store.IndexY.STY_ABS;
+import Firmeware.store.IndexY.STY_ZP;
+import Firmeware.store.IndexY.STY_ZPX;
+import Firmeware.Logic.BIT_ABS;
+import Firmeware.Logic.BIT_ZP;
 import MachineState.DecoderMap;
 
 /*
@@ -91,9 +130,15 @@ public  enum OpCodes {
 	INY(new INY()),
 	
 	BEQ(new BEQ()),
+	BCC(new BCC()),
+	BCS(new BCS()),
+	BIT_ZP(new BIT_ZP()),
+	BIT_ABS(new BIT_ABS()),
+	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),
 	RTS(new RTS()),
+	BRK(new BRK()),
 
 	PLA(new PLA()),
 
