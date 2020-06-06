@@ -153,12 +153,20 @@ public class CPU extends Thread {
 	}
 
 	public byte fetchInstruction() throws illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub
+		// Interrupt handling
+		// Interrupts are only checked when the CPU is in the fetch cycle.  If an interrupt is raised
+		// this injects a special MIH instructions (non standard instruction) to read the specific
+		// interrupt vector, push the current PC and PSR to the stack then set the pc to the 
+		// interrupt routine.
 		MemoryDriver m = memory;
 		int value;
 		if   ((!IFLAG.isSet() &&interruptFired) || NMInterruptFired || powerOnResetFired ) {
 			// We have received an interrupt -- need to jump to the
-			// address at $FFFE and FFFF
+			// indirect address between  $FFFA/B  and FFFC/D  and FFFE/F
+			//  non-maskable interrupt handler ($FFFA/B), 
+			// the power on reset location ($FFFC/D) and the 
+			// BRK/interrupt request handler ($FFFE/F) respectively.
+			// Also don't increment the PC still need to execut that instruction.
 			value = OpCodes.MIH.code();
 		} else {
 			value = (int) (m.read(pc) & 0xff);

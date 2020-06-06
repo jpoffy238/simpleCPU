@@ -12,11 +12,17 @@ public interface PBus {
 	
 	public  byte  read ( int destAddress ) throws illegalAddressException, DeviceUnavailable;
 	
-	public void interupt();
+	public void blockWrite (int address, byte data[]) throws illegalAddressException, DeviceUnavailable;
+	
+	public  byte[]  blockRead ( int destAddress ) throws illegalAddressException, DeviceUnavailable;
+	public void raiseInterupt();
+	public void raiseNMInterupt();
+	public void raisepowerOnReset();
+	
 	
 	public void  registerDevice (BussId bus, int address, int length, Device deviceHandler );
 
-	public void unregisterDevice(int address);
+	public void unregisterDevice(BussId bus, int address);
 	
 	
 }
