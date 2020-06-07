@@ -63,7 +63,7 @@ import Firmeware.store.IndexY.STY_ABS;
 import Firmeware.store.IndexY.STY_ZP;
 import Firmeware.store.IndexY.STY_ZPX;
 import Firmeware.Logic.BIT_ABS;
-import Firmeware.Logic.BIT_ZP;
+import Firmeware.Logic.*;
 import MachineState.DecoderMap;
 
 /*
@@ -99,7 +99,8 @@ public  enum OpCodes {
 	STA_INX(new STA_INX()),
 	STA_INY(new STA_INY()),
 	STA_ZP(new STA_ZP()),
-	STA_ZPX(new STA_ZPX()),
+	STA_ZPX(new STA_ZPX()),// TODO Auto-generated catch block
+
 
 	STX_ABS(new STX_ABS()),
 	STX_ZP(new STX_ZP()),
@@ -134,6 +135,16 @@ public  enum OpCodes {
 	BCS(new BCS()),
 	BIT_ZP(new BIT_ZP()),
 	BIT_ABS(new BIT_ABS()),
+	AND_IMM(new AND_IMM()),
+	AND_ZP(new AND_ZP()),
+	AND_ZPX(new AND_ZPX()),
+	AND_ABS(new AND_ABS()),
+	AND_ABX(new AND_ABX()),
+	AND_ABY(new AND_ABY()),
+	AND_INX(new AND_INX()),
+	AND_INY(new AND_INY()),
+	
+	
 	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),
