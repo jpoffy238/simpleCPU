@@ -1,12 +1,18 @@
 package com.mj.Firmware.store.Accumulator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.illegalAddressException;
 
 public class STA_ABS extends Instruction {
-public STA_ABS() {
+	 private static final Logger logger = LogManager.getLogger(STA_ABS.class);
+
+	
+	public STA_ABS() {
 	super((byte)0x8d);
 	setProperty(KEY_MNEMONIC, "STA");
 	setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABS);
@@ -33,7 +39,8 @@ public STA_ABS() {
 		 *  instruction supports the mode (not all do).
 		 */
 		int address = getAbsoluteAddress(c);
-	
+		String sadd = String.format("ABS %04x value %02x ", address, (byte)(c.a.get()&0xff));
+	    logger.debug(sadd);
 		c.memory.write(address, (byte)(c.a.get() & 0xff));
 		c.pc +=2;
 	}

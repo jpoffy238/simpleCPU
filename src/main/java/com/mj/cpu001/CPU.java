@@ -109,9 +109,17 @@ public class CPU extends Thread {
 
 	public void run() {
 		reset();
-       
-
+		long instructionCount = 0;
+       long beginTime = System.currentTimeMillis();
+		long current  = System.currentTimeMillis();
+		long previous = System.currentTimeMillis();
+		long difftime;
 		while (true) {
+			instructionCount++;
+			current = System.currentTimeMillis();
+			difftime = current - previous;
+			previous = current;
+			logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
 			
 			byte opcode = 0;
 			try {
@@ -136,6 +144,7 @@ public class CPU extends Thread {
 				logger.error("Device Unavailable : " + dump());
 				System.exit(8);
 			}
+			
 		}
 	}
 

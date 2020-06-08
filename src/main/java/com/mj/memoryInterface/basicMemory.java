@@ -85,11 +85,22 @@ public class basicMemory implements MemoryDriver {
 		memory[i++] = 0x00;
 		memory[i++] = (byte)0xfe;
 		*/
-		memory[i++] = OpCodes.LDA_IMM.code();
-		memory[i++] = 0x0a;
-		memory[i++] = OpCodes.STA_ABS.code();
+		memory[i++] = OpCodes.LDA_IMM.code(); // 0x1000
+		memory[i++] = 0x7a;                  		                  // 0x1001
+		memory[i++] = OpCodes.STA_ABS.code(); // 0x1002
+		memory[i++] = 0x01;                                         // 0x1003
+		memory[i++] = (byte)0xce;                            // 0x1004
+		memory[i++] = OpCodes.DEC_ABS.code();;
 		memory[i++] = 0x01;
-		memory[i++] = (byte)0xfe;
+		memory[i++] = (byte)0xce;
+		memory[i++] = OpCodes.LDA_ABS.code();
+		memory[i++] = 0x01;
+		memory[i++] = (byte)0xce;
+		memory[i++] = OpCodes.BNE.code();
+		memory[i++] = -7;
+		
+	
+		
 		memory[i++] = OpCodes.HLT.code(); // 15
 
 	}

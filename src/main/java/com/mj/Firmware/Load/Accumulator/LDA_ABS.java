@@ -32,6 +32,6 @@ public class LDA_ABS extends Instruction {
 		} catch (nflagException e) {
 			handleNException(c);
 		}
-		c.pc = (++c.pc);
+		c.pc+=2;
 	}
 }
