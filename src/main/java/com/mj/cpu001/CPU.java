@@ -114,7 +114,8 @@ public class CPU extends Thread {
 		long current  = System.currentTimeMillis();
 		long previous = System.currentTimeMillis();
 		long difftime;
-		while (true) {
+		boolean RUN=true;
+		while (RUN) {
 			instructionCount++;
 			current = System.currentTimeMillis();
 			difftime = current - previous;
@@ -134,15 +135,14 @@ public class CPU extends Thread {
 			} catch (illegalOpCodeException e) {
 				// TODO Auto-generated catch block
 				logger.error("[" + (int) (opcode & 0xff) + "] BAD OPCODE : " + dump());
-				System.exit(8);
+				RUN=false;
 			} catch (illegalAddressException e) {
 				logger.error("Bad address: " + dump());
-				
 
-				System.exit(8);
+				RUN=false;
 			} catch (DeviceUnavailable e) {
 				logger.error("Device Unavailable : " + dump());
-				System.exit(8);
+				RUN=false;
 			}
 			
 		}

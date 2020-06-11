@@ -11,12 +11,12 @@ public class CPUBus implements PBus {
 	
 	
 	
-	public void write(int address, byte data) throws illegalAddressException, DeviceUnavailable {
+	public void write(BussId bus, int address, byte data) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		
 	}
 	
-	public byte read(int destAddress) throws illegalAddressException, DeviceUnavailable {
+	public byte read(BussId bus, int destAddress) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -26,22 +26,22 @@ public class CPUBus implements PBus {
 		
 	}
 
-	public void registerDevice( PBus.BussId bus, int address, int length, Device deviceHandler) {
+	public void registerDevice( BussId bus, int address, int length, Device deviceHandler) {
 		// TODO Auto-generated  stub
 		
 	}
 
-	public void unregisterDevice(int address) {
+	public void unregisterDevice(BussId bus , int address) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void blockWrite(int address, byte[] data) throws illegalAddressException, DeviceUnavailable {
+	public void blockWrite(BussId bus, int address, byte[] data) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public byte[] blockRead(int destAddress) throws illegalAddressException, DeviceUnavailable {
+	public byte[] blockRead(BussId bus, int destAddress) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -60,9 +60,15 @@ public class CPUBus implements PBus {
 		// TODO Auto-generated method stub
 		
 	}
-	public void unregisterDevice(BussId bus, int address) {
+
+	public void registerDevice(BussId bus, DEVTYPE t, int address, int length, Device deviceHandler) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	public void unregisterDevice(BussId bus, DEVTYPE t, int address) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

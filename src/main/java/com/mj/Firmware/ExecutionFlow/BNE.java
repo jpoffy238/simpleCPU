@@ -1,6 +1,10 @@
 package com.mj.Firmware.ExecutionFlow;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.mj.Firmware.Framework.Instruction;
+import com.mj.Firmware.Load.Accumulator.LDA_ABS;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.illegalAddressException;
@@ -35,9 +39,10 @@ A page boundary crossing occurs (i.e. the BCS takes 4 cycles) when (the address 
   LABEL NOP
 the BVC instruction will take 3 cycles no matter what address it is located at.
  */
+	private static final Logger logger = LogManager.getLogger(BNE.class);
 	public BNE() {
 		super((byte)(0xd0));
-		setProperty(KEY_MNEMONIC, "BMI");
+		setProperty(KEY_MNEMONIC, "BNE");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_REL);
 		setProperty(KEY_OPCODE, "0xd0");
 		setProperty(KEY_INSTRUCTION_SIZE, "2");
@@ -49,10 +54,15 @@ the BVC instruction will take 3 cycles no matter what address it is located at.
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
+		byte offset = (byte) (c.memory.read(c.pc) & 0x00ff);
 		if ( ! c.ZFLAG.isSet()) {
-			byte offset = (byte) (c.memory.read(c.pc) & 0x00ff);
+			String currentState = String.format("%-10s $(%-2x) Value[ %-4x] BANCHING", getProperty(KEY_MNEMONIC), offset , (int)(c.pc+offset));
+			logger.debug(currentState);
 			c.pc = (int)(c.pc+offset);
 		} else {
+			offset = 0;
+			String currentState = String.format("%-10s $(%-2x) Value[ %-4x] NO BANCH", getProperty(KEY_MNEMONIC), offset, (int)(c.pc+offset));
+			logger.debug(currentState);
 			c.pc++;
 		}
 	}

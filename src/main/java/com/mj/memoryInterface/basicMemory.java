@@ -85,6 +85,7 @@ public class basicMemory implements MemoryDriver {
 		memory[i++] = 0x00;
 		memory[i++] = (byte)0xfe;
 		*/
+		/*
 		memory[i++] = OpCodes.LDA_IMM.code(); // 0x1000
 		memory[i++] = (byte)0xff;                  		                  // 0x1001
 		memory[i++] = OpCodes.STA_ABS.code(); // 0x1002
@@ -99,7 +100,7 @@ public class basicMemory implements MemoryDriver {
 		memory[i++] = OpCodes.BNE.code();
 		memory[i++] = -7;
 		memory[i++] = OpCodes.HLT.code(); // 15
-
+*/
 	}
 
 	public byte read(int address) throws DeviceUnavailable, illegalAddressException {

@@ -9,10 +9,11 @@ import org.apache.logging.log4j.Logger;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.illegalAddressException;
+import com.mj.exceptions.illegalOpCodeException;
 
 public abstract class Instruction implements machineState {
 
-	final  Logger logger = LogManager.getLogger("Instruction");
+	protected final  Logger logger = LogManager.getLogger("Instruction");
 	private byte opCode;
 
 	public final String KEY_OPCODE = "opcode";
@@ -49,7 +50,7 @@ public abstract class Instruction implements machineState {
 		opCode = op;
 	}
 
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	public void exeute(CPU c) throws illegalOpCodeException, illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 	}
 
