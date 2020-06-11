@@ -22,7 +22,6 @@ public class basicMemory implements MemoryDriver {
 	public basicMemory() {
 		memory = new byte[maxMemorySize];
 		int i = 0x1000;
-/*
 		memory[i++] = OpCodes.TEST.code();
 		memory[i++] = 0x40;
 		memory[i++] = OpCodes.TEST.code();
@@ -61,9 +60,7 @@ public class basicMemory implements MemoryDriver {
 		memory[i++] = (byte) 0x00;
 		memory[i++] = OpCodes.TEST.code();
 		memory[i++] = (byte) 0x80;
-		*/
 		// 0xfe00
-		/*
 		memory[i++] = OpCodes.LDA_IMM.code();
 		memory[i++] = 0x41;
 		memory[i++] = OpCodes.STA_ABS.code();
@@ -92,6 +89,9 @@ public class basicMemory implements MemoryDriver {
 		memory[i++] = 0x01;                                         // 0x1003
 		memory[i++] = (byte)0xce;                            // 0x1004
 		memory[i++] = OpCodes.DEC_ABS.code();;
+		memory[i++] = OpCodes.LDA_IMM.code();
+		memory[i++] = 0x0a;
+		memory[i++] = OpCodes.STA_ABS.code();
 		memory[i++] = 0x01;
 		memory[i++] = (byte)0xce;
 		memory[i++] = OpCodes.LDA_ABS.code();
