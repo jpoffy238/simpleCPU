@@ -22,6 +22,7 @@ public class basicMemory implements MemoryDriver {
 	public basicMemory() {
 		memory = new byte[maxMemorySize];
 		int i = 0x1000;
+		/*
 		memory[i++] = OpCodes.TEST.code();
 		memory[i++] = 0x40;
 		memory[i++] = OpCodes.TEST.code();
