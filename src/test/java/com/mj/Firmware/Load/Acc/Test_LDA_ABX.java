@@ -3,8 +3,11 @@ package com.mj.Firmware.Load.Acc;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.mj.Devices.Device;
+import com.mj.Devices.FileDevice;
 import com.mj.Firmware.Framework.OpCodes;
 import com.mj.MachineState.cpu001decoder;
 import com.mj.cpu001.CPU;
@@ -13,16 +16,16 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.MemoryDriver;
 import com.mj.memoryInterface.basicMemory;
 
-public class Test_LDX_ABS {
+public class Test_LDA_ABX {
 	private static CPU c;
-	private static MemoryDriver mem = new basicMemory();;
-	final Logger logger = LogManager.getLogger("Test_LDA_ABS");
+	private static MemoryDriver mem;
+	private static final Logger logger = LogManager.getLogger("Test_LDA_ABS");
 
 	@BeforeAll
 	public static void setup() {
-
+		mem = new basicMemory();;
 		mem.setIOPage(0xfe00);
-
+		
 		try {
 			mem.write(0xfffc, (byte) 0x00);
 			mem.write(0xfffd, (byte) 0x10);
@@ -38,19 +41,22 @@ public class Test_LDX_ABS {
 			e.printStackTrace();
 		}
 		c = new CPU(mem, new cpu001decoder());
+		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}
 
-
-
 	@Test
-	public void Test_LDX_ABS1() {
+	public void Test_exec() {
 		int i = 0x1000;
 		try {
-			mem.write(i++, OpCodes.LDX_ABS.code());
+			mem.write(i++,  OpCodes.LDX_IMM.code());
+			mem.write(i++,  (byte)0x10);
+			mem.write(i++, OpCodes.LDA_ABSX.code());
 			mem.write(i++, (byte) 0x00);
 			mem.write(i++, (byte) (0x20));
 			mem.write(i++, OpCodes.HLT.code());
-			mem.write(0x2000, (byte) 0x55);
+			mem.write(0x1fff,(byte)0x00);
+			mem.write(0x2010, (byte) 0x55);
+			mem.write(0x2001,(byte)0xff);
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -68,10 +74,10 @@ public class Test_LDX_ABS {
 
 			}
 		}
-		int result = c.x.get();
-		logger.debug("What X is loaded with : ", +result);
+		int result = c.a.get();
+		logger.debug("What A is loaded with : ", +result);
 		try {
-			assert (result == mem.read(0x2000));
+			assert (result == mem.read(0x2010));
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -79,6 +85,8 @@ public class Test_LDX_ABS {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+	}
 
-	}	
+
 }
