@@ -58,7 +58,7 @@ public class FileDevice implements Device {
 		
 	}
 
-	public byte read(int address) throws illegalAddressException, ROException, DeviceUnavailable {
+	public byte read(int address) throws illegalAddressException,  DeviceUnavailable {
 		// TODO Auto-generated method stub
 		return 0;
 	}

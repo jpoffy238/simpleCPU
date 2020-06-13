@@ -14,7 +14,7 @@ public class basicMemory implements MemoryDriver {
 	final BussId  bus = BussId.MEMROY;
 	final DEVTYPE type = DEVTYPE.CHAR;
 	final IOALLOW ioallow = IOALLOW.RW;
-	public final static int maxMemorySize = 64 * 1024;;
+	public final static int maxMemorySize = 32 * 1024;;
 	final MemoryRange range = new MemoryRange(0,maxMemorySize );
 
 	

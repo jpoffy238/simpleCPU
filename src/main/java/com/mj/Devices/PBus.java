@@ -24,9 +24,9 @@ public interface PBus extends CPUBus {
 	public void raisepowerOnReset();
 	
 	
-	public void  registerDevice (BussId bus, DEVTYPE t, IOALLOW io, MemoryRange range, Device deviceHandler );
+	public void  registerDevice ( Device deviceHandler );
 
-	public void unregisterDevice(BussId bus, DEVTYPE t , MemoryRange range);
+	public void unregisterDevice(Device deviceHandler);
 	
 	
 }

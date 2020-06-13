@@ -11,5 +11,5 @@ public interface Device  {
 	 public BussId getBusId();
 	 public MemoryRange getAddressRange();	 
 	 public void write(int address, byte data ) throws illegalAddressException, ROException, DeviceUnavailable;
-	  public byte read(int address) throws illegalAddressException, ROException, DeviceUnavailable;
+	  public byte read(int address) throws illegalAddressException, DeviceUnavailable;
 }
