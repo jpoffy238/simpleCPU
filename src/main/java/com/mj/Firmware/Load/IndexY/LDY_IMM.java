@@ -23,7 +23,7 @@ public LDY_IMM() {
 }
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		byte m = c.memory.read(c.pc);
+		byte m = c.bus.read(c.pc);
 		try {
 			c.y.set(m);
 		} catch (zflagException e) {

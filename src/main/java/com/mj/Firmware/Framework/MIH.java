@@ -2,24 +2,25 @@ package com.mj.Firmware.Framework;
 
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class MIH extends Instruction {
 
 	public MIH() {
-		super((byte) (0x3E));
+		super((byte) (0x013E));
 	}
 
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
 		int interuptHandlerAddress = 0; 
-		if (c.getNMInterruptFired()) {
+		if (c.bus.IsNMInterruptRaised()) {
 			interuptHandlerAddress = getNMInterruptHandlerAddress(c);
 		} else {
-			if (c.getInterruptFired()) {
+			if (c.bus.IsInterruptRaised() ) {
 				interuptHandlerAddress = getInterruptHandlerAddress(c);
 			} else {
-				if (c.getPowerOnResetFired()) {
+				if (c.bus.IsPowerOnResetRased()) {
 					interuptHandlerAddress = getResetHandlerAddress(c);
 				}
 			}
@@ -31,11 +32,11 @@ public class MIH extends Instruction {
 
 			// push on stack
 			c.sp--;
-			c.memory.write(c.sp, (byte) (upper & 0xff));
+			c.bus.write(c.sp, (byte) (upper & 0xff));
 			c.sp--;
-			c.memory.write(c.sp, (byte) (lower & 0xff));
+			c.bus.write(c.sp, (byte) (lower & 0xff));
 			c.sp--;
-			c.memory.write(c.sp, psr(c));
+			c.bus.write(c.sp, psr(c));
 
 			c.pc = interuptHandlerAddress;
 		}

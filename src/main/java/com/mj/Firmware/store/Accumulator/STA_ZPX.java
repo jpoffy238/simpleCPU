@@ -3,6 +3,7 @@ package com.mj.Firmware.store.Accumulator;
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class STA_ZPX extends Instruction {
@@ -17,7 +18,7 @@ public class STA_ZPX extends Instruction {
 		setProperty(KEY_WEB,"http://6502.org/tutorials/6502opcodes.html#STA" );
 		setProperty(KEY_DESCRIPTION ,"M = A  Stores the contents of the accumulator into zero page+x");
 	}
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
 		/*
 		 * http://www.obelisk.me.uk/6502/addressing.html#ZPX
@@ -34,7 +35,7 @@ public class STA_ZPX extends Instruction {
 
 		
 		int  zeroPageAddress = getZeroPageXAddress(c);
-		c.memory.write(zeroPageAddress, (byte)(c.a.get() & 0xff));
+		c.bus.write(zeroPageAddress, (byte)(c.a.get() & 0xff));
 		c.pc++;
 	}
 }

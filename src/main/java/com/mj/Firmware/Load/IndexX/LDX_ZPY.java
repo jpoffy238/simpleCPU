@@ -28,7 +28,7 @@ public class LDX_ZPY extends Instruction {
 		// TODO Auto-generated method stub
 		int loadAdress = getZeroPageYAddress(c);
 		
-		byte value = c.memory.read(loadAdress);
+		byte value = c.bus.read(loadAdress);
 		try {
 			c.x.set(value);
 		} catch (zflagException e) {

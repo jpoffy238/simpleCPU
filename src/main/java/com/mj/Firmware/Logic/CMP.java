@@ -43,7 +43,7 @@ of and the sign (i.e. A>=$80) of the accumulator.
 	
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int m = c.memory.read(c.pc);
+		int m = c.bus.read(c.pc);
 		c.pc = (++c.pc);
 		int a = c.a.get();
 		

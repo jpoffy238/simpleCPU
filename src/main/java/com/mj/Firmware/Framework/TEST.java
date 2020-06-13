@@ -13,7 +13,7 @@ public class TEST extends Instruction {
 		byte currentState = psr(c);
 		boolean restore = true;;
 		System.out.println("Initial State: " + c.dump());
-		byte data = c.memory.read(c.pc);
+		byte data = c.bus.read(c.pc);
 		if ((data & 0x80) != 0 ) {
 			restore = false;
 		}

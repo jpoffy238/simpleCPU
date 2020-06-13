@@ -26,7 +26,7 @@ public class LDX_ZP extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int zeroPageAddress  = getZeroPageAddress(c); // read the zero page address - operand 
-		byte value = c.memory.read(zeroPageAddress);
+		byte value = c.bus.read(zeroPageAddress);
 		try {
 			c.x.set(value);
 		} catch (zflagException e) {

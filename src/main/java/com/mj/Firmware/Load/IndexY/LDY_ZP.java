@@ -26,7 +26,7 @@ public class LDY_ZP extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int zeropageAddress  = getZeroPageAddress(c); // read the zero page address - operand 
-		byte value = c.memory.read(zeropageAddress);
+		byte value = c.bus.read(zeropageAddress);
 		try {
 			c.y.set(value);
 		} catch (zflagException e) {

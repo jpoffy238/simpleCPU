@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class STA_ABS extends Instruction {
@@ -22,7 +23,7 @@ public class STA_ABS extends Instruction {
 	setProperty(KEY_WEB,"http://6502.org/tutorials/6502opcodes.html#STA" );
 	setProperty(KEY_DESCRIPTION ,"M = A  Stores the contents of the accumulator into memory.");
 }
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
 		/* 
 		 * Zero Page Address
@@ -41,7 +42,7 @@ public class STA_ABS extends Instruction {
 		int address = getAbsoluteAddress(c);
 		String sadd = String.format("ABS %04x value %02x ", address, (byte)(c.a.get()&0xff));
 	    logger.debug(sadd);
-		c.memory.write(address, (byte)(c.a.get() & 0xff));
+		c.bus.write(address, (byte)(c.a.get() & 0xff));
 		c.pc +=2;
 	}
 }

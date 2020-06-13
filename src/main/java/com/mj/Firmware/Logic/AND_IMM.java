@@ -52,7 +52,7 @@ public class AND_IMM extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		
-		byte testValue = c.memory.read(c.pc);
+		byte testValue = c.bus.read(c.pc);
 		int result = testValue & (byte) (c.a.get() & 0xff);
 		try {
 			c.a.set(result& 0xff);

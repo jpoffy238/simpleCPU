@@ -52,7 +52,7 @@ public class AND_ZP extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int zeroPageAddress = getZeroPageAddress(c);
-		byte testValue = c.memory.read(zeroPageAddress);
+		byte testValue = c.bus.read(zeroPageAddress);
 		int result = testValue & (byte) (c.a.get() & 0xff);
 		try {
 			c.a.set(result& 0xff);

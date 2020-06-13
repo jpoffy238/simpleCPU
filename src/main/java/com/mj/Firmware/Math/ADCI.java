@@ -45,7 +45,7 @@ public class ADCI extends Instruction {
 		 * N 	Negative Flag 	Set if bit 7 set
 		 * 
 		 */
-		int m = c.memory.read(c.pc);
+		int m = c.bus.read(c.pc);
 		c.pc = (++c.pc);
 		int a = c.a.get();
 		boolean anegative = (a & 0x80) > 0;

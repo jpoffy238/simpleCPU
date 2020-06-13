@@ -52,7 +52,7 @@ public class AND_ABS extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int address = getAbsoluteAddress(c);
-		byte testValue = c.memory.read(address);
+		byte testValue = c.bus.read(address);
 		
 		int result = testValue & (byte) (c.a.get() & 0xff);
 		try {

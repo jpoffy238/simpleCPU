@@ -24,7 +24,7 @@ public class LDA_ZX extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int address = getZeroPageXAddress(c);
-		byte m = c.memory.read(address);
+		byte m = c.bus.read(address);
 		try {
 			c.a.set(m);
 		} catch (zflagException e) {

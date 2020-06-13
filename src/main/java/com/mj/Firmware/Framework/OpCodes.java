@@ -59,7 +59,6 @@ import com.mj.Firmware.store.IndexX.STX_ZPY;
 import com.mj.Firmware.store.IndexY.STY_ABS;
 import com.mj.Firmware.store.IndexY.STY_ZP;
 import com.mj.Firmware.store.IndexY.STY_ZPX;
-import com.mj.MachineState.DecoderMap;
 import com.mj.cpu001.CPU;
 
 /*

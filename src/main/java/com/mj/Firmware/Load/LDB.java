@@ -14,7 +14,7 @@ public class LDB extends Instruction {
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 	
-		byte m = c.memory.read(c.pc);
+		byte m = c.bus.read(c.pc);
 		try {
 			c.b.set(m);
 		} catch (zflagException e) {

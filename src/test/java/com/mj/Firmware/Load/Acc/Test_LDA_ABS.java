@@ -3,28 +3,26 @@ package com.mj.Firmware.Load.Acc;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.mj.Devices.Device;
-import com.mj.Devices.FileDevice;
+import com.mj.Devices.BasicBus;
+import com.mj.Devices.CPUBus;
 import com.mj.Firmware.Framework.OpCodes;
-import com.mj.MachineState.cpu001decoder;
+import com.mj.Firmware.Framework.cpu001decoder;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
-import com.mj.memoryInterface.MemoryDriver;
-import com.mj.memoryInterface.basicMemory;
 
 public class Test_LDA_ABS {
 	private static CPU c;
-	private static MemoryDriver mem;
+	private static CPUBus  mem;
 	private static final Logger logger = LogManager.getLogger("Test_LDA_ABS");
 
 	@BeforeAll
 	public static void setup() {
-		mem = new basicMemory();;
-		mem.setIOPage(0xfe00);
+		mem = new BasicBus();
+		
 		
 		try {
 			mem.write(0xfffc, (byte) 0x00);
@@ -37,6 +35,9 @@ public class Test_LDA_ABS {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ROException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -59,6 +60,9 @@ public class Test_LDA_ABS {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ROException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

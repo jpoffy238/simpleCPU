@@ -50,7 +50,7 @@ public class BIT_ZP extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int testAddress = getZeroPageAddress(c);
-		byte testValue = c.memory.read(testAddress);
+		byte testValue = c.bus.read(testAddress);
 		int result = testValue & (byte) (c.a.get() & 0xff);
 		if (result == 0) {
 			c.ZFLAG.set();

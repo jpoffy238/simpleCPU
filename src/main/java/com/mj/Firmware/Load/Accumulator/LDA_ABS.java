@@ -28,7 +28,7 @@ public class LDA_ABS extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int address = getAbsoluteAddress(c);
-		byte m = c.memory.read(address);
+		byte m = c.bus.read(address);
 		String currentState = String.format("%-10s $(%-4x) Value[ %-2x]", getProperty(KEY_MNEMONIC), address, (int)(m & 0xff));
 		logger.debug(currentState);
 		try {

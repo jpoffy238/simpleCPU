@@ -52,7 +52,7 @@ public class AND_INX extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int addressY= getIndexX(c);
-		byte testValue = c.memory.read(addressY);
+		byte testValue = c.bus.read(addressY);
 		
 		int result = testValue & (byte) (c.a.get() & 0xff);
 		try {

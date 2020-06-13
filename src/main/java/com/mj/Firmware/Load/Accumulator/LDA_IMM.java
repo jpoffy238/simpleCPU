@@ -34,7 +34,7 @@ public class LDA_IMM extends Instruction {
 		 *         LDX #LO LABEL   ;Load the LSB of a 16 bit address into X
 		 *         LDY #HI LABEL   ;Load the MSB of a 16 bit address into Y
 		 */
-		byte m = c.memory.read(c.pc);
+		byte m = c.bus.read(c.pc);
 		c.pc = (++c.pc);
 		try {
 			c.a.set(m);

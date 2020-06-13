@@ -3,6 +3,7 @@ package com.mj.Firmware.store.Accumulator;
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class STA_ABX extends Instruction {
@@ -16,7 +17,7 @@ public STA_ABX() {
 	setProperty(KEY_WEB,"http://6502.org/tutorials/6502opcodes.html#STA" );
 	setProperty(KEY_DESCRIPTION ,"M = A  Stores the contents of the accumulator into memory.");
 }
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
 		/* 
 		 * Zero Page Address
@@ -34,7 +35,7 @@ public STA_ABX() {
 		 */
 		int address = getAbsoluteAddressX(c);
 		
-		c.memory.write(address, (byte)(c.a.get() & 0xff));
+		c.bus.write(address, (byte)(c.a.get() & 0xff));
 		c.pc +=2;
 	}
 }

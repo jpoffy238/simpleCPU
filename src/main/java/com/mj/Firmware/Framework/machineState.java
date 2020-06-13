@@ -2,11 +2,12 @@ package com.mj.Firmware.Framework;
 
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.illegalOpCodeException;
 
 public interface machineState {
-		public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, illegalOpCodeException;
+		public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, illegalOpCodeException, ROException;
 		public byte getOpCode();
 }
 

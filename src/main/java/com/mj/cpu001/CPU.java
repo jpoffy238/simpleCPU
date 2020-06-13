@@ -3,58 +3,26 @@ package com.mj.cpu001;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.mj.Devices.CPUBus;
+import com.mj.Firmware.Framework.Decoder;
 import com.mj.Firmware.Framework.OpCodes;
 import com.mj.Firmware.Framework.machineState;
-import com.mj.MachineState.Decoder;
 import com.mj.Registers.generalPurpose;
 import com.mj.Registers.gpregister;
 import com.mj.Registers.registerFlags;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.illegalOpCodeException;
 import com.mj.memoryInterface.MemoryDriver;
 
 public class CPU extends Thread {
-	public CPU(MemoryDriver memdrv, Decoder dcd) {
-		memory = memdrv;
+	public CPU(CPUBus bus, Decoder dcd) {
+		this.bus =bus;
 		decoder = dcd;
 	}
     private static final Logger logger = LogManager.getLogger(CPU.class);
 
-	private Boolean interruptFired = false;
-	private Boolean NMInterruptFired = false;
-	private Boolean powerOnResetFired = true;
-
-	public Boolean getNMInterruptFired() {
-		boolean returnValue =  NMInterruptFired;
-		NMInterruptFired = false;
-		return returnValue;
-				
-	}
-
-	public void setNMInterruptFired() {
-		NMInterruptFired = true;
-	}
-
-	public Boolean getPowerOnResetFired() {
-		boolean returnValue = powerOnResetFired;
-		powerOnResetFired = false;
-		return returnValue;
-	}
-
-	public void setPowerOnResetFired() {
-		powerOnResetFired = true;
-	}
-
-	public Boolean getInterruptFired() {
-		boolean returnvalue = interruptFired;
-		interruptFired = false;
-		return returnvalue;
-	}
-
-	public void setInterruptFired() {
-		interruptFired = true;
-	}
 
 	public registerFlags CFLAG = new registerFlags("C");
 	public registerFlags ZFLAG = new registerFlags("Z");
@@ -71,10 +39,13 @@ public class CPU extends Thread {
 
 	public int pc;
 	public int sp;
-	public MemoryDriver memory;
-	Decoder decoder;
+	public CPUBus bus;
+	private Decoder decoder;
 	public int clockState;
 	machineState state;
+
+
+	public Object memory;
 
 
 	public void reset() {
@@ -92,8 +63,7 @@ public class CPU extends Thread {
 		y.reset();
 		pc = 0x1000;
 		sp = (0x01ff);
-		powerOnResetFired = true;
-		
+
 		logger.debug(dump());
 	}
 
@@ -143,6 +113,10 @@ public class CPU extends Thread {
 			} catch (DeviceUnavailable e) {
 				logger.error("Device Unavailable : " + dump());
 				RUN=false;
+			} catch (ROException e) {
+				// TODO Auto-generated catch block
+				logger.error("RO Memory Write attempt : " + dump());
+				e.printStackTrace();
 			}
 			
 		}
@@ -154,9 +128,9 @@ public class CPU extends Thread {
 		// this injects a special MIH instructions (non standard instruction) to read the specific
 		// interrupt vector, push the current PC and PSR to the stack then set the pc to the 
 		// interrupt routine.
-		MemoryDriver m = memory;
+		
 		int value;
-		if   ((!IFLAG.isSet() &&interruptFired) || NMInterruptFired || powerOnResetFired ) {
+		if   ((!IFLAG.isSet() &&bus.IsInterruptRaised()) || bus.IsNMInterruptRaised()|| bus.IsPowerOnResetRased() ) {
 			// We have received an interrupt -- need to jump to the
 			// indirect address between  $FFFA/B  and FFFC/D  and FFFE/F
 			//  non-maskable interrupt handler ($FFFA/B), 
@@ -165,7 +139,7 @@ public class CPU extends Thread {
 			// Also don't increment the PC still need to executethat instruction.
 			value = OpCodes.MIH.code();
 		} else {
-			value = (int) (m.read(pc) & 0xff);
+			value = (int) (bus.read(pc) & 0xff);
 			pc++;
 		}
 		return (byte) value;

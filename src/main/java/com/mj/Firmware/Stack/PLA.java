@@ -48,7 +48,7 @@ $68
 		// TODO Auto-generated method stub
 			
 		try {	
-			c.a.set(c.memory.read(c.sp));
+			c.a.set(c.bus.read(c.sp));
 		} catch (zflagException z) {
 			c.ZFLAG.set();
 		} catch (nflagException e) {

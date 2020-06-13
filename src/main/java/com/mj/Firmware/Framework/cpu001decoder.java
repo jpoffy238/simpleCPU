@@ -1,6 +1,5 @@
-package com.mj.MachineState;
+package com.mj.Firmware.Framework;
 
-import com.mj.Firmware.Framework.machineState;
 import com.mj.exceptions.illegalOpCodeException;
 
 public class cpu001decoder implements Decoder {
