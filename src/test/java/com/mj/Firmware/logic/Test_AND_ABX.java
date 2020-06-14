@@ -16,7 +16,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
 
-public class Test_AND_IMM {
+public class Test_AND_ABX {
 	private static CPU c;
 
 	private static final Logger logger = LogManager.getLogger("Test_LDA_ABS");
@@ -40,7 +40,11 @@ public class Test_AND_IMM {
 			c.bus.write(i++, OpCodes.LDA_ABS.code());
 			c.bus.write(i++, (byte) 0x00);
 			c.bus.write(i++, (byte) (0x20));
-			c.bus.write(i++, OpCodes.AND_IMM.code());
+			c.bus.write(i++,OpCodes.LDX_IMM.code() );
+			c.bus.write(i++, (byte)0x01);
+			c.bus.write(i++, OpCodes.AND_ABX.code());
+			c.bus.write(i++, (byte) 0x00);
+			c.bus.write(i++, (byte) (0x20));
 			c.bus.write(i++, (byte) 0xaa);
 			c.bus.write(i++, OpCodes.HLT.code());
 			c.bus.write(0x1fff, (byte) 0x00);
