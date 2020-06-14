@@ -26,7 +26,7 @@ public class Test_LDA_ABS {
 		
 		PBus bus = new DeviceBus();
 		bus.registerDevice(new basicMemory());
-		bus.registerDevice(new basicROM());
+		bus.registerDevice(new basicROM(bus));
 		
 		 c = new CPU(bus, new cpu001decoder());
 	

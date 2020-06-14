@@ -12,4 +12,6 @@ public interface Device  {
 	 public MemoryRange getAddressRange();	 
 	 public void write(int address, byte data ) throws illegalAddressException, ROException, DeviceUnavailable;
 	  public byte read(int address) throws illegalAddressException, DeviceUnavailable;
+	  public void raiseInterrupt ();
+	  
 }

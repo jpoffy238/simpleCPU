@@ -1,6 +1,7 @@
 package com.mj.memoryInterface;
 
 import com.mj.Devices.MemoryRange;
+import com.mj.Devices.PBus;
 import com.mj.Devices.PBus.BussId;
 import com.mj.Devices.PBus.DEVTYPE;
 import com.mj.exceptions.ROException;
@@ -8,8 +9,10 @@ import com.mj.exceptions.illegalAddressException;
 
 public class basicROM implements MemoryDriver {
 
+	PBus sysbus;
 	private byte[] ROM = new  byte[0xffff-0xf000 + 1];
-	public basicROM() {
+	public basicROM(PBus bus) {
+		sysbus = bus;
 		ROM[0xfffc - 0xf000] =  (byte)(0x00);
 		ROM[0xfffd - 0xf000] =  (byte)(0x10);
 		ROM[0xfffe - 0xf000] =  (byte)(0x00);
@@ -40,6 +43,11 @@ public class basicROM implements MemoryDriver {
 	public void write(int address, byte data) throws illegalAddressException, ROException {
 		// TODO Auto-generated method stub
 		throw new ROException();
+	}
+	public void raiseInterrupt() {
+		// TODO Auto-generated method stub
+		sysbus.raisepowerOnReset();
+		
 	}
 
 }

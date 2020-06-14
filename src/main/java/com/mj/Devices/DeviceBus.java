@@ -12,6 +12,7 @@ import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class DeviceBus implements PBus {
+	String formater = "DeviceType : %s10 : BusId : %s10 : Object : %s20";
 	private static final Logger logger = LogManager.getLogger(DeviceBus.class);
 	private Map<MemoryRange, Device> devices = new HashMap<MemoryRange, Device>();
 	
@@ -22,7 +23,7 @@ public class DeviceBus implements PBus {
 		if (null == d) {
 			throw new DeviceUnavailable();
 		}
-		logger.debug ( d.getDeviceType().name() +  d.getBusId().name() +   d.getClass().getCanonicalName()) ;
+		logger.debug ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
 		d.write(address, data);
 
 	}
@@ -34,7 +35,7 @@ public class DeviceBus implements PBus {
 		if (null == d) {
 			throw new DeviceUnavailable();
 		}
-		logger.debug ( d.getDeviceType().name() +  d.getBusId().name() +   d.getClass().getCanonicalName()) ;
+		logger.debug ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
 		byte value = d.read(destAddress);
 		return value;
 	}
@@ -102,21 +103,22 @@ public class DeviceBus implements PBus {
 	public void unregisterDevice(Device deviceHandler) {
 		// TODO Auto-generated method stub
 
+					logger.debug("Unregister Device " + deviceHandler.getClass().getCanonicalName());
 	}
 
 	private Device getDevice(int address) {
-		Device returnDevice = null;
+		Device d = null;
 		Set<MemoryRange> s = devices.keySet();
 		for ( MemoryRange r : s) {
 			logger.debug(r.toString());
 			
 			if (r.contains(address) ) {
-				returnDevice = devices.get(r);
-				logger.debug("Found Device " + returnDevice.getClass().getCanonicalName());
+				d = devices.get(r);
+				logger.debug ( String.format("Device Match: " + formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
 				break;
 			}
 		}
-		return returnDevice;
+		return d;
 	}
 
 	

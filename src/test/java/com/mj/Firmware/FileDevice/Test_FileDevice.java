@@ -28,8 +28,8 @@ public class Test_FileDevice {
 		
 		PBus bus = new DeviceBus();
 		bus.registerDevice(new basicMemory());
-		bus.registerDevice(new basicROM());
-		bus.registerDevice(new FileDevice());
+		bus.registerDevice(new basicROM(bus));
+		bus.registerDevice(new FileDevice(bus));
 		
 		
 		 c = new CPU(bus, new cpu001decoder());
@@ -45,6 +45,9 @@ public class Test_FileDevice {
 			c.bus.write(i++, (byte) (0x20));
 			c.bus.write(i++,  OpCodes.STA_ABS.code());
 			c.bus.write(i++, (byte)(0x00));
+			c.bus.write(i++,  (byte)(0xec));
+			c.bus.write(i++,OpCodes.STA_ABS.code());
+			c.bus.write(i++,  (byte)0x01);
 			c.bus.write(i++,  (byte)(0xec));
 			c.bus.write(i++, OpCodes.HLT.code());
 			c.bus.write(0x1fff,(byte)0x00);

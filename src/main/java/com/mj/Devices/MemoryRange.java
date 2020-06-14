@@ -3,40 +3,35 @@ package com.mj.Devices;
 public class MemoryRange  implements  Comparable<MemoryRange> {
 	protected int startAddressRange;
 	protected int  EndAddressRange;
+	protected int length;
 	
 	public MemoryRange(int saddress, int eaddress) {
 		startAddressRange = saddress;
 		EndAddressRange = eaddress;
+		length = EndAddressRange - startAddressRange +1;
 	}
 	public boolean  contains(int address) {
 		// TODO Auto-generated method stub
 		return ((startAddressRange <= address)  && (address <= EndAddressRange ));
 	}
 	public int size() {
-		return (EndAddressRange - startAddressRange);
+		return (length);
 	}
-	public int compareTo(MemoryRange o) {
+	public int compareTo(MemoryRange other) {
 		// TODO Auto-generated method stub
-		int returnValue = 0;
-		if ((startAddressRange == o.startAddressRange) && 
-				(EndAddressRange == o.EndAddressRange))  {
-			returnValue = 0;
-		} else {
-			if (  (startAddressRange >= o.EndAddressRange ) || 
-				( EndAddressRange <= o.startAddressRange) )
-			{
-				returnValue = 1;
-			} else { 
-				if ( ((startAddressRange >= o.startAddressRange ) && (startAddressRange <= o.EndAddressRange ) ) || 
-						((EndAddressRange <= o.startAddressRange ) && ( EndAddressRange >= o.EndAddressRange)) ) { 
-					returnValue = -1;
-				}
-			}
-		}
-		return returnValue;
+		if (other == null) {
+            throw new NullPointerException("Cannot compare to null.");
+        }
+        if (this == other) {
+            return 0;
+        }
+        Integer thisStartAddr = this.startAddressRange;
+        Integer thatStartAddr = other.startAddressRange;
+        return thisStartAddr.compareTo(thatStartAddr);
+	
 	}
 	public String toString() {
-		return  String.format("Start Address %x04 : End Address %x04 ", startAddressRange, EndAddressRange); 
+		return  String.format("Start Address %04x : End Address %04x ", startAddressRange, EndAddressRange); 
 	} //
 
 }

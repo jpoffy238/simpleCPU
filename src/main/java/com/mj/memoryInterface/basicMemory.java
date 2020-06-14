@@ -77,6 +77,11 @@ public class basicMemory implements MemoryDriver {
 		return range;
 	}
 
+	public void raiseInterrupt() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 
 	
