@@ -35,5 +35,8 @@ public class MemoryRange  implements  Comparable<MemoryRange> {
 		}
 		return returnValue;
 	}
+	public String toString() {
+		return  String.format("Start Address %x04 : End Address %x04 ", startAddressRange, EndAddressRange); 
+	} //
 
 }

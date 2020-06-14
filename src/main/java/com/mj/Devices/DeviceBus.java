@@ -4,23 +4,37 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class DeviceBus implements PBus {
+	private static final Logger logger = LogManager.getLogger(DeviceBus.class);
 	private Map<MemoryRange, Device> devices = new HashMap<MemoryRange, Device>();
 	
 	public void write(int address, byte data) throws ROException, illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
+		logger.debug("WRITE: " + String.format("%04x %02x: " , address, data));
 		Device d = getDevice(address);
+		if (null == d) {
+			throw new DeviceUnavailable();
+		}
+		logger.debug ( d.getDeviceType().name() +  d.getBusId().name() +   d.getClass().getCanonicalName()) ;
 		d.write(address, data);
 
 	}
 
 	public byte read(int destAddress) throws illegalAddressException, DeviceUnavailable  {
 		// TODO Auto-generated method stub
+		logger.debug("READ: " + String.format("%04x" , destAddress));
 		Device d = getDevice(destAddress);
+		if (null == d) {
+			throw new DeviceUnavailable();
+		}
+		logger.debug ( d.getDeviceType().name() +  d.getBusId().name() +   d.getClass().getCanonicalName()) ;
 		byte value = d.read(destAddress);
 		return value;
 	}
@@ -94,8 +108,11 @@ public class DeviceBus implements PBus {
 		Device returnDevice = null;
 		Set<MemoryRange> s = devices.keySet();
 		for ( MemoryRange r : s) {
+			logger.debug(r.toString());
+			
 			if (r.contains(address) ) {
 				returnDevice = devices.get(r);
+				logger.debug("Found Device " + returnDevice.getClass().getCanonicalName());
 				break;
 			}
 		}

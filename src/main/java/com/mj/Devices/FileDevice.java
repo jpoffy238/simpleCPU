@@ -13,7 +13,7 @@ public class FileDevice implements Device {
 	final  Logger logger = LogManager.getLogger("FileDevice");
 	public void write(int data) throws DeviceUnavailable {
 		// TODO Auto-generated method stub
-		System.out.print((char)data);
+		logger.debug("OUTPUT CHAR : " + (char)data);
 	}
 
 	public int read() throws DeviceUnavailable {
@@ -40,17 +40,17 @@ public class FileDevice implements Device {
 
 	public DEVTYPE getDeviceType() {
 		// TODO Auto-generated method stub
-		return null;
+		return DEVTYPE.CHAR;
 	}
 
 	public BussId getBusId() {
 		// TODO Auto-generated method stub
-		return null;
+		return BussId.DEVICE;
 	}
 
 	public MemoryRange getAddressRange() {
 		// TODO Auto-generated method stub
-		return null;
+		return new MemoryRange(0xe000, 0xe0001);
 	}
 
 	public void write(int address, byte data) throws illegalAddressException, ROException, DeviceUnavailable {
