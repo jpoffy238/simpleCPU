@@ -21,7 +21,7 @@ public class basicMemory implements MemoryDriver {
 	private byte[] memory;
 
 	public basicMemory() {
-		memory = new byte[range.size()];
+		memory = new byte[range.size() + 1];
 		}
 
 	public byte read(int address) throws  illegalAddressException {

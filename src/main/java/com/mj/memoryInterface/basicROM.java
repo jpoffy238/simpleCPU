@@ -8,9 +8,14 @@ import com.mj.exceptions.illegalAddressException;
 
 public class basicROM implements MemoryDriver {
 
-	private byte[] ROM = new  byte[0xffff-0xf000];
+	private byte[] ROM = new  byte[0xffff-0xf000 + 1];
 	public basicROM() {
-		
+		ROM[0xfffc - 0xf000] =  (byte)(0x00);
+		ROM[0xfffd - 0xf000] =  (byte)(0x10);
+		ROM[0xfffe - 0xf000] =  (byte)(0x00);
+		ROM[0xffff - 0xf000] = (byte)(0x10);
+		ROM[0xfffa - 0xf000] = (byte)(0x00);
+		ROM[0xfffb - 0xf000] =  (byte)(0x10);
 	}
 	public DEVTYPE getDeviceType() {
 		// TODO Auto-generated method stub
@@ -29,7 +34,7 @@ public class basicROM implements MemoryDriver {
 
 	public byte read(int address) throws illegalAddressException {
 		// TODO Auto-generated method stub
-		return 0;
+		return ROM[address - 0xf000];
 	}
 
 	public void write(int address, byte data) throws illegalAddressException, ROException {

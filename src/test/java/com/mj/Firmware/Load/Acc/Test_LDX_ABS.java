@@ -7,41 +7,31 @@ import org.junit.jupiter.api.Test;
 
 import com.mj.Devices.BasicBus;
 import com.mj.Devices.CPUBus;
+import com.mj.Devices.DeviceBus;
+import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.OpCodes;
 import com.mj.Firmware.Framework.cpu001decoder;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
+import com.mj.memoryInterface.basicMemory;
+import com.mj.memoryInterface.basicROM;
 
 public class Test_LDX_ABS {
 	private static CPU c;
-	private static CPUBus mem = new BasicBus();;
-	final Logger logger = LogManager.getLogger("Test_LDA_ABS");
+	
+	final static Logger logger = LogManager.getLogger("Test_LDA_ABS");
 
 	@BeforeAll
 	public static void setup() {
-
+		PBus bus = new DeviceBus();
+		bus.registerDevice(new basicMemory());
+		bus.registerDevice(new basicROM());
 		
-
-		try {
-			mem.write(0xfffc, (byte) 0x00);
-			mem.write(0xfffd, (byte) 0x10);
-			mem.write(0xfffe, (byte) 0x00);
-			mem.write(0xffff, (byte) 0x10);
-			mem.write(0xfffa, (byte) 0x00);
-			mem.write(0xfffb, (byte) 0x10);
-		} catch (illegalAddressException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DeviceUnavailable e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ROException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		c = new CPU(mem, new cpu001decoder());
+		c = new CPU(bus, new cpu001decoder());
+	
+		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}
 
 
@@ -50,20 +40,23 @@ public class Test_LDX_ABS {
 	public void Test_LDX_ABS1() {
 		int i = 0x1000;
 		try {
-			mem.write(i++, OpCodes.LDX_ABS.code());
-			mem.write(i++, (byte) 0x00);
-			mem.write(i++, (byte) (0x20));
-			mem.write(i++, OpCodes.HLT.code());
-			mem.write(0x2000, (byte) 0x55);
+			c.bus.write(i++, OpCodes.LDX_ABS.code());
+			c.bus.write(i++, (byte) 0x00);
+			c.bus.write(i++, (byte) (0x20));
+			c.bus.write(i++, OpCodes.HLT.code());
+			c.bus.write(0x2000, (byte) 0x55);
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			assert(false);
 		} catch (DeviceUnavailable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			assert(false);
 		} catch (ROException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			assert(false);
 		}
 		logger.debug("Starting CPU");
 		c.start();
@@ -78,13 +71,15 @@ public class Test_LDX_ABS {
 		int result = c.x.get();
 		logger.debug("What X is loaded with : ", +result);
 		try {
-			assert (result == mem.read(0x2000));
+			assert (result == c.bus.read(0x2000));
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			assert(false);
 		} catch (DeviceUnavailable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			assert(false);
 		}
 
 	}	
