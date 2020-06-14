@@ -18,8 +18,7 @@ import com.mj.memoryInterface.basicROM;
 
 public class Test_AND_ABX {
 	private static CPU c;
-
-	private static final Logger logger = LogManager.getLogger("Test_LDA_ABS");
+	private static final Logger logger = LogManager.getLogger(Test_AND_ABX.class);
 
 	@BeforeAll
 	public static void setup() {
@@ -45,7 +44,6 @@ public class Test_AND_ABX {
 			c.bus.write(i++, OpCodes.AND_ABX.code());
 			c.bus.write(i++, (byte) 0x00);
 			c.bus.write(i++, (byte) (0x20));
-			c.bus.write(i++, (byte) 0xaa);
 			c.bus.write(i++, OpCodes.HLT.code());
 			c.bus.write(0x1fff, (byte) 0x00);
 			c.bus.write(0x2000, (byte) 0x55);

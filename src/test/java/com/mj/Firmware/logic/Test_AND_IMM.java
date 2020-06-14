@@ -43,6 +43,7 @@ public class Test_AND_IMM {
 			c.bus.write(i++, OpCodes.AND_IMM.code());
 			c.bus.write(i++, (byte) 0xaa);
 			c.bus.write(i++, OpCodes.HLT.code());
+	// DATA
 			c.bus.write(0x1fff, (byte) 0x00);
 			c.bus.write(0x2000, (byte) 0x55);
 			c.bus.write(0x2001, (byte) 0xaa);
