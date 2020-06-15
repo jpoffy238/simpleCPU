@@ -1,4 +1,4 @@
-package com.mj.Firmware.Logic;
+package com.mj.Firmware.Logic.AND;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
@@ -7,7 +7,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class AND_INY extends Instruction {
+public class AND_ABS extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
@@ -36,23 +36,23 @@ public class AND_INY extends Instruction {
 	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
 	 * matter what address it is located at.
 	 */
-	public AND_INY() {
-		super((byte) (0x31));
-		setProperty(KEY_MNEMONIC, "BBIT");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_REL);
-		setProperty(KEY_OPCODE, "0x31");
+	public AND_ABS() {
+		super((byte) (0x2f));
+		setProperty(KEY_MNEMONIC, "AND");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABS);
+		setProperty(KEY_OPCODE, "0x2f");
 		setProperty(KEY_INSTRUCTION_SIZE, "3");
 		setProperty(KEY_CYCLES, "3");
 		setProperty(KEY_FLAGS_EFFECTED, "NONE");
-		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#BIT");
-		setProperty(KEY_DESCRIPTION, "BCC  (Branch on Carry  set )  If Carry  flag is set");
+		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#AND");
+		setProperty(KEY_DESCRIPTION, "And Imm value with acc.");
 
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int addressY= getIndexY(c);
-		byte testValue = c.bus.read(addressY);
+		int address = getAbsoluteAddress(c);
+		byte testValue = c.bus.read(address);
 		
 		int result = testValue & (byte) (c.a.get() & 0xff);
 		try {

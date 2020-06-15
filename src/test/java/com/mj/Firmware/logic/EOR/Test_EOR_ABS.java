@@ -1,4 +1,4 @@
-package com.mj.Firmware.logic;
+package com.mj.Firmware.logic.EOR;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,10 +16,10 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
 
-public class Test_AND_IMM {
+public class Test_EOR_ABS {
 	private static CPU c;
 
-	private static final Logger logger = LogManager.getLogger("Test_LDA_ABS");
+	private static final Logger logger = LogManager.getLogger(Test_EOR_ABS.class);
 
 	@BeforeAll
 	public static void setup() {
@@ -40,10 +40,11 @@ public class Test_AND_IMM {
 			c.bus.write(i++, OpCodes.LDA_ABS.code());
 			c.bus.write(i++, (byte) 0x00);
 			c.bus.write(i++, (byte) (0x20));
-			c.bus.write(i++, OpCodes.AND_IMM.code());
-			c.bus.write(i++, (byte) 0xaa);
+			c.bus.write(i++, OpCodes.EOR_ABS.code());
+			c.bus.write(i++, (byte) 0x01);
+			c.bus.write(i++, (byte) (0x20));
+			
 			c.bus.write(i++, OpCodes.HLT.code());
-	// DATA
 			c.bus.write(0x1fff, (byte) 0x00);
 			c.bus.write(0x2000, (byte) 0x55);
 			c.bus.write(0x2001, (byte) 0xaa);
@@ -74,9 +75,9 @@ public class Test_AND_IMM {
 		int result = c.a.get();
 		logger.debug("What A is loaded with : ", +result);
 
-		assert (result == 0);
-		assert (c.ZFLAG.isSet());
-		assert(!c.NFLAG.isSet());
+		assert (result == 0x00ff);
+		assert (!c.ZFLAG.isSet());
+		assert(c.NFLAG.isSet());
 
 	}
 

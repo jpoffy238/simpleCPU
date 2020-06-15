@@ -1,4 +1,4 @@
-package com.mj.Firmware.Logic;
+package com.mj.Firmware.Logic.EOR;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
@@ -7,7 +7,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class AND_IMM extends Instruction {
+public class EOR_ZP extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
@@ -36,24 +36,25 @@ public class AND_IMM extends Instruction {
 	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
 	 * matter what address it is located at.
 	 */
-	public AND_IMM() {
-		super((byte) (0x29));
-		setProperty(KEY_MNEMONIC, "BBIT");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_REL);
-		setProperty(KEY_OPCODE, "0x29");
-		setProperty(KEY_INSTRUCTION_SIZE, "3");
+	public EOR_ZP() {
+		super((byte) (0x44));
+		setProperty(KEY_MNEMONIC, "EOR");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZP);
+		setProperty(KEY_OPCODE, "0x43");
+		setProperty(KEY_INSTRUCTION_SIZE, "2");
 		setProperty(KEY_CYCLES, "3");
-		setProperty(KEY_FLAGS_EFFECTED, "NONE");
-		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#BIT");
-		setProperty(KEY_DESCRIPTION, "BCC  (Branch on Carry  set )  If Carry  flag is set");
+		setProperty(KEY_FLAGS_EFFECTED, "Z, N");
+		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#XOR");
+		setProperty(KEY_DESCRIPTION, "A,Z,N = A^M.");
 
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
+		int address = getZeroPageAddress(c);
+		byte testValue = c.bus.read(address);
 		
-		byte testValue = c.bus.read(c.pc);
-		int result = testValue & (byte) (c.a.get() & 0xff);
+		int result = testValue ^ (byte) (c.a.get() & 0xff);
 		try {
 			c.a.set(result& 0xff);
 		} catch (zflagException e) {
@@ -61,7 +62,7 @@ public class AND_IMM extends Instruction {
 		} catch (nflagException e) {
 			handleNException(c);
 		}
-		c.pc++;
+		c.pc +=1;
 	}
 
 }

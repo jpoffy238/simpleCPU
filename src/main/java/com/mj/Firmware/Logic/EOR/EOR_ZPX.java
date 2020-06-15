@@ -1,4 +1,4 @@
-package com.mj.Firmware.Logic;
+package com.mj.Firmware.Logic.EOR;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
@@ -7,7 +7,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class AND_ABS extends Instruction {
+public class EOR_ZPX extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
@@ -36,25 +36,25 @@ public class AND_ABS extends Instruction {
 	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
 	 * matter what address it is located at.
 	 */
-	public AND_ABS() {
-		super((byte) (0x2f));
-		setProperty(KEY_MNEMONIC, "AND");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABS);
-		setProperty(KEY_OPCODE, "0x2f");
-		setProperty(KEY_INSTRUCTION_SIZE, "3");
-		setProperty(KEY_CYCLES, "3");
-		setProperty(KEY_FLAGS_EFFECTED, "NONE");
-		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#AND");
-		setProperty(KEY_DESCRIPTION, "And Imm value with acc.");
+	public EOR_ZPX() {
+		super((byte) (0x55));
+		setProperty(KEY_MNEMONIC, "EOR");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZPX);
+		setProperty(KEY_OPCODE, "0x55");
+		setProperty(KEY_INSTRUCTION_SIZE, "2");
+		setProperty(KEY_CYCLES, "4");
+		setProperty(KEY_FLAGS_EFFECTED, "Z, N");
+		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#XOR");
+		setProperty(KEY_DESCRIPTION, "A,Z,N = A^M.");
 
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int address = getAbsoluteAddress(c);
+		int address = getZeroPageXAddress(c);
 		byte testValue = c.bus.read(address);
 		
-		int result = testValue & (byte) (c.a.get() & 0xff);
+		int result = testValue ^ (byte) (c.a.get() & 0xff);
 		try {
 			c.a.set(result& 0xff);
 		} catch (zflagException e) {
@@ -62,7 +62,7 @@ public class AND_ABS extends Instruction {
 		} catch (nflagException e) {
 			handleNException(c);
 		}
-		c.pc +=2;
+		c.pc +=1;
 	}
 
 }

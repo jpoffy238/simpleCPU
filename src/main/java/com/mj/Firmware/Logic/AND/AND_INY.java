@@ -1,4 +1,4 @@
-package com.mj.Firmware.Logic;
+package com.mj.Firmware.Logic.AND;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
@@ -7,7 +7,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class AND_ABX extends Instruction {
+public class AND_INY extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
@@ -36,11 +36,11 @@ public class AND_ABX extends Instruction {
 	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
 	 * matter what address it is located at.
 	 */
-	public AND_ABX() {
-		super((byte) (0x3d));
+	public AND_INY() {
+		super((byte) (0x31));
 		setProperty(KEY_MNEMONIC, "BBIT");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_REL);
-		setProperty(KEY_OPCODE, "0x3d");
+		setProperty(KEY_OPCODE, "0x31");
 		setProperty(KEY_INSTRUCTION_SIZE, "3");
 		setProperty(KEY_CYCLES, "3");
 		setProperty(KEY_FLAGS_EFFECTED, "NONE");
@@ -51,8 +51,8 @@ public class AND_ABX extends Instruction {
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int addressX = getAbsoluteAddressX(c);
-		byte testValue = c.bus.read(addressX);
+		int addressY= getIndexY(c);
+		byte testValue = c.bus.read(addressY);
 		
 		int result = testValue & (byte) (c.a.get() & 0xff);
 		try {

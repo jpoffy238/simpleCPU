@@ -1,4 +1,4 @@
-package com.mj.Firmware.logic;
+package com.mj.Firmware.logic.AND;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

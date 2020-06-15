@@ -26,6 +26,17 @@ import com.mj.Firmware.Load.IndexY.LDY_IMM;
 import com.mj.Firmware.Load.IndexY.LDY_ZP;
 import com.mj.Firmware.Load.IndexY.LDY_ZPX;
 import com.mj.Firmware.Logic.*;
+import com.mj.Firmware.Logic.AND.AND_ABS;
+import com.mj.Firmware.Logic.AND.AND_ABX;
+import com.mj.Firmware.Logic.AND.AND_ABY;
+import com.mj.Firmware.Logic.AND.AND_IMM;
+import com.mj.Firmware.Logic.AND.AND_INX;
+import com.mj.Firmware.Logic.AND.AND_INY;
+import com.mj.Firmware.Logic.AND.AND_ZP;
+import com.mj.Firmware.Logic.AND.AND_ZPX;
+import com.mj.Firmware.Logic.EOR.EOR_ABS;
+import com.mj.Firmware.Logic.EOR.EOR_IMM;
+import com.mj.Firmware.Logic.EOR.*;
 import com.mj.Firmware.Stack.PHA;
 import com.mj.Firmware.Stack.PLA;
 import com.mj.Firmware.Transfers.TAX;
@@ -141,6 +152,11 @@ public  enum OpCodes {
 	AND_ABY(new AND_ABY()),
 	AND_INX(new AND_INX()),
 	AND_INY(new AND_INY()),
+	
+	EOR_ABS(new EOR_ABS()),
+	EOR_IMM(new EOR_IMM()),
+	EOR_ZP(new EOR_ZP()),
+	EOR_ZPX(new EOR_ZPX()),
 	ASL(new ASL()),
 	
 	

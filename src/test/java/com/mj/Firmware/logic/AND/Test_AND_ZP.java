@@ -1,4 +1,4 @@
-package com.mj.Firmware.logic;
+package com.mj.Firmware.logic.AND;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,10 +16,10 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
 
-public class Test_AND_ZPX {
+public class Test_AND_ZP {
 	private static CPU c;
 
-	private static final Logger logger = LogManager.getLogger(Test_AND_ZPX.class);
+	private static final Logger logger = LogManager.getLogger(Test_AND_ZP.class);
 
 	@BeforeAll
 	public static void setup() {
@@ -42,14 +42,16 @@ public class Test_AND_ZPX {
 			c.bus.write(i++, (byte) (0x20));
 			c.bus.write(i++,OpCodes.LDX_IMM.code() );
 			c.bus.write(i++, (byte)0x01);
-			c.bus.write(i++, OpCodes.AND_ZPX.code());
-			c.bus.write(i++, (byte) (0x20));
+			c.bus.write(i++, OpCodes.AND_ZP.code());
+			c.bus.write(i++, (byte) 0x01);
 			
 			c.bus.write(i++, OpCodes.HLT.code());
 			//data
 			c.bus.write(0x1fff, (byte) 0x00);
 			c.bus.write(0x2000, (byte) 0x55);
 			c.bus.write(0x2001, (byte) 0xaa);
+			c.bus.write(0x0001,(byte)(0xaa));
+			
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
