@@ -141,6 +141,7 @@ public  enum OpCodes {
 	AND_ABY(new AND_ABY()),
 	AND_INX(new AND_INX()),
 	AND_INY(new AND_INY()),
+	ASL(new ASL()),
 	
 	
 	BNE(new BNE()),

@@ -7,7 +7,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class AND_ABS extends Instruction {
+public class ASL extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
@@ -36,25 +36,27 @@ public class AND_ABS extends Instruction {
 	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
 	 * matter what address it is located at.
 	 */
-	public AND_ABS() {
-		super((byte) (0x2f));
-		setProperty(KEY_MNEMONIC, "AND");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABS);
+	public ASL() {
+		super((byte) (0x0a));
+		setProperty(KEY_MNEMONIC, "ASL");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_IMP);
 		setProperty(KEY_OPCODE, "0x2f");
 		setProperty(KEY_INSTRUCTION_SIZE, "3");
 		setProperty(KEY_CYCLES, "3");
 		setProperty(KEY_FLAGS_EFFECTED, "NONE");
-		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#AND");
-		setProperty(KEY_DESCRIPTION, "And Imm value with acc.");
+		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#ASL");
+		setProperty(KEY_DESCRIPTION, "Shift A left by 1 or (A*2).");
 
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int address = getAbsoluteAddress(c);
-		byte testValue = c.bus.read(address);
+		int a = c.a.get();
 		
-		int result = testValue & (byte) (c.a.get() & 0xff);
+		int result = a << 1;
+		if ((a & 0x80) != 0) {
+			c.CFLAG.set();
+		}
 		try {
 			c.a.set(result& 0xff);
 		} catch (zflagException e) {

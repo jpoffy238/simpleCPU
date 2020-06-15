@@ -1,4 +1,4 @@
-package com.mj.Firmware.Load.Acc;
+package com.mj.Firmware.logic;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,47 +16,54 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
 
-public class Test_LDA_ABS {
+public class Test_AND_ZPX {
 	private static CPU c;
 
-	private static final Logger logger = LogManager.getLogger("Test_LDA_ABS");
+	private static final Logger logger = LogManager.getLogger(Test_AND_ZPX.class);
 
 	@BeforeAll
 	public static void setup() {
-		
+
 		PBus bus = new DeviceBus();
 		bus.registerDevice(new basicMemory());
 		bus.registerDevice(new basicROM(bus));
-		
-		 c = new CPU(bus, new cpu001decoder());
-	
+
+		c = new CPU(bus, new cpu001decoder());
+
 		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}
 
 	@Test
-	public void Test_LDA_ABS1() {
+	public void Test_exec() {
 		int i = 0x1000;
 		try {
 			c.bus.write(i++, OpCodes.LDA_ABS.code());
 			c.bus.write(i++, (byte) 0x00);
 			c.bus.write(i++, (byte) (0x20));
+			c.bus.write(i++,OpCodes.LDX_IMM.code() );
+			c.bus.write(i++, (byte)0x01);
+			c.bus.write(i++, OpCodes.AND_ZPX.code());
+			c.bus.write(i++, (byte) (0x20));
+			
 			c.bus.write(i++, OpCodes.HLT.code());
-			c.bus.write(0x1fff,(byte)0x00);
+			//data
+			c.bus.write(0x1fff, (byte) 0x00);
 			c.bus.write(0x2000, (byte) 0x55);
-			c.bus.write(0x2001,(byte)0xff);
+			c.bus.write(0x2001, (byte) 0xaa);
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			assert(false);
+			assert (false);
 		} catch (DeviceUnavailable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			assert(false);
+			assert (false);
 		} catch (ROException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			assert(false);
+			assert (false);
 		}
+
 		logger.debug("Starting CPU");
 		c.start();
 		logger.debug("CPU state = " + c.getState());
@@ -69,21 +76,11 @@ public class Test_LDA_ABS {
 		}
 		int result = c.a.get();
 		logger.debug("What A is loaded with : ", +result);
-		try {
-			assert (result == c.bus.read(0x2000));
-			assert(!c.ZFLAG.isSet());
-			assert(!c.NFLAG.isSet());
-		} catch (illegalAddressException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			assert(false);
-		} catch (DeviceUnavailable e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			assert(false);
-		}
-		
-	}
 
+		assert (result == 0);
+		assert (c.ZFLAG.isSet());
+		assert(!c.NFLAG.isSet());
+
+	}
 
 }
