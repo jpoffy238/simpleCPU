@@ -35,6 +35,7 @@ import com.mj.Firmware.Load.IndexY.LDY_IMM;
 import com.mj.Firmware.Load.IndexY.LDY_ZP;
 import com.mj.Firmware.Load.IndexY.LDY_ZPX;
 import com.mj.Firmware.Logic.ASL;
+import com.mj.Firmware.Logic.*;
 import com.mj.Firmware.Logic.BIT_ABS;
 import com.mj.Firmware.Logic.BIT_ZP;
 import com.mj.Firmware.Logic.AND.AND_ABS;
@@ -169,7 +170,7 @@ public  enum OpCodes {
 	EOR_ZP(new EOR_ZP()),
 	EOR_ZPX(new EOR_ZPX()),
 	ASL(new ASL()),
-	
+	ASL_ZP(new ASL_ZP()),
 	
 	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
