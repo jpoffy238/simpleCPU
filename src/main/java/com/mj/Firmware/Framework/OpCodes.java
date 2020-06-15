@@ -171,7 +171,7 @@ public  enum OpCodes {
 	EOR_ZPX(new EOR_ZPX()),
 	ASL(new ASL()),
 	ASL_ZP(new ASL_ZP()),
-	
+	ASL_ZPX(new ASL_ZPX()),
 	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),
