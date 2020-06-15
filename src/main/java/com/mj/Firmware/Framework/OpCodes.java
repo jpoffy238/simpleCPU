@@ -6,7 +6,16 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.mj.Firmware.ExecutionFlow.*;
+import com.mj.Firmware.ExecutionFlow.BCC;
+import com.mj.Firmware.ExecutionFlow.BCS;
+import com.mj.Firmware.ExecutionFlow.BEQ;
+import com.mj.Firmware.ExecutionFlow.BNE;
+import com.mj.Firmware.ExecutionFlow.BRK;
+import com.mj.Firmware.ExecutionFlow.HLT;
+import com.mj.Firmware.ExecutionFlow.JMP_ABS;
+import com.mj.Firmware.ExecutionFlow.JSR;
+import com.mj.Firmware.ExecutionFlow.NOP;
+import com.mj.Firmware.ExecutionFlow.RTS;
 import com.mj.Firmware.Load.Accumulator.LDA_ABS;
 import com.mj.Firmware.Load.Accumulator.LDA_ABSX;
 import com.mj.Firmware.Load.Accumulator.LDA_ABSY;
@@ -25,7 +34,9 @@ import com.mj.Firmware.Load.IndexY.LDY_ABSX;
 import com.mj.Firmware.Load.IndexY.LDY_IMM;
 import com.mj.Firmware.Load.IndexY.LDY_ZP;
 import com.mj.Firmware.Load.IndexY.LDY_ZPX;
-import com.mj.Firmware.Logic.*;
+import com.mj.Firmware.Logic.ASL;
+import com.mj.Firmware.Logic.BIT_ABS;
+import com.mj.Firmware.Logic.BIT_ZP;
 import com.mj.Firmware.Logic.AND.AND_ABS;
 import com.mj.Firmware.Logic.AND.AND_ABX;
 import com.mj.Firmware.Logic.AND.AND_ABY;
@@ -36,7 +47,8 @@ import com.mj.Firmware.Logic.AND.AND_ZP;
 import com.mj.Firmware.Logic.AND.AND_ZPX;
 import com.mj.Firmware.Logic.EOR.EOR_ABS;
 import com.mj.Firmware.Logic.EOR.EOR_IMM;
-import com.mj.Firmware.Logic.EOR.*;
+import com.mj.Firmware.Logic.EOR.EOR_ZP;
+import com.mj.Firmware.Logic.EOR.EOR_ZPX;
 import com.mj.Firmware.Stack.PHA;
 import com.mj.Firmware.Stack.PLA;
 import com.mj.Firmware.Transfers.TAX;
@@ -70,7 +82,6 @@ import com.mj.Firmware.store.IndexX.STX_ZPY;
 import com.mj.Firmware.store.IndexY.STY_ABS;
 import com.mj.Firmware.store.IndexY.STY_ZP;
 import com.mj.Firmware.store.IndexY.STY_ZPX;
-import com.mj.cpu001.CPU;
 
 /*
  * 

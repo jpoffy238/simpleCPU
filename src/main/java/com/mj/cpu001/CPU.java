@@ -14,7 +14,6 @@ import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.illegalOpCodeException;
-import com.mj.memoryInterface.MemoryDriver;
 
 public class CPU extends Thread {
 	public CPU(CPUBus bus, Decoder dcd) {

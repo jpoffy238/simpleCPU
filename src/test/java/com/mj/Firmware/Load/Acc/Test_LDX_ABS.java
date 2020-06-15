@@ -5,8 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.mj.Devices.BasicBus;
-import com.mj.Devices.CPUBus;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.OpCodes;

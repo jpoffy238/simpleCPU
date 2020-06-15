@@ -1,7 +1,6 @@
 package com.mj.Firmware.Load.IndexX;
 
 import com.mj.Firmware.Framework.Instruction;
-import com.mj.Registers.registerFlags;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.illegalAddressException;
