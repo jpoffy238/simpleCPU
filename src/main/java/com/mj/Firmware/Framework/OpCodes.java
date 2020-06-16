@@ -47,9 +47,13 @@ import com.mj.Firmware.Logic.AND.AND_INY;
 import com.mj.Firmware.Logic.AND.AND_ZP;
 import com.mj.Firmware.Logic.AND.AND_ZPX;
 import com.mj.Firmware.Logic.EOR.EOR_ABS;
+import com.mj.Firmware.Logic.EOR.EOR_ABSX;
+import com.mj.Firmware.Logic.EOR.EOR_ABSY;
 import com.mj.Firmware.Logic.EOR.EOR_IMM;
 import com.mj.Firmware.Logic.EOR.EOR_ZP;
 import com.mj.Firmware.Logic.EOR.EOR_ZPX;
+import com.mj.Firmware.Logic.EOR.EOR_INX;
+import com.mj.Firmware.Logic.EOR.EOR_INY;
 import com.mj.Firmware.Stack.PHA;
 import com.mj.Firmware.Stack.PLA;
 import com.mj.Firmware.Transfers.TAX;
@@ -169,6 +173,10 @@ public  enum OpCodes {
 	EOR_IMM(new EOR_IMM()),
 	EOR_ZP(new EOR_ZP()),
 	EOR_ZPX(new EOR_ZPX()),
+	EOR_ABSX(new EOR_ABSX()),
+	EOR_ABSY(new EOR_ABSY()),
+	EOR_INX(new EOR_INX()),
+	EOR_INY(new EOR_INY()),
 	ASL(new ASL()),
 	ASL_ZP(new ASL_ZP()),
 	ASL_ZPX(new ASL_ZPX()),

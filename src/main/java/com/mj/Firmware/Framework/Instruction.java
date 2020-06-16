@@ -170,11 +170,12 @@ public abstract class Instruction implements machineState {
 		 * in the zero page.
 		 */
 		int address;
-		int operand = c.bus.read(c.pc);
+		int operand = c.bus.read(c.pc) & 0xff;;
 		int pageZero = (operand + c.x.get()) & 0x00ff;
-		int lower = c.bus.read(pageZero);
-		int upper = c.bus.read(pageZero + 1);
-		address = (upper & 0x00ff) << 8 + (lower + 0x00ff);
+		int lower = c.bus.read(pageZero)   & 0xff;
+		int upper = c.bus.read((pageZero + 1) & 0xff ) & 0xff;
+		address = (upper & 0x00ff) << 8;
+		address +=  (lower);
 		return address;
 	}
 
@@ -206,7 +207,9 @@ public abstract class Instruction implements machineState {
 		int pageZero = (operand) & 0x00ff;
 		int lower = c.bus.read(pageZero);
 		int upper = c.bus.read(pageZero + 1);
-		address = (upper & 0x00ff) << 8 + (((lower + c.y.get()) & 0x00ff));
+		address = (upper & 0x00ff) << 8 ;
+		address += lower & 0x00ff;
+		address += (c.y.get() & 0x00ff);
 		return address;
 	}
 

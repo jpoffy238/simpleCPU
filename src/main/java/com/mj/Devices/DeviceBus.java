@@ -18,24 +18,24 @@ public class DeviceBus implements PBus {
 	
 	public void write(int address, byte data) throws ROException, illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		logger.debug("WRITE: " + String.format("%04x %02x: " , address, data));
+		logger.trace("WRITE: " + String.format("%04x %02x: " , address, data));
 		Device d = getDevice(address);
 		if (null == d) {
 			throw new DeviceUnavailable();
 		}
-		logger.debug ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
+		logger.trace ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
 		d.write(address, data);
 
 	}
 
 	public byte read(int destAddress) throws illegalAddressException, DeviceUnavailable  {
 		// TODO Auto-generated method stub
-		logger.debug("READ: " + String.format("%04x" , destAddress));
+		logger.trace("READ: " + String.format("%04x" , destAddress));
 		Device d = getDevice(destAddress);
 		if (null == d) {
 			throw new DeviceUnavailable();
 		}
-		logger.debug ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
+		logger.trace ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
 		byte value = d.read(destAddress);
 		return value;
 	}
@@ -103,18 +103,18 @@ public class DeviceBus implements PBus {
 	public void unregisterDevice(Device deviceHandler) {
 		// TODO Auto-generated method stub
 
-					logger.debug("Unregister Device " + deviceHandler.getClass().getCanonicalName());
+					logger.trace("Unregister Device " + deviceHandler.getClass().getCanonicalName());
 	}
 
 	private Device getDevice(int address) {
 		Device d = null;
 		Set<MemoryRange> s = devices.keySet();
 		for ( MemoryRange r : s) {
-			logger.debug(r.toString());
+			logger.trace(r.toString());
 			
 			if (r.contains(address) ) {
 				d = devices.get(r);
-				logger.debug ( String.format("Device Match: " + formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
+				logger.trace ( String.format("Device Match: " + formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
 				break;
 			}
 		}
