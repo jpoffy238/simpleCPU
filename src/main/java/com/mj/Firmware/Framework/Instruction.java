@@ -14,7 +14,7 @@ import com.mj.exceptions.illegalOpCodeException;
 
 public abstract class Instruction implements machineState {
 
-	protected final  Logger logger = LogManager.getLogger("Instruction");
+	protected final  Logger logger = LogManager.getLogger(Instruction.class);
 	private byte opCode;
 
 	public final String KEY_OPCODE = "opcode";

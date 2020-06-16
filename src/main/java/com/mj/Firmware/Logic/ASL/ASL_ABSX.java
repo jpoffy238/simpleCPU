@@ -1,5 +1,8 @@
 package com.mj.Firmware.Logic.ASL;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
@@ -9,6 +12,7 @@ import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
 public class ASL_ABSX extends Instruction {
+	protected final  Logger logger = LogManager.getLogger(ASL_ABSX.class);
 	/*
 	 * Affect Flags: none
 	 * 
@@ -53,9 +57,11 @@ public class ASL_ABSX extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
 		int address =  getAbsoluteAddressX(c);
-		int a = c.bus.read(address);
-		
-		int result = a << 1;
+		int a = (c.bus.read(address)) &0xff;
+		logger.debug(String.format("Address : [%04x] Value: [%02x]", address, a));
+		int result = a << 1 ;
+		logger.debug(String.format("Compute Value : [%04x] ",result));
+		result &= 0x00ff;
 		if ((a & 0x80) != 0) {
 			c.CFLAG.set();
 		} else { 
@@ -63,14 +69,17 @@ public class ASL_ABSX extends Instruction {
 				c.ZFLAG.set();
 				c.NFLAG.clear();
 			} else { 
-				if ((result & 0x80)  == 0x80 ){
+				if ((result & 0x80)  == 0x80 ) {
 					c.NFLAG.set();
 					c.ZFLAG.clear();
 				}
 			}
-		c.pc +=2;
+	
 		}
-		c.bus.write(address, (byte)(result & 0xff));
+		c.bus.write(address, (byte)(result ));
+		int x = c.bus.read(address);
+		logger.debug(String.format("Address [%04x] w [%04x]  r [%04x]", address, result, x));
+		c.pc +=2;
 	}
 
 }
