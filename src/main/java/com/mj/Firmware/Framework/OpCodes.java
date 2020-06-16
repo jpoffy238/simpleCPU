@@ -47,6 +47,7 @@ import com.mj.Firmware.Logic.ASL.ASL;
 import com.mj.Firmware.Logic.ASL.ASL_ZP;
 import com.mj.Firmware.Logic.ASL.ASL_ZPX;
 import com.mj.Firmware.Logic.ASL.ASL_ABS;
+import com.mj.Firmware.Logic.ASL.ASL_ABSX;
 import com.mj.Firmware.Logic.EOR.EOR_ABS;
 import com.mj.Firmware.Logic.EOR.EOR_ABSX;
 import com.mj.Firmware.Logic.EOR.EOR_ABSY;
@@ -182,6 +183,7 @@ public  enum OpCodes {
 	ASL_ZP(new ASL_ZP()),
 	ASL_ZPX(new ASL_ZPX()),
 	ASL_ABS(new ASL_ABS()),
+	ASL_ABSX(new ASL_ABSX()),
 	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),
