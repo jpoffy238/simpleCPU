@@ -34,10 +34,7 @@ import com.mj.Firmware.Load.IndexY.LDY_ABSX;
 import com.mj.Firmware.Load.IndexY.LDY_IMM;
 import com.mj.Firmware.Load.IndexY.LDY_ZP;
 import com.mj.Firmware.Load.IndexY.LDY_ZPX;
-import com.mj.Firmware.Logic.ASL;
 import com.mj.Firmware.Logic.*;
-import com.mj.Firmware.Logic.BIT_ABS;
-import com.mj.Firmware.Logic.BIT_ZP;
 import com.mj.Firmware.Logic.AND.AND_ABS;
 import com.mj.Firmware.Logic.AND.AND_ABX;
 import com.mj.Firmware.Logic.AND.AND_ABY;
@@ -46,6 +43,10 @@ import com.mj.Firmware.Logic.AND.AND_INX;
 import com.mj.Firmware.Logic.AND.AND_INY;
 import com.mj.Firmware.Logic.AND.AND_ZP;
 import com.mj.Firmware.Logic.AND.AND_ZPX;
+import com.mj.Firmware.Logic.ASL.ASL;
+import com.mj.Firmware.Logic.ASL.ASL_ZP;
+import com.mj.Firmware.Logic.ASL.ASL_ZPX;
+import com.mj.Firmware.Logic.ASL.ASL_ABS;
 import com.mj.Firmware.Logic.EOR.EOR_ABS;
 import com.mj.Firmware.Logic.EOR.EOR_ABSX;
 import com.mj.Firmware.Logic.EOR.EOR_ABSY;
@@ -180,6 +181,7 @@ public  enum OpCodes {
 	ASL(new ASL()),
 	ASL_ZP(new ASL_ZP()),
 	ASL_ZPX(new ASL_ZPX()),
+	ASL_ABS(new ASL_ABS()),
 	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),

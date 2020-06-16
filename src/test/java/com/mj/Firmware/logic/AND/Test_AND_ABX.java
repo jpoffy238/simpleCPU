@@ -63,15 +63,8 @@ public class Test_AND_ABX {
 		}
 
 		logger.debug("Starting CPU");
-		c.start();
-		logger.debug("CPU state = " + c.getState());
-		while (c.getState() != Thread.State.TERMINATED) {
-			try {
-				Thread.sleep(10);
-			} catch (Exception e) {
-
-			}
-		}
+		c.run();
+	
 		int result = c.a.get();
 		logger.debug("What A is loaded with : ", +result);
 

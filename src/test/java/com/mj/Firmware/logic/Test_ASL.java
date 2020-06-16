@@ -62,15 +62,8 @@ public class Test_ASL {
 		}
 
 		logger.debug("Starting CPU");
-		c.start();
-		logger.debug("CPU state = " + c.getState());
-		while (c.getState() != Thread.State.TERMINATED) {
-			try {
-				Thread.sleep(10);
-			} catch (Exception e) {
-
-			}
-		}
+		c.run();
+		
 		int result = c.a.get();
 		int initialValue = 0;
 		try {

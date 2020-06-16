@@ -1,4 +1,4 @@
-package com.mj.Firmware.Logic;
+package com.mj.Firmware.Logic.ASL;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;

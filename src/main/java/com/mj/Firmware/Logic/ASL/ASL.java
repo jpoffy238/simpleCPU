@@ -1,4 +1,4 @@
-package com.mj.Firmware.Logic;
+package com.mj.Firmware.Logic.ASL;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
@@ -41,7 +41,7 @@ public class ASL extends Instruction {
 		setProperty(KEY_MNEMONIC, "ASL");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_IMP);
 		setProperty(KEY_OPCODE, "0x2f");
-		setProperty(KEY_INSTRUCTION_SIZE, "3");
+		setProperty(KEY_INSTRUCTION_SIZE, "1");
 		setProperty(KEY_CYCLES, "3");
 		setProperty(KEY_FLAGS_EFFECTED, "NONE");
 		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#ASL");
@@ -64,7 +64,7 @@ public class ASL extends Instruction {
 		} catch (nflagException e) {
 			handleNException(c);
 		}
-		c.pc +=2;
+	
 	}
 
 }

@@ -57,15 +57,8 @@ public class Test_LDX_ABS {
 			assert(false);
 		}
 		logger.debug("Starting CPU");
-		c.start();
-		logger.debug("CPU state = " + c.getState());
-		while (c.getState() != Thread.State.TERMINATED) {
-			try {
-				Thread.sleep(10);
-			} catch (Exception e) {
-
-			}
-		}
+		c.run();
+	
 		int result = c.x.get();
 		logger.debug("What X is loaded with : ", +result);
 		try {

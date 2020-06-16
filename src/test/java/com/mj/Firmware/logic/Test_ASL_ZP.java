@@ -70,15 +70,8 @@ public class Test_ASL_ZP {
 			e1.printStackTrace();
 		}
 		logger.debug("Starting CPU");
-		c.start();
-		logger.debug("CPU state = " + c.getState());
-		while (c.getState() != Thread.State.TERMINATED) {
-			try {
-				Thread.sleep(10);
-			} catch (Exception e) {
-
-			}
-		}
+		c.run();
+	
 	
 		try {
 			int initialValue = (int)(c.bus.read(0x0024) & 0xff);

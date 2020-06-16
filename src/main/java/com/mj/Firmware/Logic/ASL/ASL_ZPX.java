@@ -1,4 +1,4 @@
-package com.mj.Firmware.Logic;
+package com.mj.Firmware.Logic.ASL;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
@@ -52,29 +52,27 @@ public class ASL_ZPX extends Instruction {
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
-		int address =  (getZeroPageXAddress(c) & 0xff);
+		int address = (getZeroPageXAddress(c) & 0xff);
 		int a = c.bus.read(address);
-		
+
 		int result = a << 1;
 		if ((a & 0x80) != 0) {
 			c.CFLAG.set();
-		} else { 
-			if ( result == 0) {
+		} else {
+			if (result == 0) {
 				c.ZFLAG.set();
 				c.NFLAG.clear();
-			} else { 
-				if ((result & 0x80)  == 0x80 ){
+			} else {
+				if ((result & 0x80) == 0x80) {
 					c.NFLAG.set();
 					c.ZFLAG.clear();
 				}
 			}
 		}
-		
-			
-				c.bus.write(address,(byte)(result & 0xff));
-		
-		
-		c.pc +=1;
+
+		c.bus.write(address, (byte) (result & 0xff));
+
+		c.pc += 1;
 	}
 
 }
