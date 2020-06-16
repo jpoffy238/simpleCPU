@@ -16,10 +16,10 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
 
-public class Test_ASL_ABS {
+public class Test_ASL {
 	private  CPU c;
 
-	private static final Logger logger = LogManager.getLogger(Test_ASL_ABS.class);
+	private static final Logger logger = LogManager.getLogger(Test_ASL.class);
 
 	@BeforeEach
 	public  void setup() {
@@ -34,7 +34,7 @@ public class Test_ASL_ABS {
 	}
 
 	@Test
-	public void Test_exec() {
+	public void Test_ASL_ABS() {
 		int i = 0x1000;
 		try {
 			c.bus.write(i++, OpCodes.ASL_ABS.code());
@@ -78,7 +78,7 @@ public class Test_ASL_ABS {
 
 	}
 	@Test
-	public void Test_exec_01() {
+	public void Test_ASL_ABS_2() {
 		int i = 0x1000;
 		try {
 			c.bus.write(i++, OpCodes.ASL_ABS.code());
@@ -131,7 +131,7 @@ public class Test_ASL_ABS {
 	}
 
 	@Test
-	public void Test_exec_ZP() {
+	public void Test_ASL_ZP() {
 		int i = 0x1000;
 		try {
 			c.bus.write(i++, OpCodes.ASL_ZP.code());
@@ -158,14 +158,7 @@ public class Test_ASL_ABS {
 
 		logger.debug("Starting CPU");
 		c.run();
-//		logger.debug("CPU state = " + c.getState());
-//		while (c.getState() != Thread.State.TERMINATED) {
-//			try {
-//				Thread.sleep(10);
-//			} catch (Exception e) {
-//
-//			}
-//		}
+
 		int result = -1;
 		try {
 			result = c.bus.read(0x2001);
@@ -183,7 +176,7 @@ public class Test_ASL_ABS {
 
 	}
 	@Test
-	public void Test_exec_ABSX()  {
+	public void Test_ALS_ABSX()  {
 		int i = 0x1000;
 		try {
 			c.bus.write(i++,  OpCodes.LDX_IMM.code());
