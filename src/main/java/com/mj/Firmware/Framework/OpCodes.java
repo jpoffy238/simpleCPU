@@ -89,7 +89,7 @@ import com.mj.Firmware.store.IndexX.STX_ZPY;
 import com.mj.Firmware.store.IndexY.STY_ABS;
 import com.mj.Firmware.store.IndexY.STY_ZP;
 import com.mj.Firmware.store.IndexY.STY_ZPX;
-
+import com.mj.Firmware.StatusFlags.*;
 /*
  * 
  */
@@ -193,6 +193,14 @@ public  enum OpCodes {
 	PLA(new PLA()),
 
 	PHA(new PHA()),
+	
+	CLC(new CLC()),
+	CLD(new CLD()),
+	CLV(new CLV()),
+	CLI(new CLI()),
+	SEC(new SEC()),
+	SED(new SED()),
+	SEI(new SEI()),
 	
 	//TEST(new TEST()),
 	MIH(new MIH()),
