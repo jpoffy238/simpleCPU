@@ -3,6 +3,7 @@ package com.mj.Firmware.Framework;
 
 import java.util.Map;
 
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,6 +57,7 @@ import com.mj.Firmware.Logic.EOR.EOR_ZP;
 import com.mj.Firmware.Logic.EOR.EOR_ZPX;
 import com.mj.Firmware.Logic.EOR.EOR_INX;
 import com.mj.Firmware.Logic.EOR.EOR_INY;
+import com.mj.Firmware.Logic.ROL.*;
 import com.mj.Firmware.Stack.PHA;
 import com.mj.Firmware.Stack.PLA;
 import com.mj.Firmware.Transfers.TAX;
@@ -184,6 +186,7 @@ public  enum OpCodes {
 	ASL_ZPX(new ASL_ZPX()),
 	ASL_ABS(new ASL_ABS()),
 	ASL_ABSX(new ASL_ABSX()),
+	ROL_ABS(new ROL_ABS()),
 	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),
