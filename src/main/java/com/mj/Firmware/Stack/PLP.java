@@ -14,7 +14,7 @@ public class PLP extends Instruction {
 		// TODO Auto-generated method stub
 		
 		
-		
+	
 		
 		byte data;
 		

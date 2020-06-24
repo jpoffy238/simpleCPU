@@ -1,4 +1,4 @@
-package com.mj.Firmware.logic;
+package com.mj.Firmware.logic.ASL;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,10 +16,10 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
 
-public class Test_ASL {
+public class Test_ASL_ACC {
 	private static CPU c;
 
-	private static final Logger logger = LogManager.getLogger(Test_ASL.class);
+	private static final Logger logger = LogManager.getLogger(Test_ASL_ACC.class);
 
 	@BeforeAll
 	public static void setup() {

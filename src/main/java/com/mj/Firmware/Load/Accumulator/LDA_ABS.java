@@ -18,8 +18,8 @@ public class LDA_ABS extends Instruction {
 		setProperty(KEY_MNEMONIC, "LDA");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABS);
 		setProperty(KEY_OPCODE, "0xad");
-		setProperty(KEY_INSTRUCTION_SIZE, "2");
-		setProperty(KEY_CYCLES, "2");
+		setProperty(KEY_INSTRUCTION_SIZE, "3");
+		setProperty(KEY_CYCLES, "3");
 		setProperty(KEY_FLAGS_EFFECTED, "Z,N");
 		setProperty(KEY_WEB,"http://www.obelisk.me.uk/6502/reference.html#LDA" );
 		setProperty(KEY_DESCRIPTION, "A,Z,N = M - Loads a byte of memory from "

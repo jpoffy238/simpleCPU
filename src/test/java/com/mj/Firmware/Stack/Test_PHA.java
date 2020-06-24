@@ -1,4 +1,4 @@
-package com.mj.Firmware.logic;
+package com.mj.Firmware.Stack;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,10 +16,10 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
 
-public class Test_ASL_ZPX {
+public class Test_PHA {
 	private static CPU c;
 
-	private static final Logger logger = LogManager.getLogger(Test_ASL_ZPX.class);
+	private static final Logger logger = LogManager.getLogger(Test_PHA.class);
 
 	@BeforeAll
 	public static void setup() {
@@ -37,17 +37,20 @@ public class Test_ASL_ZPX {
 	public void Test_exec() {
 		int i = 0x1000;
 		try {
-			c.bus.write(i++,  OpCodes.LDX_IMM.code());
-			c.bus.write(i++, (byte)(0x20));
-			c.bus.write(i++, OpCodes.ASL_ZPX.code());
-			c.bus.write(i++,(byte)(0x04));
-			
+			c.bus.write(i++, OpCodes.LDA_ABS.code());
+			c.bus.write(i++, (byte) 0x00);
+			c.bus.write(i++, (byte) (0x20));
+			c.bus.write(i++, OpCodes.PHA.code());
+			c.bus.write(i++,OpCodes.LDA_ABS.code());
+			c.bus.write(i++, (byte) 0x01);
+			c.bus.write(i++, (byte) (0x20));
+			c.bus.write(i++, OpCodes.STA_ZP.code());
+			c.bus.write(i++, (byte)(0x30));
+			c.bus.write(i++,OpCodes.PLA.code());
 			c.bus.write(i++, OpCodes.HLT.code());
 			c.bus.write(0x1fff, (byte) 0x00);
 			c.bus.write(0x2000, (byte) 0x55);
 			c.bus.write(0x2001, (byte) 0xaa);
-			c.bus.write(0x0024, (byte)0x44);
-			
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -61,31 +64,25 @@ public class Test_ASL_ZPX {
 			e.printStackTrace();
 			assert (false);
 		}
-		try {
-			assert(c.bus.read(0x0024) == 0x44);
-		} catch (illegalAddressException | DeviceUnavailable e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+
 		logger.debug("Starting CPU");
 		c.run();
+
+		
 	
+		int result = 0;
+		int result1 = 0;
 		try {
-			int initialValue = (int)(c.bus.read(0x0024) & 0xff);
-			logger.debug("ASL_ZPX: " + initialValue);
-			assert (initialValue == 0x0088);
-			assert(c.NFLAG.isSet());
-			assert(!c.ZFLAG.isSet());
-		} catch (illegalAddressException e) {
+			result = (int)(c.a.get() & 0x00ff);
+			result1 = (int)(c.bus.read(0x30) & 0x00ff);
+		} catch (illegalAddressException | DeviceUnavailable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			assert(false);
-		} catch (DeviceUnavailable e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			assert(false);
 		}
-	
+		logger.debug(String.format("A = [%2x] ZP(30) = [%2x]", result, result1));
+		assert (result == 0x55);
+		assert (result1 == 0xaa);
+
 	}
 
 }

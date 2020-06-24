@@ -40,7 +40,7 @@ public class basicMemory implements MemoryDriver {
 		// For devices the odd address is control while even is data.
 
 			if (range.contains(address)) {
-				memory[address] = (byte) (data & 0x00ff);
+				memory[address] = (byte) (data & 0xff);
 			} else {
 				throw new illegalAddressException(address, data);
 			}
