@@ -228,7 +228,7 @@ public class Test_ASL_ABS {
 		assert ((result & 0xff) == 0x54);
 		assert (!c.ZFLAG.isSet());
 		assert(c.NFLAG.isSet());
-		assert(!c.CFLAG.isSet());
+		assert(c.CFLAG.isSet());
 
 	}
 	
