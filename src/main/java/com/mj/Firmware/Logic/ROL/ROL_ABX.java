@@ -8,7 +8,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class ROL_ACC extends Instruction {
+public class ROL_ABX extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
@@ -37,23 +37,23 @@ public class ROL_ACC extends Instruction {
 	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
 	 * matter what address it is located at.
 	 */
-	public ROL_ACC() {
-		super((byte) (0x2a));
+	public ROL_ABX() {
+		super((byte) (0x3e));
 		setProperty(KEY_MNEMONIC, "ROL");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_IMP);
-		setProperty(KEY_OPCODE, "0x2a");
-		setProperty(KEY_INSTRUCTION_SIZE, "1");
-		setProperty(KEY_CYCLES, "2");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABX);
+		setProperty(KEY_OPCODE, "0x3e");
+		setProperty(KEY_INSTRUCTION_SIZE, "3");
+		setProperty(KEY_CYCLES, "7");
 		setProperty(KEY_FLAGS_EFFECTED, "NONE");
-		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#ROL");
-		setProperty(KEY_DESCRIPTION, "Shift A left  by 1 or (A/2). ");
+		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#ASL");
+		setProperty(KEY_DESCRIPTION, "Shift A left by 1 or (A*2).");
 
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
-		
-		int a = c.a.get();
+		int address =  (getAbsoluteAddressX(c) );
+		int a = c.bus.read(address);
 		
 		int result = a << 1;
 		if (c.CFLAG.isSet()) {
@@ -72,14 +72,9 @@ public class ROL_ACC extends Instruction {
 					c.ZFLAG.clear();
 				}
 			}
-		
+		c.pc +=2;
 		}
-		try {
-			c.a.set(result & 0xff);
-		} catch (zflagException | nflagException e) {
-			// TODO Auto-generated catch block
-			
-		}
+		c.bus.write(address, (byte)(result & 0xff));
 	}
 
 }

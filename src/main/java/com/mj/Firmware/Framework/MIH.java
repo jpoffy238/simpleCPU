@@ -8,7 +8,7 @@ import com.mj.exceptions.illegalAddressException;
 public class MIH extends Instruction {
 
 	public MIH() {
-		super((byte) (0x013E));
+		super((byte) (0xfb));
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {

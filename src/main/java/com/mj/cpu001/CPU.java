@@ -120,6 +120,30 @@ public class CPU extends Thread {
 			
 		}
 	}
+	public void step() throws illegalAddressException, DeviceUnavailable, illegalOpCodeException, ROException {
+
+		long instructionCount = 0;
+       long beginTime = System.currentTimeMillis();
+		long current  = System.currentTimeMillis();
+		long previous = System.currentTimeMillis();
+		long difftime;
+		
+			instructionCount++;
+			current = System.currentTimeMillis();
+			difftime = current - previous;
+			previous = current;
+			logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
+			
+			byte opcode = 0;
+		
+				opcode = 0;
+				opcode = fetchInstruction();
+				state = decoder.decode(opcode);
+				String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
+				currentState += dump();
+				logger.debug(currentState);	
+				state.exeute(this);
+	}
 
 	private byte fetchInstruction() throws illegalAddressException, DeviceUnavailable {
 		// Interrupt handling
@@ -135,7 +159,7 @@ public class CPU extends Thread {
 			//  non-maskable interrupt handler ($FFFA/B), 
 			// the power on reset location ($FFFC/D) and the 
 			// BRK/interrupt request handler ($FFFE/F) respectively.
-			// Also don't increment the PC still need to executethat instruction.
+			// Also don't increment the PC still need to execute that instruction.
 			value = OpCodes.MIH.code();
 		} else {
 			value = (int) (bus.read(pc) & 0xff);
