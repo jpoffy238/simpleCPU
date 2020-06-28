@@ -1,4 +1,4 @@
-package com.mj.Firmware.Logic.ASL;
+package com.mj.Firmware.Logic.Shift.ROL;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
@@ -8,7 +8,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class ASL_ZPX extends Instruction {
+public class ROL_ACC extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
@@ -37,42 +37,49 @@ public class ASL_ZPX extends Instruction {
 	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
 	 * matter what address it is located at.
 	 */
-	public ASL_ZPX() {
-		super((byte) (0x16));
-		setProperty(KEY_MNEMONIC, "ASL");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZPX);
-		setProperty(KEY_OPCODE, "0x16");
-		setProperty(KEY_INSTRUCTION_SIZE, "2");
-		setProperty(KEY_CYCLES, "5");
-		setProperty(KEY_FLAGS_EFFECTED, "Z, N");
-		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#ASL");
-		setProperty(KEY_DESCRIPTION, "Shift A left by 1 or (A*2).");
+	public ROL_ACC() {
+		super((byte) (0x2a));
+		setProperty(KEY_MNEMONIC, "ROL");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_IMP);
+		setProperty(KEY_OPCODE, "0x2a");
+		setProperty(KEY_INSTRUCTION_SIZE, "1");
+		setProperty(KEY_CYCLES, "2");
+		setProperty(KEY_FLAGS_EFFECTED, "NONE");
+		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#ROL");
+		setProperty(KEY_DESCRIPTION, "Shift A left  by 1 or (A/2). ");
 
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
-		int address = (getZeroPageXAddress(c) & 0xff);
-		int a = c.bus.read(address);
-
+		
+		int a = c.a.get();
+		
 		int result = a << 1;
+		if (c.CFLAG.isSet()) {
+			result += 1; // Pull in Carry Flag if set
+			c.CFLAG.clear();  // Clear it
+		}
 		if ((a & 0x80) != 0) {
-			c.CFLAG.set();
-		} else {
-			if (result == 0) {
+			c.CFLAG.set(); 
+		} else { 
+			if ( result == 0) {
 				c.ZFLAG.set();
 				c.NFLAG.clear();
-			} else {
-				if ((result & 0x80) == 0x80) {
+			} else { 
+				if ((result & 0x80)  == 0x80 ){
 					c.NFLAG.set();
 					c.ZFLAG.clear();
 				}
 			}
+		
 		}
-
-		c.bus.write(address, (byte) (result & 0xff));
-
-		c.pc += 1;
+		try {
+			c.a.set(result & 0xff);
+		} catch (zflagException | nflagException e) {
+			// TODO Auto-generated catch block
+			
+		}
 	}
 
 }

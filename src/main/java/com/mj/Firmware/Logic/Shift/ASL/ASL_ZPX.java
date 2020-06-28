@@ -1,7 +1,4 @@
-package com.mj.Firmware.Logic.ASL;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+package com.mj.Firmware.Logic.Shift.ASL;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
@@ -11,8 +8,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class ASL_ABSX extends Instruction {
-	protected final  Logger logger = LogManager.getLogger(ASL_ABSX.class);
+public class ASL_ZPX extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
@@ -41,14 +37,14 @@ public class ASL_ABSX extends Instruction {
 	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
 	 * matter what address it is located at.
 	 */
-	public ASL_ABSX() {
-		super((byte) (0x1e));
+	public ASL_ZPX() {
+		super((byte) (0x16));
 		setProperty(KEY_MNEMONIC, "ASL");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABX);
-		setProperty(KEY_OPCODE, "0x2e");
-		setProperty(KEY_INSTRUCTION_SIZE, "3");
-		setProperty(KEY_CYCLES, "7");
-		setProperty(KEY_FLAGS_EFFECTED, "C,Z,N");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZPX);
+		setProperty(KEY_OPCODE, "0x16");
+		setProperty(KEY_INSTRUCTION_SIZE, "2");
+		setProperty(KEY_CYCLES, "5");
+		setProperty(KEY_FLAGS_EFFECTED, "Z, N");
 		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#ASL");
 		setProperty(KEY_DESCRIPTION, "Shift A left by 1 or (A*2).");
 
@@ -56,30 +52,27 @@ public class ASL_ABSX extends Instruction {
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
-		int address =  getAbsoluteAddressX(c);
-		int a = (c.bus.read(address)) &0xff;
-		logger.debug(String.format("Address : [%04x] Value: [%02x]", address, a));
-		int result = a << 1 ;
-		logger.debug(String.format("Compute Value : [%04x] ",result));
-		result &= 0x00ff;
+		int address = (getZeroPageXAddress(c) & 0xff);
+		int a = c.bus.read(address);
+
+		int result = a << 1;
 		if ((a & 0x80) != 0) {
 			c.CFLAG.set();
-		} else { 
-			if ( result == 0) {
+		} else {
+			if (result == 0) {
 				c.ZFLAG.set();
 				c.NFLAG.clear();
-			} else { 
-				if ((result & 0x80)  == 0x80 ) {
+			} else {
+				if ((result & 0x80) == 0x80) {
 					c.NFLAG.set();
 					c.ZFLAG.clear();
 				}
 			}
-	
 		}
-		c.bus.write(address, (byte)(result ));
-		int x = c.bus.read(address);
-		logger.debug(String.format("Address [%04x] w [%04x]  r [%04x]", address, result, x));
-		c.pc +=2;
+
+		c.bus.write(address, (byte) (result & 0xff));
+
+		c.pc += 1;
 	}
 
 }

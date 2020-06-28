@@ -1,4 +1,4 @@
-package com.mj.Firmware.Logic.ROL;
+package com.mj.Firmware.Logic.Shift.ROL;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
@@ -8,7 +8,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class ROL_ZPX extends Instruction {
+public class ROL_ZP extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
@@ -37,13 +37,13 @@ public class ROL_ZPX extends Instruction {
 	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
 	 * matter what address it is located at.
 	 */
-	public ROL_ZPX() {
-		super((byte) (0x36));
+	public ROL_ZP() {
+		super((byte) (0x26));
 		setProperty(KEY_MNEMONIC, "ROL");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZPX);
-		setProperty(KEY_OPCODE, "0x36");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZP);
+		setProperty(KEY_OPCODE, "0x26");
 		setProperty(KEY_INSTRUCTION_SIZE, "2");
-		setProperty(KEY_CYCLES, "6");
+		setProperty(KEY_CYCLES, "5");
 		setProperty(KEY_FLAGS_EFFECTED, "NONE");
 		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#ASL");
 		setProperty(KEY_DESCRIPTION, "Shift A left by 1 or (A*2).");
@@ -52,7 +52,7 @@ public class ROL_ZPX extends Instruction {
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
-		int address =  (getZeroPageXAddress(c) );
+		int address =  (getZeroPageAddress(c) );
 		int a = c.bus.read(address);
 		
 		int result = a << 1;

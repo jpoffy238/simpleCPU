@@ -1,14 +1,13 @@
-package com.mj.Firmware.Logic.ASL;
+package com.mj.Firmware.Logic.Shift.ASL;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
-import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class ASL_ABS extends Instruction {
+public class ASL extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
@@ -37,40 +36,35 @@ public class ASL_ABS extends Instruction {
 	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
 	 * matter what address it is located at.
 	 */
-	public ASL_ABS() {
-		super((byte) (0x0e));
+	public ASL() {
+		super((byte) (0x0a));
 		setProperty(KEY_MNEMONIC, "ASL");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABS);
-		setProperty(KEY_OPCODE, "0x2e");
-		setProperty(KEY_INSTRUCTION_SIZE, "3");
-		setProperty(KEY_CYCLES, "6");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_IMP);
+		setProperty(KEY_OPCODE, "0x2f");
+		setProperty(KEY_INSTRUCTION_SIZE, "1");
+		setProperty(KEY_CYCLES, "3");
 		setProperty(KEY_FLAGS_EFFECTED, "NONE");
 		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#ASL");
 		setProperty(KEY_DESCRIPTION, "Shift A left by 1 or (A*2).");
 
 	}
 
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		int address =  (getAbsoluteAddress(c) );
-		int a = c.bus.read(address);
+		int a = c.a.get();
 		
 		int result = a << 1;
 		if ((a & 0x80) != 0) {
 			c.CFLAG.set();
-		} else { 
-			if ( result == 0) {
-				c.ZFLAG.set();
-				c.NFLAG.clear();
-			} else { 
-				if ((result & 0x80)  == 0x80 ){
-					c.NFLAG.set();
-					c.ZFLAG.clear();
-				}
-			}
-		c.pc +=2;
 		}
-		c.bus.write(address, (byte)(result & 0xff));
+		try {
+			c.a.set(result& 0xff);
+		} catch (zflagException e) {
+			handleZException(c);
+		} catch (nflagException e) {
+			handleNException(c);
+		}
+	
 	}
 
 }
