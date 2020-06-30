@@ -38,10 +38,10 @@ public class ROR_ZPX extends Instruction {
 	 * matter what address it is located at.
 	 */
 	public ROR_ZPX() {
-		super((byte) (0x7e));
+		super((byte) (0x76));
 		setProperty(KEY_MNEMONIC, "ROR");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ZPX);
-		setProperty(KEY_OPCODE, "0x7e");
+		setProperty(KEY_OPCODE, "0x76");
 		setProperty(KEY_INSTRUCTION_SIZE, "2");
 		setProperty(KEY_CYCLES, "6");
 		setProperty(KEY_FLAGS_EFFECTED, "NONE");
