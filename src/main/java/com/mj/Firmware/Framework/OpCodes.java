@@ -58,6 +58,7 @@ import com.mj.Firmware.Logic.Shift.ASL.ASL_ABSX;
 import com.mj.Firmware.Logic.Shift.ASL.ASL_ZP;
 import com.mj.Firmware.Logic.Shift.ASL.ASL_ZPX;
 import com.mj.Firmware.Logic.Shift.ROL.*;
+import com.mj.Firmware.Logic.Shift.ROR.*;
 import com.mj.Firmware.Stack.PHA;
 import com.mj.Firmware.Stack.PLA;
 import com.mj.Firmware.Transfers.TAX;
@@ -191,6 +192,14 @@ public  enum OpCodes {
 	ROL_ZP(new ROL_ZP()),
 	ROL_ZPX(new ROL_ZPX()),
 	ROL_ABX(new ROL_ABX()),
+	
+	
+	ROR_ABS(new ROR_ABS()),
+	ROR_ABX(new ROR_ABX()),
+	ROR_ACC(new ROR_ACC()),
+	ROR_ZP(new ROR_ZP()),
+	ROR_ZPX(new ROR_ZPX()),
+	
 	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),
