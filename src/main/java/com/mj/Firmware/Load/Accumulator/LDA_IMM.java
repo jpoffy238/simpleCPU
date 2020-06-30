@@ -35,6 +35,8 @@ public class LDA_IMM extends Instruction {
 		 *         LDY #HI LABEL   ;Load the MSB of a 16 bit address into Y
 		 */
 		byte m = c.bus.read(c.pc);
+		String currentState = String.format("%-10s  #$ %-2x", getProperty(KEY_MNEMONIC),  (int)(m & 0xff));
+		logger.debug(currentState);
 		c.pc = (++c.pc);
 		try {
 			c.a.set(m);

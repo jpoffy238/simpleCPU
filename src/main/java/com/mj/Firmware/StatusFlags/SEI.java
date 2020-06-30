@@ -2,8 +2,6 @@ package com.mj.Firmware.StatusFlags;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
-import com.mj.exceptions.nflagException;
-import com.mj.exceptions.zflagException;
 
 public class SEI extends Instruction {
 	public SEI() {
@@ -13,8 +11,8 @@ public class SEI extends Instruction {
 		setProperty(KEY_OPCODE, "0x78");
 		setProperty(KEY_INSTRUCTION_SIZE, "1");
 		setProperty(KEY_CYCLES, "2");
-		setProperty(KEY_WEB,"http://6502.org/tutorials/6502opcodes.html#TAX" );
-		setProperty(KEY_DESCRIPTION ,"X = A  Stores the contents of the accumulator X.");
+		setProperty(KEY_WEB,"http://6502.org/tutorials/6502opcodes.html#SEI" );
+		setProperty(KEY_DESCRIPTION ,"Set Interrupt flag");
 	}
 	public void exeute(CPU c) {
 		c.IFLAG.set();

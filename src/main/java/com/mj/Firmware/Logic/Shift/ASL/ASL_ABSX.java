@@ -8,8 +8,6 @@ import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
-import com.mj.exceptions.nflagException;
-import com.mj.exceptions.zflagException;
 
 public class ASL_ABSX extends Instruction {
 	protected final  Logger logger = LogManager.getLogger(ASL_ABSX.class);

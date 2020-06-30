@@ -2,8 +2,6 @@ package com.mj.Firmware.StatusFlags;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
-import com.mj.exceptions.nflagException;
-import com.mj.exceptions.zflagException;
 
 public class CLI extends Instruction {
 	public CLI() {
