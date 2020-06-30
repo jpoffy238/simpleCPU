@@ -1,11 +1,11 @@
-package com.mj.Firmware.Logic;
+package com.mj.Firmware.Logic.CMP;
 
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.illegalAddressException;
 
-public class CMP extends Instruction {
+public class CMP_IMM extends Instruction {
 /*
  * CMP (CoMPare accumulator)
 Affects Flags: N Z C
@@ -29,11 +29,11 @@ negative (N) flags will be set based on equality or lack there
 of and the sign (i.e. A>=$80) of the accumulator.
  
  */
-	public CMP () {
-		super((byte)0x44);
+	public CMP_IMM () {
+		super((byte)0xc9);
 		setProperty(KEY_MNEMONIC, "CMP");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_IMM);
-		setProperty(KEY_OPCODE, "0x44");
+		setProperty(KEY_OPCODE, "0xc9");
 		setProperty(KEY_INSTRUCTION_SIZE, "2");
 		setProperty(KEY_CYCLES, "2");
 		setProperty(KEY_WEB,"http://6502.org/tutorials/6502opcodes.html#CMP" );
@@ -44,22 +44,26 @@ of and the sign (i.e. A>=$80) of the accumulator.
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int m = c.bus.read(c.pc);
-		c.pc = (++c.pc);
+	
 		int a = c.a.get();
 		
 		int result = a - m;
 		if (result == 0) {
 			c.ZFLAG.set();
 			c.NFLAG.clear();
+			c.CFLAG.clear();
 		} else {
 			if (result < 0) {
 				c.NFLAG.set();
 				c.ZFLAG.clear();
+				c.CFLAG.clear();
 			}  else {
 				c.NFLAG.clear();
 				c.ZFLAG.clear();
+				c.CFLAG.set();
 			}
 		}
+		c.pc++;
 	}
 
 	

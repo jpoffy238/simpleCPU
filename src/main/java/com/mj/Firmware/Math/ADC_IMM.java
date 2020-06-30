@@ -7,8 +7,8 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class ADCI extends Instruction {
-	public ADCI() {
+public class ADC_IMM extends Instruction {
+	public ADC_IMM() {
 		super((byte)0x69);
 		// TODO Auto-generated constructor stub
 		setProperty(KEY_MNEMONIC, "ADC");
@@ -46,7 +46,7 @@ public class ADCI extends Instruction {
 		 * 
 		 */
 		int m = c.bus.read(c.pc);
-		c.pc = (++c.pc);
+	
 		int a = c.a.get();
 		boolean anegative = (a & 0x80) > 0;
 		boolean  mnegative  = (m & 0x80) > 0;
@@ -80,6 +80,6 @@ public class ADCI extends Instruction {
 		if ( !anegative && !mnegative ) {
 			c.NFLAG.clear();
 		}
-		
+		c.pc++;
 	}
 }

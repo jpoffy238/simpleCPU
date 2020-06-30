@@ -44,7 +44,7 @@ public class CPU extends Thread {
 	machineState state;
 
 
-	public Object memory;
+
 
 
 	public void reset() {

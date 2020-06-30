@@ -1,5 +1,8 @@
 package com.mj.Firmware.Logic;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
@@ -9,39 +12,25 @@ public class BIT_ABS extends Instruction {
 	/*
 	 * Affect Flags: none
 	 * 
-	 * All branches are relative mode and have a length of two bytes. Syntax is
-	 * "Bxx Displacement" or (better) "Bxx Label". See the notes on the Program
-	 * Counter for more on displacements.
-	 * 
-	 * Branches are dependant on the status of the flag bits when the op code is
-	 * encountered. A branch not taken requires two machine cycles. Add one if the
-	 * branch is taken and add one more if the branch crosses a page boundary.
-	 * 
-	 * MNEMONIC HEX BPL (Branch on PLus) $10 BMI (Branch on MInus) $30 BVC (Branch
-	 * on oVerflow Clear) $50 BVS (Branch on oVerflow Set) $70 BCC (Branch on Carry
-	 * Clear) $90 BCS (Branch on Carry Set) $B0 BNE (Branch on Not Equal) $D0 BEQ
-	 * (Branch on EQual) $F0
-	 * 
-	 * There is no BRA (BRanch Always) instruction but it can be easily emulated by
-	 * branching on the basis of a known condition. One of the best flags to use for
-	 * this purpose is the oVerflow which is unchanged by all but addition and
-	 * subtraction operations. A page boundary crossing occurs when the branch
-	 * destination is on a different page than the instruction AFTER the branch
-	 * instruction. For example:
-	 * 
-	 * SEC BCS LABEL NOP A page boundary crossing occurs (i.e. the BCS takes 4
-	 * cycles) when (the address of) LABEL and the NOP are on different pages. This
-	 * means that CLV BVC LABEL LABEL NOP the BVC instruction will take 3 cycles no
-	 * matter what address it is located at.
+	 BIT - Bit Test
+		A & M, N = M7, V = M6
+
+This instructions is used to test if one or more bits are set in a target 
+memory location. The mask pattern in A is ANDed with the value in memory 
+to set or clear the zero flag, but the result is not kept. Bits 7 and 6 of the 
+value from memory are copied into the N and V flags.
+
+Processor Status after use:
 	 */
+	  private static final Logger logger = LogManager.getLogger(BIT_ABS.class);
 	public BIT_ABS() {
 		super((byte) (0x2c));
-		setProperty(KEY_MNEMONIC, "BBIT");
-		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_REL);
+		setProperty(KEY_MNEMONIC, "BIT");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABS);
 		setProperty(KEY_OPCODE, "0x2c");
 		setProperty(KEY_INSTRUCTION_SIZE, "3");
-		setProperty(KEY_CYCLES, "3");
-		setProperty(KEY_FLAGS_EFFECTED, "NONE");
+		setProperty(KEY_CYCLES, "4");
+		setProperty(KEY_FLAGS_EFFECTED, "Z,N,O");
 		setProperty(KEY_WEB, "http://6502.org/tutorials/6502opcodes.html#BIT");
 		setProperty(KEY_DESCRIPTION, "BCC  (Branch on Carry  set )  If Carry  flag is set");
 
@@ -51,11 +40,20 @@ public class BIT_ABS extends Instruction {
 		// TODO Auto-generated method stub
 		int testAddress = getAbsoluteAddress(c);
 		byte testValue = c.bus.read(testAddress);
+		String currentState = String.format("%-10s $(%-4x) Value[ %-2x]", getProperty(KEY_MNEMONIC), testAddress, (int)(testValue));
+		logger.debug(currentState);
+		if ((0x80 & testValue) != 0) {
+			c.NFLAG.set();
+		}
+		if ((0x40 & testValue ) != 0 ) {
+			c.OFLAG.set();
+		}
 		int result = testValue & (byte) (c.a.get() & 0xff);
 		if (result == 0) {
 			c.ZFLAG.set();
 		}
 		c.pc += 2;
+		logger.debug(c.dump());
 	}
 
 }
