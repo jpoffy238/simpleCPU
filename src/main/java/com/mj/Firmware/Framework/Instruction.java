@@ -52,7 +52,7 @@ public abstract class Instruction implements machineState {
 	}
 
 	public void exeute(CPU c) throws illegalOpCodeException, illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
+		
 	}
 
 	public byte getOpCode() {
