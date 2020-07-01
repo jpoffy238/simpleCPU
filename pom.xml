@@ -53,9 +53,10 @@
 				    <Build-OS>${os.name} ${os.arch} ${os.version}</Build-OS>
 				    <Build-Branch>${git.branch}</Build-Branch>
 				    <Build-Version>${git.build.version}</Build-Version>
-				    <Build-closest-Tag>${git.closest.tag.name}</Build-closest-Tag>
-				    <Build-commit-Count>${git.closest.tag.commit.count}</Build-commit-Count>
+				    <Build-closest-Tag>${git.tags}</Build-closest-Tag>
+				    <Build-commit-Count>${git.total.commit.count}</Build-commit-Count>
 				    <Build-IsDirty>${git.dirty}</Build-IsDirty>
+				    <Build-Number>${git.build.number}</Build-Number>
 			    </manifestEntries>
                 <manifest>
                     <mainClass>
