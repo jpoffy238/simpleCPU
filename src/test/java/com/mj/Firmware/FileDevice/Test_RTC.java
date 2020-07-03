@@ -24,13 +24,13 @@ public class Test_RTC {
 	private static  int RTCstartAddress;
 	private static int RTCEndAddress;
 	private static int STDOUT;
-	private static final Logger logger = LogManager.getLogger("Test_FileDevice");
+	private static final Logger logger = LogManager.getLogger(Test_RTC.class);
 
 	@BeforeAll
 	public static void setup() {
 		RTC rtc = new RTC();
-		RTCstartAddress = 0xec02;
-		RTCEndAddress =   0xec22;
+		RTCstartAddress = 0xa000;
+		RTCEndAddress =  RTCstartAddress  +21;
 		STDOUT = 0xe000;
 		
 		rtc.start();
@@ -49,22 +49,34 @@ public class Test_RTC {
 	@Test
 	public void Test_Reading_RTC() {
 		int i = 0x1000;
+		byte lowerStartAddress = (byte)(RTCstartAddress&0x00ff);
+		byte UpperStartAddress = (byte)((RTCstartAddress >> 8) &0x00ff);
 		int MARKER ;
 		try {
-			c.bus.write(i++, OpCodes.LDX_IMM.code());
-			c.bus.write(i++,(byte)(RTCEndAddress -RTCstartAddress) );
-			MARKER=i;
-			c.bus.write(i++, OpCodes.LDA_ABSX.code());
-			c.bus.write(i++, (byte) (RTCstartAddress&0x00ff));
-			c.bus.write(i++, (byte) ((RTCstartAddress >> 8) &0x00ff));
-			c.bus.write(i++,  OpCodes.STA_ABS.code());
+			c.bus.write(i++, OpCodes.LDX_IMM.code());  // Load lenght into X
+			c.bus.write(i++,(byte)(20) );
+			MARKER=i; // For branch location
+			c.bus.write(i++, OpCodes.LDA_ABSX.code()); // Clock is read backwards 
+			c.bus.write(i++, lowerStartAddress);
+			c.bus.write(i++, UpperStartAddress);
+			c.bus.write(i++,  OpCodes.STA_ABS.code()); // write to output
 			c.bus.write(i++, (byte)(0x00));
 			c.bus.write(i++,  (byte)(0xec));
-	
-			c.bus.write(i++, OpCodes.DEX.code());
-			c.bus.write(i++, OpCodes.BNE.code());			
-			c.bus.write(i++,  (byte) (MARKER - i - 1));
-			
+			c.bus.write(i++,  OpCodes.STA_ABX.code()); // Store it in local memory
+			c.bus.write(i++, (byte)(0x00));
+			c.bus.write(i++,  (byte)(0x20));
+			c.bus.write(i++, OpCodes.DEX.code());  // dec x to point to next location
+			c.bus.write(i++, OpCodes.BNE.code()); // branch for next			 
+			c.bus.write(i++,  (byte) (MARKER - i +1));
+			c.bus.write(i++, OpCodes.LDA_ABSX.code()); // Clock is read backwards 
+			c.bus.write(i++, lowerStartAddress);
+			c.bus.write(i++, UpperStartAddress);
+			c.bus.write(i++,  OpCodes.STA_ABS.code()); // write to output
+			c.bus.write(i++, (byte)(0x00));
+			c.bus.write(i++,  (byte)(0xec));
+			c.bus.write(i++,  OpCodes.STA_ABX.code()); // Store it in local memory
+			c.bus.write(i++, (byte)(0x00));
+			c.bus.write(i++,  (byte)(0x20));
 			c.bus.write(i++, OpCodes.HLT.code());
 			
 		} catch (illegalAddressException e) {
@@ -82,9 +94,19 @@ public class Test_RTC {
 		}
 		logger.debug("Starting CPU");
 		c.run();
-	
-		int result = c.a.get();
-		logger.debug("What A is loaded with : ", +result);
+		logger.debug("Stopped CPU");
+		char []  results = new char[21];
+		for (i=0; i < 21 ; i++) {
+			try {
+				results[i] = (char)c.bus.read(0x2000 + i);
+				logger.debug("results[" + i + "] = " + results[i]);
+			} catch (illegalAddressException | DeviceUnavailable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		String ouput = new String(results);
+		logger.debug("Time  " + ouput);
 		
 
 }

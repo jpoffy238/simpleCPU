@@ -3,6 +3,9 @@ package com.mj.Devices;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.mj.Devices.PBus.BussId;
 import com.mj.Devices.PBus.DEVTYPE;
 import com.mj.exceptions.DeviceUnavailable;
@@ -10,13 +13,14 @@ import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class RTC extends Thread implements Device {
+	static Logger logger = LogManager.getLogger(RTC.class);
+	private MemoryRange mr = new MemoryRange(0xa000, 0xa000 + 21);
+	private char[] time = new char[mr.size()];
 
-	public RTC () {
+	public RTC() {
 		now();
 	}
-	private MemoryRange mr = new MemoryRange(0xec02, 0xec22);
-	private char[] time = new char[mr.size()];
-	@Override
+
 	public DEVTYPE getDeviceType() {
 		// TODO Auto-generated method stub
 		return DEVTYPE.CHAR;
@@ -31,7 +35,7 @@ public class RTC extends Thread implements Device {
 	@Override
 	public MemoryRange getAddressRange() {
 		// TODO Auto-generated method stub
-		return  mr;
+		return mr;
 	}
 
 	@Override
@@ -43,7 +47,11 @@ public class RTC extends Thread implements Device {
 	@Override
 	public byte read(int address) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		return (byte)time[address - mr.startAddressRange];
+		int localAddress = address - mr.startAddressRange;
+		byte value = (byte) time[localAddress];
+		logger.debug(String.format("Address %04x Virtual Address %04x Value %02x", localAddress, address, value));
+
+		return (byte) time[localAddress];
 	}
 
 	@Override
@@ -63,17 +71,18 @@ public class RTC extends Thread implements Device {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			 
+
 		}
 	}
-	public  void now() {
+
+	public void now() {
 		final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
 		String tmp = sdf.format(cal.getTime());
-		for (int i = 0; i < tmp.length(); i++) { 
-           time[i] = tmp.trim().charAt(i);
-		 
+		for (int i = 0; i < tmp.length(); i++) {
+			time[i] = tmp.trim().charAt(i);
+
 		}
 	}
 }
