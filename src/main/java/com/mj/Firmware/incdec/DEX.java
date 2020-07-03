@@ -14,6 +14,7 @@ public class DEX extends Instruction {
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		try {
+			c.ZFLAG.clear();
 			c.x.dec();
 		} catch (nflagException e) {
 			handleNException(c);

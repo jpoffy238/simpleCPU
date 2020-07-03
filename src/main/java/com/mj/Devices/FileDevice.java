@@ -75,6 +75,7 @@ public class FileDevice implements Device {
 
 	public void write(int address, byte data) throws illegalAddressException, ROException, DeviceUnavailable {
 		if ((address & 0x0001) == 0) {
+			
 			logger.debug("OUTPUT CHAR : " + (char)data);
 			write(data);
 		} else {
