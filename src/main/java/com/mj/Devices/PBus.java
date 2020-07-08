@@ -19,7 +19,7 @@ public interface PBus extends CPUBus {
 	
 	public void raiseInterupt();
 	
-	public void raisekNMInterupt();
+	public void raiseNMInterupt();
 	
 	public void raisepowerOnReset();
 	

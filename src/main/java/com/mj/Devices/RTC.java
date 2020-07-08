@@ -16,8 +16,9 @@ public class RTC extends Thread implements Device {
 	static Logger logger = LogManager.getLogger(RTC.class);
 	private MemoryRange mr = new MemoryRange(0xa000, 0xa000 + 21);
 	private char[] time = new char[mr.size()];
-
-	public RTC() {
+	PBus bus;
+	public RTC(PBus bus) {
+		this.bus = bus;
 		now();
 	}
 
@@ -65,6 +66,7 @@ public class RTC extends Thread implements Device {
 		// TODO Auto-generated method stub
 		while (true) {
 			now();
+			bus.raiseInterupt();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {

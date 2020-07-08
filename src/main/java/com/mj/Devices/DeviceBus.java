@@ -15,7 +15,9 @@ public class DeviceBus implements PBus {
 	String formater = "DeviceType : %s10 : BusId : %s10 : Object : %s20";
 	private static final Logger logger = LogManager.getLogger(DeviceBus.class);
 	private Map<MemoryRange, Device> devices = new HashMap<MemoryRange, Device>();
-	
+	protected boolean interuptRaised = false;
+	protected boolean raiseNMInterupt = false;
+	protected boolean powerOnReset = false;
 	public void write(int address, byte data) throws ROException, illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		logger.trace("WRITE: " + String.format("%04x %02x: " , address, data));
@@ -42,17 +44,17 @@ public class DeviceBus implements PBus {
 
 	public boolean IsInterruptRaised() {
 		// TODO Auto-generated method stub
-		return false;
+		return interuptRaised;
 	}
 
 	public boolean IsNMInterruptRaised() {
 		// TODO Auto-generated method stub
-		return false;
+		return raiseNMInterupt;
 	}
 
 	public boolean IsPowerOnResetRased() {
 		// TODO Auto-generated method stub
-		return false;
+		return powerOnReset;
 	}
 
 	public void write(BussId bus, int address, byte data)
@@ -79,17 +81,17 @@ public class DeviceBus implements PBus {
 
 	public void raiseInterupt() {
 		// TODO Auto-generated method stub
-
+		interuptRaised = true;
 	}
 
-	public void raisekNMInterupt() {
+	public void raiseNMInterupt() {
 		// TODO Auto-generated method stub
-
+		raiseNMInterupt  = true;
 	}
 
 	public void raisepowerOnReset() {
 		// TODO Auto-generated method stub
-
+		powerOnReset = true;
 	}
 
 	public void registerDevice(Device deviceHandler) {
@@ -120,6 +122,8 @@ public class DeviceBus implements PBus {
 		}
 		return d;
 	}
+
+	
 
 	
 	

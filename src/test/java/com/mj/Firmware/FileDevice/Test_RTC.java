@@ -28,19 +28,20 @@ public class Test_RTC {
 
 	@BeforeAll
 	public static void setup() {
-		RTC rtc = new RTC();
+		PBus bus = new DeviceBus();
+		RTC rtc = new RTC(bus);
 		RTCstartAddress = 0xa000;
 		RTCEndAddress =  RTCstartAddress  +21;
 		STDOUT = 0xe000;
 		
-		rtc.start();
 		
-		PBus bus = new DeviceBus();
+		
+		
 		bus.registerDevice(new basicMemory());
 		bus.registerDevice(new basicROM(bus));
 		bus.registerDevice(new FileDevice(bus));
 		bus.registerDevice(rtc);
-		
+		rtc.start();
 		
 		 c = new CPU(bus, new cpu001decoder());
 	
