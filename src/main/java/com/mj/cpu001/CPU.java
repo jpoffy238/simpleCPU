@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.mj.Devices.CPUBus;
+import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.Decoder;
 import com.mj.Firmware.Framework.OpCodes;
 import com.mj.Firmware.Framework.machineState;
@@ -16,7 +17,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.illegalOpCodeException;
 
 public class CPU extends Thread {
-	public CPU(CPUBus bus, Decoder dcd) {
+	public CPU(PBus bus, Decoder dcd) {
 		this.bus =bus;
 		decoder = dcd;
 	}
@@ -38,7 +39,7 @@ public class CPU extends Thread {
 
 	public int pc;
 	public int sp;
-	public CPUBus bus;
+	public PBus bus;
 	private Decoder decoder;
 	public int clockState;
 	machineState state;
@@ -80,7 +81,9 @@ public class CPU extends Thread {
 		reset();
 		long instructionCount = 0;
        long beginTime = System.currentTimeMillis();
-		long current  = System.currentTimeMillis();
+		long current  = System.currentTimeMillis();	if (bus.IsInterruptRaised()) {
+			
+		}
 		long previous = System.currentTimeMillis();
 		long difftime;
 		boolean RUN=true;
@@ -161,6 +164,7 @@ public class CPU extends Thread {
 			// BRK/interrupt request handler ($FFFE/F) respectively.
 			// Also don't increment the PC still need to execute that instruction.
 			value = OpCodes.MIH.code();
+		
 		} else {
 			value = (int) (bus.read(pc) & 0xff);
 			pc++;

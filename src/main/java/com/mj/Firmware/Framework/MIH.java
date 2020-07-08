@@ -1,6 +1,7 @@
 package com.mj.Firmware.Framework;
 
 import com.mj.cpu001.CPU;
+import com.mj.Devices.PBus;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
@@ -18,7 +19,9 @@ public class MIH extends Instruction {
 			interuptHandlerAddress = getNMInterruptHandlerAddress(c);
 		} else {
 			if (c.bus.IsInterruptRaised() ) {
+				c.IFLAG.set();
 				interuptHandlerAddress = getInterruptHandlerAddress(c);
+				c.bus.clearInterupt();
 			} else {
 				if (c.bus.IsPowerOnResetRased()) {
 					interuptHandlerAddress = getResetHandlerAddress(c);

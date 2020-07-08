@@ -17,6 +17,8 @@ import com.mj.Firmware.ExecutionFlow.JMP_ABS;
 import com.mj.Firmware.ExecutionFlow.JSR;
 import com.mj.Firmware.ExecutionFlow.NOP;
 import com.mj.Firmware.ExecutionFlow.RTS;
+import com.mj.Firmware.ExecutionFlow.RTI;
+
 import com.mj.Firmware.Load.Accumulator.LDA_ABS;
 import com.mj.Firmware.Load.Accumulator.LDA_ABSX;
 import com.mj.Firmware.Load.Accumulator.LDA_ABSY;
@@ -204,6 +206,8 @@ public  enum OpCodes {
 	JMP_ABS(new JMP_ABS()),
 	JSR(new JSR()),
 	RTS(new RTS()),
+	RTI(new RTI()),
+	
 	BRK(new BRK()),
 
 	PLA(new PLA()),

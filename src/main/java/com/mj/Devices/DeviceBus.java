@@ -44,6 +44,7 @@ public class DeviceBus implements PBus {
 
 	public boolean IsInterruptRaised() {
 		// TODO Auto-generated method stub
+		
 		return interuptRaised;
 	}
 
@@ -121,6 +122,24 @@ public class DeviceBus implements PBus {
 			}
 		}
 		return d;
+	}
+
+	@Override
+	public void clearInterupt() {
+		// TODO Auto-generated method stub
+		interuptRaised = false;
+	}
+
+	@Override
+	public void clearNMInterupt() {
+		// TODO Auto-generated method stub
+		raiseNMInterupt = false;
+	}
+
+	@Override
+	public void clearpowerOnReset() {
+		// TODO Auto-generated method stub
+		powerOnReset = false;
 	}
 
 	
