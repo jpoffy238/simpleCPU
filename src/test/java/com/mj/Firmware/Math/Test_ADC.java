@@ -87,7 +87,7 @@ public class Test_ADC {
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			assert (false);
+			assert (false);assert(c.CFLAG.isSet());
 		} catch (DeviceUnavailable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -146,11 +146,159 @@ public class Test_ADC {
 
 		assert ((byte)(result & 0xff) == (byte)(127+127));
 		assert (!c.ZFLAG.isSet());
-		assert(!c.NFLAG.isSet());
+		assert(c.NFLAG.isSet());
+		assert(c.OFLAG.isSet());
+		assert(!c.CFLAG.isSet());
+
+	}
+	@Test
+	public void Test_ADC_Basic04() {
+		int i = 0x1000;
+		try {
+			c.bus.write( i++, OpCodes.LDA_IMM.code());
+			c.bus.write(i++, (byte)200);
+			c.bus.write(i++, OpCodes.ADC_IMM.code());
+			c.bus.write(i++, (byte) 127);
+			c.bus.write(i++, OpCodes.NOP.code());
+		
+			
+			c.bus.write(i++, OpCodes.HLT.code());
+		
+		} catch (illegalAddressException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert (false);
+		} catch (DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert (false);
+		} catch (ROException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert (false);
+		}
+
+		logger.debug("Starting CPU");
+		c.run();
+		
+		int result;
+		result = c.a.get();
+		logger.debug("What A is loaded with : ", +result);
+
+		assert ((byte)(result & 0xff) == ((byte)(200+127) & 0xff));
+		assert (!c.ZFLAG.isSet());
+		assert(c.NFLAG.isSet());
 		assert(c.OFLAG.isSet());
 		assert(c.CFLAG.isSet());
 
 	}
+//	CLC      ; 1 + 1 = 2, returns C = 0
+//			  LDA #$01
+//			  ADC #$01
+//
+//			  CLC      ; 1 + -1 = 0, returns C = 1
+//			  LDA #$01
+//			  ADC #$FF
+//
+//			  CLC      ; 127 + 1 = 128, returns C = 0
+//			  LDA #$7F
+//			  ADC #$01
+//
+//			  CLC      ; -128 + -1 = -129, returns C = 1
+//			  LDA #$80
+//			  ADC #$FF
+	
+	@Test
+	public void Test_ADC_Basic05() {
+//		CLC      ; 1 + 1 = 2, returns C = 0
+//		  LDA #$01
+//		  ADC #$01
+		int i = 0x1000;
+		try {
+			c.bus.write(i++, OpCodes.CLC.code());
+			c.bus.write(i++, OpCodes.CLV.code());
+			c.bus.write( i++, OpCodes.LDA_IMM.code());
+			c.bus.write(i++, (byte)1);
+			c.bus.write(i++, OpCodes.ADC_IMM.code());
+			c.bus.write(i++, (byte) 1);
+			c.bus.write(i++, OpCodes.NOP.code());
+		
+			
+			c.bus.write(i++, OpCodes.HLT.code());
+		
+		} catch (illegalAddressException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert (false);
+		} catch (DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert (false);
+		} catch (ROException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert (false);
+		}
+
+		logger.debug("Starting CPU");
+		c.run();
+		
+		int result;
+		result = c.a.get();
+		logger.debug("What A is loaded with : ", +result);
+
+		assert ((byte)(result & 0xff) == ((byte)2));
+		assert (!c.ZFLAG.isSet());
+		assert(!c.NFLAG.isSet());
+		assert(!c.OFLAG.isSet());
+		assert(!c.CFLAG.isSet());
+
+	}
+	@Test
+	public void Test_ADC_Basic06() {
+///			  CLC      ; 1 + -1 = 0, returns C = 1
+//		  LDA #$01
+//		  ADC #$FF
+		int i = 0x1000;
+		try {
+			c.bus.write(i++, OpCodes.CLC.code());
+			c.bus.write(i++, OpCodes.CLV.code());
+			c.bus.write( i++, OpCodes.LDA_IMM.code());
+			c.bus.write(i++, (byte)1);
+			c.bus.write(i++, OpCodes.ADC_IMM.code());
+			c.bus.write(i++, (byte) 0xff);
+			c.bus.write(i++, OpCodes.NOP.code());
+		
+			
+			c.bus.write(i++, OpCodes.HLT.code());
+		
+		} catch (illegalAddressException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert (false);
+		} catch (DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert (false);
+		} catch (ROException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assert (false);
+		}
+
+		logger.debug("Starting CPU");
+		c.run();
+		
+		int result;
+		result = c.a.get();
+		logger.debug("What A is loaded with : ", +result);
+
+		assert ((byte)(result & 0xff) == ((byte)0));
+		assert (c.ZFLAG.isSet());
+		assert(!c.NFLAG.isSet());
+		assert(c.CFLAG.isSet());
+		assert(c.OFLAG.isSet());
 		
 
+	}	
 }

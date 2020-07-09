@@ -95,7 +95,12 @@ import com.mj.Firmware.store.IndexY.STY_ABS;
 import com.mj.Firmware.store.IndexY.STY_ZP;
 import com.mj.Firmware.store.IndexY.STY_ZPX;
 import com.mj.Firmware.StatusFlags.*;
-import com.mj.Firmware.Math.*;
+import com.mj.Firmware.Math.ADC.*;
+//import com.mj.Firmware.Math.SBC.*;
+import com.mj.Firmware.Math.ADC.ADC_IMM;
+import com.mj.Firmware.Logic.CMP.*;
+import com.mj.Firmware.Logic.ORA.*;
+
 /*
  * 
  */
@@ -104,6 +109,12 @@ import com.mj.Firmware.Math.*;
 public  enum OpCodes {
 	
 	ADC_IMM(new ADC_IMM()),
+	ADC_ZP(new ADC_ZP()),
+	ADC_ZPX(new ADC_ZPX()),
+	ADC_ABS(new ADC_ABS()),
+	ADC_ABSX(new ADC_ABSX()),
+	ADC_ABSY(new ADC_ABSY()),
+	ADC_INX(new ADC_INX()),
 	MIH(new MIH()),  // Special instruction to handle interrupts
 	
 	NOP( new NOP()),
@@ -187,6 +198,13 @@ public  enum OpCodes {
 	EOR_ABSY(new EOR_ABSY()),
 	EOR_INX(new EOR_INX()),
 	EOR_INY(new EOR_INY()),
+	ORA_ABS(new ORA_ABS()),
+	ORA_ABSX(new ORA_ABSX()),
+	ORA_ZPX(new ORA_ZPX()),
+	ORA_ZP(new ORA_ZP()),
+	ORA_INY(new ORA_INY()),
+	ORA_IMM(new ORA_IMM()),
+	ORA_ABSY(new ORA_ABSY()),
 	ASL(new ASL()),
 	ASL_ZP(new ASL_ZP()),
 	ASL_ZPX(new ASL_ZPX()),
@@ -224,7 +242,20 @@ public  enum OpCodes {
 	SEC(new SEC()),
 	SED(new SED()),
 	SEI(new SEI()),
-	
+	CMP_IMM(new CMP_IMM()),
+	CMP_ABS(new CMP_ABS()),
+	CMP_ZP(new CMP_ZP()),
+	CMP_ZPX(new CMP_ZPX()),
+	CMP_ABX(new CMP_ABX()),
+	CMP_ABY(new CMP_ABY()),
+	CMP_INX(new CMP_INX()),
+	CMP_INY(new CMP_INY()),
+	CPX_ABS(new CPX_ABS()),
+	CPX_IMM(new CPX_IMM()),
+	CPX_ZP(new CPX_ZP()),
+	CPY_IMM(new CPY_IMM()),
+	CPY_ABS(new CPY_ABS()),
+	CPY_ZP(new CPY_ZP()),
 	//TEST(new TEST()),
 	
 HLT( new HLT());
