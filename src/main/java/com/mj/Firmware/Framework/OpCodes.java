@@ -96,7 +96,7 @@ import com.mj.Firmware.store.IndexY.STY_ZP;
 import com.mj.Firmware.store.IndexY.STY_ZPX;
 import com.mj.Firmware.StatusFlags.*;
 import com.mj.Firmware.Math.ADC.*;
-//import com.mj.Firmware.Math.SBC.*;
+import com.mj.Firmware.Math.SBC.*;
 import com.mj.Firmware.Math.ADC.ADC_IMM;
 import com.mj.Firmware.Logic.CMP.*;
 import com.mj.Firmware.Logic.ORA.*;
@@ -115,6 +115,15 @@ public  enum OpCodes {
 	ADC_ABSX(new ADC_ABSX()),
 	ADC_ABSY(new ADC_ABSY()),
 	ADC_INX(new ADC_INX()),
+	SBC_ABS(new SBC_ABS()),
+	SBC_ZPX(new SBC_ZPX()),
+	SBC_ABSX(new SBC_ABSX()),
+	SBC_ZP(new SBC_ZP()),
+	SBC_INY(new SBC_INY()),
+	SBC_INX(new SBC_INX()),
+	SBC_IMM(new SBC_IMM()),
+	SBC_ABSY(new SBC_ABSY()),
+	
 	MIH(new MIH()),  // Special instruction to handle interrupts
 	
 	NOP( new NOP()),

@@ -95,8 +95,8 @@ public class Test_RTC {
 		logger.debug("Starting CPU");
 		c.run();
 		logger.debug("Stopped CPU");
-		char []  results = new char[21];
-		for (i=0; i < 21 ; i++) {
+		char []  results = new char[7];
+		for (i=0; i < 7 ; i++) {
 			try {
 				results[i] = (char)c.bus.read(0x4000 + i);
 				logger.debug("results[" + i + "] = " + results[i]);
@@ -107,6 +107,9 @@ public class Test_RTC {
 		}
 		String ouput = new String(results);
 		logger.debug("Time  " + ouput);
+		String tmp = "2020-07";
+		assert(tmp.equals(ouput));
+		
 		
 
 }
