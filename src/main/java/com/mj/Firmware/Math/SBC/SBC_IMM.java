@@ -532,9 +532,9 @@ thus:
 
 		
 		
-		int carryValue  = 0;
+		int carryValue  = 1;
 		if (c.CFLAG.isSet() ) {
-			carryValue = 1;
+			carryValue = 0;
 		}
 	//	V = 0 when U1 + U2 >= 128 and U1 + U2 <= 383 ($17F)
 	//  V = 1 when U1 + U2 <  128 or  U1 + U2 >  383 ($17F)

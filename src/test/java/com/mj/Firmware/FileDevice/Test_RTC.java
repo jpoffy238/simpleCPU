@@ -76,6 +76,7 @@ public class Test_RTC {
 			c.bus.write(i++,OpCodes.DEY.code());
 			c.bus.write(i++,  OpCodes.BNE.code());
 			c.bus.write(i++,  (byte) (START - i +1));
+			c.bus.write(i++, OpCodes.NOP.code());
 			
 			c.bus.write(i++, OpCodes.HLT.code());
 			
