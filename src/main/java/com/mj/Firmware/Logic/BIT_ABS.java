@@ -42,6 +42,9 @@ Processor Status after use:
 		byte testValue = c.bus.read(testAddress);
 		String currentState = String.format("%-10s $(%-4x) Value[ %-2x]", getProperty(KEY_MNEMONIC), testAddress, (int)(testValue));
 		logger.debug(currentState);
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
+		c.OFLAG.clear();
 		if ((0x80 & testValue) != 0) {
 			c.NFLAG.set();
 		}

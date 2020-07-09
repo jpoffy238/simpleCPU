@@ -14,6 +14,8 @@ public class INX extends Instruction {
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.x.inc();
 		} catch (nflagException e) {
 			handleNException(c);

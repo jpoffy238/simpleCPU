@@ -18,6 +18,8 @@ public class TXA extends Instruction {
 	}
 	public void exeute(CPU c) {
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.a.set(c.x.get());
 		} catch (zflagException e) {
 			handleZException(c);

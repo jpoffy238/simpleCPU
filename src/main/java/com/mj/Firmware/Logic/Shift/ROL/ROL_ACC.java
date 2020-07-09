@@ -52,7 +52,9 @@ public class ROL_ACC extends Instruction {
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
-		
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
+
 		int a = c.a.get();
 		
 		int result = a << 1;

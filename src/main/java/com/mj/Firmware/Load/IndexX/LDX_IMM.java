@@ -24,6 +24,8 @@ public LDX_IMM() {
 		// TODO Auto-generated method stub
 		byte m = c.bus.read(c.pc);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.x.set(m);
 		} catch (zflagException e) {
 			c.ZFLAG.set();

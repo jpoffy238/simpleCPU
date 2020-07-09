@@ -26,6 +26,8 @@ public class LDA_ABSX extends Instruction {
 		int address = getAbsoluteAddressX(c);
 		byte m = c.bus.read(address); 
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.a.set(m);
 		} catch (zflagException e) {
 			handleZException(c);

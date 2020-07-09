@@ -53,7 +53,9 @@ public class EOR_ZP extends Instruction {
 		// TODO Auto-generated method stub
 		int address = getZeroPageAddress(c);
 		byte testValue = c.bus.read(address);
-		
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
+
 		int result = testValue ^ (byte) (c.a.get() & 0xff);
 		try {
 			c.a.set(result& 0xff);

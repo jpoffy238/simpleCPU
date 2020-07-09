@@ -52,6 +52,8 @@ public class ROR_ABS extends Instruction {
 		// TODO Auto-generated method stub
 		int address = (getAbsoluteAddress(c));
 		int a = c.bus.read(address);
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
 
 		int result = a >> 1;
 		if (c.CFLAG.isSet()) {

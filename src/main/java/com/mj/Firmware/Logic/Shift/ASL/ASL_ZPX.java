@@ -52,6 +52,8 @@ public class ASL_ZPX extends Instruction {
 		// TODO Auto-generated method stub
 		int address = (getZeroPageXAddress(c) & 0xff);
 		int a = c.bus.read(address);
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
 
 		int result = a << 1;
 		if ((a & 0x80) != 0) {

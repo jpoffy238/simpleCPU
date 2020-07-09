@@ -52,7 +52,9 @@ public class ROR_ABX extends Instruction {
 		// TODO Auto-generated method stub
 		int address =  (getAbsoluteAddressX(c) );
 		int a = c.bus.read(address);
-		
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
+
 		int result = a >>  1;
 		if (c.CFLAG.isSet()) {
 			result += 0x80; // Pull in Carry Flag if set

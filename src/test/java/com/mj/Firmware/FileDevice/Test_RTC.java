@@ -33,10 +33,6 @@ public class Test_RTC {
 		RTCstartAddress = 0xa000;
 		RTCEndAddress =  RTCstartAddress  +21;
 		
-		
-		
-		
-		
 		bus.registerDevice(new basicMemory());
 		bus.registerDevice(new basicROM(bus));
 		bus.registerDevice(new FileDevice(bus));
@@ -50,20 +46,19 @@ public class Test_RTC {
 	@Test
 	public void Test_Reading_RTC() {
 		int i = 0x1000;
-		byte lowerStartAddress = (byte)(RTCstartAddress&0x00ff);
-		byte UpperStartAddress = (byte)((RTCstartAddress >> 8) &0x00ff);
+		
 		int MARKER ;
 		int START ;
 		try {
 			c.bus.write(i++,  OpCodes.LDY_IMM.code()); // Setup Y to loop for 0x7f types
-			c.bus.write(i++,  (byte)(0x7f));
+			c.bus.write(i++,  (byte)(0x0f));
 			START = i;
 			c.bus.write(i++, OpCodes.LDX_IMM.code());  // Load lenght into X
 			c.bus.write(i++,(byte)(20) );
 			MARKER=i; // For branch location
 			c.bus.write(i++, OpCodes.LDA_ABSX.code()); // Clock is read backwards 
 			c.bus.write(i++, (byte)(0x00));
-			c.bus.write(i++,  (byte)(0x20));
+			c.bus.write(i++,  (byte)(0x40));
 			c.bus.write(i++,  OpCodes.STA_ABS.code()); // write to output
 			c.bus.write(i++, (byte)(0x00));
 			c.bus.write(i++,  (byte)(0xec));
@@ -73,10 +68,11 @@ public class Test_RTC {
 			c.bus.write(i++,  (byte) (MARKER - i +1));
 			c.bus.write(i++, OpCodes.LDA_ABSX.code()); // Clock is read backwards 
 			c.bus.write(i++, (byte)(0x00));
-			c.bus.write(i++,  (byte)(0x20));
+			c.bus.write(i++,  (byte)(0x40));
 			c.bus.write(i++,  OpCodes.STA_ABS.code()); // write to output
 			c.bus.write(i++, (byte)(0x00));
 			c.bus.write(i++,  (byte)(0xec));
+			
 			c.bus.write(i++,OpCodes.DEY.code());
 			c.bus.write(i++,  OpCodes.BNE.code());
 			c.bus.write(i++,  (byte) (START - i +1));
@@ -102,7 +98,7 @@ public class Test_RTC {
 		char []  results = new char[21];
 		for (i=0; i < 21 ; i++) {
 			try {
-				results[i] = (char)c.bus.read(0x2000 + i);
+				results[i] = (char)c.bus.read(0x4000 + i);
 				logger.debug("results[" + i + "] = " + results[i]);
 			} catch (illegalAddressException | DeviceUnavailable e) {
 				// TODO Auto-generated catch block

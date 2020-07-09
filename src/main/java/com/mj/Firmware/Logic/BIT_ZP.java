@@ -51,6 +51,9 @@ public class BIT_ZP extends Instruction {
 		// TODO Auto-generated method stub
 		int testAddress = getZeroPageAddress(c);
 		byte testValue = c.bus.read(testAddress);
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
+		c.OFLAG.clear();
 		if ((0x80 & testValue) != 0) {
 			c.NFLAG.set();
 		}

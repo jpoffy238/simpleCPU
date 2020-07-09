@@ -52,7 +52,9 @@ public class ROL_ZPX extends Instruction {
 		// TODO Auto-generated method stub
 		int address =  (getZeroPageXAddress(c) );
 		int a = c.bus.read(address);
-		
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
+
 		int result = a << 1;
 		if (c.CFLAG.isSet()) {
 			result += 1; // Pull in Carry Flag if set

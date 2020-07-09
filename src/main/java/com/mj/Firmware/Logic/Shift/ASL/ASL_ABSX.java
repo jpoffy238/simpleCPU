@@ -60,6 +60,9 @@ public class ASL_ABSX extends Instruction {
 		int result = a << 1 ;
 		logger.debug(String.format("Compute Value : [%04x] ",result));
 		result &= 0x00ff;
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
+
 		if ((a & 0x80) != 0) {
 			c.CFLAG.set();
 		} else { 

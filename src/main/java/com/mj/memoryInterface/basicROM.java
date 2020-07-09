@@ -26,11 +26,11 @@ public class basicROM implements MemoryDriver {
 		 * BRK/interrupt request handler ($FFFE/F) respectively.
 		 * 
 		 */
-		ROM[0xfffa - 0xf000] = (byte)(0x00);
+		ROM[0xfffa - 0xf000] = (byte)(0x00);  // Non maskable interrupt handler
 		ROM[0xfffb - 0xf000] =  (byte)(0x10);
-		ROM[0xfffc - 0xf000] =  (byte)(0x00);
+		ROM[0xfffc - 0xf000] =  (byte)(0x00); // Power on reset
 		ROM[0xfffd - 0xf000] =  (byte)(0x10);
-		ROM[0xfffe - 0xf000] =  (byte)(0x00);
+		ROM[0xfffe - 0xf000] =  (byte)(0x00); // BRK/interrupt handler
 		ROM[0xffff - 0xf000] = (byte)(0xf0);
 		
 		int i =   0;
@@ -48,7 +48,7 @@ public class basicROM implements MemoryDriver {
 		ROM[i++] = (byte)UpperStartAddress;
 		ROM[i++] =  OpCodes.STA_ABX.code(); // Store it in local memory
 		ROM[i++] =  (byte)(0x00);
-		ROM[i++] =   (byte)(0x20);
+		ROM[i++] =   (byte)(0x40);
 		ROM[i++] =  OpCodes.DEX.code();  // dec x to point to next location
 		ROM[i++] =  OpCodes.BNE.code(); // branch for next			 
 		ROM[i++] =  (byte) (MARKER - i +1);
@@ -58,7 +58,7 @@ public class basicROM implements MemoryDriver {
 		
 		ROM[i++] =  OpCodes.STA_ABX.code(); // Store it in local memory
 		ROM[i++] = (byte)(0x00);
-		ROM[i++] =   (byte)(0x20);
+		ROM[i++] =   (byte)(0x40);
 		ROM[i++] = OpCodes.PLA.code();
 		ROM[i++]= OpCodes.TAX.code();
 		ROM[i++] = OpCodes.PLA.code();

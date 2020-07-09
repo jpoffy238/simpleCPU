@@ -56,6 +56,9 @@ public class EOR_ABS extends Instruction {
 		
 		int result = testValue ^ (byte) (c.a.get() & 0xff);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
+			
 			c.a.set(result& 0xff);
 		} catch (zflagException e) {
 			handleZException(c);

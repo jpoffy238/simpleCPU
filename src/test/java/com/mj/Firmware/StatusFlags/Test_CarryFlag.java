@@ -30,7 +30,7 @@ public class Test_CarryFlag {
 		bus.registerDevice(new basicROM(bus));
 
 		c = new CPU(bus, new cpu001decoder());
-
+		
 		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}
 
@@ -89,32 +89,12 @@ public class Test_CarryFlag {
 		}
 
 		logger.debug("Starting CPU");
-		try {
-			c.step();
-		} catch (illegalAddressException | DeviceUnavailable | illegalOpCodeException | ROException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			c.step();
-		} catch (illegalAddressException | DeviceUnavailable | illegalOpCodeException | ROException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		c.run();
+		
 		assert (c.CFLAG.isSet());
-		try {
-			c.step();
-		} catch (illegalAddressException | DeviceUnavailable | illegalOpCodeException | ROException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		assert (c.DFLAG.isSet());
-		try {
-			c.step();
-		} catch (illegalAddressException | DeviceUnavailable | illegalOpCodeException | ROException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		assert(c.IFLAG.isSet());
 
 	}

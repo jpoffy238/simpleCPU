@@ -39,6 +39,8 @@ public class LDA_IMM extends Instruction {
 		logger.debug(currentState);
 		c.pc = (++c.pc);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.a.set(m);
 		} catch (zflagException z) {
 			handleZException(c);

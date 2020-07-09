@@ -30,6 +30,8 @@ public class LDX_ZPY extends Instruction {
 		
 		byte value = c.bus.read(loadAdress);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.x.set(value);
 		} catch (zflagException e) {
 			c.ZFLAG.set();

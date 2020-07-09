@@ -95,6 +95,7 @@ import com.mj.Firmware.store.IndexY.STY_ABS;
 import com.mj.Firmware.store.IndexY.STY_ZP;
 import com.mj.Firmware.store.IndexY.STY_ZPX;
 import com.mj.Firmware.StatusFlags.*;
+import com.mj.Firmware.Math.*;
 /*
  * 
  */
@@ -102,6 +103,8 @@ import com.mj.Firmware.StatusFlags.*;
 
 public  enum OpCodes {
 	
+	ADC_IMM(new ADC_IMM()),
+	MIH(new MIH()),  // Special instruction to handle interrupts
 	
 	NOP( new NOP()),
 	LDA_IMM( new LDA_IMM()), // Immediate 
@@ -223,7 +226,6 @@ public  enum OpCodes {
 	SEI(new SEI()),
 	
 	//TEST(new TEST()),
-	MIH(new MIH()),
 	
 HLT( new HLT());
 	

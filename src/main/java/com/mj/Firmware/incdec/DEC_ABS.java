@@ -24,6 +24,8 @@ public class DEC_ABS extends Instruction {
 		logger.debug("READ:" + sadd);
 		data--;
 		data &= 0x00ff;
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
 		if (data == 0) {
 			handleZException(c);
 		}

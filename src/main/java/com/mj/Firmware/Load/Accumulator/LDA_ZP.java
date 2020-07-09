@@ -25,6 +25,8 @@ public class LDA_ZP extends Instruction {
 		int address = getZeroPageAddress(c);
 		byte m = c.bus.read(address);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.a.set(m);
 		} catch (zflagException e) {
 			handleZException(c);

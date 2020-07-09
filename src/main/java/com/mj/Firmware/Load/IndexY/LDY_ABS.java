@@ -26,6 +26,8 @@ public class LDY_ABS extends Instruction {
 		int loadAddress = getAbsoluteAddress(c);		
 		byte value = c.bus.read((int)(loadAddress));
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.y.set(value);
 		} catch (zflagException e) {
 			handleZException(c);

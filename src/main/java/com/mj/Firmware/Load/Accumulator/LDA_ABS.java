@@ -32,6 +32,8 @@ public class LDA_ABS extends Instruction {
 		String currentState = String.format("%-10s $(%-4x) Value[ %-2x]", getProperty(KEY_MNEMONIC), address, (int)(m & 0xff));
 		logger.debug(currentState);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.a.set(m);
 		} catch (zflagException e) {
 			handleZException(c);

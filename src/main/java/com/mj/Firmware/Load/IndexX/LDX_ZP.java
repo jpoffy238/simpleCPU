@@ -28,6 +28,8 @@ public class LDX_ZP extends Instruction {
 		int zeroPageAddress  = getZeroPageAddress(c); // read the zero page address - operand 
 		byte value = c.bus.read(zeroPageAddress);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.x.set(value);
 		} catch (zflagException e) {
 			c.ZFLAG.set();

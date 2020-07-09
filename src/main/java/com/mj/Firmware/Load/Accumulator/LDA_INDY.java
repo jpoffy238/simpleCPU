@@ -26,6 +26,8 @@ public class LDA_INDY extends Instruction {
 		int address = getIndexY	(c);
 		byte m = c.bus.read(address);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.a.set(m);
 		} catch (zflagException e) {
 			handleZException(c);

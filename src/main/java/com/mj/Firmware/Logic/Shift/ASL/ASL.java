@@ -52,7 +52,9 @@ public class ASL extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int a = c.a.get();
-		
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
+
 		int result = a << 1;
 		if ((a & 0x80) != 0) {
 			c.CFLAG.set();

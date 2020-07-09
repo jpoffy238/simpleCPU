@@ -54,6 +54,8 @@ public class ROR_ACC extends Instruction {
 		// TODO Auto-generated method stub
 
 		int a = c.a.get();
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
 
 		int result = a >> 1;
 		if (c.CFLAG.isSet()) {
