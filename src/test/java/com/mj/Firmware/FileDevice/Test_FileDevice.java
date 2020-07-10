@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.mj.Devices.DeviceBus;
-import com.mj.Devices.FileDevice;
+import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.OpCodes;
 import com.mj.Firmware.Framework.cpu001decoder;
@@ -29,7 +29,7 @@ public class Test_FileDevice {
 		PBus bus = new DeviceBus();
 		bus.registerDevice(new basicMemory());
 		bus.registerDevice(new basicROM(bus));
-		bus.registerDevice(new FileDevice(bus));
+		bus.registerDevice(new ConsoleDevice(bus));
 		
 		
 		 c = new CPU(bus, new cpu001decoder());

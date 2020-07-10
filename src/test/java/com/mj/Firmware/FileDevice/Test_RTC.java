@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.mj.Devices.DeviceBus;
-import com.mj.Devices.FileDevice;
+import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.PBus;
 import com.mj.Devices.RTC;
 import com.mj.Firmware.Framework.OpCodes;
@@ -35,7 +35,7 @@ public class Test_RTC {
 		
 		bus.registerDevice(new basicMemory());
 		bus.registerDevice(new basicROM(bus));
-		bus.registerDevice(new FileDevice(bus));
+		bus.registerDevice(new ConsoleDevice(bus));
 		bus.registerDevice(rtc);
 		rtc.start();
 		

@@ -12,12 +12,12 @@ import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
-public class FileDevice implements Device {
+public class ConsoleDevice implements charDevice {
 	Queue<Integer> output = new LinkedList<Integer>();
 	Queue<Integer> input = new LinkedList<Integer>();
-	final  Logger logger = LogManager.getLogger(FileDevice.class);
+	final  Logger logger = LogManager.getLogger(ConsoleDevice.class);
 	PBus sysBus;
-	public FileDevice(PBus SystemBus) {
+	public ConsoleDevice(PBus SystemBus) {
 		sysBus = SystemBus;
 	}
 	public void write(int data) throws DeviceUnavailable {
@@ -25,7 +25,7 @@ public class FileDevice implements Device {
 		logger.debug("OUTPUT CHAR : " + (char)data);
 	}
 
-	public byte read() throws DeviceUnavailable {
+	public byte read1() throws DeviceUnavailable {
 		// TODO Auto-generated method stub
 		byte returnValue = 0;
 		if (input.size() > 0) {
@@ -37,7 +37,7 @@ public class FileDevice implements Device {
 	
 	}
 
-	public byte status() throws DeviceUnavailable {
+	public byte status1() throws DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int size = input.size();
 		if (size > 127) {
@@ -90,16 +90,31 @@ public class FileDevice implements Device {
 		// TODO Auto-generated method stub
 		if ((address & 0x0001) == 0) {
 			logger.debug("Reading from file ");
-			return read();
+			return read1();
 		} else {
 			logger.debug("Reading status Control   : " );
-			return status();
+			return status1();
 		}
 	}
 
 	public void raiseInterrupt() {
 		// TODO Auto-generated method stub
 		sysBus.raiseInterupt();
+	}
+	@Override
+	public int read() throws DeviceUnavailable {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public int status() throws DeviceUnavailable {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public void control(int data) throws DeviceUnavailable {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

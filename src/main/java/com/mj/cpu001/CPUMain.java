@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.mj.Devices.DeviceBus;
-import com.mj.Devices.FileDevice;
+import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.Decoder;
 import com.mj.Firmware.Framework.OpCodes;
@@ -20,7 +20,7 @@ public class CPUMain {
 		PBus bus = new DeviceBus();
 		bus.registerDevice(new basicMemory());
 		bus.registerDevice(new basicROM(bus));
-		bus.registerDevice(new FileDevice(bus));
+		bus.registerDevice(new ConsoleDevice(bus));
 		Decoder d =  new cpu001decoder();
 		
 		CPU c = new CPU(bus, d);

@@ -302,7 +302,7 @@ public class Test_ADC {
 
 	}	
 	
-	@Test
+	// @Test
 	public void Test_ADC_Basic07() {
 ///			  CLC      ; 1 + -1 = 0, returns C = 1
 //		  LDA #$01

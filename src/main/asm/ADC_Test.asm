@@ -5,10 +5,8 @@
 ; Five (additional) memory locations are used: ERROR, S1, S2, U1, and U2
 ; which can be located anywhere convenient in RAM
 ;
-PROCESSOR .6502
-ORG
-
-
+PROCESSOR=6502
+ORG=$1000
 
 START:
 
@@ -35,8 +33,7 @@ LOOP JSR ADD   ; Test ADC
      INC U2
      BNE LOOP  ; Loop until all 256 possibilities of S2 and U2 are tested
      DEY
-     BPL LOOP  ; Loop until both possiblities of the carry flag are tested
-     LDA #0
+     BPL LOOP  ; Loop until both possiblities of the carry flag are tested LDA #0
      STA ERROR ; All tests pass, so store 0 in ERROR
 DONE RTS
 ;
