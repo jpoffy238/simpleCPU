@@ -392,8 +392,18 @@ public class Test_ADC {
 			c.bus.write(i++,  OpCodes.STA_ABS.code());
 			c.bus.write(i++, (byte)(ERROR & 0x00ff));
 			c.bus.write(i++, (byte)((ERROR >> 8) & 0x00ff));
-			
+			c.bus.write(i++,  OpCodes.LDA_IMM.code());
+			c.bus.write(i++,  (byte)0x80);
+			c.bus.write(i++,  OpCodes.STA_ABS.code());
+			c.bus.write(i++, (byte)(S1 & 0x00ff));
+			c.bus.write(i++, (byte)((S1 >> 8) & 0x00ff));
+			c.bus.write(i++,  OpCodes.STA_ABS.code());
+			c.bus.write(i++, (byte)(S2 & 0x00ff));
+			c.bus.write(i++, (byte)((S2 >> 8) & 0x00ff));
+			c.bus.write(i++,  OpCodes.LDY_IMM.code());
+			c.bus.write(i++, (byte)(0x01));
 			c.bus.write(i++, OpCodes.HLT.code());
+		int LOOP = i;
 		
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block

@@ -1,0 +1,33 @@
+0000                    PROCESSOR .6502
+0000                    ORG
+
+
+
+0000                    START:
+0000  48                	PHA
+0001  98                	TYA
+0002  48                	PHA
+0003  AC 1900           	LDY LEN
+0006                    LOOPA:
+0006  B1 15             	LDA (RTC),Y
+0008  91 17             	STA (RAM),Y
+000A  88                	DEY
+000B  D0 F9             	BNE LOOPA
+000D  B1 15             	LDA (RTC),Y
+000F  91 17             	STA (RAM),Y
+0011  68                	PLA
+0012  A8                	TAY
+0013  68                	PLA
+0014  40                	RTI
+0015                    END:
+0015  00A0              RTC: DW $a000
+0017  0040              RAM: DW $4000
+0019  14                LEN: BYTE 20
+                        ;	
+                        ;		;
+
+00000 Total Error(s)
+
+END                0015    LEN                0019    LOOPA              0006
+ORG                0000    PROCESSOR          0000    RAM                0017
+RTC                0015    START              0000

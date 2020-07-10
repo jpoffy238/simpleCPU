@@ -7,6 +7,7 @@ import com.mj.Devices.MemoryRange;
 import com.mj.Devices.PBus.BussId;
 import com.mj.Devices.PBus.DEVTYPE;
 import com.mj.Devices.PBus.IOALLOW;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class basicMemory implements MemoryDriver {
@@ -78,6 +79,12 @@ public class basicMemory implements MemoryDriver {
 	}
 
 	public void raiseInterrupt() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void load(String fileName, int startAddress) throws illegalAddressException, ROException {
 		// TODO Auto-generated method stub
 		
 	}

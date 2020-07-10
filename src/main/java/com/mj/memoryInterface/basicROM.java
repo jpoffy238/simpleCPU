@@ -95,5 +95,10 @@ public class basicROM implements MemoryDriver {
 		sysbus.raisepowerOnReset();
 		
 	}
+	@Override
+	public void load(String fileName, int startAddress) throws illegalAddressException, ROException {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
