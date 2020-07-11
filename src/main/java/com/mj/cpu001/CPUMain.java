@@ -24,7 +24,7 @@ public class CPUMain {
 		Decoder d =  new cpu001decoder();
 		
 		CPU c = new CPU(bus, d);
-		logger.debug(String.format("Number of Opcodes = %d ", OpCodes.getMap().size()));
+		logger.error(String.format("Number of Opcodes = %d ", OpCodes.getMap().size()));
 		c.start();
 		}
 	
