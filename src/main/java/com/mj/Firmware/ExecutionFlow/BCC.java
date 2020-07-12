@@ -51,7 +51,7 @@ the BVC instruction will take 3 cycles no matter what address it is located at.
 		// TODO Auto-generated method stub
 		if (! c.CFLAG.isSet()) {
 			byte offset = (byte) (c.bus.read(c.pc) & 0x00ff);
-			c.pc = (int)(c.pc+offset);
+			c.pc = (int)(c.pc+offset+1);
 		} else {
 			c.pc++;
 		}

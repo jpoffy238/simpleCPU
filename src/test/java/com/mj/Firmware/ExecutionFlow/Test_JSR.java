@@ -144,12 +144,14 @@ public class Test_JSR {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-				logger.debug("What A is loaded with : ", +result);
+			logger.debug("What A is loaded with : ", +result);
+			logger.debug(String.format("Loopcount = %d",loopcount));
 		try {
-			for (int idx = 1; idx < loopcount; idx++) {
+			for (int idx = 1; idx < loopcount+1; idx++) {
 				byte value = c.bus.read(0x2000 + idx);
-				logger.debug(String.format("[%04x] %02x", 0x2000 + idx, value));
-				assert (value == ( loopcount - idx) + 1);
+				logger.debug(String.format("[%04x] %02x ?? %02x", 0x2000 + idx, value, ( loopcount - idx) + 11));
+				
+				assert (value == ( loopcount - idx) + 11);
 			}
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
