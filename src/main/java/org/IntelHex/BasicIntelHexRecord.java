@@ -204,10 +204,13 @@ private byte asciiHexToByte(String data) throws IntelHexFileInvalidFormatExcepti
 private int AsciiHexToInt(String data) throws IntelHexFileInvalidFormatException {
 	int returnValue = 0;
 	if (data.length() == 4) {
-		String LowerByte = data.substring(0, 2);
-		String upperByte = data.substring(2, 4);
-		returnValue = asciiHexToByte(upperByte);
-		returnValue  = returnValue << 8 + asciiHexToByte(LowerByte);
+		String upperByte = data.substring(0, 2);
+		String LowerByte = data.substring(2, 4);
+		logger.debug("Upper = " + upperByte + " Lower = " + LowerByte);
+		int upperValue = (byte)(asciiHexToByte(upperByte) & 0x00ff);
+		int lowerValue = (byte)(asciiHexToByte(LowerByte) & 0x00ff);
+		returnValue = upperValue << 8;
+		returnValue += lowerValue;
 	} else {
 		if (data.length() == 2) {
 			returnValue = asciiHexToByte(data);
