@@ -1,5 +1,5 @@
 PROCESSOR .6502
-ORG 
+ORG=$F000
 
 
 

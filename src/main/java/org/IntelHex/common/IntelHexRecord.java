@@ -1,7 +1,7 @@
 package org.IntelHex.common;
 
 public interface IntelHexRecord {
-	public IntelHexRecord parse(String data) throws IntelHexFileInvalidFormatException;
+	public IntelHexRecord parse(String data) throws IntelHexFileInvalidFormatException, IntelHexFileChecksumMisMatchException;
 	public int getRcordLength();
 	public void setRecordLength(int len);
 	public int getAddress();

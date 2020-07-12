@@ -6,35 +6,35 @@
                         ; which can be located anywhere convenient in RAM
                         ;
       = 1966            PROCESSOR=6502
-      = 1000            ORG=$1000
+      = 1000            START=$1000
 
-0000                    START:
+
 
 0000  D8                TEST CLD       ; Clear decimal mode (just in case) for test
 0001  A9 01                  LDA #1
-0003  8D 6E04                STA ERROR ; Store 1 in ERROR until test passes
+0003  8D 8600                STA ERROR ; Store 1 in ERROR until test passes
 0006  A9 80                  LDA #$80
-0008  8D 7004                STA S1    ; Initalize S1 and S2 to -128 ($80)
-000B  8D 7204                STA S2
+0008  8D 8800                STA S1    ; Initalize S1 and S2 to -128 ($80)
+000B  8D 8A00                STA S2
 000E  A9 00                  LDA #0
-0010  8D 7404                STA U1    ; Initialize U1 and U2 to 0
-0013  8D 7604                STA U2
+0010  8D 8C00                STA U1    ; Initialize U1 and U2 to 0
+0013  8D 8E00                STA U2
 0016  A0 01                  LDY #1    ; Initialize Y (used to set and clear the carry flag) to 1
-0018  20 3D00           LOOP JSR ADD   ; Test ADC
+0018  20 3D10           LOOP JSR ADD+START   ; Test ADC
 001B  E0 01                  CPX #1
 001D  F0 1D                  BEQ DONE  ; End if V and unsigned result do not agree (X = 1)
-001F  20 5C00                JSR SUB   ; Test SBC
+001F  20 5C10                JSR SUB+START   ; Test SBC
 0022  E0 01                  CPX #1
 0024  F0 16                  BEQ DONE  ; End if V and unsigned result do not agree (X = 1)
-0026  EE 7004                INC S1
-0029  EE 7404                INC U1
+0026  EE 8800                INC S1
+0029  EE 8C00                INC U1
 002C  D0 EA                  BNE LOOP  ; Loop until all 256 possibilities of S1 and U1 are tested
-002E  EE 7204                INC S2
-0031  EE 7604                INC U2
+002E  EE 8A00                INC S2
+0031  EE 8E00                INC U2
 0034  D0 E2                  BNE LOOP  ; Loop until all 256 possibilities of S2 and U2 are tested
 0036  88                     DEY
 0037  10 DF                  BPL LOOP  ; Loop until both possiblities of the carry flag are tested LDA #0
-0039  8D 6E04                STA ERROR ; All tests pass, so store 0 in ERROR
+0039  8D 8600                STA ERROR ; All tests pass, so store 0 in ERROR
 003C  60                DONE RTS
                         ;
                         ; Test ADC
@@ -47,14 +47,14 @@
                         ; not agree X will be incremented once (returning X = 1)
                         ;
 003D  C0 01             ADD  CPY #1   ; Set carry when Y = 1, clear carry when Y = 0
-003F  AD 7004                LDA S1   ; Test twos complement addition
-0042  6D 7204                ADC S2
+003F  AD 8800                LDA S1   ; Test twos complement addition
+0042  6D 8A00                ADC S2
 0045  A2 00                  LDX #0   ; Initialize X to 0
 0047  50 01                  BVC ADD1
 0049  E8                     INX      ; Increment X if V = 1
 004A  C0 01             ADD1 CPY #1   ; Set carry when Y = 1, clear carry when Y = 0
-004C  AD 7404                LDA U1   ; Test unsigned addition
-004F  6D 7604                ADC U2
+004C  AD 8C00                LDA U1   ; Test unsigned addition
+004F  6D 8E00                ADC U2
 0052  B0 04                  BCS ADD3 ; Carry is set if U1 + U2 >= 256
 0054  30 01                  BMI ADD2 ; U1 + U2 < 256, A >= 128 if U1 + U2 >= 128
 0056  E8                     INX      ; Increment X if U1 + U2 < 128
@@ -74,14 +74,14 @@
                         ; not agree X will be incremented once (returning X = 1)
                         ;
 005C  C0 01             SUB  CPY #1   ; Set carry when Y = 1, clear carry when Y = 0
-005E  AD 7004                LDA S1   ; Test twos complement subtraction
-0061  ED 7204                SBC S2
+005E  AD 8800                LDA S1   ; Test twos complement subtraction
+0061  ED 8A00                SBC S2
 0064  A2 00                  LDX #0   ; Initialize X to 0
 0066  50 01                  BVC SUB1
 0068  E8                     INX      ; Increment X if V = 1
 0069  C0 01             SUB1 CPY #1   ; Set carry when Y = 1, clear carry when Y = 0
-006B  AD 7404                LDA U1   ; Test unsigned subtraction
-006E  ED 7604                SBC U2
+006B  AD 8C00                LDA U1   ; Test unsigned subtraction
+006E  ED 8E00                SBC U2
 0071  48                     PHA      ; Save the low byte of result on the stack
 0072  A9 FF                  LDA #$FF
 0074  E9 00                  SBC #$00 ; result = (65280 + U1) - U2, 65280 = $FF00
@@ -96,22 +96,23 @@
 0082  10 01                  BPL SUB5 ; result >= 65280 ($FF00), A <= 127 if result <= 65407 ($FF7F)
 0084  E8                     INX      ; Increment X if result > 65407 ($FF7F)
 0085  60                SUB5 RTS
+0086                    END
 
-0086   (03E8)           .DS 1000
-046E  0000              ERROR: DW  0
-0470  0000              S1: DW  0
-0472  0000              S2: DW  0
-0474  0000              U1: DW  0
-0476  0000              U2: DW  0
+
+0086  0000              ERROR: DW  0
+0088  0000              S1: DW  0
+008A  0000              S2: DW  0
+008C  0000              U1: DW  0
+008E  0000              U2: DW  0
 
 
 00000 Total Error(s)
 
-.                  0086    ADD                003D    ADD1               004A
-ADD2               0057    ADD3               0058    ADD4               005B
-DONE               003C    ERROR              046E    LOOP               0018
-ORG                1000 E  PROCESSOR          1966 E  S1                 0470
-S2                 0472    START              0000    SUB                005C
-SUB1               0069    SUB2               007D    SUB3               007E
-SUB4               007F    SUB5               0085    TEST               0000
-U1                 0474    U2                 0476
+ADD                003D    ADD1               004A    ADD2               0057
+ADD3               0058    ADD4               005B    DONE               003C
+END                0086    ERROR              0086    LOOP               0018
+PROCESSOR          1966 E  S1                 0088    S2                 008A
+START              1000 E  SUB                005C    SUB1               0069
+SUB2               007D    SUB3               007E    SUB4               007F
+SUB5               0085    TEST               0000    U1                 008C
+U2                 008E

@@ -1,0 +1,15 @@
+      = 1966            PROCESSOR=6502
+      = 1000            ORG=$1000
+
+      = 1000            START=$1000
+0000  A9 0A             			LDA #$0A
+0002  8D 0020           			STA VALUE
+
+0005  3F                HTL: BYTE $3F
+      = 2000            VALUE=$2000
+
+
+00000 Total Error(s)
+
+HTL                0005    ORG                1000 E  PROCESSOR          1966 E
+START              1000 E  VALUE              2000 E

@@ -1,5 +1,12 @@
 package com.mj.Firmware.Load.Acc;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.IntelHex.BasicIntelHexFiles;
+import org.IntelHex.BasicIntelHexRecord;
+import org.IntelHex.common.IntelHexFileChecksumMisMatchException;
+import org.IntelHex.common.IntelHexRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,6 +31,7 @@ public class Test_LDA_ABS {
 	@BeforeAll
 	public static void setup() {
 		
+			
 		PBus bus = new DeviceBus();
 		bus.registerDevice(new basicMemory());
 		bus.registerDevice(new basicROM(bus));
@@ -36,27 +44,44 @@ public class Test_LDA_ABS {
 	@Test
 	public void Test_LDA_ABS1() {
 		int i = 0x1000;
+		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
+		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
-			c.bus.write(i++, OpCodes.LDA_ABS.code());
-			c.bus.write(i++, (byte) 0x00);
-			c.bus.write(i++, (byte) (0x20));
-			c.bus.write(i++, OpCodes.HLT.code());
-			c.bus.write(0x1fff,(byte)0x00);
-			c.bus.write(0x2000, (byte) 0x55);
-			c.bus.write(0x2001,(byte)0xff);
-		} catch (illegalAddressException e) {
+			 code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/LDA_IMM_TEST.hex");
+		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			assert(false);
-		} catch (DeviceUnavailable e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			assert(false);
-		} catch (ROException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			assert(false);
 		}
+		for (int x = 0 ; x < code.size(); x++   ) {
+			IntelHexRecord r = code.get(x);
+			byte[] program = r.getData();
+			try {
+				for (int idx = 0; idx < program.length; idx++) {
+					c.bus.write(i+idx,program[idx]);
+				}
+	//			c.bus.write(i++, OpCodes.LDA_ABS.code());
+//				c.bus.write(i++, (byte) 0x00);
+//				c.bus.write(i++, (byte) (0x20));
+//				c.bus.write(i++, OpCodes.HLT.code());
+//				c.bus.write(0x1fff,(byte)0x00);
+//				c.bus.write(0x2000, (byte) 0x55);
+//				c.bus.write(0x2001,(byte)0xff);
+			} catch (illegalAddressException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				assert(false);
+			} catch (DeviceUnavailable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				assert(false);
+			} catch (ROException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				assert(false);
+			}
+			
+		}
+	
 		logger.debug("Starting CPU");
 		c.run();
 		

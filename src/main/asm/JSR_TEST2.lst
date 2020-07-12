@@ -1,0 +1,29 @@
+      = 1966            PROCESSOR=6502
+      = 1000            ORG=$1000
+      = 2000            VALUE=$2000
+
+      = 1000            START=$1000
+0000  A2 0A             			LDX #$0A     ;; Setup to cal ADDONE 10 times
+0002  A9 0A             			LDA #$0A     ;; lOAD 10 into acc
+0004                    LOOP:
+0004  20 1010           			JSR ADDONE+START  ;; Just to sub to add 1
+0007  9D 0020           			STA VALUE,X    ;; store new value in value.
+000A  CA                			DEX
+000B  D0 F7             			BNE LOOP
+000D  EA                			NOP
+000E  EA                			NOP
+000F  3F                HLT: BYTE $3F
+
+0010                    ADDONE:
+0010  69 01             		ADC #$01
+0012  60                		RTS
+0013  EA                		NOP
+0014  EA                		NOP
+0015  3F                HLT2: BYTE $3F
+
+
+00000 Total Error(s)
+
+ADDONE             0010    HLT                000F    HLT2               0015
+LOOP               0004    ORG                1000 E  PROCESSOR          1966 E
+START              1000 E  VALUE              2000 E

@@ -6,9 +6,9 @@
 ; which can be located anywhere convenient in RAM
 ;
 PROCESSOR=6502
-ORG=$1000
+START=$1000
 
-START:
+
 
 TEST CLD       ; Clear decimal mode (just in case) for test
      LDA #1
@@ -20,10 +20,10 @@ TEST CLD       ; Clear decimal mode (just in case) for test
      STA U1    ; Initialize U1 and U2 to 0
      STA U2
      LDY #1    ; Initialize Y (used to set and clear the carry flag) to 1
-LOOP JSR ADD   ; Test ADC
+LOOP JSR ADD+START   ; Test ADC
      CPX #1
      BEQ DONE  ; End if V and unsigned result do not agree (X = 1)
-     JSR SUB   ; Test SBC
+     JSR SUB+START   ; Test SBC
      CPX #1
      BEQ DONE  ; End if V and unsigned result do not agree (X = 1)
      INC S1
@@ -96,8 +96,9 @@ SUB4 PLA      ; Get the low byte of result (does not affect the carry flag)
      BPL SUB5 ; result >= 65280 ($FF00), A <= 127 if result <= 65407 ($FF7F)
      INX      ; Increment X if result > 65407 ($FF7F)
 SUB5 RTS
+END
 
-.DS 1000
+
 ERROR: DW  0
 S1: DW  0
 S2: DW  0

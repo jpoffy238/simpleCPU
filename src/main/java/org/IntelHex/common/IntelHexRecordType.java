@@ -41,5 +41,8 @@ public enum IntelHexRecordType {
 		}
 		return returnValue;
 	}
+	public int valueOf() {
+		return value;
+	}
 	
 }

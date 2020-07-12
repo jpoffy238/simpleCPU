@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.IntelHex.common.IntelHexFile;
+import org.IntelHex.common.IntelHexFileChecksumMisMatchException;
 import org.IntelHex.common.IntelHexFileInvalidFormatException;
 import org.IntelHex.common.IntelHexRecord;
 
@@ -24,7 +25,7 @@ import org.IntelHex.common.IntelHexRecord;
 public class BasicIntelHexFiles implements IntelHexFile {
 
 	
-	public ArrayList<IntelHexRecord> read(String filename) throws IOException {
+	public ArrayList<IntelHexRecord> read(String filename) throws IOException, IntelHexFileChecksumMisMatchException {
 		// TODO Auto-generated method stub
 		File baseFile = new File(filename);
 		 BufferedReader br = new BufferedReader(new FileReader(baseFile)); 
