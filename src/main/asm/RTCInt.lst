@@ -1,33 +1,33 @@
 0000                    PROCESSOR .6502
-0000                    ORG
+      = F000            ORG=$F000
 
 
 
-0000                    START:
-0000  48                	PHA
-0001  98                	TYA
-0002  48                	PHA
-0003  AC 1900           	LDY LEN
-0006                    LOOPA:
-0006  B1 15             	LDA (RTC),Y
-0008  91 17             	STA (RAM),Y
-000A  88                	DEY
-000B  D0 F9             	BNE LOOPA
-000D  B1 15             	LDA (RTC),Y
-000F  91 17             	STA (RAM),Y
-0011  68                	PLA
-0012  A8                	TAY
-0013  68                	PLA
-0014  40                	RTI
-0015                    END:
-0015  00A0              RTC: DW $a000
-0017  0040              RAM: DW $4000
-0019  14                LEN: BYTE 20
+0000  78                START:	SEI
+0001  48                				PHA  ;; save acc
+0002  98                				TYA ;; transfere to A to push on stack
+0003  48                				PHA  ;; push y on stack
+0004  A2 14             				LDX #LEN  ;; setup 20 bytes to transfere
+0006  BD 00A0           LOOPA:	LDA RTC,X   ;; copy RTC to RAM
+0009  9D 0040           				STA RAM,X
+000C  CA                				DEX
+000D  D0 F7             				BNE LOOPA
+000F  BD 00A0           				LDA RTC,X   ;; copy RTC to RAM
+0012  9D 0040           				STA RAM,X
+0015  68                				PLA
+0016  A8                				TAY
+0017  68                				PLA
+0018  58                				CLI
+0019  40                				RTI
+001A                    END:
+      = A000            RTC=$A000
+      = 4000            RAM=$4000
+      = 0014            LEN=20
                         ;	
                         ;		;
 
 00000 Total Error(s)
 
-END                0015    LEN                0019    LOOPA              0006
-ORG                0000    PROCESSOR          0000    RAM                0017
-RTC                0015    START              0000
+END                001A    LEN                0014 E  LOOPA              0006
+ORG                F000 E  PROCESSOR          0000    RAM                4000 E
+RTC                A000 E  START              0000

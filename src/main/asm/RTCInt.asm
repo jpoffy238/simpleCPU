@@ -3,25 +3,25 @@ ORG=$F000
 
 
 
-START:
-	PHA
-	TYA
-	PHA
-	LDY LEN
-LOOPA:
-	LDA (RTC),Y
-	STA (RAM),Y
-	DEY
-	BNE LOOPA
-	LDA (RTC),Y
-	STA (RAM),Y
-	PLA
-	TAY
-	PLA
-	RTI
+START:				SEI
+				PHA  ;; save acc
+				TYA ;; transfere to A to push on stack
+				PHA  ;; push y on stack
+				LDX #LEN  ;; setup 20 bytes to transfere
+LOOPA:				LDA RTC,X   ;; copy RTC to RAM
+				STA RAM,X
+				DEX
+				BNE LOOPA
+				LDA RTC,X   ;; copy RTC to RAM
+				STA RAM,X
+				PLA
+				TAY
+				PLA
+				CLI
+				RTI
 END:
-RTC: DW $a000
-RAM: DW $4000
-LEN: BYTE 20
+RTC=$A000
+RAM=$4000
+LEN=20
 ;	
 ;		;

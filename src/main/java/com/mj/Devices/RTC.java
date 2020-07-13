@@ -2,6 +2,9 @@ package com.mj.Devices;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +16,7 @@ import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class RTC extends Thread implements Device {
+	private Lock readLock = new ReentrantLock();
 	static Logger logger = LogManager.getLogger(RTC.class);
 	private MemoryRange mr = new MemoryRange(0xa000, 0xa000 + 21);
 	private char[] time = new char[mr.size()];
@@ -49,9 +53,10 @@ public class RTC extends Thread implements Device {
 	public byte read(int address) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int localAddress = address - mr.startAddressRange;
+		readLock.lock();
 		byte value = (byte) time[localAddress];
 		logger.debug(String.format("Address %04x Virtual Address %04x Value %02x", localAddress, address, value));
-
+		readLock.unlock();
 		return (byte) time[localAddress];
 	}
 
@@ -68,7 +73,7 @@ public class RTC extends Thread implements Device {
 			now();
 			bus.raiseInterupt();
 			try {
-				Thread.sleep(10000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -82,9 +87,11 @@ public class RTC extends Thread implements Device {
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
 		String tmp = sdf.format(cal.getTime());
+		readLock.lock();
 		for (int i = 0; i < tmp.length(); i++) {
 			time[i] = tmp.trim().charAt(i);
-
+			
 		}
+		readLock.unlock();
 	}
 }

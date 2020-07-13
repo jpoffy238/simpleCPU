@@ -58,7 +58,7 @@ public class Test_BCS {
 			byte[] program = r.getData();
 			try {
 				for (int idx = 0; idx < program.length; idx++) {
-					c.bus.write(i + idx+r.getAddress(), program[idx]);
+					c.bus.write(i + idx + r.getAddress(), program[idx]);
 				}
 
 			} catch (illegalAddressException e) {
@@ -84,8 +84,8 @@ public class Test_BCS {
 		logger.debug("What A is loaded with : ", +result);
 		try {
 			assert (result == c.bus.read(0x2001));
-			
-			assert((char)result == (char)'C');
+
+			assert ((char) result == (char) 'C');
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -97,6 +97,7 @@ public class Test_BCS {
 		}
 
 	}
+
 	@Test
 	public void Test_BCS_02() {
 		int i = 0x1000; // program load point
@@ -112,29 +113,28 @@ public class Test_BCS {
 		for (int x = 0; x < code.size(); x++) {
 			IntelHexRecord r = code.get(x);
 			if (r.getRecordType() == IntelHexRecordType.DATA) {
-				
-			
-			byte[] program = r.getData();
-			try {
-				for (int idx = 0; idx < program.length; idx++) {
-					c.bus.write(i + idx+r.getAddress(), program[idx]);
+
+				byte[] program = r.getData();
+				try {
+					for (int idx = 0; idx < program.length; idx++) {
+						c.bus.write(i + idx + r.getAddress(), program[idx]);
+					}
+
+				} catch (illegalAddressException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					assert (false);
+				} catch (DeviceUnavailable e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					assert (false);
+				} catch (ROException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					assert (false);
 				}
 
-			} catch (illegalAddressException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (DeviceUnavailable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (ROException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
 			}
-
-		}
 		}
 
 		logger.debug("Starting CPU");
@@ -144,8 +144,8 @@ public class Test_BCS {
 		logger.debug("What A is loaded with : ", +result);
 		try {
 			assert (result == c.bus.read(0x2001));
-			
-			assert((char)result == (char)'N');
+
+			assert ((char) result == (char) 'N');
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -158,6 +158,4 @@ public class Test_BCS {
 
 	}
 
-
-	
 }
