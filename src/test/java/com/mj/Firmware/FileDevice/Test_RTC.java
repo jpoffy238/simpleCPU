@@ -32,18 +32,18 @@ public class Test_RTC {
 	private static CPU c;
 	
 	private static final Logger logger = LogManager.getLogger(Test_RTC.class);
-
+	private static RTC rtc;
 	@BeforeAll
 	public static void setup() {
 		PBus bus = new DeviceBus();
-		RTC rtc = new RTC(bus);
+		rtc = new RTC(bus);
 		
 		
 		bus.registerDevice(new basicMemory());
 		bus.registerDevice(new basicROM(bus));
 		bus.registerDevice(new ConsoleDevice(bus));
 		bus.registerDevice(rtc);
-		rtc.start();
+		
 		
 		 c = new CPU(bus, new cpu001decoder());
 	
@@ -89,7 +89,9 @@ public class Test_RTC {
 		}
 
 		logger.debug("Starting CPU");
+		rtc.start();
 		c.run();
+		
 		logger.debug("Stopped CPU");
 		byte []  results = new byte[7];
 		for (i=0; i < 7 ; i++) {
