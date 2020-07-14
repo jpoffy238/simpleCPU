@@ -1,4 +1,4 @@
-package org.IntelHex;
+package com.mj.IntelHex;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,10 +6,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.IntelHex.common.IntelHexFile;
-import org.IntelHex.common.IntelHexFileChecksumMisMatchException;
-import org.IntelHex.common.IntelHexFileInvalidFormatException;
-import org.IntelHex.common.IntelHexRecord;
+import com.mj.IntelHex.common.IntelHexFile;
+import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
+import com.mj.IntelHex.common.IntelHexFileInvalidFormatException;
+import com.mj.IntelHex.common.IntelHexRecord;
 
 // Record structure
 //A record (line of text) consists of six fields (parts) that appear in order from left to right:[7]

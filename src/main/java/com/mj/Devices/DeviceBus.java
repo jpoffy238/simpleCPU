@@ -23,7 +23,7 @@ public class DeviceBus implements PBus {
 		logger.trace("WRITE: " + String.format("%04x %02x: " , address, data));
 		Device d = getDevice(address);
 		if (null == d) {
-			throw new DeviceUnavailable();
+			throw new DeviceUnavailable(address);
 		}
 		logger.trace ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
 		d.write(address, data);
@@ -35,7 +35,7 @@ public class DeviceBus implements PBus {
 		logger.trace("READ: " + String.format("%04x" , destAddress));
 		Device d = getDevice(destAddress);
 		if (null == d) {
-			throw new DeviceUnavailable();
+			throw new DeviceUnavailable(destAddress);
 		}
 		logger.trace ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
 		byte value = d.read(destAddress);

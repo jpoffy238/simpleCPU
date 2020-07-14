@@ -25,16 +25,14 @@ public class ConsoleDevice implements charDevice {
 		logger.debug("OUTPUT CHAR : " + (char)data);
 	}
 
-	public byte read1() throws DeviceUnavailable {
+	public byte read1()  {
 		// TODO Auto-generated method stub
 		byte returnValue = 0;
 		if (input.size() > 0) {
 			returnValue = (byte)(input.remove().byteValue());
-			return returnValue;
-		} else {
-			throw new DeviceUnavailable();
-		}
-	
+		
+		} 
+		return returnValue;
 	}
 
 	public byte status1() throws DeviceUnavailable {

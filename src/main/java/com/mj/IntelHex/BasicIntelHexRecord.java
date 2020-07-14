@@ -1,12 +1,13 @@
-package org.IntelHex;
+package com.mj.IntelHex;
 
-import org.IntelHex.common.IntelHexFields;
-import org.IntelHex.common.IntelHexFileChecksumMisMatchException;
-import org.IntelHex.common.IntelHexFileInvalidFormatException;
-import org.IntelHex.common.IntelHexRecord;
-import org.IntelHex.common.IntelHexRecordType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.mj.IntelHex.common.IntelHexFields;
+import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
+import com.mj.IntelHex.common.IntelHexFileInvalidFormatException;
+import com.mj.IntelHex.common.IntelHexRecord;
+import com.mj.IntelHex.common.IntelHexRecordType;
 
 public class BasicIntelHexRecord implements IntelHexRecord {
 	private static final Logger logger = LogManager.getLogger(BasicIntelHexRecord.class);

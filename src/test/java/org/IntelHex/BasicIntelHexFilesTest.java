@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.IntelHex.common.IntelHexFileChecksumMisMatchException;
-import org.IntelHex.common.IntelHexRecord;
 import org.junit.jupiter.api.Test;
+
+import com.mj.IntelHex.BasicIntelHexFiles;
+import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
+import com.mj.IntelHex.common.IntelHexRecord;
 
 class BasicIntelHexFilesTest {
 

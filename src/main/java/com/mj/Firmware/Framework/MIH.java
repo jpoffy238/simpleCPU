@@ -17,6 +17,7 @@ public class MIH extends Instruction {
 		int interuptHandlerAddress = 0; 
 		if (c.bus.IsNMInterruptRaised()) {
 			interuptHandlerAddress = getNMInterruptHandlerAddress(c);
+			c.bus.clearNMInterupt();
 		} else {
 			if (c.bus.IsInterruptRaised() ) {
 				c.IFLAG.set();
@@ -25,6 +26,7 @@ public class MIH extends Instruction {
 			} else {
 				if (c.bus.IsPowerOnResetRased()) {
 					interuptHandlerAddress = getResetHandlerAddress(c);
+					c.bus.clearpowerOnReset();
 				}
 			}
 		}
@@ -42,6 +44,7 @@ public class MIH extends Instruction {
 			c.bus.write(c.sp, psr(c));
 
 			c.pc = interuptHandlerAddress;
+			
 		}
 	}
 

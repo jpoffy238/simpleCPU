@@ -1,4 +1,4 @@
-package org.IntelHex.common;
+package com.mj.IntelHex.common;
 
 import java.io.IOException;
 import java.util.ArrayList;

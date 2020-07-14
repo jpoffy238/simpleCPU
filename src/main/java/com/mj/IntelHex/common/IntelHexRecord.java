@@ -1,4 +1,4 @@
-package org.IntelHex.common;
+package com.mj.IntelHex.common;
 
 public interface IntelHexRecord {
 	public IntelHexRecord parse(String data) throws IntelHexFileInvalidFormatException, IntelHexFileChecksumMisMatchException;

@@ -6,10 +6,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.IntelHex.BasicIntelHexFiles;
-import org.IntelHex.common.IntelHexFileChecksumMisMatchException;
-import org.IntelHex.common.IntelHexRecord;
-import org.IntelHex.common.IntelHexRecordType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,6 +17,10 @@ import com.mj.Devices.PBus;
 import com.mj.Devices.RTC;
 import com.mj.Firmware.Framework.OpCodes;
 import com.mj.Firmware.Framework.cpu001decoder;
+import com.mj.IntelHex.BasicIntelHexFiles;
+import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
+import com.mj.IntelHex.common.IntelHexRecord;
+import com.mj.IntelHex.common.IntelHexRecordType;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
@@ -78,7 +78,7 @@ public class Test_RTC {
 				} catch (DeviceUnavailable e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					assert (false);
+					logger.error(String.format("Unable to access address %04x" ,e.getAddress()));
 				} catch (ROException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -87,12 +87,23 @@ public class Test_RTC {
 
 			}
 		}
-
-		logger.debug("Starting CPU");
-		rtc.start();
-		c.run();
 		
-		logger.debug("Stopped CPU");
+		logger.debug("Starting CPU");
+		c.start();
+		rtc.start();
+		
+		
+		try {
+			while ((byte)c.bus.read(0x4000) == 0) {
+				Thread.sleep(1000);
+			}
+		} catch (illegalAddressException | DeviceUnavailable | InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	
+	
+		logger.debug("CPU Terminated");
 		byte []  results = new byte[7];
 		for (i=0; i < 7 ; i++) {
 			try {

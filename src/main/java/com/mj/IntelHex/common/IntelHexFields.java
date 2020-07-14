@@ -1,4 +1,4 @@
-package org.IntelHex.common;
+package com.mj.IntelHex.common;
 
 public enum IntelHexFields {
 	StartCode(0, 1),

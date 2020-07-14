@@ -44,7 +44,9 @@ public class CPU extends Thread {
 	public int clockState;
 	machineState state;
 
-
+public Decoder getDecoder() {
+	return decoder;
+}
 
 
 
@@ -81,9 +83,8 @@ public class CPU extends Thread {
 		reset();
 		long instructionCount = 0;
        long beginTime = System.currentTimeMillis();
-		long current  = System.currentTimeMillis();	if (bus.IsInterruptRaised()) {
-			
-		}
+		long current  = System.currentTimeMillis();	
+	
 		long previous = System.currentTimeMillis();
 		long difftime;
 		boolean RUN=true;
@@ -114,7 +115,9 @@ public class CPU extends Thread {
 				RUN=false;
 			} catch (DeviceUnavailable e) {
 				logger.error("Device Unavailable : " + dump());
-				RUN=false;
+				logger.error(String.format("Error Address: %04x",e.getAddress()));
+				logger.error(e);
+				//RUN=false;
 			} catch (ROException e) {
 				// TODO Auto-generated catch block
 				logger.error("RO Memory Write attempt : " + dump());

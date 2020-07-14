@@ -1,4 +1,4 @@
-package org.IntelHex.common;
+package com.mj.IntelHex.common;
 
 public enum IntelHexRecordType {
 	DATA(0), // DATA - Contains data and a 16-bit starting address for the data.

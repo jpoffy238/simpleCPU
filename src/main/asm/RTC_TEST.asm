@@ -18,7 +18,9 @@ WAIT:		NOP
 		BEQ LOOP        ;;  if wait is over check string length again
 
 HLT: BYTE $3F
-STRLN:		PHA		;; Save current status of thing
+
+STRLN:		NOP  		;; don't allow interrupts got cmpute string length
+		PHA		;; Save current status of thing
 		TYA 
 		PHA
 		TXA
@@ -37,6 +39,7 @@ EOS:		STY STL
 		PLA
 		TYA
 		PLA
+		CLI
 		RTS
 		
 

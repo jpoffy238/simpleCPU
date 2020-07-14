@@ -4,8 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +21,7 @@ public class RTC extends Thread implements Device {
 	PBus bus;
 	public RTC(PBus bus) {
 		this.bus = bus;
-		now();
+;
 	}
 
 	public DEVTYPE getDeviceType() {
@@ -73,7 +71,7 @@ public class RTC extends Thread implements Device {
 			now();
 			bus.raiseInterupt();
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
