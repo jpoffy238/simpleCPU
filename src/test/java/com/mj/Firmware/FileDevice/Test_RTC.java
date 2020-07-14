@@ -91,11 +91,16 @@ public class Test_RTC {
 		logger.debug("Starting CPU");
 		c.start();
 		rtc.start();
-		
+		int retry=0;
 		
 		try {
-			while ((byte)c.bus.read(0x4000) == 0) {
+			while ( ((byte)c.bus.read(0x4000) == 0) && (rtc.getState() != Thread.State.TERMINATED)) {
+				retry++;
 				Thread.sleep(1000);
+				if (retry > 10) {
+					break;
+				}
+				logger.debug(String.format("Found null at %04x - retryCount = %d",  0x4000, retry));
 			}
 		} catch (illegalAddressException | DeviceUnavailable | InterruptedException e1) {
 			// TODO Auto-generated catch block
