@@ -89,7 +89,11 @@ public class Test_RTC {
 
 			}
 		}
-		
+		final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm";
+
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
+		String tmp = sdf.format(cal.getTime());
 		logger.debug("Starting CPU");
 		c.start();
 		rtc.start();
@@ -98,7 +102,7 @@ public class Test_RTC {
 		try {
 			while ( ((byte)c.bus.read(0x4000) == 0) && (rtc.getState() != Thread.State.TERMINATED)) {
 				retry++;
-				Thread.sleep(1000);
+				Thread.sleep(100);
 				if (retry > 10) {
 					break;
 				}
@@ -108,7 +112,6 @@ public class Test_RTC {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
 	
 		logger.debug("CPU Terminated");
 		byte []  results = new byte[DATE_FORMAT_NOW.length()];
@@ -124,9 +127,7 @@ public class Test_RTC {
 		String ouput = new String(results);
 		logger.debug("RTC_Time  " + ouput);
 		
-		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
-		String tmp = sdf.format(cal.getTime());
+
 		logger.debug ( "Comparing RTC " + ouput  + " to " + tmp);
 		assert(tmp.equals(ouput));
 		
