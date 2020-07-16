@@ -4,7 +4,9 @@ package com.mj.Firmware.FileDevice;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -106,11 +108,11 @@ public class Test_RTC {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	
+		final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
 	
 		logger.debug("CPU Terminated");
-		byte []  results = new byte[7];
-		for (i=0; i < 7 ; i++) {
+		byte []  results = new byte[DATE_FORMAT_NOW.length()];
+		for (i=0; i < DATE_FORMAT_NOW.length() ; i++) {
 			try {
 				results[i] = (byte)c.bus.read(0x4000 + i);
 				logger.debug("results[" + i + "] = " + String.format("%02x",results[i]));
@@ -121,7 +123,11 @@ public class Test_RTC {
 		}
 		String ouput = new String(results);
 		logger.debug("RTC_Time  " + ouput);
-		String tmp = "2020-07";
+		
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
+		String tmp = sdf.format(cal.getTime());
+		logger.debug ( "Comparing RTC " + ouput  + " to " + tmp);
 		assert(tmp.equals(ouput));
 		
 		
