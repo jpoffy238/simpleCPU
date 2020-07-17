@@ -3,7 +3,7 @@ package com.mj.memoryInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.mj.Devices.MemoryRange;
+import com.mj.Devices.AddressRange;
 import com.mj.Devices.PBus.BussId;
 import com.mj.Devices.PBus.DEVTYPE;
 import com.mj.Devices.PBus.IOALLOW;
@@ -13,7 +13,7 @@ import com.mj.exceptions.illegalAddressException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class basicMemory implements MemoryDriver {
+public class basicMemory extends AbstractMemoryLayer  {
 	private Lock readLock = new ReentrantLock();
 	private Lock writeLock = new ReentrantLock();
 
@@ -22,7 +22,7 @@ public class basicMemory implements MemoryDriver {
 	final DEVTYPE type = DEVTYPE.CHAR;
 	final IOALLOW ioallow = IOALLOW.RW;
 	public final static int maxMemorySize = 32 * 1024;;
-	final MemoryRange range = new MemoryRange(0, maxMemorySize);
+	final AddressRange range = new AddressRange(0, maxMemorySize);
 
 	private byte[] memory;
 
@@ -80,12 +80,12 @@ public class basicMemory implements MemoryDriver {
 		return bus;
 	}
 
-	public void setAddressRange(MemoryRange range) {
+	public void setAddressRange(AddressRange range) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public MemoryRange getAddressRange() {
+	public AddressRange getAddressRange() {
 		// TODO Auto-generated method stub
 		return range;
 	}

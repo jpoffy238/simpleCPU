@@ -9,7 +9,7 @@ import com.mj.exceptions.illegalAddressException;
 public interface Device  {
 	 public DEVTYPE getDeviceType();
 	 public BussId getBusId();
-	 public MemoryRange getAddressRange();	 
+	 public AddressRange getAddressRange();	 
 	 public void write(int address, byte data ) throws illegalAddressException, ROException, DeviceUnavailable;
 	  public byte read(int address) throws illegalAddressException, DeviceUnavailable;
 	  public void raiseInterrupt ();
