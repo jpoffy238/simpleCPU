@@ -142,6 +142,17 @@ public class DeviceBus implements PBus {
 		powerOnReset = false;
 	}
 
+	@Override
+	public void startDevices() {
+		Device d = null;
+		Set<AddressRange> s = devices.keySet();
+		for ( AddressRange r : s) {
+			d = devices.get(r);
+			if (d instanceof Thread) {
+				((Thread) d).start();
+			}
+	}
+	}
 	
 
 	

@@ -16,7 +16,7 @@ public interface PBus extends CPUBus {
 	enum IOALLOW {
 		RO, RW, WO
 	}
-
+	public void startDevices();
 	public void write(BussId bus, int address, byte data)
 			throws ROException, illegalAddressException, DeviceUnavailable;
 

@@ -6,8 +6,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.mj.Devices.AddressRange;
+import com.mj.Devices.PBus;
 import com.mj.Devices.PBus.BussId;
 import com.mj.Devices.PBus.DEVTYPE;
+import com.mj.Devices.PBus.IOALLOW;
 import com.mj.IntelHex.BasicIntelHexFiles;
 import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
 import com.mj.IntelHex.common.IntelHexRecord;
@@ -18,26 +20,43 @@ import com.mj.exceptions.illegalAddressException;
 public abstract class AbstractMemoryLayer implements MemoryDriver {
 	private Lock readLock = new ReentrantLock();
 	private Lock writeLock = new ReentrantLock();
+	protected PBus sysbus;
+	protected DEVTYPE dtype = DEVTYPE.CHAR;
+	protected BussId busId = BussId.MEMROY;
+	protected IOALLOW ioallow = IOALLOW.RW;
 
-	protected DEVTYPE dtype;
-	protected BussId busId;
 	protected AddressRange memrange;
 	protected byte[] memory;
+	public AbstractMemoryLayer (PBus bus, AddressRange memsize, String OptinalFileToLoad, int startAddress) {
+		sysbus = bus;
+		this.memrange = memsize;
+		memory = new byte[memrange.size()+1];
+		
+		if (OptinalFileToLoad != null ) {
+			try {
+				load(OptinalFileToLoad, startAddress);
+			} catch (illegalAddressException | ROException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
 	public DEVTYPE getDeviceType() {
 		// TODO Auto-generated method stub
-		return null;
+		return dtype;
 	}
 
 	@Override
 	public BussId getBusId() {
 		// TODO Auto-generated method stub
-		return null;
+		return busId;
 	}
-
+	
 	@Override
 	public AddressRange getAddressRange() {
 		// TODO Auto-generated method stub
-		return null;
+		return memrange;
 	}
 
 	@Override
@@ -46,12 +65,16 @@ public abstract class AbstractMemoryLayer implements MemoryDriver {
 
 	}
 
-	public byte read(int address) throws illegalAddressException {
+	public byte read(int address) throws illegalAddressException  {
 		// TODO Auto-generated method stub
+		if (ioallow != IOALLOW.RO && ioallow != IOALLOW.RW) {
+			throw new illegalAddressException(address, 0);
+		}
 		int value = 0;
 		if (memrange.contains(address)) {
+			int localAddress = addressMapper(address);
 			readLock.lock();
-			value = (int) (memory[address] & 0xff);
+			value = (int) (memory[localAddress] & 0xff);
 			readLock.unlock();
 		} else {
 			throw new illegalAddressException(address, 00);
@@ -62,10 +85,13 @@ public abstract class AbstractMemoryLayer implements MemoryDriver {
 	public void write(int address, byte data) throws illegalAddressException, ROException {
 		// TODO Auto-generated method stub
 		// For devices the odd address is control while even is data.
-
+		if (ioallow == IOALLOW.RO) {
+			throw new ROException();
+		}
 		if (memrange.contains(address)) {
 			writeLock.lock();
-			memory[address] = (byte) (data & 0xff);
+			int localAddress = addressMapper(address);
+			memory[localAddress] = (byte) (data & 0xff);
 			writeLock.unlock();
 		} else {
 			throw new illegalAddressException(address, data);
@@ -74,8 +100,8 @@ public abstract class AbstractMemoryLayer implements MemoryDriver {
 	}
 
 	@Override
-	public void load(String fileName, int startAddress) throws illegalAddressException, ROException {
-		int i = startAddress; // program load point
+	public void load(String fileName, int startAddress) throws illegalAddressException, ROException, IOException {
+	
 		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
 		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
@@ -103,7 +129,7 @@ public abstract class AbstractMemoryLayer implements MemoryDriver {
 		
 	}
 }
-private int addressMapper(int virtualAddress) throws  illegalAddressException {
+protected int addressMapper(int virtualAddress) throws  illegalAddressException {
 	if (! memrange.contains(virtualAddress)) {
 		throw new illegalAddressException(virtualAddress, 0);
 	}

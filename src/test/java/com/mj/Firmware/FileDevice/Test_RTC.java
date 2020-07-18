@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.mj.Devices.DeviceBus;
+import com.mj.Devices.AddressRange;
 import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.PBus;
 import com.mj.Devices.RTC;
@@ -29,25 +30,16 @@ import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
+import com.mj.util.CPU_CreateUtil;
 
 public class Test_RTC {
 	private static CPU c;
 	
 	private static final Logger logger = LogManager.getLogger(Test_RTC.class);
-	private static RTC rtc;
+	
 	@BeforeAll
 	public static void setup() {
-		PBus bus = new DeviceBus();
-		rtc = new RTC(bus);
-		
-		
-		bus.registerDevice(new basicMemory());
-		bus.registerDevice(new basicROM(bus));
-		bus.registerDevice(new ConsoleDevice(bus));
-		bus.registerDevice(rtc);
-		
-		
-		 c = new CPU(bus, new cpu001decoder());
+		c = CPU_CreateUtil.getCPU();
 	
 		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}
@@ -96,11 +88,11 @@ public class Test_RTC {
 		String tmp = sdf.format(cal.getTime());
 		logger.debug("Starting CPU");
 		c.start();
-		rtc.start();
+		c.bus.startDevices();
 		int retry=0;
 		
 		try {
-			while ( ((byte)c.bus.read(0x4000) == 0) && (rtc.getState() != Thread.State.TERMINATED)) {
+			while ( ((byte)c.bus.read(0x4000) == 0) ) {
 				retry++;
 				Thread.sleep(100);
 				if (retry > 10) {
