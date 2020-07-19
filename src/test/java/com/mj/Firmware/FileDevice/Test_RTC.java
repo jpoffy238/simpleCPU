@@ -46,6 +46,7 @@ public class Test_RTC {
 	@Test
 	public void Test_Reading_RTC() {
 		int i = 0x1000; // program load point
+		
 		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
 		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
