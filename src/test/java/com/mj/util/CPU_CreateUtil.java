@@ -16,16 +16,16 @@ public class  CPU_CreateUtil {
 		
 		PBus bus = new DeviceBus();
 		rtc = new RTC(bus);
-		
-		
 		bus.registerDevice(new basicMemory(bus,
 				new AddressRange(0, 32*1024) ,
 				null, 0	));
+		bus.registerDevice(new basicROM(bus, 
+				new AddressRange(0xf000, 0xffff),
+				"/home/jpoffen/git/simpleCPU/src/main/asm/RTCInt.hex", 0xf000));
 	
 	
-	bus.registerDevice(new basicROM(bus, 
-			new AddressRange(0xf000, 0xffff),
-			"/home/jpoffen/git/simpleCPU/src/main/asm/RTC_TEST.hex", 0xf000));
+	
+	
 	bus.registerDevice(new ConsoleDevice(bus));
 	bus.registerDevice(rtc);
 		

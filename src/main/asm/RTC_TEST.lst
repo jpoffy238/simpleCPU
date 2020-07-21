@@ -5,48 +5,51 @@
       = 4000            TIME=$4000
       = 0000            STL=$00
       = 1000            START=$1000
-                        		
-0000  A2 7F             LOOP:		LDX #$7F
-0002  20 1210           		JSR STRLN+ORG
-0005  A9 00             		LDA #0
-0007  C5 00             		CMP STL
-0009  D0 06             		BNE HLT
-                        		
-000B  EA                WAIT:		NOP
-000C  CA                		DEX
-000D  D0 FC             		BNE WAIT	;; delay for some cycles
-000F  F0 EF             		BEQ LOOP        ;;  if wait is over check string length again
 
-0011  3F                HLT: BYTE $3F
+0000  58                			CLI			;; ensure interrupts are handled.
+0001                    LOOP:
+0001  A2 1F             		LDX #$1F      ;; Count down register
+0003  20 1310           		JSR STRLN+ORG   ;; get length of string $00 terminated
+0006  A9 00             		LDA #0                  ;; Load the value to compare null char
+0008  C5 00             		CMP STL               ;; if String length is not 0 then halt - test done
+000A  D0 06             		BNE HLT
+                        		
+000C  EA                WAIT:		NOP              ;; do nothing waste time
+000D  CA                		DEX
+000E  D0 FC             		BNE WAIT	;; delay for some cycles
+0010  F0 EF             		BEQ LOOP        ;;  if wait is over check string length again
 
-0012  EA                STRLN:		NOP  		;; don't allow interrupts got cmpute string length
-0013  48                		PHA		;; Save current status of thing
-0014  98                		TYA
-0015  48                		PHA
-0016  8A                		TXA
-0017  48                		PHA
-0018  A0 00             		LDY #0		;;
-001A  A9 00             		LDA #0
-001C  A2 14             		LDX #20         ;; max string size
-001E  D9 0040           LOOP1:		CMP TIME,Y	;; is this the end of the string
-0021  F0 04             		BEQ EOS
-0023  C8                		INY
-0024  CA                		DEX
-0025  D0 F7             		BNE LOOP1	;; not at end check next char
-0027  84 00             EOS:		STY STL
-0029  68                		PLA
-002A  AA                		TAX
-002B  68                		PLA
-002C  98                		TYA
-002D  68                		PLA
-002E  58                		CLI
+0012  3F                HLT: BYTE $3F
+
+0013                    STRLN:
+0013  EA                		NOP  		;; don't allow interrupts got cmpute string length
+0014  48                		PHA		;; Save current status of thing
+0015  98                		TYA
+0016  48                		PHA
+0017  8A                		TXA
+0018  48                		PHA
+0019  A0 00             		LDY #0		;;
+001B  A9 00             		LDA #0
+001D  A2 14             		LDX #20         ;; max string size
+001F  D9 0040           LOOP1:		CMP TIME,Y	;; is this the end of the string
+0022  F0 04             		BEQ EOS   ;; so if a null term char found - go to exit code
+0024  C8                		INY            ;; did not found it so next char
+0025  CA                		DEX           ;; one less char to check
+0026  D0 F7             		BNE LOOP1	;; not at end check next char
+0028  84 00             EOS:		STY STL      ;; String length in Y so store in it 0 page mem
+002A  68                		PLA              ;; restore registers
+002B  AA                		TAX
+002C  68                		PLA
+002D  98                		TYA
+002E  68                		PLA
+
 002F  60                		RTS
                         		
 
 
 00000 Total Error(s)
 
-EOS                0027    HLT                0011    LOOP               0000
-LOOP1              001E    ORG                1000 E  PROCESSOR          1966 E
-START              1000 E  STL                0000 E  STRLN              0012
-TIME               4000 E  WAIT               000B
+EOS                0028    HLT                0012    LOOP               0001
+LOOP1              001F    ORG                1000 E  PROCESSOR          1966 E
+START              1000 E  STL                0000 E  STRLN              0013
+TIME               4000 E  WAIT               000C

@@ -3,12 +3,12 @@ ORG=$F000
 
 
 
-START:				SEI
+START:	SEI
 				PHA  ;; save acc
 				TYA ;; transfere to A to push on stack
 				PHA  ;; push y on stack
 				LDX #LEN  ;; setup 20 bytes to transfere
-LOOPA:				LDA RTC,X   ;; copy RTC to RAM
+LOOPA:	LDA RTC,X   ;; copy RTC to RAM
 				STA RAM,X
 				DEX
 				BNE LOOPA

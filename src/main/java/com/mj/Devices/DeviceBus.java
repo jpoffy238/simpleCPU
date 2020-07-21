@@ -3,6 +3,8 @@ package com.mj.Devices;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +14,8 @@ import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class DeviceBus implements PBus {
+	private Lock readLock = new ReentrantLock();
+	private Lock writeLock = new ReentrantLock();
 	String formater = "DeviceType : %s10 : BusId : %s10 : Object : %s20";
 	private static final Logger logger = LogManager.getLogger(DeviceBus.class);
 	private Map<AddressRange, Device> devices = new HashMap<AddressRange, Device>();
@@ -110,6 +114,7 @@ public class DeviceBus implements PBus {
 	}
 
 	private Device getDevice(int address) {
+		readLock.lock();
 		Device d = null;
 		Set<AddressRange> s = devices.keySet();
 		for ( AddressRange r : s) {
@@ -121,6 +126,7 @@ public class DeviceBus implements PBus {
 				break;
 			}
 		}
+		readLock.unlock();
 		return d;
 	}
 

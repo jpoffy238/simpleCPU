@@ -76,6 +76,10 @@ public abstract class Instruction implements machineState {
 
 		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
 		logger.debug(String.format("Final Address %04x ", loadAddress));
+		if (loadAddress != 0xf000) {
+			logger.debug("BAD ADDRESS for Interrupt");
+			throw new DeviceUnavailable (loadAddress);
+		}
 		return loadAddress;
 	}
 	protected int getNMInterruptHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {

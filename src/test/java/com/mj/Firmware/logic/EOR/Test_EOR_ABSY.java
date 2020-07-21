@@ -17,6 +17,7 @@ import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
+import com.mj.util.CPU_CreateUtil;
 
 public class Test_EOR_ABSY {
 	private static CPU c;
@@ -25,19 +26,8 @@ public class Test_EOR_ABSY {
 
 	@BeforeAll
 	public static void setup() {
-
-		PBus bus = new DeviceBus();
-		bus.registerDevice(new basicMemory(bus,
-				new AddressRange(0, 32*1024) ,
-				null, 0	));
-	
-	
-	bus.registerDevice(new basicROM(bus, 
-			new AddressRange(0xff00, 0xffff),
-			null, 0));
-	bus.registerDevice(new ConsoleDevice(bus));
-		c = new CPU(bus, new cpu001decoder());
-
+		c = CPU_CreateUtil.getCPU();
+		
 		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}
 

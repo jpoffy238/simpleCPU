@@ -68,7 +68,7 @@ public class ConsoleDevice implements charDevice {
 
 	public AddressRange getAddressRange() {
 		// TODO Auto-generated method stub
-		return new AddressRange(0xe000, 0xe0001);
+		return new AddressRange(0xe000, 0xe001);
 	}
 
 	public void write(int address, byte data) throws illegalAddressException, ROException, DeviceUnavailable {
