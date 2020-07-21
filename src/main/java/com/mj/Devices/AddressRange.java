@@ -1,11 +1,13 @@
 package com.mj.Devices;
 
-public class MemoryRange  implements  Comparable<MemoryRange> {
+import com.mj.exceptions.illegalAddressException;
+
+public class AddressRange  implements  Comparable<AddressRange> {
 	protected int startAddressRange;
 	protected int  EndAddressRange;
 	protected int length;
 	
-	public MemoryRange(int saddress, int eaddress) {
+	public AddressRange(int saddress, int eaddress) {
 		startAddressRange = saddress;
 		EndAddressRange = eaddress;
 		length = EndAddressRange - startAddressRange +1;
@@ -17,7 +19,7 @@ public class MemoryRange  implements  Comparable<MemoryRange> {
 	public int size() {
 		return (length);
 	}
-	public int compareTo(MemoryRange other) {
+	public int compareTo(AddressRange other) {
 		// TODO Auto-generated method stub
 		if (other == null) {
             throw new NullPointerException("Cannot compare to null.");
@@ -30,8 +32,23 @@ public class MemoryRange  implements  Comparable<MemoryRange> {
         return thisStartAddr.compareTo(thatStartAddr);
 	
 	}
+	public int baseAddress() {
+		return startAddressRange;
+	}
 	public String toString() {
 		return  String.format("Start Address %04x : End Address %04x ", startAddressRange, EndAddressRange); 
 	} //
-
+	
+	public int addressMapper(int virtualAddress) throws  illegalAddressException {
+		// 
+		if (! contains(virtualAddress)) {
+			throw new illegalAddressException(virtualAddress, 0);
+		}
+			int localAddress = virtualAddress - baseAddress() ;
+			if ((localAddress < 0 )  || ( localAddress >= size())) {
+				throw new illegalAddressException(virtualAddress, localAddress);
+			}
+		
+		return localAddress;
+	}	
 }

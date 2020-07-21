@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.mj.Devices.DeviceBus;
+import com.mj.Devices.AddressRange;
 import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.Decoder;
@@ -18,8 +19,14 @@ public class CPUMain {
 	public static void main(String[] args) {
 			
 		PBus bus = new DeviceBus();
-		bus.registerDevice(new basicMemory());
-		bus.registerDevice(new basicROM(bus));
+		bus.registerDevice(new basicMemory(bus,
+					new AddressRange(0, 32*1024) ,
+					null, 0	));
+		
+		
+		bus.registerDevice(new basicROM(bus, 
+				new AddressRange(0xff00, 0xffff),
+				null, 0));
 		bus.registerDevice(new ConsoleDevice(bus));
 		Decoder d =  new cpu001decoder();
 		

@@ -15,16 +15,24 @@ public class MIH extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
 		int interuptHandlerAddress = 0; 
+		logger.debug("INTERRUPT=============================================================");
 		if (c.bus.IsNMInterruptRaised()) {
+			logger.debug("NM === INTERRUPT=============================================================");
 			interuptHandlerAddress = getNMInterruptHandlerAddress(c);
 			c.bus.clearNMInterupt();
 		} else {
 			if (c.bus.IsInterruptRaised() ) {
-				c.IFLAG.set();
+				logger.debug("INT/BRK === INTERRUPT=============================================================");
+				
 				interuptHandlerAddress = getInterruptHandlerAddress(c);
+				c.IFLAG.set();
 				c.bus.clearInterupt();
+				if (interuptHandlerAddress != 0xf000) {
+					logger.debug("BAD-INTERRUPT ADDRESS -- INT/BRK === INTERRUPT=============================================================");
+				}
 			} else {
 				if (c.bus.IsPowerOnResetRased()) {
+					logger.debug("RESET === INTERRUPT=============================================================");
 					interuptHandlerAddress = getResetHandlerAddress(c);
 					c.bus.clearpowerOnReset();
 				}
@@ -42,8 +50,9 @@ public class MIH extends Instruction {
 			c.bus.write(c.sp, (byte) (lower & 0xff));
 			c.sp--;
 			c.bus.write(c.sp, psr(c));
-
+			logger.debug(String.format("Interrupt Address = %04x " , interuptHandlerAddress));
 			c.pc = interuptHandlerAddress;
+			
 			
 		}
 	}

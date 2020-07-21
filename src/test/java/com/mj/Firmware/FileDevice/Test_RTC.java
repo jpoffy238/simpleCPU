@@ -4,7 +4,9 @@ package com.mj.Firmware.FileDevice;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.mj.Devices.DeviceBus;
+import com.mj.Devices.AddressRange;
 import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.PBus;
 import com.mj.Devices.RTC;
@@ -27,31 +30,23 @@ import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
+import com.mj.util.CPU_CreateUtil;
 
 public class Test_RTC {
 	private static CPU c;
 	
 	private static final Logger logger = LogManager.getLogger(Test_RTC.class);
-	private static RTC rtc;
+	
 	@BeforeAll
 	public static void setup() {
-		PBus bus = new DeviceBus();
-		rtc = new RTC(bus);
-		
-		
-		bus.registerDevice(new basicMemory());
-		bus.registerDevice(new basicROM(bus));
-		bus.registerDevice(new ConsoleDevice(bus));
-		bus.registerDevice(rtc);
-		
-		
-		 c = new CPU(bus, new cpu001decoder());
+		c = CPU_CreateUtil.getCPU();
 	
 		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}
 	@Test
 	public void Test_Reading_RTC() {
 		int i = 0x1000; // program load point
+		
 		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
 		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
@@ -87,16 +82,20 @@ public class Test_RTC {
 
 			}
 		}
-		
+		final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm";
+
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
+		String tmp = sdf.format(cal.getTime());
 		logger.debug("Starting CPU");
 		c.start();
-		rtc.start();
+		c.bus.startDevices();
 		int retry=0;
 		
 		try {
-			while ( ((byte)c.bus.read(0x4000) == 0) && (rtc.getState() != Thread.State.TERMINATED)) {
+			while ( ((byte)c.bus.read(0x4000) == 0) ) {
 				retry++;
-				Thread.sleep(1000);
+				Thread.sleep(100);
 				if (retry > 10) {
 					break;
 				}
@@ -107,10 +106,9 @@ public class Test_RTC {
 			e1.printStackTrace();
 		}
 	
-	
 		logger.debug("CPU Terminated");
-		byte []  results = new byte[7];
-		for (i=0; i < 7 ; i++) {
+		byte []  results = new byte[DATE_FORMAT_NOW.length()];
+		for (i=0; i < DATE_FORMAT_NOW.length() ; i++) {
 			try {
 				results[i] = (byte)c.bus.read(0x4000 + i);
 				logger.debug("results[" + i + "] = " + String.format("%02x",results[i]));
@@ -121,7 +119,9 @@ public class Test_RTC {
 		}
 		String ouput = new String(results);
 		logger.debug("RTC_Time  " + ouput);
-		String tmp = "2020-07";
+		
+
+		logger.debug ( "Comparing RTC " + ouput  + " to " + tmp);
 		assert(tmp.equals(ouput));
 		
 		

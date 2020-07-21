@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.mj.Devices.AddressRange;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.OpCodes;
@@ -16,6 +17,7 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.illegalOpCodeException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
+import com.mj.util.CPU_CreateUtil;
 
 public class Test_CarryFlag {
 	private static CPU c;
@@ -25,12 +27,7 @@ public class Test_CarryFlag {
 	@BeforeAll
 	public static void setup() {
 
-		PBus bus = new DeviceBus();
-		bus.registerDevice(new basicMemory());
-		bus.registerDevice(new basicROM(bus));
-
-		c = new CPU(bus, new cpu001decoder());
-		
+		c = CPU_CreateUtil.getCPU();
 		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}
 

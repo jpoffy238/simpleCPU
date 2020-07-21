@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.mj.Devices.AddressRange;
+import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.OpCodes;
@@ -15,6 +17,7 @@ import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
+import com.mj.util.CPU_CreateUtil;
 
 public class Test_DEY {
 	private static CPU c;
@@ -24,11 +27,9 @@ public class Test_DEY {
 	@BeforeAll
 	public static void setup() {
 		
-		PBus bus = new DeviceBus();
-		bus.registerDevice(new basicMemory());
-		bus.registerDevice(new basicROM(bus));
+		c = CPU_CreateUtil.getCPU();
 		
-		 c = new CPU(bus, new cpu001decoder());
+	
 	
 		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}

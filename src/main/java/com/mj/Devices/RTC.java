@@ -16,7 +16,7 @@ import com.mj.exceptions.illegalAddressException;
 public class RTC extends Thread implements Device {
 	private Lock readLock = new ReentrantLock();
 	static Logger logger = LogManager.getLogger(RTC.class);
-	private MemoryRange mr = new MemoryRange(0xa000, 0xa000 + 21);
+	private AddressRange mr = new AddressRange(0xa000, 0xa000 + 21);
 	private char[] time = new char[mr.size()];
 	PBus bus;
 	public RTC(PBus bus) {
@@ -36,7 +36,7 @@ public class RTC extends Thread implements Device {
 	}
 
 	@Override
-	public MemoryRange getAddressRange() {
+	public AddressRange getAddressRange() {
 		// TODO Auto-generated method stub
 		return mr;
 	}
@@ -71,7 +71,7 @@ public class RTC extends Thread implements Device {
 			now();
 			bus.raiseInterupt();
 			try {
-				Thread.sleep(10000);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
