@@ -99,9 +99,9 @@ SUB5 RTS
 END
 
 
-ERROR: DW  0
-S1: DW  0
-S2: DW  0
-U1: DW  0
-U2: DW  0
+ERROR: DB  0
+S1: DB  0
+S2: DB  0
+U1: DB  0
+U2: DB  0
 
