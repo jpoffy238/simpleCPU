@@ -39,24 +39,9 @@ public class Test_JSR {
 
 	@Test
 	public void Test_JSR01() {
-		int i = 0x1000;
-		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
-		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
-			code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/JSR_TEST.hex");
-		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			fail("Unable to load test program");
-		}
-		for (int x = 0; x < code.size(); x++) {
-			IntelHexRecord r = code.get(x);
-			byte[] program = r.getData();
-			try {
-				for (int idx = 0; idx < program.length; idx++) {
-					c.bus.write(i + idx, program[idx]);
-				}
-
+		CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/JSR_TEST.hex", 0x1000);
+		
 			} catch (illegalAddressException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -69,9 +54,13 @@ public class Test_JSR {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				assert (false);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				logger.error(e);
+				assert (false);
 			}
 
-		}
+		
 
 		logger.debug("Starting CPU");
 		c.run();

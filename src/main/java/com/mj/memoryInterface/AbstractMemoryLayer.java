@@ -111,6 +111,7 @@ public abstract class AbstractMemoryLayer implements MemoryDriver {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			
+			
 		}
 		for (int x = 0; x < code.size(); x++) {
 			IntelHexRecord r = code.get(x);
