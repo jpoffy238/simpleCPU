@@ -1,5 +1,5 @@
-.SUFFIXES: .hex .a
-JSR_TEST.hex: JSR_TEST.a 
+.SUFFIXES: .hex .asm
+JSR_TEST.hex: JSR_TEST.asm
 
-%.hex : %.a
+%.hex : %.asm
 	crasm  $< -o $@ > $(@).lst

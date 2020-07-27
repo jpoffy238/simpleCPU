@@ -1,39 +1,132 @@
 Crasm 1.10:                                                   page  1
 
-  00001966               1  PROCESSOR=6502
-  00001000               2  ORG=$1000
-  00002000               3  VALUE=$2000
-                         4  ;;CPU 6502
-                         5  ;;OUTPUT HEX
-  00001000               6  * = $1000
->>>>> 7 ERROR: Unknown macro or mnemonic
-                         7          LDA #$0A     ;; lOAD 10 into acc
->>>>> 8 ERROR: Unknown macro or mnemonic
-                         8          JSR ADDONE   ;; Just to sub to add 1
->>>>> 9 ERROR: Unknown macro or mnemonic
-                         9          STA VALUE    ;; store new value in value
+                         1  ;;PROCESSOR=6502
+                         2  ;;ORG=$1000
+                         3  ;;VALUE=$2000
+                         4  CPU 6502
+                         5  OUTPUT HEX
+                         6  
+  1000                   7  * = $1000
+1000 A90A                8          LDA #$0A     ;; lOAD 10 into acc
+1002 200B10              9          JSR ADDONE   ;; Just to sub to add 1
+1005 8D0020             10          STA VALUE    ;; store new value in value
                       .
->>>> 10 ERROR: Unknown macro or mnemonic
-                        10          NOP
->>>> 11 ERROR: Unknown macro or mnemonic
-                        11          NOP
-00001000 3F             12  HLT DB $3F
-                        13  
->>>> 14 ERROR: Unknown macro or mnemonic
-                        14  ADDONE  ADC #$01
->>>> 15 ERROR: Unknown macro or mnemonic
-                        15          RTS
->>>> 16 ERROR: Unknown macro or mnemonic
-                        16          NOP
->>>> 17 ERROR: Unknown macro or mnemonic
-                        17          NOP
-00001001 3F             18  HLT2 DB $3F
-                        19  
-  00002000              20  VALUE = $2000
-                        21  
+1008 EA                 11          NOP
+1009 EA                 12          NOP
+100A 3F                 13  HLT DB $3F
+                        14  
+100B 6901               15  ADDONE  ADC #$01
+100D 60                 16          RTS
+100E EA                 17          NOP
+100F EA                 18          NOP
+1010 3F                 19  HLT2 DB $3F
+                        20  
+  2000                  21  VALUE = $2000
                         22  
+                        23  
 
-ERRORS:       9
+ERRORS:       0
 WARNINGS:     0
 
-No code generated...
+Successful assembly...
+ Last address     1010 (4112)
+ Code length        22 (34)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Crasm 1.10:                                                   page  2
+
+^100B   Abs ADDONE                                           
+?100A   Abs HLT                                              
+?1010   Abs HLT2                                             
+^2000   Abs VALUE                                            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

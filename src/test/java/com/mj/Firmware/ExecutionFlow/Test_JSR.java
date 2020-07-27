@@ -40,25 +40,14 @@ public class Test_JSR {
 	@Test
 	public void Test_JSR01() {
 		try {
-		CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/JSR_TEST.hex", 0x1000);
+		CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/JSR_TEST.hex", 0);
 		
-			} catch (illegalAddressException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (DeviceUnavailable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (ROException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				logger.error(e);
-				assert (false);
-			}
+		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail("Unable to load test program");
+
+		}
 
 		
 
@@ -86,37 +75,15 @@ public class Test_JSR {
 
 	@Test
 	public void Test_JSR02() {
-		int i = 0x1000;
-		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
-		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
+		
 		try {
-			code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/JSR_TEST2.hex");
-		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
+			CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/JSR_TEST2.hex", 0x1000);
+			
+			
+		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			fail("Unable to load test program");
-		}
-		for (int x = 0; x < code.size(); x++) {
-			IntelHexRecord r = code.get(x);
-			byte[] program = r.getData();
-			try {
-				for (int idx = 0; idx < program.length; idx++) {
-					c.bus.write(i + idx, program[idx]);
-				}
-
-			} catch (illegalAddressException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (DeviceUnavailable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (ROException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			}
 
 		}
 
