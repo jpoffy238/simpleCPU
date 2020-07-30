@@ -14,6 +14,7 @@ import com.mj.Firmware.ExecutionFlow.BNE;
 import com.mj.Firmware.ExecutionFlow.BRK;
 import com.mj.Firmware.ExecutionFlow.HLT;
 import com.mj.Firmware.ExecutionFlow.JMP_ABS;
+import com.mj.Firmware.ExecutionFlow.JMP_IND;
 import com.mj.Firmware.ExecutionFlow.JSR;
 import com.mj.Firmware.ExecutionFlow.NOP;
 import com.mj.Firmware.ExecutionFlow.RTS;
@@ -234,6 +235,7 @@ public  enum OpCodes {
 	
 	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
+	JMP_IND(new JMP_IND()),
 	JSR(new JSR()),
 	RTS(new RTS()),
 	RTI(new RTI()),
