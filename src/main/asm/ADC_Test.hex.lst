@@ -1,0 +1,264 @@
+Crasm 1.10:                                                   page  1
+
+                         1  ; Demonstrate that the V flag works as described
+                         2  ;
+                         3  ; Returns with ERROR = 0 if the test passes, ERR
+  OR = 1 if the test fails
+                         4  ;
+                         5  ; Five (additional) memory locations are used: E
+  RROR, S1, S2, U1, and U2
+                         6  ; which can be located anywhere convenient in RA
+  M
+                         7  ;
+                         8  CPU 6502
+                         9  OUTPUT HEX
+  1000                  10  * = $1000
+                        11  
+1000 200810             12  START JSR TEST
+1003 206410             13        JSR SUB
+1006 EA                 14        NOP
+1007 3F                 15  HLT  DB $3F
+                        16  
+1008 D8                 17  TEST CLD       ; Clear decimal mode (just in cas
+                 e) for test
+1009 A901               18       LDA #1
+100B 8D8E10             19       STA ERROR ; Store 1 in ERROR until test pas
+                 ses
+100E A980               20       LDA #$80
+1010 8D8F10             21       STA S1    ; Initalize S1 and S2 to -128 ($8
+                 0)
+1013 8D9010             22       STA S2
+1016 A900               23       LDA #0
+1018 8D9110             24       STA U1    ; Initialize U1 and U2 to 0
+101B 8D9210             25       STA U2
+101E A001               26       LDY #1    ; Initialize Y (used to set and c
+                 lear the carry flag) to 1
+1020 204510             27  LOOP JSR ADD   ; Test ADC
+1023 E001               28       CPX #1
+1025 F01D               29       BEQ DONE  ; End if V and unsigned result do
+                 not agree (X = 1)
+1027 206410             30       JSR SUB   ; Test SBC
+102A E001               31       CPX #1
+102C F016               32       BEQ DONE  ; End if V and unsigned result do
+                 not agree (X = 1)
+102E EE8F10             33       INC S1
+1031 EE9110             34       INC U1
+1034 D0EA               35       BNE LOOP  ; Loop until all 256 possibilitie
+                 s of S1 and U1 are tested
+1036 EE9010             36       INC S2
+1039 EE9210             37       INC U2
+103C D0E2               38       BNE LOOP  ; Loop until all 256 possibilitie
+                 s of S2 and U2 are tested
+103E 88                 39       DEY
+103F 10DF               40       BPL LOOP  ; Loop until both possiblities of
+                 the carry flag are tested LDA #0
+1041 8D8E10             41       STA ERROR ; All tests pass, so store 0 in E
+                 RROR
+1044 60                 42  DONE RTS
+                        43  ;
+                        44  ; Test ADC
+                        45  ;
+                        46  ; X is initialized to 0
+                        47  ; X is incremented when V = 1
+                        48  ; X is incremented when the unsigned result pred
+  icts an overflow
+
+
+Crasm 1.10:                                                   page  2
+
+                        49  ; Therefore, if the V flag and the unsigned resu
+  lt agree, X will be
+                        50  ; incremented zero or two times (returning X = 0
+  or X = 2), and if they do
+                        51  ; not agree X will be incremented once (returnin
+  g X = 1)
+                        52  ;
+1045 C001               53  ADD  CPY #1   ; Set carry when Y = 1, clear carr
+                y when Y = 0
+1047 AD8F10             54       LDA S1   ; Test twos complement addition
+104A 6D9010             55       ADC S2
+104D A200               56       LDX #0   ; Initialize X to 0
+104F 5001               57       BVC ADD1
+1051 E8                 58       INX      ; Increment X if V = 1
+1052 C001               59  ADD1 CPY #1   ; Set carry when Y = 1, clear carr
+                y when Y = 0
+1054 AD9110             60       LDA U1   ; Test unsigned addition
+1057 6D9210             61       ADC U2
+105A B004               62       BCS ADD3 ; Carry is set if U1 + U2 >= 256
+105C 3001               63       BMI ADD2 ; U1 + U2 < 256, A >= 128 if U1 + 
+                U2 >= 128
+105E E8                 64       INX      ; Increment X if U1 + U2 < 128
+105F 60                 65  ADD2 RTS
+1060 1001               66  ADD3 BPL ADD4 ; U1 + U2 >= 256, A <= 127 if U1 +
+                U2 <= 383 ($17F)
+1062 E8                 67       INX      ; Increment X if U1 + U2 > 383
+1063 60                 68  ADD4 RTS
+                        69  
+                        70  ;
+                        71  ; Test SBC
+                        72  ;
+                        73  ; X is initialized to 0
+                        74  ; X is incremented when V = 1
+                        75  ; X is incremented when the unsigned result pred
+  icts an overflow
+                        76  ; Therefore, if the V flag and the unsigned resu
+  lt agree, X will be
+                        77  ; incremented zero or two times (returning X = 0
+  or X = 2), and if they do
+                        78  ; not agree X will be incremented once (returnin
+  g X = 1)
+                        79  ;
+1064 C001               80  SUB  CPY #1   ; Set carry when Y = 1, clear carr
+                y when Y = 0
+1066 AD8F10             81       LDA S1   ; Test twos complement subtraction
+1069 ED9010             82       SBC S2
+106C A200               83       LDX #0   ; Initialize X to 0
+106E 5001               84       BVC SUB1
+1070 E8                 85       INX      ; Increment X if V = 1
+1071 C001               86  SUB1 CPY #1   ; Set carry when Y = 1, clear carr
+                y when Y = 0
+1073 AD9110             87       LDA U1   ; Test unsigned subtraction
+1076 ED9210             88       SBC U2
+1079 48                 89       PHA      ; Save the low byte of result on t
+                he stack
+107A A9FF               90       LDA #$FF
+107C E900               91       SBC #$00 ; result = (65280 + U1) - U2, 6528
+                0 = $FF00
+107E C9FE               92       CMP #$FE
+1080 D005               93       BNE SUB4 ; Branch if result >= 65280 ($FF00
+                ) or result < 65024 ($FE00)
+1082 68                 94       PLA      ; Get the low byte of result
+
+
+Crasm 1.10:                                                   page  3
+
+1083 3001               95       BMI SUB3 ; result < 65280 ($FF00), A >= 128
+                if result >= 65152 ($FE80)
+1085 E8                 96  SUB2 INX      ; Increment X if result < 65152 ($
+                FE80)
+1086 60                 97  SUB3 RTS
+1087 68                 98  SUB4 PLA      ; Get the low byte of result (does
+                not affect the carry flag)
+1088 90FB               99       BCC SUB2 ; The carry flag is clear if resul
+                t < 65024 ($FE00)
+108A 1001              100       BPL SUB5 ; result >= 65280 ($FF00), A <= 12
+                7 if result <= 65407 ($FF7F)
+108C E8                101       INX      ; Increment X if result > 65407 ($
+                FF7F)
+108D 60                102  SUB5 RTS
+                       103  
+                       104  
+108E 00                105  ERROR DB  0
+108F 00                106  S1 DB  0
+1090 00                107  S2 DB  0
+1091 00                108  U1 DB  0
+1092 00                109  U2 DB  0
+                       110  
+                       111  
+
+ERRORS:       0
+WARNINGS:     0
+
+Successful assembly...
+ Last address     1092 (4242)
+ Code length       126 (294)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Crasm 1.10:                                                   page  4
+
+^1045   Abs ADD                                              
+^1052   Abs ADD1                                             
+^105F   Abs ADD2                                             
+^1060   Abs ADD3                                             
+^1063   Abs ADD4                                             
+^1044   Abs DONE                                             
+^108E   Abs ERROR                                            
+?1007   Abs HLT                                              
+ 1020   Abs LOOP                                             
+^108F   Abs S1                                               
+^1090   Abs S2                                               
+?1000   Abs START                                            
+^1064   Abs SUB                                              
+^1071   Abs SUB1                                             
+ 1085   Abs SUB2                                             
+^1086   Abs SUB3                                             
+^1087   Abs SUB4                                             
+^108D   Abs SUB5                                             
+^1008   Abs TEST                                             
+^1091   Abs U1                                               
+^1092   Abs U2                                               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

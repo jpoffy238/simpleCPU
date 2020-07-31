@@ -1,5 +1,7 @@
 package com.mj.Firmware.Math;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -338,6 +340,30 @@ public class Test_ADC {
 			}
 
 	}	
+	}
+	@Test
+	public void Test_ADC_Advanced() {
+		try {
+			CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/ADC_Test.hex", 0);
+			
+			
+		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail("Unable to load test program");
+
+		}
+		c.pc = 0x1000;
+		c.run();
+		try {
+			int results = c.bus.read(0x108);
+			logger.debug(String.format("Computed Value = %02x", results));
+			assert(results == 0);
+		} catch (illegalAddressException | DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail("Unable to read computed value");
+		}
 	}
 	}	
 

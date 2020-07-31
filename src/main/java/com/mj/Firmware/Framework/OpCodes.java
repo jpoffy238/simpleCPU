@@ -10,6 +10,9 @@ import org.apache.logging.log4j.Logger;
 import com.mj.Firmware.ExecutionFlow.BCC;
 import com.mj.Firmware.ExecutionFlow.BCS;
 import com.mj.Firmware.ExecutionFlow.BEQ;
+import com.mj.Firmware.ExecutionFlow.BVC;
+import com.mj.Firmware.ExecutionFlow.*;
+
 import com.mj.Firmware.ExecutionFlow.BNE;
 import com.mj.Firmware.ExecutionFlow.BRK;
 import com.mj.Firmware.ExecutionFlow.HLT;
@@ -189,6 +192,9 @@ public  enum OpCodes {
 	BEQ(new BEQ()),
 	BCC(new BCC()),
 	BCS(new BCS()),
+	BVC(new BVC()),
+	BVS(new BVS()),
+	BMI(new BMI()),
 	BIT_ZP(new BIT_ZP()),
 	BIT_ABS(new BIT_ABS()),
 	AND_IMM(new AND_IMM()),

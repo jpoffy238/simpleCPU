@@ -569,6 +569,6 @@ thus:
 			c.ZFLAG.clear();
 		
 		}
-		c.pc++;
+		c.pc += 2;
 	}
 }

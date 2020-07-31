@@ -105,13 +105,13 @@ public abstract class Instruction implements machineState {
 		return loadAddress;
 	}
 	protected int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower = c.bus.read(c.pc);
+		int opperand_lower = c.bus.read(c.pc) & 0xff;
 		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
 
-		int opperand_upper = (int) (c.bus.read(c.pc + 1) & 0x00ff);
+		int opperand_upper = (int) (c.bus.read(c.pc + 1) & 0xff);
 		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
 
-		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
+		int loadAddress = (((opperand_upper << 8) ) + opperand_lower) & 0x0ffff;
 		logger.debug(String.format("Final Address %04x ", loadAddress));
 		return loadAddress;
 	}
