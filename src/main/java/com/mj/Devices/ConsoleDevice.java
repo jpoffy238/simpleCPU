@@ -22,6 +22,7 @@ public class ConsoleDevice implements charDevice {
 	}
 	public void write(int data) throws DeviceUnavailable {
 		// TODO Auto-generated method stub
+		System.out.append((char)data));
 		logger.debug("OUTPUT CHAR : " + (char)data);
 	}
 
