@@ -149,10 +149,12 @@ public abstract class Instruction implements machineState {
 	protected int getIndirect(CPU c) throws illegalAddressException, DeviceUnavailable {
 		int lower = c.bus.read(c.pc);
 		int upper = c.bus.read(c.pc + 1);
-		int lookupAddress = ((upper & 0xff) << 8) + (lower + 0xff);
-		lower = c.bus.read(lookupAddress);
-		upper = c.bus.read(lookupAddress + 1);
-		lookupAddress = ((upper & 0xff) << 8 ) + (lower + 0xff);
+		int PCAddress = ((upper & 0xff) << 8) + (lower & 0xff);
+		lower = c.bus.read(PCAddress);
+		upper = c.bus.read(PCAddress + 1);
+		int lookupAddress = ((upper & 0xff) << 8 ) + (lower & 0xff);
+		logger.debug(String.format("IndirectAddress PC[%04x] -> To Address [%04x]",PCAddress , lookupAddress));
+
 		return lookupAddress;
 	}
 
