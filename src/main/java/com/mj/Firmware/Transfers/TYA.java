@@ -18,6 +18,8 @@ public class TYA extends Instruction {
 	}
 	public void exeute(CPU c) {
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.a.set(c.y.get());
 		} catch (zflagException e) {
 			handleZException(c);

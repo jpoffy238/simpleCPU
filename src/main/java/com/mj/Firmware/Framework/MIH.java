@@ -1,26 +1,40 @@
 package com.mj.Firmware.Framework;
 
 import com.mj.cpu001.CPU;
+import com.mj.Devices.PBus;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class MIH extends Instruction {
 
 	public MIH() {
-		super((byte) (0x3E));
+		super((byte) (0xfb));
 	}
 
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
 		int interuptHandlerAddress = 0; 
-		if (c.getNMInterruptFired()) {
+		logger.debug("INTERRUPT=============================================================");
+		if (c.bus.IsNMInterruptRaised()) {
+			logger.debug("NM === INTERRUPT=============================================================");
 			interuptHandlerAddress = getNMInterruptHandlerAddress(c);
+			c.bus.clearNMInterupt();
 		} else {
-			if (c.getInterruptFired()) {
+			if (c.bus.IsInterruptRaised() ) {
+				logger.debug("INT/BRK === INTERRUPT=============================================================");
+				
 				interuptHandlerAddress = getInterruptHandlerAddress(c);
+				c.IFLAG.set();
+				c.bus.clearInterupt();
+				if (interuptHandlerAddress != 0xf000) {
+					logger.debug("BAD-INTERRUPT ADDRESS -- INT/BRK === INTERRUPT=============================================================");
+				}
 			} else {
-				if (c.getPowerOnResetFired()) {
+				if (c.bus.IsPowerOnResetRased()) {
+					logger.debug("RESET === INTERRUPT=============================================================");
 					interuptHandlerAddress = getResetHandlerAddress(c);
+					c.bus.clearpowerOnReset();
 				}
 			}
 		}
@@ -31,13 +45,15 @@ public class MIH extends Instruction {
 
 			// push on stack
 			c.sp--;
-			c.memory.write(c.sp, (byte) (upper & 0xff));
+			c.bus.write(c.sp, (byte) (upper & 0xff));
 			c.sp--;
-			c.memory.write(c.sp, (byte) (lower & 0xff));
+			c.bus.write(c.sp, (byte) (lower & 0xff));
 			c.sp--;
-			c.memory.write(c.sp, psr(c));
-
+			c.bus.write(c.sp, psr(c));
+			logger.debug(String.format("Interrupt Address = %04x " , interuptHandlerAddress));
 			c.pc = interuptHandlerAddress;
+			
+			
 		}
 	}
 

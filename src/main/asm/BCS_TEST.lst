@@ -1,0 +1,42 @@
+                        ;; Test app for BCS	Branch if carry flag set
+      = 1966            PROCESSOR=6502
+      = 1000            ORG=$1000
+      = 2000            VALUE=$2000
+      = 2001            RESULT=$2001
+
+      = 1000            START=$1000
+0000  A9 64             			LDA #100     ;; lOAD 10 into acc
+0002  69 AF             			ADC #175    ;; This should set cary flag
+0004  8D 0020           			STA VALUE    ;; store new value in value.
+0007  B0 06             			BCS SET       ;; If carry set call set subroutine
+0009  20 2610           			JSR CNS+ORG ;; else call carry clear subroutine
+000C  4C 1C10           			JMP HLT+ORG  ;; stop
+
+000F  20 1D10           SET:		JSR CST+ORG
+0012  4C 1C10           			JMP HLT+ORG
+
+0015  20 2610           CLR:		JSR CNS+ORG
+0018  4C 1C10           			JMP HLT+ORG
+001B  EA                			NOP
+001C  3F                HLT: BYTE $3F
+
+001D  A9 43             CST:		LDA #'C'
+001F  8D 0120           			STA RESULT
+0022  60                			RTS
+0023  EA                			NOP
+0024  EA                			NOP
+0025  3F                HLT2: BYTE $3F
+
+0026  A9 4E             CNS:		LDA #'N'
+0028  8D 0120           			STA RESULT
+002B  60                			RTS
+002C  EA                			NOP
+002D  EA                			NOP
+002E  3F                HLT3: BYTE $3F
+
+00000 Total Error(s)
+
+CLR                0015    CNS                0026    CST                001D
+HLT                001C    HLT2               0025    HLT3               002E
+ORG                1000 E  PROCESSOR          1966 E  RESULT             2001 E
+SET                000F    START              1000 E  VALUE              2000 E

@@ -1,41 +1,38 @@
 package com.mj.cpu001;
 
-import com.mj.Devices.Device;
-import com.mj.Devices.FileDevice;
-import com.mj.MachineState.cpu001decoder;
-import com.mj.exceptions.DeviceUnavailable;
-import com.mj.exceptions.illegalAddressException;
-import com.mj.memoryInterface.MemoryDriver;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.mj.Devices.DeviceBus;
+import com.mj.Devices.AddressRange;
+import com.mj.Devices.ConsoleDevice;
+import com.mj.Devices.PBus;
+import com.mj.Firmware.Framework.Decoder;
+import com.mj.Firmware.Framework.OpCodes;
+import com.mj.Firmware.Framework.cpu001decoder;
 import com.mj.memoryInterface.basicMemory;
+import com.mj.memoryInterface.basicROM;
 
 public class CPUMain {
-
+	private static final Logger logger = LogManager.getLogger(CPUMain.class);
 	public static void main(String[] args) {
-		
-		
-
-				MemoryDriver mem = new basicMemory();
-			mem.setIOPage(0xfe00);
-			Device fd = new FileDevice();
-			mem.registerDevice(0xfe00, fd);
-			try {
-				mem.write(0xfffc, (byte)0x00);
-				mem.write(0xfffd, (byte)0x10);
-				mem.write(0xfffe,(byte)0x00);
-				mem.write(0xffff,(byte)0x10);
-				mem.write(0xfffa,(byte)0x00);
-				mem.write(0xfffb, (byte)0x10);
-			} catch (illegalAddressException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (DeviceUnavailable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			
-		CPU c = new CPU( mem, new cpu001decoder());
+		PBus bus = new DeviceBus();
+		bus.registerDevice(new basicMemory(bus,
+					new AddressRange(0, 32*1024) ,
+					null, 0	));
 		
-	//	c.start();
+		
+		bus.registerDevice(new basicROM(bus, 
+				new AddressRange(0xff00, 0xffff),
+				null, 0));
+		bus.registerDevice(new ConsoleDevice(bus));
+		Decoder d =  new cpu001decoder();
+		
+		CPU c = new CPU(bus, d);
+		logger.error(String.format("Number of Opcodes = %d ", OpCodes.getMap().size()));
+		c.start();
 		}
 	
 	

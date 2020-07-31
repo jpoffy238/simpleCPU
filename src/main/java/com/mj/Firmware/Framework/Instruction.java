@@ -8,12 +8,13 @@ import org.apache.logging.log4j.Logger;
 
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.illegalOpCodeException;
 
 public abstract class Instruction implements machineState {
 
-	protected final  Logger logger = LogManager.getLogger("Instruction");
+	protected final  Logger logger = LogManager.getLogger(Instruction.class);
 	private byte opCode;
 
 	public final String KEY_OPCODE = "opcode";
@@ -50,8 +51,8 @@ public abstract class Instruction implements machineState {
 		opCode = op;
 	}
 
-	public void exeute(CPU c) throws illegalOpCodeException, illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub
+	public void exeute(CPU c) throws illegalOpCodeException, illegalAddressException, DeviceUnavailable, ROException {
+		
 	}
 
 	public byte getOpCode() {
@@ -67,21 +68,25 @@ public abstract class Instruction implements machineState {
 	}
 
 	protected int getInterruptHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower =  (int)(c.memory.read(0x00fffe) & 0x00ff);                     
+		int opperand_lower =  (int)(c.bus.read(0x00fffe) & 0x00ff);                     
 		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
 
-		int opperand_upper = (int) (c.memory.read (0x00ffff) & 0x00ff);
+		int opperand_upper = (int) (c.bus.read (0x00ffff) & 0x00ff);
 		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
 
 		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
 		logger.debug(String.format("Final Address %04x ", loadAddress));
+		if (loadAddress != 0xf000) {
+			logger.debug("BAD ADDRESS for Interrupt");
+			throw new DeviceUnavailable (loadAddress);
+		}
 		return loadAddress;
 	}
 	protected int getNMInterruptHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower =  (int)(c.memory.read(0x00fffa) & 0x00ff);                     
+		int opperand_lower =  (int)(c.bus.read(0x00fffa) & 0x00ff);                     
 		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
 
-		int opperand_upper = (int) (c.memory.read (0x00fffb) & 0x00ff);
+		int opperand_upper = (int) (c.bus.read (0x00fffb) & 0x00ff);
 		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
 
 		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
@@ -89,10 +94,10 @@ public abstract class Instruction implements machineState {
 		return loadAddress;
 	}
 	protected int getResetHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower =  (int)(c.memory.read(0x00fffc) & 0x00ff);                     
+		int opperand_lower =  (int)(c.bus.read(0x00fffc) & 0x00ff);                     
 		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
 
-		int opperand_upper = (int) (c.memory.read (0x00fffd) & 0x00ff);
+		int opperand_upper = (int) (c.bus.read (0x00fffd) & 0x00ff);
 		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
 
 		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
@@ -100,13 +105,13 @@ public abstract class Instruction implements machineState {
 		return loadAddress;
 	}
 	protected int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower = c.memory.read(c.pc);
+		int opperand_lower = c.bus.read(c.pc) & 0xff;
 		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
 
-		int opperand_upper = (int) (c.memory.read(c.pc + 1) & 0x00ff);
+		int opperand_upper = (int) (c.bus.read(c.pc + 1) & 0xff);
 		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
 
-		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
+		int loadAddress = (((opperand_upper << 8) ) + opperand_lower) & 0x0ffff;
 		logger.debug(String.format("Final Address %04x ", loadAddress));
 		return loadAddress;
 	}
@@ -124,30 +129,32 @@ public abstract class Instruction implements machineState {
 	}
 
 	protected int getZeroPageAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int operand = c.memory.read(c.pc);
+		int operand = c.bus.read(c.pc);
 		int address = (int) (operand) & 0x00ff;
 		return address;
 	}
 
 	protected int getZeroPageXAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int operand = c.memory.read(c.pc);
+		int operand = c.bus.read(c.pc);
 		int address = (int) (operand + c.x.get()) & 0x00ff;
 		return address;
 	}
 
 	protected int getZeroPageYAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int operand = c.memory.read(c.pc);
+		int operand = c.bus.read(c.pc);
 		int address = (int) (operand + c.y.get()) & 0x00ff;
 		return address;
 	}
 
 	protected int getIndirect(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int lower = c.memory.read(c.pc);
-		int upper = c.memory.read(c.pc + 1);
-		int lookupAddress = (upper & 0x00ff) << 8 + (lower + 0x00ff);
-		lower = c.memory.read(lookupAddress);
-		upper = c.memory.read(lookupAddress + 1);
-		lookupAddress = (upper & 0x00ff) << 8 + (lower + 0x00ff);
+		int lower = c.bus.read(c.pc);
+		int upper = c.bus.read(c.pc + 1);
+		int PCAddress = ((upper & 0xff) << 8) + (lower & 0xff);
+		lower = c.bus.read(PCAddress);
+		upper = c.bus.read(PCAddress + 1);
+		int lookupAddress = ((upper & 0xff) << 8 ) + (lower & 0xff);
+		logger.debug(String.format("IndirectAddress PC[%04x] -> To Address [%04x]",PCAddress , lookupAddress));
+
 		return lookupAddress;
 	}
 
@@ -169,11 +176,12 @@ public abstract class Instruction implements machineState {
 		 * in the zero page.
 		 */
 		int address;
-		int operand = c.memory.read(c.pc);
+		int operand = c.bus.read(c.pc) & 0xff;;
 		int pageZero = (operand + c.x.get()) & 0x00ff;
-		int lower = c.memory.read(pageZero);
-		int upper = c.memory.read(pageZero + 1);
-		address = (upper & 0x00ff) << 8 + (lower + 0x00ff);
+		int lower = c.bus.read(pageZero)   & 0xff;
+		int upper = c.bus.read((pageZero + 1) & 0xff ) & 0xff;
+		address = (upper & 0x00ff) << 8;
+		address +=  (lower);
 		return address;
 	}
 
@@ -201,11 +209,13 @@ public abstract class Instruction implements machineState {
 		 * address space.
 		 */
 		int address;
-		int operand = c.memory.read(c.pc);
+		int operand = c.bus.read(c.pc);
 		int pageZero = (operand) & 0x00ff;
-		int lower = c.memory.read(pageZero);
-		int upper = c.memory.read(pageZero + 1);
-		address = (upper & 0x00ff) << 8 + (((lower + c.y.get()) & 0x00ff));
+		int lower = c.bus.read(pageZero);
+		int upper = c.bus.read(pageZero + 1);
+		address = (upper & 0x00ff) << 8 ;
+		address += lower & 0x00ff;
+		address += (c.y.get() & 0x00ff);
 		return address;
 	}
 

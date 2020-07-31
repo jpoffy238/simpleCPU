@@ -64,9 +64,9 @@ EXEC
 		// 
 		
 			
-			int lower = c.memory.read(c.sp);
+			int lower = c.bus.read(c.sp);
 			c.sp++;
-			int upper = c.memory.read(c.sp);
+			int upper = c.bus.read(c.sp);
 			c.sp++;
 				
 		    

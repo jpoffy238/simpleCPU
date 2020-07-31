@@ -34,9 +34,13 @@ public class LDA_IMM extends Instruction {
 		 *         LDX #LO LABEL   ;Load the LSB of a 16 bit address into X
 		 *         LDY #HI LABEL   ;Load the MSB of a 16 bit address into Y
 		 */
-		byte m = c.memory.read(c.pc);
+		byte m = c.bus.read(c.pc);
+		String currentState = String.format("%-10s  #$ %-2x", getProperty(KEY_MNEMONIC),  (int)(m & 0xff));
+		logger.debug(currentState);
 		c.pc = (++c.pc);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.a.set(m);
 		} catch (zflagException z) {
 			handleZException(c);

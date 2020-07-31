@@ -18,8 +18,8 @@ public class LDA_ABS extends Instruction {
 		setProperty(KEY_MNEMONIC, "LDA");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABS);
 		setProperty(KEY_OPCODE, "0xad");
-		setProperty(KEY_INSTRUCTION_SIZE, "2");
-		setProperty(KEY_CYCLES, "2");
+		setProperty(KEY_INSTRUCTION_SIZE, "3");
+		setProperty(KEY_CYCLES, "3");
 		setProperty(KEY_FLAGS_EFFECTED, "Z,N");
 		setProperty(KEY_WEB,"http://www.obelisk.me.uk/6502/reference.html#LDA" );
 		setProperty(KEY_DESCRIPTION, "A,Z,N = M - Loads a byte of memory from "
@@ -28,10 +28,12 @@ public class LDA_ABS extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int address = getAbsoluteAddress(c);
-		byte m = c.memory.read(address);
+		byte m = c.bus.read(address);
 		String currentState = String.format("%-10s $(%-4x) Value[ %-2x]", getProperty(KEY_MNEMONIC), address, (int)(m & 0xff));
 		logger.debug(currentState);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.a.set(m);
 		} catch (zflagException e) {
 			handleZException(c);

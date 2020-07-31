@@ -1,0 +1,33 @@
+0000                    PROCESSOR .6502
+      = F000            ORG=$F000
+
+
+
+0000  78                START:	SEI
+0001  48                				PHA  ;; save acc
+0002  98                				TYA ;; transfere to A to push on stack
+0003  48                				PHA  ;; push y on stack
+0004  A2 14             				LDX #LEN  ;; setup 20 bytes to transfere
+0006  BD 00A0           LOOPA:	LDA RTC,X   ;; copy RTC to RAM
+0009  9D 0040           				STA RAM,X
+000C  CA                				DEX
+000D  D0 F7             				BNE LOOPA
+000F  BD 00A0           				LDA RTC,X   ;; copy RTC to RAM
+0012  9D 0040           				STA RAM,X
+0015  68                				PLA
+0016  A8                				TAY
+0017  68                				PLA
+0018  58                				CLI
+0019  40                				RTI
+001A                    END:
+      = A000            RTC=$A000
+      = 4000            RAM=$4000
+      = 0014            LEN=20
+                        ;	
+                        ;		;
+
+00000 Total Error(s)
+
+END                001A    LEN                0014 E  LOOPA              0006
+ORG                F000 E  PROCESSOR          0000    RAM                4000 E
+RTC                A000 E  START              0000

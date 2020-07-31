@@ -18,6 +18,8 @@ public class TAX extends Instruction {
 	}
 	public void exeute(CPU c) {
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.x.set(c.a.get());
 		} catch (zflagException e) {
 			handleZException(c);

@@ -26,8 +26,10 @@ public class LDY_ZPX extends Instruction {
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		int zeroPageAddress = getZeroPageXAddress(c); // will wrap around zero page 
-		int value = c.memory.read(zeroPageAddress);
+		int value = c.bus.read(zeroPageAddress);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.y.set(value);
 		} catch (zflagException e) {
 			handleZException(c);

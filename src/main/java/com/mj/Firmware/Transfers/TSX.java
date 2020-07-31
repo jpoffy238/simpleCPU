@@ -18,6 +18,8 @@ public class TSX extends Instruction {
 	}
 	public void exeute(CPU c) {
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.x.set(c.sp&0xff);
 		} catch (zflagException e) {
 			handleZException(c);

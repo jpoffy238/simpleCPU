@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.mj.Firmware.Framework.Instruction;
-import com.mj.Firmware.Load.Accumulator.LDA_ABS;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.illegalAddressException;
@@ -54,11 +53,11 @@ the BVC instruction will take 3 cycles no matter what address it is located at.
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		byte offset = (byte) (c.memory.read(c.pc) & 0x00ff);
+		byte offset = (byte) (c.bus.read(c.pc) & 0x00ff);
 		if ( ! c.ZFLAG.isSet()) {
 			String currentState = String.format("%-10s $(%-2x) Value[ %-4x] BANCHING", getProperty(KEY_MNEMONIC), offset , (int)(c.pc+offset));
 			logger.debug(currentState);
-			c.pc = (int)(c.pc+offset);
+			c.pc = (int)(c.pc+offset+1);
 		} else {
 			offset = 0;
 			String currentState = String.format("%-10s $(%-2x) Value[ %-4x] NO BANCH", getProperty(KEY_MNEMONIC), offset, (int)(c.pc+offset));

@@ -24,8 +24,10 @@ public class LDA_ABSX extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int address = getAbsoluteAddressX(c);
-		byte m = c.memory.read(address);
+		byte m = c.bus.read(address); 
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.a.set(m);
 		} catch (zflagException e) {
 			handleZException(c);

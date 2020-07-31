@@ -1,0 +1,132 @@
+Crasm 1.10:                                                   page  1
+
+                         1  CPU 6502
+                         2  OUTPUT HEX
+                         3  
+  1000                   4  * = $1000
+1000 78                  5          SEI
+1001 A90A                6          LDA #$0A     ;; lOAD 10 into acc
+1003 6C1610              7          JMP (TAD)   ;; Just to sub to add 1
+1006 8D0020              8  RT      STA VALUE    ;; store new value in value
+                      .
+1009 EA                  9          NOP
+100A 6C1A10             10          JMP (RDH)
+100D 3F                 11  HLT DB $3F
+                        12  
+100E 6901               13  ADDONE  ADC #$01
+1010 6C1810             14          JMP (TRT)
+1013 EA                 15          NOP
+1014 EA                 16          NOP
+1015 3F                 17  HLT2 DB $3F
+                        18  
+  2000                  19  VALUE = $2000
+1016 0E10               20  TAD DW ADDONE
+1018 0610               21  TRT DW RT
+101A 1510               22  RDH DW HLT2
+                        23  
+                        24  
+
+ERRORS:       0
+WARNINGS:     0
+
+Successful assembly...
+ Last address     101b (4123)
+ Code length        38 (56)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Crasm 1.10:                                                   page  2
+
+ 100E   Abs ADDONE                                           
+?100D   Abs HLT                                              
+ 1015   Abs HLT2                                             
+^101A   Abs RDH                                              
+ 1006   Abs RT                                               
+^1016   Abs TAD                                              
+^1018   Abs TRT                                              
+^2000   Abs VALUE                                            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

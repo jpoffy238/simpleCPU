@@ -1,7 +1,6 @@
 package com.mj.Firmware.Load.IndexX;
 
 import com.mj.Firmware.Framework.Instruction;
-import com.mj.Registers.registerFlags;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.illegalAddressException;
@@ -23,8 +22,10 @@ public LDX_IMM() {
 }
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		byte m = c.memory.read(c.pc);
+		byte m = c.bus.read(c.pc);
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.x.set(m);
 		} catch (zflagException e) {
 			c.ZFLAG.set();

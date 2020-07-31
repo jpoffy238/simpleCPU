@@ -1,182 +1,32 @@
 package com.mj.memoryInterface;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.mj.Devices.Device;
-import com.mj.Firmware.Framework.OpCodes;
-import com.mj.exceptions.DeviceUnavailable;
+import com.mj.Devices.AddressRange;
+import com.mj.Devices.PBus;
+import com.mj.Devices.PBus.BussId;
+import com.mj.Devices.PBus.DEVTYPE;
+import com.mj.Devices.PBus.IOALLOW;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
-public class basicMemory implements MemoryDriver {
-	final  Logger logger = LogManager.getLogger("basicMemory");
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-	public final static int maxMemorySize = 64 * 1024;;
-	private int ioPage;
-	private Map<Integer, Device> devices = new HashMap<Integer, Device>();
-	private byte[] memory;
+public class basicMemory extends AbstractMemoryLayer  {
+	
 
-	public basicMemory() {
-		memory = new byte[maxMemorySize];
-		int i = 0x1000;
-		/*
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = 0x40;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = 0x20;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = 0x10;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = 0x08;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = 0x04;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = 0x02;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = 0x01;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = 0x00;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0xc0;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0xa0;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0x90;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0x88;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0x84;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0x82;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0x81;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0x80;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0xff;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0x00;
-		memory[i++] = OpCodes.TEST.code();
-		memory[i++] = (byte) 0x80;
-		// 0xfe00
-		memory[i++] = OpCodes.LDA_IMM.code();
-		memory[i++] = 0x41;
-		memory[i++] = OpCodes.STA_ABS.code();
-		memory[i++] = 0x00;
-		memory[i++] = (byte)0xfe;
-		memory[i++] = OpCodes.LDA_IMM.code();
-		memory[i++] = 0x42;
-		memory[i++] = OpCodes.STA_ABS.code();
-		memory[i++] = 0x00;
-		memory[i++] = (byte)0xfe;		
-		memory[i++] = OpCodes.LDA_IMM.code();
-		memory[i++] = 0x43;
-		memory[i++] = OpCodes.STA_ABS.code();
-		memory[i++] = 0x00;
-		memory[i++] = (byte)0xfe;	
-		memory[i++] = OpCodes.LDA_IMM.code();
-		memory[i++] = 0x0a;
-		memory[i++] = OpCodes.STA_ABS.code();
-		memory[i++] = 0x00;
-		memory[i++] = (byte)0xfe;
-		*/
-		/*
-		memory[i++] = OpCodes.LDA_IMM.code(); // 0x1000
-		memory[i++] = (byte)0xff;                  		                  // 0x1001
-		memory[i++] = OpCodes.STA_ABS.code(); // 0x1002
-		memory[i++] = 0x01;                                         // 0x1003
-		memory[i++] = (byte)0xce;                            // 0x1004
-		memory[i++] = OpCodes.DEC_ABS.code();;
-		memory[i++] = OpCodes.LDA_IMM.code();
-		memory[i++] = 0x0a;
-		memory[i++] = OpCodes.STA_ABS.code();
-		memory[i++] = 0x01;
-		memory[i++] = (byte)0xce;
-		memory[i++] = OpCodes.LDA_ABS.code();
-		memory[i++] = 0x01;
-		memory[i++] = (byte)0xce;
-		memory[i++] = OpCodes.BNE.code();
-		memory[i++] = -7;
-		memory[i++] = OpCodes.HLT.code(); // 15
-*/
+	final Logger logger = LogManager.getLogger("basicMemory");
+	
+	final IOALLOW ioallow = IOALLOW.RW;
+	
+	
+	
+	public basicMemory(PBus bus, AddressRange memsize, String OptinalFileToLoad, int startAddress) {
+		super (bus, memsize, OptinalFileToLoad, startAddress);
+	
 	}
 
-	public byte read(int address) throws DeviceUnavailable, illegalAddressException {
-		// TODO Auto-generated method stub
-		int value = 0;
-		if ((address & 0xfff0) == ioPage) {
-			int pageAddress = address & 0x00ff;
-			Device d = devices.get(new Integer(pageAddress));
-			if (null == d) {
-				throw new DeviceUnavailable();
-			} else {
-					if ((address & 0x0001) == 1) {
-						value = d.status();
-					} else {
-						value = d.read();
-					}
-			}
-		} else {
-
-			if (address < maxMemorySize && address >= 0) {
-				value = (int) (memory[address] & 0xff);
-			} else {
-				throw new illegalAddressException();
-			} 
-		}
-
-		return (byte) (value & 0xff);
-	}
-
-	public void write(int address, byte data) throws illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub
-		// For devices the odd address is control while even is data.
-		if ((address & 0xfff0) == ioPage) {
-			logger.debug("In Device Page ");
-			int pageAddress = address & 0x00fe; // ensure even address
-			logger.debug(String.format("Address Requested %04x ", pageAddress));
-			Device d = devices.get(new Integer(pageAddress));
-			if (null == d) {
-				throw new DeviceUnavailable();
-			} else {
-				if ((address & 0x0001) == 1) {
-					d.status(data);
-				} else {
-					d.write(data);
-				}
-			}
-		} else {
-			if (address <= maxMemorySize && address > 0) {
-				memory[address] = (byte) (data & 0x00ff);
-			} else {
-				throw new illegalAddressException();
-			}
-		}
-	}
-
-	public void setIOPage(int address) {
-		// TODO Auto-generated method stub
-		ioPage = address & 0xfff0; // must be on 256 byte boundary
-	}
-
-	public int getIOPage() {
-		// TODO Auto-generated method stub
-		return ioPage;
-	}
-
-	public void registerDevice(int address, Device d) {
-		// TODO Auto-generated method stub
-		int pageAddress = address & 0x00ff;
-		devices.put(new Integer(pageAddress), d);
-	}
-
-	public void unregisterDevice(int address) {
-		// TODO Auto-generated method stub
-		int pageAddress = address & 0x00ff;
-		devices.remove(new Integer(pageAddress));
-	}
 
 }

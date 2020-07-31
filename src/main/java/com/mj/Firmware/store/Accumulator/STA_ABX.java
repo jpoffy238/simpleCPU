@@ -1,11 +1,17 @@
 package com.mj.Firmware.store.Accumulator;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.mj.Devices.RTC;
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class STA_ABX extends Instruction {
+	static Logger logger = LogManager.getLogger(STA_ABX.class);
 public STA_ABX() {
 	super((byte)0x9d);
 	setProperty(KEY_MNEMONIC, "STA");
@@ -16,7 +22,7 @@ public STA_ABX() {
 	setProperty(KEY_WEB,"http://6502.org/tutorials/6502opcodes.html#STA" );
 	setProperty(KEY_DESCRIPTION ,"M = A  Stores the contents of the accumulator into memory.");
 }
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
 		/* 
 		 * Zero Page Address
@@ -33,8 +39,8 @@ public STA_ABX() {
 		 *  instruction supports the mode (not all do).
 		 */
 		int address = getAbsoluteAddressX(c);
-		
-		c.memory.write(address, (byte)(c.a.get() & 0xff));
+		logger.debug(String.format("W: Address %04x Value %02x", address, c.a.get()));
+		c.bus.write(address, (byte)(c.a.get() & 0xff));
 		c.pc +=2;
 	}
 }

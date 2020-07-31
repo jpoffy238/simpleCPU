@@ -3,7 +3,6 @@ package com.mj.Firmware.Stack;
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
-import com.mj.exceptions.cflagException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
@@ -48,7 +47,7 @@ $68
 		// TODO Auto-generated method stub
 			
 		try {	
-			c.a.set(c.memory.read(c.sp));
+			c.a.set(c.bus.read(c.sp));
 		} catch (zflagException z) {
 			c.ZFLAG.set();
 		} catch (nflagException e) {

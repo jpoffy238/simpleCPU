@@ -20,7 +20,7 @@
         <Logger name="com.mj" level="debug" additivity="false">
             <AppenderRef ref="LogToRollingFile"/>
         </Logger>
-        <Root level="error">
+        <Root level="debug">
             <AppenderRef ref="LogToRollingFile"/>
         </Root>
     </Loggers>

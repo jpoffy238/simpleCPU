@@ -4,9 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.mj.Firmware.Framework.Instruction;
-import com.mj.Firmware.store.Accumulator.STA_ABS;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class DEC_ABS extends Instruction {
@@ -15,15 +15,17 @@ public class DEC_ABS extends Instruction {
 	public DEC_ABS() {
 		super((byte)0xce);
 	}
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		int address = getAbsoluteAddress(c);
 		
-		int data = c.memory.read(address);
+		int data = c.bus.read(address);
 		
 		String sadd = String.format("ABS %04x value %02x ", address, (byte)(data&0xff));
 		logger.debug("READ:" + sadd);
 		data--;
 		data &= 0x00ff;
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
 		if (data == 0) {
 			handleZException(c);
 		}
@@ -32,7 +34,7 @@ public class DEC_ABS extends Instruction {
 		}
 		sadd = String.format("ABS %04x value %02x ", address, (byte)(data&0xff));
 		logger.debug("WRITE:" + sadd);
-		c.memory.write(address, (byte)data);
+		c.bus.write(address, (byte)data);
 		c.pc+=2;
 		
 	}

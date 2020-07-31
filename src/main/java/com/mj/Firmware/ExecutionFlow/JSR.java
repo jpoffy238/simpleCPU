@@ -3,6 +3,7 @@ package com.mj.Firmware.ExecutionFlow;
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 /*
@@ -30,7 +31,7 @@ public class JSR extends Instruction {
 		setProperty(KEY_DESCRIPTION ,"JSR pushes the address-1 of the next operation " +
 				"on to the stack before transferring program control to the following address. Subroutines are normally terminated by a RTS op code.");
 	}
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// Jump to Subroutine  
 		// Push the high order PC+2 to stack 
 		// Push low order PC+2 to stack
@@ -41,15 +42,15 @@ public class JSR extends Instruction {
 			
 		    // push on stack
 		    c.sp--;
-			c.memory.write(c.sp, (byte)(upper & 0xff));
+			c.bus.write(c.sp, (byte)(upper & 0xff));
 			c.sp--;
-			c.memory.write(c.sp, (byte)(lower & 0xff));
+			c.bus.write(c.sp, (byte)(lower & 0xff));
 			
 			
 			// Load new jmp address into PC
-		    lower = (c.memory.read(c.pc)  & 0xff);
+		    lower = (c.bus.read(c.pc)  & 0xff);
 		    c.pc++;
-		    upper = (c.memory.read(c.pc) & 0xff);
+		    upper = (c.bus.read(c.pc) & 0xff);
 			int newpc =( (upper & 0x00ff) << 8) + (int)(lower & 0x00ff);
 			c.pc = newpc;
 		}

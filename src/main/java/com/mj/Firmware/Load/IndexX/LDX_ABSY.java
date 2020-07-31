@@ -24,8 +24,10 @@ public class LDX_ABSY extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int loadAddress = getAbsoluteAddressY(c);				
-		byte value = c.memory.read((int)(loadAddress));
+		byte value = c.bus.read((int)(loadAddress));
 		try {
+			c.ZFLAG.clear();
+			c.NFLAG.clear();
 			c.x.set(value);
 		} catch (zflagException e) {
 			handleZException(c);

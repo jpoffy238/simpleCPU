@@ -3,6 +3,7 @@ package com.mj.Firmware.ExecutionFlow;
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class BRK extends Instruction {
@@ -47,16 +48,16 @@ the BVC instruction will take 3 cycles no matter what address it is located at.
 		setProperty(KEY_DESCRIPTION, "BCC  (Branch on Carry NOT set )  If Carry NOT flag is set");
 	
 	}
-	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
+	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		// TODO Auto-generated method stub
 		int upper = (((c.pc) & 0xff00) >> 8);
 		int lower = (((c.pc) & 0x00ff));
 		c.sp--;
-		c.memory.write(c.sp, (byte) (upper & 0xff));
+		c.bus.write(c.sp, (byte) (upper & 0xff));
 		c.sp--;
-		c.memory.write(c.sp, (byte) (lower & 0xff));
+		c.bus.write(c.sp, (byte) (lower & 0xff));
 		c.sp--;
-		c.memory.write(c.sp, psr(c));
+		c.bus.write(c.sp, psr(c));
 
 		int IntAddress = getInterruptHandlerAddress(c);
 		c.pc = IntAddress;

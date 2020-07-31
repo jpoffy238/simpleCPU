@@ -36,7 +36,7 @@ public class BIT_ZP extends Instruction {
 	 */
 	public BIT_ZP() {
 		super((byte) (0x24));
-		setProperty(KEY_MNEMONIC, "BBIT");
+		setProperty(KEY_MNEMONIC, "BIT");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_REL);
 		setProperty(KEY_OPCODE, "0x24");
 		setProperty(KEY_INSTRUCTION_SIZE, "2");
@@ -50,7 +50,16 @@ public class BIT_ZP extends Instruction {
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 		int testAddress = getZeroPageAddress(c);
-		byte testValue = c.memory.read(testAddress);
+		byte testValue = c.bus.read(testAddress);
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
+		c.OFLAG.clear();
+		if ((0x80 & testValue) != 0) {
+			c.NFLAG.set();
+		}
+		if ((0x40 & testValue ) != 0 ) {
+			c.OFLAG.set();
+		}
 		int result = testValue & (byte) (c.a.get() & 0xff);
 		if (result == 0) {
 			c.ZFLAG.set();
