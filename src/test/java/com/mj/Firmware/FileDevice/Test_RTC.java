@@ -43,7 +43,7 @@ public class Test_RTC {
 	
 		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}
-	@Test
+	//@Test
 	public void Test_Reading_RTC() {
 		int i = 0x1000; // program load point
 		

@@ -36,7 +36,7 @@ public class  CPU_CreateUtil {
 	
 	
 	
-	bus.registerDevice(new ConsoleDevice(bus));
+	bus.registerDevice(new ConsoleDevice(bus, new AddressRange(0xe000, 0xe001)));
 	bus.registerDevice(rtc);
 		
 		 return  new CPU(bus, new cpu001decoder());

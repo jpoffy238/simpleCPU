@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.mj.Devices.AddressRange;
 import com.mj.Devices.PBus;
 import com.mj.Devices.PBus.BussId;
@@ -19,6 +22,7 @@ import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public abstract class AbstractMemoryLayer implements MemoryDriver {
+	private static final Logger logger = LogManager.getLogger(AbstractMemoryLayer.class);
 	private Lock readLock = new ReentrantLock();
 	private Lock writeLock = new ReentrantLock();
 	protected PBus sysbus;
@@ -140,10 +144,13 @@ public abstract class AbstractMemoryLayer implements MemoryDriver {
 }
 protected int addressMapper(int virtualAddress) throws  illegalAddressException {
 	if (! memrange.contains(virtualAddress)) {
+		logger.error(String.format("Unable to Map Address %04x" , virtualAddress));
+			
 		throw new illegalAddressException(virtualAddress, 0);
 	}
 		int localAddress = virtualAddress -  memrange.baseAddress() ;
 		if ((localAddress < 0 )  || ( localAddress >= memrange.size())) {
+			logger.error(String.format("Unable to Map Address %04x to local Adress %04x" , virtualAddress, localAddress));
 			throw new illegalAddressException(virtualAddress, localAddress);
 		}
 	
