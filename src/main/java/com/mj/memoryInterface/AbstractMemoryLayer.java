@@ -17,7 +17,6 @@ import com.mj.IntelHex.BasicIntelHexFiles;
 import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
 import com.mj.IntelHex.common.IntelHexRecord;
 import com.mj.IntelHex.common.IntelHexRecordType;
-import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 

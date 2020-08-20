@@ -15,7 +15,6 @@ import com.mj.exceptions.illegalAddressException;
 
 public class DeviceBus implements PBus {
 	private Lock readLock = new ReentrantLock();
-	private Lock writeLock = new ReentrantLock();
 	String formater = "DeviceType : %s10 : BusId : %s10 : Object : %s20";
 	private static final Logger logger = LogManager.getLogger(DeviceBus.class);
 	private Map<AddressRange, Device> devices = new HashMap<AddressRange, Device>();

@@ -9,9 +9,6 @@ import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.util.CPU_CreateUtil;
-import com.mj.Devices.PBus;
-import com.mj.Devices.PBus.BussId;
-import com.mj.Devices.PBus.DEVTYPE;
 
 public class basicROM extends AbstractMemoryLayer {
 
