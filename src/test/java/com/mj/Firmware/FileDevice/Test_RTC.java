@@ -11,6 +11,7 @@ import java.util.Calendar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import com.mj.IntelHex.BasicIntelHexFiles;
 import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
@@ -33,7 +34,7 @@ public class Test_RTC {
 	
 		logger.debug("In Setup -- Current cpu state: " + CPU.currentThread().getState());
 	}
-	//@Test
+	@Test
 	public void Test_Reading_RTC() {
 		int i = 0x1000; // program load point
 		

@@ -208,9 +208,9 @@ private int AsciiHexToInt(String data) throws IntelHexFileInvalidFormatException
 		String upperByte = data.substring(0, 2);
 		String LowerByte = data.substring(2, 4);
 		logger.debug("Upper = " + upperByte + " Lower = " + LowerByte);
-		int upperValue = (byte)(asciiHexToByte(upperByte) & 0x00ff);
-		int lowerValue = (byte)(asciiHexToByte(LowerByte) & 0x00ff);
-		returnValue = upperValue << 8;
+		int upperValue = (int)(asciiHexToByte(upperByte) & 0x00ff);
+		int lowerValue = (int)(asciiHexToByte(LowerByte) & 0x00ff);
+		returnValue = (upperValue << 8)&0x0000ffff;
 		returnValue += lowerValue;
 	} else {
 		if (data.length() == 2) {

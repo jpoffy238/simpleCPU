@@ -143,7 +143,7 @@ public abstract class AbstractMemoryLayer implements MemoryDriver {
 }
 protected int addressMapper(int virtualAddress) throws  illegalAddressException {
 	if (! memrange.contains(virtualAddress)) {
-		logger.error(String.format("Unable to Map Address %04x" , virtualAddress));
+		logger.error(String.format("Unable to Map Address %08x" , virtualAddress));
 			
 		throw new illegalAddressException(virtualAddress, 0);
 	}
