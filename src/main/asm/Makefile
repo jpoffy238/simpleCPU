@@ -4,6 +4,7 @@ ALL:  JSR_TEST.hex JMP_ABS.hex JMP_IND.hex ADC_Test.hex Echo.hex RTCInt.hex LDA_
 
 install: ALL
 	cp *.hex ../../test/resources
+	cp Echo.hex ../../main/resources
 
 clean: 
 	rm *.hex *.lst

@@ -76,8 +76,18 @@ public class ConsoleDevice implements charDevice {
 		if ((address & 0x0001) == 0) {
 			logger.debug("Reading from file ");
 			try {
-				returnValue =  (byte) System.console().reader().read();
+				char[] cbuff = new char[10];
+				
+				int chsread = 0;
+				while ( chsread <= 0 ) {
+					chsread = System.console().reader().read(cbuff,0, 1);
+					Thread.sleep(10);
+				}
+				returnValue =  (byte) cbuff[0];
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

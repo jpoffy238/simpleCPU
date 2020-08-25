@@ -7,18 +7,18 @@ COUT =$EC00
 
 START   JSR PRT
 WAIT    LDA COUT
-        BNE WAIT
+        BEQ WAIT
         STA COUT
         JMP START
         
 PRT     LDX #$10
         LDY #0
-        LDA PRPT,Y
+LOOP    LDA PRPT,Y
         BEQ PRTE
         STA COUT
         INY
         DEX
-        BNE PRT
+        BNE LOOP
         
 PRTE    RTS        
         

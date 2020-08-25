@@ -41,7 +41,7 @@ public class CPUMain {
 		logger.error(String.format("Number of Opcodes = %d ", OpCodes.getMap().size()));
 		//CPU_CreateUtil.load(bus, fileName, startAddress);
 		try {
-			CPU_CreateUtil.load(bus,  "/home/jpoffen/git/simpleCPU/src/main/asm/Echo.hex", 0);
+			CPU_CreateUtil.load(bus,  "Echo.hex", 0);
 		} catch (illegalAddressException | ROException | DeviceUnavailable | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

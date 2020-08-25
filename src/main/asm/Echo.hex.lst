@@ -9,18 +9,18 @@ Crasm 1.10:                                                   page  1
                          7  
 1000 200E10              8  START   JSR PRT
 1003 AD00EC              9  WAIT    LDA COUT
-1006 D0FB               10          BNE WAIT
+1006 F0FB               10          BEQ WAIT
 1008 8D00EC             11          STA COUT
 100B 4C0010             12          JMP START
                         13  
 100E A210               14  PRT     LDX #$10
 1010 A000               15          LDY #0
-1012 B91F10             16          LDA PRPT,Y
+1012 B91F10             16  LOOP    LDA PRPT,Y
 1015 F007               17          BEQ PRTE
 1017 8D00EC             18          STA COUT
 101A C8                 19          INY
 101B CA                 20          DEX
-101C D0F0               21          BNE PRT
+101C D0F4               21          BNE LOOP
                         22  
 101E 60                 23  PRTE    RTS
                         24  
@@ -67,12 +67,12 @@ Successful assembly...
 Crasm 1.10:                                                   page  2
 
  EC00   Abs COUT                                             
+ 1012   Abs LOOP                                             
 ^101F   Abs PRPT                                             
 ^100E   Abs PRT                                              
 ^101E   Abs PRTE                                             
  1000   Abs START                                            
  1003   Abs WAIT                                             
-
 
 
 
