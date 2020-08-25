@@ -2,8 +2,11 @@ package com.mj.IntelHex;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import com.mj.IntelHex.common.IntelHexFile;
@@ -27,13 +30,18 @@ public class BasicIntelHexFiles implements IntelHexFile {
 	
 	public ArrayList<IntelHexRecord> read(String filename) throws IOException, IntelHexFileChecksumMisMatchException {
 		// TODO Auto-generated method stub
-		File baseFile = new File(filename);
-		 BufferedReader br = new BufferedReader(new FileReader(baseFile)); 
+		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filename);
+		
+		if (inputStream == null) {
+			inputStream = new FileInputStream(new File (filename));
+			
+		}
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		  ArrayList<IntelHexRecord> records = new ArrayList<IntelHexRecord>();
 		  
 		  String string; 
 		 
-		  while ((string = br.readLine()) != null)  {
+		  while ((string = reader.readLine()) != null)  {
 			  IntelHexRecord hr = new BasicIntelHexRecord();
 			  try {
 				hr.parse(string);
@@ -44,8 +52,8 @@ public class BasicIntelHexFiles implements IntelHexFile {
 			  records.add(hr);
 		    System.out.println(string); 
 		  } 
-		  br.close();
-		  
+		  reader.close();
+		  inputStream.close();
 		  return records;
 		  
 	}

@@ -41,7 +41,7 @@ public class Test_RTC {
 		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
 		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
-			code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/RTC_TEST.hex");
+			code = testCode.read("RTC_TEST.hex");
 		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

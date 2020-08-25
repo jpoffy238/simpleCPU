@@ -29,7 +29,7 @@ public class Test_JSR {
 	@Test
 	public void Test_JSR01() {
 		try {
-		CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/JSR_TEST.hex", 0);
+		CPU_CreateUtil.load(c.bus, "JSR_TEST.hex", 0);
 		
 		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
 			// TODO Auto-generated catch block
@@ -66,7 +66,7 @@ public class Test_JSR {
 	public void Test_JSR02() {
 		
 		try {
-			CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/JSR_TEST2.hex", 0x1000);
+			CPU_CreateUtil.load(c.bus, "JSR_TEST2.hex", 0);
 			
 			
 		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
@@ -79,14 +79,15 @@ public class Test_JSR {
 		logger.debug("Starting CPU");
 		c.run();
 		int loopcount = 0;
-		int result = c.a.get();
+		
 		try {
 			loopcount = c.bus.read(0x1001);
 		} catch (illegalAddressException | DeviceUnavailable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-			logger.debug("What A is loaded with : ", +result);
+		int result = c.a.get();
+			logger.debug(String.format("A = [%02x]", result));
 			logger.debug(String.format("Loopcount = %d",loopcount));
 		try {
 			for (int idx = 1; idx < loopcount+1; idx++) {

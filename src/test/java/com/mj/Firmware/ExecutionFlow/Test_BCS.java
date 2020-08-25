@@ -41,7 +41,7 @@ public class Test_BCS {
 		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
 		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
-			code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/BCS_TEST.hex");
+			code = testCode.read("BCS_TEST.hex");
 		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -98,7 +98,7 @@ public class Test_BCS {
 		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
 		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
-			code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/BCS_TEST2.hex");
+			code = testCode.read("BCS_TEST2.hex");
 		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

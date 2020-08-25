@@ -1,0 +1,132 @@
+Crasm 1.10:                                                   page  1
+
+                         1  
+                         2  CPU 6502
+                         3  OUTPUT HEX
+                         4  
+  1000                   5  * = $1000
+                         6  
+1000 A90A                7  START           LDA #$0A
+1002 8D0020              8                          STA VALUE
+                         9  
+1005 3F                 10  HLT DB $3F
+  2000                  11  VALUE=$2000
+                        12  
+                        13  
+
+ERRORS:       0
+WARNINGS:     0
+
+Successful assembly...
+ Last address     1005 (4101)
+ Code length         c (12)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Crasm 1.10:                                                   page  2
+
+?1005   Abs HLT                                              
+?1000   Abs START                                            
+^2000   Abs VALUE                                            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

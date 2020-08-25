@@ -1,0 +1,132 @@
+Crasm 1.10:                                                   page  1
+
+                         1  CPU 6502
+                         2  OUTPUT HEX
+                         3  
+  1000                   4  * = $1000
+1000 A20A                5                  LDX #$0A     ;; Setup to cal ADD
+                              ONE 10 times
+1002 A90A                6                  LDA #$0A     ;; lOAD 10 into acc
+1004 201010              7  LOOP    JSR ADDONE  ;; Just to sub to add 1
+1007 9D0020              8                  STA VALUE,X    ;; store new valu
+                                e in value.
+100A CA                  9                  DEX
+100B D0F7               10                  BNE LOOP
+100D EA                 11                  NOP
+100E EA                 12                  NOP
+100F 3F                 13  HLT     DB $3F
+                        14  
+1010 6901               15  ADDONE  ADC #$01
+1012 60                 16                  RTS
+1013 EA                 17                  NOP
+1014 EA                 18                  NOP
+1015 3F                 19  HLT2    DB  $3F
+                        20  
+  2000                  21  * = $2000
+2000 00                 22  VALUE   DB $00
+                        23  
+                        24  
+
+ERRORS:       0
+WARNINGS:     0
+
+Successful assembly...
+ Last address     2000 (8192)
+ Code length        2e (46)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Crasm 1.10:                                                   page  2
+
+^1010   Abs ADDONE                                           
+?100F   Abs HLT                                              
+?1015   Abs HLT2                                             
+ 1004   Abs LOOP                                             
+^2000   Abs VALUE                                            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

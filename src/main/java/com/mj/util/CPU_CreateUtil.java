@@ -31,7 +31,7 @@ public class  CPU_CreateUtil {
 				null, 0	));
 		basicROM rom = new basicROM(bus, 
 				new AddressRange(0xf000, 0xffff),
-				"/home/jpoffen/git/simpleCPU/src/main/asm/RTCInt.hex", 0);
+				"RTCInt.hex", 0);
 		
 		bus.registerDevice(rom);
 	
