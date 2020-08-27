@@ -57,7 +57,7 @@ public class Test_FileDevice {
 		try {
 			Thread.sleep(2000);
 			int result = c.a.get();
-			logger.debug(String.format("What A is loaded with : ", +result));
+			logger.debug(String.format("What A is loaded with : %02x", result));
 			assert (result == c.bus.read(0x2000));
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block

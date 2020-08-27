@@ -1,11 +1,16 @@
 package com.mj.Devices;
 
+import java.io.Console;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.NonBlockingReader;
 
 import com.mj.Devices.PBus.BussId;
 import com.mj.Devices.PBus.DEVTYPE;
@@ -13,20 +18,40 @@ import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
-public class ConsoleDevice implements charDevice {
+public class ConsoleDevice implements charDevice , Runnable {
 	Queue<Integer> output = new LinkedList<Integer>();
 	Queue<Integer> input = new LinkedList<Integer>();
 	final  Logger logger = LogManager.getLogger(ConsoleDevice.class);
 	PBus sysBus;
-	AddressRange range = null;
+	Terminal terminal ;
+	NonBlockingReader reader;
+	PrintWriter writer;
+	Console con = null;
+	AddressRange range;
 	public ConsoleDevice(PBus SystemBus,AddressRange range ) {
 		sysBus = SystemBus;
 		this.range= range;
+		try {
+			terminal = TerminalBuilder.builder()
+				    .jna(true)
+				    .system(true)
+				    .build();
+			reader = terminal.reader();
+			writer = terminal.writer();
+			terminal.enterRawMode();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			// raw mode means we get keypresses rather than line buffered input
+		}
+		
+		
 	}
 	public void write(int data) throws DeviceUnavailable {
 		// TODO Auto-generated method stub
 
-		System.out.append((char)data);
+		
+		writer.append((char) data);
 
 	}
 
@@ -102,6 +127,7 @@ public class ConsoleDevice implements charDevice {
 	@Override
 	public int read() throws DeviceUnavailable {
 		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 	@Override
@@ -113,6 +139,33 @@ public class ConsoleDevice implements charDevice {
 	public void control(int data) throws DeviceUnavailable {
 		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		while (true) {
+			
+		
+		int peekresults = 0;
+		try {
+			peekresults = reader.peek(10);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		while ( peekresults > 0) {
+			try {
+				int inchar = reader.read();
+				input.add(new Integer(inchar));
+				peekresults = reader.peek(1);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
 	}
 
 }
