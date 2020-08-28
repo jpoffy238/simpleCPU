@@ -155,4 +155,7 @@ protected int addressMapper(int virtualAddress) throws  illegalAddressException 
 	
 	return localAddress;
 }	
+public void reset() {
+	
+}
 }

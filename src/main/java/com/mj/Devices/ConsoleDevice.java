@@ -19,9 +19,34 @@ import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public class ConsoleDevice implements charDevice , Runnable {
+	// Console Device usage:
+	// Console device uses 2 bytes of memory address space:
+	//	o The even byte (LSb=0) is used to read from OR write to
+	//    the console device.  The read operation can be set to
+	//    - Block until a key is pressed
+	//    - NoBlock returns a Null 0x00 character there is
+	//      no input available
+	//    - Raise Interrupt.
+	// The odd memory location (LSb=1) is the control/status
+	// for the console device. Bit definition:
+	// Read/Write Operations:
+	// Bit 0: Data Available Bit
+	//        - If 1 then data is available and can be read
+	//        - If 0 then data is not available
+	// Bit 1: Mode Bit
+	//        -  If 1 then Data read will block
+	//        -  If 0 then Data read will not block
+	// Bit 2: Interrupt Mode
+	//        - If 1 then device will raise the interrupt.
+	//        - If 0 then device will not raise interrupt when data is available.
+	// Bit 3: Unused
+	// Bit 4-7: (Upper nibble) Number of Characters Available for reading (0-15)
+	// 
+	//
 	Queue<Integer> output = new LinkedList<Integer>();
 	Queue<Integer> input = new LinkedList<Integer>();
 	final  Logger logger = LogManager.getLogger(ConsoleDevice.class);
+	byte status = 0;
 	PBus sysBus;
 	Terminal terminal ;
 	NonBlockingReader reader;
@@ -40,9 +65,10 @@ public class ConsoleDevice implements charDevice , Runnable {
 			writer = terminal.writer();
 			terminal.enterRawMode();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		
 			e.printStackTrace();
-			// raw mode means we get keypresses rather than line buffered input
+			// raw mode means we get each key press rather 
+			// than line buffered input
 		}
 		
 		
@@ -84,8 +110,6 @@ public class ConsoleDevice implements charDevice , Runnable {
 
 	public void write(int address, byte data) throws illegalAddressException, ROException, DeviceUnavailable {
 		if ((address & 0x0001) == 0) {
-			
-			logger.debug("OUTPUT CHAR : " + (char)data);
 			write(data);
 		} else {
 			logger.debug("Control   : " + data);
@@ -99,25 +123,32 @@ public class ConsoleDevice implements charDevice , Runnable {
 		// TODO Auto-generated method stub
 		byte returnValue = 0;
 		if ((address & 0x0001) == 0) {
-			logger.debug("Reading from file ");
-			try {
-				char[] cbuff = new char[10];
-				
-				int chsread = 0;
-				while ( chsread <= 0 ) {
-					chsread = System.console().reader().read(cbuff,0, 1);
-					Thread.sleep(10);
-				}
-				returnValue =  (byte) cbuff[0];
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} 
+			returnValue =  (byte) read(); // get character from console
+		} else {
+		
+			returnValue =  (byte) status(); // get status flags of the console
+		}
 		return returnValue;
+//		if ((address & 0x0001) == 0) {
+//			logger.debug("Reading from file ");
+//			try {
+//				char[] cbuff = new char[10];
+//				
+//				int chsread = 0;
+//				while ( chsread <= 0 ) {
+//					chsread = System.console().reader().read(cbuff,0, 1);
+//					Thread.sleep(10);
+//				}
+//				returnValue =  (byte) cbuff[0];
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		} 
+//		return returnValue;
 	}
 
 	public void raiseInterrupt() {
@@ -127,17 +158,22 @@ public class ConsoleDevice implements charDevice , Runnable {
 	@Override
 	public int read() throws DeviceUnavailable {
 		// TODO Auto-generated method stub
+		if (input.isEmpty()) {
+			return 0;
+		} else {
+			Integer i = input.remove();
+			return (byte) (i & 0x00ff);
+		}
 		
-		return 0;
 	}
 	@Override
 	public int status() throws DeviceUnavailable {
 		// TODO Auto-generated method stub
-		return 0;
+		return (byte)status;
 	}
 	@Override
 	public void control(int data) throws DeviceUnavailable {
-		// TODO Auto-generated method stub
+		status = (byte)(data & 0x00ff);
 		
 	}
 	@Override
@@ -149,6 +185,7 @@ public class ConsoleDevice implements charDevice , Runnable {
 		int peekresults = 0;
 		try {
 			peekresults = reader.peek(10);
+			//raiseInterrupt();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -166,6 +203,11 @@ public class ConsoleDevice implements charDevice , Runnable {
 			
 		}
 	}
+	}
+	@Override
+	public void reset() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

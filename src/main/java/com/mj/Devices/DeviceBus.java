@@ -158,6 +158,12 @@ public class DeviceBus implements PBus {
 			}
 	}
 	}
+
+	@Override
+	public void resetDevice() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 
 	

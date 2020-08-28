@@ -92,4 +92,10 @@ public class RTC extends Thread implements Device {
 		}
 		readLock.unlock();
 	}
+
+	@Override
+	public void reset() {
+		// TODO Auto-generated method stub
+		
+	}
 }
