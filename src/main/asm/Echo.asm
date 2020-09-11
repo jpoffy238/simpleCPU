@@ -4,7 +4,7 @@ PAGE 100,150
 
 * = $1000
 
-COUT =$EC00
+COUT = $EC00
 
 START   JSR PRT		;; print prompt
 WAIT    LDA COUT 	;; grab char from console - it though echos char.

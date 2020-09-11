@@ -81,13 +81,6 @@ public class ConsoleDevice extends Thread implements charDevice  {
 
 	}
 
-	
-
-	
-	
-
-	
-
 	public void status(int data) throws DeviceUnavailable {
 		// TODO Auto-generated method stub
 		logger.debug("STatus control Word = " + data);
@@ -162,7 +155,7 @@ public class ConsoleDevice extends Thread implements charDevice  {
 			return 0;
 		} else {
 			Integer i = input.remove();
-			return (byte) (i & 0x00ff);
+			return (byte) (i.byteValue() & 0x00ff);
 		}
 		
 	}
