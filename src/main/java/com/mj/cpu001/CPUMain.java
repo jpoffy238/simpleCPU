@@ -33,8 +33,8 @@ public class CPUMain {
 		bus.registerDevice(new basicROM(bus, 
 				new AddressRange(0xff00, 0xffff),
 				null, 0));
-
-		bus.registerDevice(new ConsoleDevice(bus, new AddressRange(0xec00, 0xec01)));
+		ConsoleDevice con = new ConsoleDevice(bus, new AddressRange(0xec00, 0xec01));
+		bus.registerDevice(con);
 		Decoder d =  new cpu001decoder();
 		
 		CPU c = new CPU(bus, d);
@@ -46,6 +46,7 @@ public class CPUMain {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		con.start();
 		c.start();
 		}
 	

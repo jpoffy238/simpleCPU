@@ -18,7 +18,7 @@ import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
-public class ConsoleDevice implements charDevice , Runnable {
+public class ConsoleDevice extends Thread implements charDevice  {
 	// Console Device usage:
 	// Console device uses 2 bytes of memory address space:
 	//	o The even byte (LSb=0) is used to read from OR write to
@@ -113,7 +113,7 @@ public class ConsoleDevice implements charDevice , Runnable {
 			write(data);
 		} else {
 			logger.debug("Control   : " + data);
-			status(data);
+			control (data);
 		}
 		
 		
