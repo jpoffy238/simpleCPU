@@ -6,7 +6,7 @@ Crasm 1.10:                                                                     
                          4  
   1000                   5  * = $1000
                          6  
-  EC00                   7  COUT =$EC00
+  EC00                   7  COUT = $EC00
                          8  
 1000 201210              9  START   JSR PRT         ;; print prompt
 1003 AD00EC             10  WAIT    LDA COUT        ;; grab char from console - it though echos char.
