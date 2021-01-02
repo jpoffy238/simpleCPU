@@ -16,7 +16,7 @@ public abstract class Instruction implements machineState {
 
 	protected final  Logger logger = LogManager.getLogger(Instruction.class);
 	private byte opCode;
-
+	protected AddressMode addressMode;
 	public final String KEY_OPCODE = "opcode";
 	public final String KEY_MNEMONIC = "Mnemonic";
 	public final String KEY_INSTRUCTION_SIZE = "InstructionSize";
