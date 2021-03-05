@@ -537,6 +537,7 @@ thus:
 		if (c.CFLAG.isSet() ) {
 			carryValue = 1;
 		}
+		if ( ! c.DFLAG.isSet() ) {
 	//	V = 0 when U1 + U2 >= 128 and U1 + U2 <= 383 ($17F)
 	//  V = 1 when U1 + U2 <  128 or  U1 + U2 >  383 ($17F)
 		int result = m + a + carryValue;
@@ -568,6 +569,40 @@ thus:
 			c.NFLAG.set();
 			c.ZFLAG.clear();
 		
+		}
+		} else {
+			// BDC math
+			int AcUppNib;
+			int AcLowNib;
+			int OprUppNib;
+			int OprLowNib;
+			AcLowNib = a & 0x000f;
+			AcUppNib = (a & 0x00f0) >> 4;
+			OprUppNib = (m & 0x00f0) >> 4;
+		        OprLowNib =  m & 0x000f ;
+			int carry = c.CFLAG.isSet() ? 1 : 0;	
+			int ncarry = 0;
+			int result = AcLowNib + OprLowNib + carry;
+			if (result > 9) {
+				result = result - 10;
+				ncarry = 1;
+			}
+			AcLowNib = result;
+			result = AcUppNib + OprUppNib + ncarry;
+			if ( result > 9) {
+				result = result - 10;
+				c.CFLAG.set();
+			}
+			try {
+			c.a.set((result << 4) + AcLowNib);		
+			} catch ( zflagException e ) {
+				c.ZFLAG.set();
+				c.NFLAG.clear();
+			} catch (nflagException e) {
+				c.ZFLAG.clear();
+				c.NFLAG.clear();
+			}
+
 		}
 		c.pc += 2;
 	}

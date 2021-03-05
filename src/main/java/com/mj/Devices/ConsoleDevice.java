@@ -46,7 +46,7 @@ public class ConsoleDevice extends Thread implements charDevice  {
 	Queue<Integer> output = new LinkedList<Integer>();
 	Queue<Integer> input = new LinkedList<Integer>();
 	final  Logger logger = LogManager.getLogger(ConsoleDevice.class);
-	byte status = 0;
+	int status = 0;
 	PBus sysBus;
 	Terminal terminal ;
 	NonBlockingReader reader;
@@ -83,6 +83,7 @@ public class ConsoleDevice extends Thread implements charDevice  {
 
 	public void status(int data) throws DeviceUnavailable {
 		// TODO Auto-generated method stub
+		status = data;
 		logger.debug("STatus control Word = " + data);
 	}
 
