@@ -1,5 +1,7 @@
 package com.mj.Firmware.Math;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -8,12 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.mj.Devices.AddressRange;
-import com.mj.Devices.ConsoleDevice;
-import com.mj.Devices.DeviceBus;
-import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.OpCodes;
-import com.mj.Firmware.Framework.cpu001decoder;
 import com.mj.IntelHex.BasicIntelHexFiles;
 import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
 import com.mj.IntelHex.common.IntelHexRecord;
@@ -21,8 +18,6 @@ import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
-import com.mj.memoryInterface.basicMemory;
-import com.mj.memoryInterface.basicROM;
 import com.mj.util.CPU_CreateUtil;
 
 public class Test_ADC {
@@ -338,6 +333,30 @@ public class Test_ADC {
 			}
 
 	}	
+	}
+	@Test
+	public void Test_ADC_Advanced() {
+		try {
+			CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/ADC_Test.hex", 0);
+			
+			
+		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail("Unable to load test program");
+
+		}
+		c.pc = 0x1000;
+		c.run();
+		try {
+			int results = c.bus.read(0x108);
+			logger.debug(String.format("Computed Value = %02x", results));
+			assert(results == 0);
+		} catch (illegalAddressException | DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail("Unable to read computed value");
+		}
 	}
 	}	
 

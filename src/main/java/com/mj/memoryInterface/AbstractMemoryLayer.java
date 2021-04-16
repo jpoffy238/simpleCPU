@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.mj.Devices.AddressRange;
 import com.mj.Devices.PBus;
 import com.mj.Devices.PBus.BussId;
@@ -14,11 +17,11 @@ import com.mj.IntelHex.BasicIntelHexFiles;
 import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
 import com.mj.IntelHex.common.IntelHexRecord;
 import com.mj.IntelHex.common.IntelHexRecordType;
-import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
 public abstract class AbstractMemoryLayer implements MemoryDriver {
+	private static final Logger logger = LogManager.getLogger(AbstractMemoryLayer.class);
 	private Lock readLock = new ReentrantLock();
 	private Lock writeLock = new ReentrantLock();
 	protected PBus sysbus;
@@ -111,6 +114,7 @@ public abstract class AbstractMemoryLayer implements MemoryDriver {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			
+			
 		}
 		for (int x = 0; x < code.size(); x++) {
 			IntelHexRecord r = code.get(x);
@@ -139,13 +143,19 @@ public abstract class AbstractMemoryLayer implements MemoryDriver {
 }
 protected int addressMapper(int virtualAddress) throws  illegalAddressException {
 	if (! memrange.contains(virtualAddress)) {
+		logger.error(String.format("Unable to Map Address %08x" , virtualAddress));
+			
 		throw new illegalAddressException(virtualAddress, 0);
 	}
 		int localAddress = virtualAddress -  memrange.baseAddress() ;
 		if ((localAddress < 0 )  || ( localAddress >= memrange.size())) {
+			logger.error(String.format("Unable to Map Address %04x to local Adress %04x" , virtualAddress, localAddress));
 			throw new illegalAddressException(virtualAddress, localAddress);
 		}
 	
 	return localAddress;
 }	
+public void reset() {
+	
+}
 }

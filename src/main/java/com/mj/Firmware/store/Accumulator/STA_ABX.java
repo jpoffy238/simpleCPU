@@ -3,7 +3,6 @@ package com.mj.Firmware.store.Accumulator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.mj.Devices.RTC;
 import com.mj.Firmware.Framework.Instruction;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;

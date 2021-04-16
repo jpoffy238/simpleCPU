@@ -10,11 +10,6 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.mj.Devices.AddressRange;
-import com.mj.Devices.ConsoleDevice;
-import com.mj.Devices.DeviceBus;
-import com.mj.Devices.PBus;
-import com.mj.Firmware.Framework.cpu001decoder;
 import com.mj.IntelHex.BasicIntelHexFiles;
 import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
 import com.mj.IntelHex.common.IntelHexRecord;
@@ -23,8 +18,6 @@ import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
-import com.mj.memoryInterface.basicMemory;
-import com.mj.memoryInterface.basicROM;
 import com.mj.util.CPU_CreateUtil;
 
 public class Test_BCS {
@@ -48,7 +41,7 @@ public class Test_BCS {
 		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
 		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
-			code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/BCS_TEST.hex");
+			code = testCode.read("BCS_TEST.hex");
 		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -105,7 +98,7 @@ public class Test_BCS {
 		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
 		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
-			code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/BCS_TEST2.hex");
+			code = testCode.read("BCS_TEST2.hex");
 		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

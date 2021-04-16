@@ -3,27 +3,16 @@ package com.mj.Firmware.ExecutionFlow;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.mj.Devices.AddressRange;
-import com.mj.Devices.ConsoleDevice;
-import com.mj.Devices.DeviceBus;
-import com.mj.Devices.PBus;
-import com.mj.Firmware.Framework.cpu001decoder;
-import com.mj.IntelHex.BasicIntelHexFiles;
-import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
-import com.mj.IntelHex.common.IntelHexRecord;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
-import com.mj.memoryInterface.basicMemory;
-import com.mj.memoryInterface.basicROM;
 import com.mj.util.CPU_CreateUtil;
 
 public class Test_JSR {
@@ -39,39 +28,17 @@ public class Test_JSR {
 
 	@Test
 	public void Test_JSR01() {
-		int i = 0x1000;
-		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
-		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
-			code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/JSR_TEST.hex");
-		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
+		CPU_CreateUtil.load(c.bus, "JSR_TEST.hex", 0);
+		
+		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			fail("Unable to load test program");
-		}
-		for (int x = 0; x < code.size(); x++) {
-			IntelHexRecord r = code.get(x);
-			byte[] program = r.getData();
-			try {
-				for (int idx = 0; idx < program.length; idx++) {
-					c.bus.write(i + idx, program[idx]);
-				}
-
-			} catch (illegalAddressException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (DeviceUnavailable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (ROException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			}
 
 		}
+
+		
 
 		logger.debug("Starting CPU");
 		c.run();
@@ -97,51 +64,30 @@ public class Test_JSR {
 
 	@Test
 	public void Test_JSR02() {
-		int i = 0x1000;
-		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
-		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
+		
 		try {
-			code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/JSR_TEST2.hex");
-		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
+			CPU_CreateUtil.load(c.bus, "JSR_TEST2.hex", 0);
+			
+			
+		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			fail("Unable to load test program");
-		}
-		for (int x = 0; x < code.size(); x++) {
-			IntelHexRecord r = code.get(x);
-			byte[] program = r.getData();
-			try {
-				for (int idx = 0; idx < program.length; idx++) {
-					c.bus.write(i + idx, program[idx]);
-				}
-
-			} catch (illegalAddressException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (DeviceUnavailable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (ROException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			}
 
 		}
 
 		logger.debug("Starting CPU");
 		c.run();
 		int loopcount = 0;
-		int result = c.a.get();
+		
 		try {
 			loopcount = c.bus.read(0x1001);
 		} catch (illegalAddressException | DeviceUnavailable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-			logger.debug("What A is loaded with : ", +result);
+		int result = c.a.get();
+			logger.debug(String.format("A = [%02x]", result));
 			logger.debug(String.format("Loopcount = %d",loopcount));
 		try {
 			for (int idx = 1; idx < loopcount+1; idx++) {

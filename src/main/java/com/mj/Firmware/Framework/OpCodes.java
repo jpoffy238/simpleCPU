@@ -10,10 +10,14 @@ import org.apache.logging.log4j.Logger;
 import com.mj.Firmware.ExecutionFlow.BCC;
 import com.mj.Firmware.ExecutionFlow.BCS;
 import com.mj.Firmware.ExecutionFlow.BEQ;
+import com.mj.Firmware.ExecutionFlow.BVC;
+import com.mj.Firmware.ExecutionFlow.*;
+
 import com.mj.Firmware.ExecutionFlow.BNE;
 import com.mj.Firmware.ExecutionFlow.BRK;
 import com.mj.Firmware.ExecutionFlow.HLT;
 import com.mj.Firmware.ExecutionFlow.JMP_ABS;
+import com.mj.Firmware.ExecutionFlow.JMP_IND;
 import com.mj.Firmware.ExecutionFlow.JSR;
 import com.mj.Firmware.ExecutionFlow.NOP;
 import com.mj.Firmware.ExecutionFlow.RTS;
@@ -188,6 +192,9 @@ public  enum OpCodes {
 	BEQ(new BEQ()),
 	BCC(new BCC()),
 	BCS(new BCS()),
+	BVC(new BVC()),
+	BVS(new BVS()),
+	BMI(new BMI()),
 	BIT_ZP(new BIT_ZP()),
 	BIT_ABS(new BIT_ABS()),
 	AND_IMM(new AND_IMM()),
@@ -234,6 +241,7 @@ public  enum OpCodes {
 	
 	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
+	JMP_IND(new JMP_IND()),
 	JSR(new JSR()),
 	RTS(new RTS()),
 	RTI(new RTI()),

@@ -3,7 +3,6 @@ package com.mj.cpu001;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.mj.Devices.CPUBus;
 import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.Decoder;
 import com.mj.Firmware.Framework.OpCodes;

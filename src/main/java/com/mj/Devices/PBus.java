@@ -27,6 +27,8 @@ public interface PBus extends CPUBus {
 
 	public byte[] blockRead(BussId bus, int destAddress) throws illegalAddressException, DeviceUnavailable;
 
+	public void resetDevice();
+	
 	public void raiseInterupt();
 
 	public void raiseNMInterupt();
