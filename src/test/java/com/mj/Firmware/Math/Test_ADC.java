@@ -85,7 +85,8 @@ public class Test_ADC {
 		} catch (illegalAddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			assert (false);assert(c.CFLAG.isSet());
+			assert (false);
+			
 		} catch (DeviceUnavailable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -300,13 +301,13 @@ public class Test_ADC {
 
 	}	
 	
-	// @Test
+	@Test
 	public void Test_ADC_Basic07() {
 		int i = 0x1000;
 		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
 		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
-			 code = testCode.read("/home/jpoffen/git/simpleCPU/src/main/asm/LDA_IMM_TEST.hex");
+			 code = testCode.read("LDA_IMM_TEST.hex");
 		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -331,13 +332,14 @@ public class Test_ADC {
 				e.printStackTrace();
 				assert(false);
 			}
+			
 
 	}	
 	}
 	@Test
 	public void Test_ADC_Advanced() {
 		try {
-			CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/ADC_Test.hex", 0);
+			CPU_CreateUtil.load(c.bus, "ADC_Test.hex", 0);
 			
 			
 		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {

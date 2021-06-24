@@ -28,11 +28,13 @@ public class gpregister implements generalPurpose {
 	public void inc() throws zflagException, nflagException { 
 		// TODO Auto-generated method stub
 	value++;
+	value&=0x00ff;
+	
 	if (value == 0) {
 		throw new zflagException();
 	} 
 	
-	if ( value < 0 ) {
+	if ( (value&0x0080)  != 0 ) {
 		throw new nflagException();
 	}
 		
@@ -46,7 +48,7 @@ public class gpregister implements generalPurpose {
 		if (value == 0) {
 			throw new zflagException();
 		} 
-		if ( value < 0 ) {
+		if ( (value&0x0080)  != 0 ) {
 			throw new nflagException();
 		}
 		
