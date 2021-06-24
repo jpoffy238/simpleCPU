@@ -1,13 +1,14 @@
 package com.mj.Firmware.Math.ADC;
 
 import com.mj.Firmware.Framework.Instruction;
+import com.mj.Firmware.Math.Math_Abstract;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.nflagException;
 import com.mj.exceptions.zflagException;
 
-public class ADC_ABSX extends ADC_Abstract {
+public class ADC_ABSX extends Math_Abstract {
 	public ADC_ABSX() {
 		super((byte)0x7d);
 		// TODO Auto-generated constructor stub
