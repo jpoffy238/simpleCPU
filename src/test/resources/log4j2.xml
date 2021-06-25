@@ -17,7 +17,7 @@
 
     <Loggers>
         <!-- avoid duplicated logs with additivity=false -->
-        <Logger name="com.mj" level="debug" additivity="false">
+        <Logger name="com.mj" level="error" additivity="false">
             <AppenderRef ref="LogToRollingFile"/>
         </Logger>
         <Root level="debug">

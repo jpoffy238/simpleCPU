@@ -43,7 +43,7 @@ public class BasicIntelHexRecord implements IntelHexRecord {
 	private IntelHexFields currentField ;
 	public IntelHexRecord parse(String data) throws IntelHexFileInvalidFormatException, IntelHexFileChecksumMisMatchException {
 		// TODO Auto-generated method stub
-		logger.debug("Data to parse" + data);
+		logger.trace("Data to parse" + data);
 		currentField = IntelHexFields.StartCode;
 		if ( ':' != data.charAt(IntelHexFields.StartCode.getStart())) {
 			throw new IntelHexFileInvalidFormatException(IntelHexFields.StartCode, data);
@@ -51,15 +51,15 @@ public class BasicIntelHexRecord implements IntelHexRecord {
 		currentField = IntelHexFields.ByteCount;
 		recordLength = (AsciiHexToInt(data.substring(IntelHexFields.ByteCount.getStart(),
 				IntelHexFields.ByteCount.getEnd() ))) & 0x00ff;
-		logger.debug("data length = " + String.format("%02x [%d]", recordLength, recordLength));
+		logger.trace("data length = " + String.format("%02x [%d]", recordLength, recordLength));
 		currentField = IntelHexFields.Address;
 		address = AsciiHexToInt(data.substring(IntelHexFields.Address.getStart(), IntelHexFields.Address.getEnd()));
-		logger.debug(String.format("Address = %04x ",address));
+		logger.trace(String.format("Address = %04x ",address));
 		currentField = IntelHexFields.RecordType;
 		type = IntelHexRecordType.search(AsciiHexToInt(
 				data.substring(IntelHexFields.RecordType.getStart(),
 						IntelHexFields.RecordType.getEnd() )));
-		logger.debug(String.format("Type = %02x",type.valueOf()));
+		logger.trace(String.format("Type = %02x",type.valueOf()));
 		
 		int dataEnd = recordLength*2 +  IntelHexFields.Data.getStart();
 		int checksumStart = dataEnd;
@@ -150,11 +150,11 @@ public class BasicIntelHexRecord implements IntelHexRecord {
 			checksum += data[i];
 		}
 		int twocomp = (( (checksum ^0xffff) + 1) & 0x00ff);
-		logger.debug(String.format("Computed twos complements checksum = %02x", twocomp));
+		logger.trace(String.format("Computed twos complements checksum = %02x", twocomp));
 		
 		// checksum += this.checksum;
 		checksum &= 0x00ff;
-		logger.debug(String.format("Computed checksum = %02x", checksum));
+		logger.trace(String.format("Computed checksum = %02x", checksum));
 		
 		if   (( ((byte)checksum + (byte)twocomp) & 0x00ff) == 0 ) {
 			return true;
@@ -207,7 +207,7 @@ private int AsciiHexToInt(String data) throws IntelHexFileInvalidFormatException
 	if (data.length() == 4) {
 		String upperByte = data.substring(0, 2);
 		String LowerByte = data.substring(2, 4);
-		logger.debug("Upper = " + upperByte + " Lower = " + LowerByte);
+		logger.trace("Upper = " + upperByte + " Lower = " + LowerByte);
 		int upperValue = (int)(asciiHexToByte(upperByte) & 0x00ff);
 		int lowerValue = (int)(asciiHexToByte(LowerByte) & 0x00ff);
 		returnValue = (upperValue << 8)&0x0000ffff;
