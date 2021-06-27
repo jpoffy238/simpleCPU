@@ -1,0 +1,16 @@
+CPU 6502
+OUTPUT HEX
+
+* = $1000
+
+	LDX	#$00 ;; use to
+	SED		;; set BCD mode
+LOOP	LDA	#$09
+	ADC #$01
+	STA (STRBS, X)
+	INX
+
+	NOP
+HLT	DB $3F
+
+STRBS DW $2000

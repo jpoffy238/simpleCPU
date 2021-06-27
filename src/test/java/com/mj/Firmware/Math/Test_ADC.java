@@ -360,5 +360,27 @@ public class Test_ADC {
 			fail("Unable to read computed value");
 		}
 	}
+	
+	@Test
+	public void Test_ADC_BCD01() {
+		try {
+			CPU_CreateUtil.load(c.bus, "ADC_DEC_mode.hex", 0);
+			
+			
+		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail("Unable to load test program");
+
+		}
+		c.pc = 0x1000;
+		c.run();
+		
+			int results = c.a.get();
+			
+			logger.debug(String.format("Computed Value = %02x", results));
+			assert(results == 0x10);
+		
+	}
 	}	
 

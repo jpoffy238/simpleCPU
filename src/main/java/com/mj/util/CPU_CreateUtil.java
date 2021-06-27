@@ -50,7 +50,7 @@ public class  CPU_CreateUtil {
 		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
 			code = testCode.read(fileName);
-		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
+		} catch (IntelHexFileChecksumMisMatchException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			
