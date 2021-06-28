@@ -14,11 +14,11 @@ RESULT=$2001
 		JSR CNS ;; else call carry clear subroutine
 		JMP HLT  ;; stop
 
-SET		JSR CST+ORG
-		JMP HLT+ORG
+SET		JSR CST
+		JMP HLT
 
-CLR		JSR CNS+ORG
-		JMP HLT+ORG
+CLR		JSR CNS
+		JMP HLT
 		NOP
 HLT DB $3F
 

@@ -37,39 +37,18 @@ public class Test_BCS {
 
 	@Test
 	public void Test_BCS_01() {
-		int i = 0x1000; // program load point
-		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
-		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
 		try {
-			code = testCode.read("BCS_TEST.hex");
-		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			fail("Unable to load test program");
-		}
-		for (int x = 0; x < code.size(); x++) {
-			IntelHexRecord r = code.get(x);
-			byte[] program = r.getData();
-			try {
-				for (int idx = 0; idx < program.length; idx++) {
-					c.bus.write(i + idx + r.getAddress(), program[idx]);
-				}
 
-			} catch (illegalAddressException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (DeviceUnavailable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				assert (false);
-			} catch (ROException e) {
+			CPU_CreateUtil.load(c.bus, "BCS_TEST.hex", 0);
+		
+			} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				assert (false);
 			}
+	
 
-		}
+		
 
 		logger.debug("Starting CPU");
 		c.run();
@@ -94,42 +73,19 @@ public class Test_BCS {
 
 	@Test
 	public void Test_BCS_02() {
-		int i = 0x1000; // program load point
-		BasicIntelHexFiles testCode = new BasicIntelHexFiles();
-		ArrayList<IntelHexRecord> code = new ArrayList<IntelHexRecord>();
+	
 		try {
-			code = testCode.read("BCS_TEST2.hex");
-		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			fail("Unable to load test program");
-		}
-		for (int x = 0; x < code.size(); x++) {
-			IntelHexRecord r = code.get(x);
-			if (r.getRecordType() == IntelHexRecordType.DATA) {
 
-				byte[] program = r.getData();
-				try {
-					for (int idx = 0; idx < program.length; idx++) {
-						c.bus.write(i + idx + r.getAddress(), program[idx]);
-					}
-
-				} catch (illegalAddressException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					assert (false);
-				} catch (DeviceUnavailable e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					assert (false);
-				} catch (ROException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					assert (false);
-				}
-
+			CPU_CreateUtil.load(c.bus, "BCS_TEST2.hex", 0);
+		
+			} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				assert (false);
 			}
-		}
+	
+		
+		
 
 		logger.debug("Starting CPU");
 		c.run();

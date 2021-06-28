@@ -7,8 +7,8 @@ OUTPUT HEX
 	SED		;; set BCD mode
 LOOP	LDA	#$09
 	ADC #$01
-	STA (STRBS, X)
-	INX
+;;	STA (STRBS, X)
+;;	INX
 
 	NOP
 HLT	DB $3F
