@@ -148,41 +148,41 @@ public abstract class Math_Abstract extends Instruction {
 	}
 
 	
-	protected void AddBCD(CPU c, int m) {
-		// BDC math
-		int a = c.a.get();
-		int AcUppNib;
-		int AcLowNib;
-		int OprUppNib;
-		int OprLowNib;
-		AcLowNib = a & 0x000f;
-		AcUppNib = (a & 0x00f0) >> 4;
-		OprUppNib = (m & 0x00f0) >> 4;
-		OprLowNib = m & 0x000f;
-		int carry = c.CFLAG.isSet() ? 1 : 0;
-		int ncarry = 0;
-		int result = AcLowNib + OprLowNib + carry;
-		if (result > 9) {
-			result = result - 10;
-			ncarry = 1;
-		}
-		AcLowNib = result;
-		result = AcUppNib + OprUppNib + ncarry;
-		if (result > 9) {
-			result = result - 10;
-			c.CFLAG.set();
-		}
-		try {
-			c.a.set((result << 4) + AcLowNib);
-		} catch (zflagException e) {
-			c.ZFLAG.set();
-			c.NFLAG.clear();
-		} catch (nflagException e) {
-			c.ZFLAG.clear();
-			c.NFLAG.clear();
-		}
-
-	}
+//	protected void AddBCD(CPU c, int m) {
+//		// BDC math
+//		int a = c.a.get();
+//		int AcUppNib;
+//		int AcLowNib;
+//		int OprUppNib;
+//		int OprLowNib;
+//		AcLowNib = a & 0x000f;
+//		AcUppNib = (a & 0x00f0) >> 4;
+//		OprUppNib = (m & 0x00f0) >> 4;
+//		OprLowNib = m & 0x000f;
+//		int carry = c.CFLAG.isSet() ? 1 : 0;
+//		int ncarry = 0;
+//		int result = AcLowNib + OprLowNib + carry;
+//		if (result > 9) {
+//			result = result - 10;
+//			ncarry = 1;
+//		}
+//		AcLowNib = result;
+//		result = AcUppNib + OprUppNib + ncarry;
+//		if (result > 9) {
+//			result = result - 10;
+//			c.CFLAG.set();
+//		}
+//		try {
+//			c.a.set((result << 4) + AcLowNib);
+//		} catch (zflagException e) {
+//			c.ZFLAG.set();
+//			c.NFLAG.clear();
+//		} catch (nflagException e) {
+//			c.ZFLAG.clear();
+//			c.NFLAG.clear();
+//		}
+//
+//	}
 	protected void AddBCD2(CPU c, int m) {
 		// BDC math
 		int a = c.a.get();
