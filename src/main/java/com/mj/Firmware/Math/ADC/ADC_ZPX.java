@@ -24,7 +24,7 @@ public class ADC_ZPX extends Math_Abstract {
 		int m = (byte)(c.bus.read(address) & 0xff);
 		
 		if (c.DFLAG.isSet()) {
-			AddBCD(c, m);
+			AddBCD2(c, m);
 		} else {
 			AddCarryBinaryMode(c, m);
 		}

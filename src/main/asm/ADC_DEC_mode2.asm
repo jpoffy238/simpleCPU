@@ -5,8 +5,8 @@ OUTPUT HEX
 
 	LDX	#$00 ;; use to
 	SED		;; set BCD mode
-LOOP	LDA	#$09
-	ADC #$01
+	LDA	#$99
+	ADC #$01  ;; Answer should be 00 with C = 1
 	NOP
 HLT	DB $3F
 

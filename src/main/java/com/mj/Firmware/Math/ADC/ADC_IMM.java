@@ -26,7 +26,7 @@ public class ADC_IMM extends Math_Abstract {
 		int m = (c.bus.read(c.pc) & 0x00ff);
 		
 		if (c.DFLAG.isSet()) {
-			AddBCD(c, m);
+			AddBCD2(c, m);
 		} else {
 			AddCarryBinaryMode(c, m);
 		}

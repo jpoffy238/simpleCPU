@@ -10,7 +10,25 @@ public abstract class Math_Abstract extends Instruction {
 	public Math_Abstract(byte opcode) {
 		super(opcode);
 	}
-
+	protected int convertToBinary(int bcdValue) {
+		// bcdValue is only a byte value
+		int result = 0;
+		int AcUppNib = (bcdValue & 0x00f0) >> 4;
+		int AcLowNib = bcdValue & 0x000f;
+		
+		result = AcUppNib*10 + AcLowNib ;
+		return result;
+	}
+	
+	protected int convertToBDC(int binaryValue) {
+		int result = 0;
+		int remainderlower = binaryValue%10;
+		int upperValue = (binaryValue - remainderlower) / 10;
+		result = (upperValue << 4);
+		result += remainderlower;
+		
+		return result;
+	}
 	protected void AddCarryBinaryMode(CPU c, int m) {
 
 		int a = c.a.get();
@@ -38,7 +56,8 @@ public abstract class Math_Abstract extends Instruction {
 		} else {
 			c.CFLAG.clear();
 		}
-
+	
+	
 		try {
 			c.a.set(result & 0xff);
 		} catch (zflagException e) {
@@ -167,33 +186,37 @@ public abstract class Math_Abstract extends Instruction {
 	protected void AddBCD2(CPU c, int m) {
 		// BDC math
 		int a = c.a.get();
-		int AcUppNib = (a & 0x00f0) >> 4;
-		int AcLowNib = a & 0x000f;
-		int OprUppNib = (m & 0x00f0) >> 4;
-		int OprLowNib = m & 0x000f;
-		int carry = c.CFLAG.isSet() ? 1 : 0;
-		int result = AcUppNib*10 + AcLowNib + OprUppNib*10 + OprLowNib + carry;
-		
-		int ncarry = 0;
-		
-		if (result > 9) {
-			result = result - 10;
-			ncarry = 1;
+		int carryValue = 0;
+		int a_as_bin = convertToBinary(a);
+		int m_as_bin = convertToBinary(m);
+		// For bcd numbers - just convert to binary and add
+		// Then convert back to BCD
+		if (c.CFLAG.isSet()) {
+			carryValue = 1;
 		}
-		AcLowNib = result;
-		result = AcUppNib + OprUppNib + ncarry;
-		if (result > 9) {
-			result = result - 10;
-			c.CFLAG.set();
+		c.CFLAG.clear();
+		int result_as_bin = a_as_bin + m_as_bin + carryValue;
+		boolean carry = result_as_bin  > 99; 
+		if (carry) {
+			result_as_bin -= 100;
 		}
+		int resultAsBCD = (convertToBDC(result_as_bin)&0x00ff);
+		// So now that we added them - if the value is > 99 we need to set carry flag
+		// 99 is bc we only have 1 byte 
+		
 		try {
-			c.a.set((result << 4) + AcLowNib);
+			c.a.set(resultAsBCD);
 		} catch (zflagException e) {
 			c.ZFLAG.set();
 			c.NFLAG.clear();
 		} catch (nflagException e) {
 			c.ZFLAG.clear();
+			// with BCD - we can never have a negative  value
+			// There is no sign bit.
 			c.NFLAG.clear();
+		}
+		if (carry) {
+			c.CFLAG.set();
 		}
 
 	}
