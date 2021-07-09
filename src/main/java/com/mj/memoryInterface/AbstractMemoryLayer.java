@@ -125,13 +125,6 @@ public abstract class AbstractMemoryLayer implements MemoryDriver {
 					for (int idx = 0; idx < program.length; idx++) {
 						int VirtualAddress =  startAddress + idx + r.getAddress();
 						int localMemoryAddress = addressMapper(VirtualAddress);
-//						try {
-//							sysbus.write(VirtualAddress, program[idx]);
-//						} catch (ROException | illegalAddressException | DeviceUnavailable e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-						
 						memory[localMemoryAddress] = program[idx];
 					}
 
