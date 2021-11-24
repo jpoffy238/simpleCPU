@@ -7,7 +7,7 @@ install: $(patsubst %.asm,%.hex,$(wildcard *.asm))
 	cp Echo.hex ../../main/resources
 
 clean: 
-	rm *.hex *.lst
+	rm -f *.hex *.lst
 
 %.hex : %.asm
 	crasm  $< -o $@ > $(@).lst

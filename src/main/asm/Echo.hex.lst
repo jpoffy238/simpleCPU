@@ -1,4 +1,4 @@
-Crasm 1.10:                                                                                                                             page  1
+Crasm 1.8:                                                                                                                             page  1
 
                          1  CPU 6502
                          2  OUTPUT HEX
@@ -98,7 +98,7 @@ Successful assembly...
 
 
 
-Crasm 1.10:                                                                                                                             page  2
+Crasm 1.8:                                                                                                                             page  2
 
  EC00   Abs COUT                                              1016   Abs LOOP                                             
 ^1023   Abs PRPT                                             ^1012   Abs PRT                                              
