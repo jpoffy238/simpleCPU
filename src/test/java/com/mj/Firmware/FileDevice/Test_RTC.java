@@ -112,7 +112,7 @@ public class Test_RTC {
 		logger.debug("RTC_Time  " + ouput);
 		
 
-		logger.debug ( "Comparing RTC " + ouput  + " to " + tmp);
+		logger.error ( "Comparing RTC " + ouput  + " to " + tmp);
 		assert(tmp.equals(ouput));
 		
 		

@@ -21,8 +21,9 @@ public class RTC extends Thread implements Device {
 	PBus bus;
 	public RTC(PBus bus) {
 		this.bus = bus;
-;
+		now();
 	}
+
 
 	public DEVTYPE getDeviceType() {
 		// TODO Auto-generated method stub
@@ -55,7 +56,7 @@ public class RTC extends Thread implements Device {
 		byte value = (byte) time[localAddress];
 		logger.debug(String.format("Address %04x Virtual Address %04x Value %02x", localAddress, address, value));
 		readLock.unlock();
-		return (byte) time[localAddress];
+		return (byte) value;
 	}
 
 	@Override
@@ -91,6 +92,8 @@ public class RTC extends Thread implements Device {
 			
 		}
 		readLock.unlock();
+		String t = new String(time);
+		logger.debug("RTC-NOW: " + t);
 	}
 
 	@Override
