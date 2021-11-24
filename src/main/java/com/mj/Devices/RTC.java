@@ -56,7 +56,11 @@ public class RTC extends Thread implements Device {
 		byte value = (byte) time[localAddress];
 		logger.debug(String.format("Address %04x Virtual Address %04x Value %02x", localAddress, address, value));
 		readLock.unlock();
+<<<<<<< HEAD
 		return (byte) value;
+=======
+		return value;
+>>>>>>> 82766c052f60ebf1c3fa47df821a77ecd66b4471
 	}
 
 	@Override
@@ -94,6 +98,10 @@ public class RTC extends Thread implements Device {
 		readLock.unlock();
 		String t = new String(time);
 		logger.debug("RTC-NOW: " + t);
+<<<<<<< HEAD
+=======
+		
+>>>>>>> 82766c052f60ebf1c3fa47df821a77ecd66b4471
 	}
 
 	@Override

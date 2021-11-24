@@ -41,7 +41,7 @@ EOS		STY STL      ;; String length in Y so store in it 0 page mem
 		PLA
 		TYA
 		PLA
-		CLI
+		CLI   ;; allow interupts
 		RTS
 		
 

@@ -82,21 +82,20 @@ public class Test_RTC {
 		c.start();
 		c.bus.startDevices();
 		int retry=0;
-		
+	
 		try {
-			while ( ((byte)c.bus.read(0x4000) == 0) ) {
-				retry++;
-				Thread.sleep(100);
-				if (retry > 10) {
-					break;
-				}
-				logger.debug(String.format("Found null at %04x - retryCount = %d",  0x4000, retry));
-			}
-		} catch (illegalAddressException | DeviceUnavailable | InterruptedException e1) {
+			Thread.sleep(2000);
+			logger.debug(String.format("Found null at %04x - retryCount = %d", 0x4000, retry));
+		} catch ( InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	
+		try {
+			c.join();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		logger.debug("CPU Terminated");
 		byte []  results = new byte[DATE_FORMAT_NOW.length()];
 		for (i=0; i < DATE_FORMAT_NOW.length() ; i++) {
