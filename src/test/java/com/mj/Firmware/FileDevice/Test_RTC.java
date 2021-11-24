@@ -91,6 +91,7 @@ public class Test_RTC {
 			e1.printStackTrace();
 		}
 		c.bus.stopDevices();
+		c.currentThread().interrupt();
 		logger.debug("CPU Terminated");
 		byte []  results = new byte[DATE_FORMAT_NOW.length()];
 		for (i=0; i < DATE_FORMAT_NOW.length() ; i++) {
