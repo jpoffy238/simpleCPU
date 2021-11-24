@@ -1,4 +1,4 @@
-Crasm 1.8:                                                   page  1
+Crasm 1.10:                                                   page  1
 
                          1  
                          2  CPU 6502
@@ -64,7 +64,7 @@ Successful assembly...
 
 
 
-Crasm 1.8:                                                   page  2
+Crasm 1.10:                                                   page  2
 
 ?1005   Abs HLT                                              
 ?1000   Abs START                                            

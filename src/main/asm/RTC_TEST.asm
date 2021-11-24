@@ -21,7 +21,7 @@ WAIT	NOP              ;; do nothing waste time
 HLT DB $3F
 
 STRLN
-		NOP  		;; don't allow interrupts got cmpute string length
+		SEI  		;; don't allow interrupts got cmpute string length
 		PHA		;; Save current status of thing
 		TYA 
 		PHA
@@ -41,7 +41,7 @@ EOS		STY STL      ;; String length in Y so store in it 0 page mem
 		PLA
 		TYA
 		PLA
-
+		CLI   ;; allow interupts
 		RTS
 		
 
