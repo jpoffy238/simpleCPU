@@ -70,14 +70,14 @@ public class RTC extends Thread implements Device {
 	public void run() {
 		// TODO Auto-generated method stub
 		
-		while (!Thread.currentThread().isInterrupted()) {
+		while (!isInterrupted()) {
 			now();
 			bus.raiseInterupt();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return;	
 			}
 
 		}
