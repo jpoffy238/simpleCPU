@@ -1,6 +1,7 @@
 package com.mj.Devices;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -158,11 +159,25 @@ public class DeviceBus implements PBus {
 			}
 	}
 	}
-
+	public void stopDevices() {
+		Device d = null;
+		Set<AddressRange> s = devices.keySet();
+		for ( AddressRange r : s) {
+			d = devices.get(r);
+			if (d instanceof Thread) {
+				((Thread) d).interrupt();
+			}
+	}
+	}
 	@Override
 	public void resetDevice() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public List<Device> getDevices() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 

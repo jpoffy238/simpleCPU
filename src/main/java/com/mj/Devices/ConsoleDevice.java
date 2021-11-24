@@ -173,13 +173,13 @@ public class ConsoleDevice extends Thread implements charDevice {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		while (true) {
+		boolean run = true;
+		while (run && !Thread.currentThread().isInterrupted()) {
 
 			int peekresults = 0;
 			
 
-			while (true) {
-				try {
+		try {
 					peekresults = reader.peek(10);
 					if (peekresults > 0) {
 						int value = reader.read();
@@ -187,11 +187,14 @@ public class ConsoleDevice extends Thread implements charDevice {
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					
+					run = false;
 				}
 
-			}
+			
 		}
+		logger.debug("Char Device stopped");
+		
 	}
 
 	@Override

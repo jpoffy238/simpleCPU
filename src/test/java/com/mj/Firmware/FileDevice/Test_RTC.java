@@ -81,21 +81,16 @@ public class Test_RTC {
 		logger.debug("Starting CPU");
 		c.start();
 		c.bus.startDevices();
-		int retry=0;
+		
 	
 		try {
 			Thread.sleep(2000);
-			logger.debug(String.format("Found null at %04x - retryCount = %d", 0x4000, retry));
+			
 		} catch ( InterruptedException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		try {
-			c.join();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		c.bus.stopDevices();
 		logger.debug("CPU Terminated");
 		byte []  results = new byte[DATE_FORMAT_NOW.length()];
 		for (i=0; i < DATE_FORMAT_NOW.length() ; i++) {
