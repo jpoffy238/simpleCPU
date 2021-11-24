@@ -308,4 +308,5 @@ public abstract class Instruction implements machineState {
 			c.CFLAG.set();
 		}
 	}
+	
 }

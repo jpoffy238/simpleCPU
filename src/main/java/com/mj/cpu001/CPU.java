@@ -19,6 +19,7 @@ public class CPU extends Thread {
 	public CPU(PBus bus, Decoder dcd) {
 		this.bus =bus;
 		decoder = dcd;
+		bus.raisepowerOnReset();
 	}
     private static final Logger logger = LogManager.getLogger(CPU.class);
 
@@ -64,8 +65,9 @@ public Decoder getDecoder() {
 		y.reset();
 		pc = 0x1000;
 		sp = (0x01ff);
-
+		
 		logger.debug(dump());
+		
 	}
 
 	public String dump() {

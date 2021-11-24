@@ -26,14 +26,15 @@ public class MIH extends Instruction {
 				interuptHandlerAddress = getInterruptHandlerAddress(c);
 				c.IFLAG.set();
 				c.bus.clearInterupt();
-				if (interuptHandlerAddress != 0xf000) {
-					logger.debug("BAD-INTERRUPT ADDRESS -- INT/BRK === INTERRUPT=============================================================");
-				}
 			} else {
 				if (c.bus.IsPowerOnResetRased()) {
 					logger.debug("RESET === INTERRUPT=============================================================");
 					interuptHandlerAddress = getResetHandlerAddress(c);
 					c.bus.clearpowerOnReset();
+					c.reset();
+					c.pc = interuptHandlerAddress;
+					// this is a special case -  need to not push cpu status on stack.
+					return;
 				}
 			}
 		}

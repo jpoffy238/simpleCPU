@@ -11,6 +11,14 @@ public class DEX extends Instruction {
 
 	public DEX() {
 		super((byte)0xca);
+		setProperty(KEY_MNEMONIC, "DEX");
+		setProperty(KEY_ADDRESSING_MODE, "IMPLIED");
+		setProperty(KEY_OPCODE, "0xca");
+		setProperty(KEY_INSTRUCTION_SIZE, "1");
+		setProperty(KEY_CYCLES, "2");
+		setProperty(KEY_FLAGS_EFFECTED, "Z,N");
+		setProperty(KEY_WEB,"http://www.obelisk.me.uk/6502/reference.html#DEX" );
+		setProperty(KEY_DESCRIPTION, "Decrement X register by 1 - set flags as needed ");
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		try {
