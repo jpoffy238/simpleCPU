@@ -21,30 +21,78 @@ public class SBC_ABS extends Instruction {
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub
-		// http://www.obelisk.me.uk/6502/reference.html#ADC
-     	//
-		// Addressing Mode 	Opcode  Bytes	Cycles
-        // Zero Page	X              $75		2		    4
+
+		int address = getAbsoluteAddress(c);
+		int m = (byte)(c.bus.read(address) & 0xff);
+		
+		int a = c.a.get();
+
+		
+		
+		int carryValue  = 0;
+		if (c.CFLAG.isSet() ) {
+			carryValue = 1;
+		}
+	//	V = 0 when U1 + U2 >= 128 and U1 + U2 <= 383 ($17F)
+	//  V = 1 when U1 + U2 <  128 or  U1 + U2 >  383 ($17F)
+		int result = a  - m - (1- carryValue);
+	//   V = 1 when S1 + S2 <  -128 or  S1 + S2 >  127
+		// V = 1 when U1 + U2 <  128 or  U1 + U2 >  383 ($17F)
+		if ((result < 128 ) || (result > 383)) {
+			c.OFLAG.clear();
+		}
+		if ((result <= 383 )&& (result >= 128)) {
+			c.OFLAG.set();
+		}
 	
-		/*ADC - Add with Carry
-		 *  A,Z,C,N = A+M+C
-		 * This instruction adds the contents of a memory 
-		 * location to the accumulator together with the 
-		 * carry bit. If overflow occurs the carry bit is set, 
-		 * this enables multiple byte addition to be performed.
-		 * 
-		 * Processor Status after use:
-		 * 
-		 * C 	Carry Flag 	Set if overflow in bit 7
-		 * Z 	Zero Flag 	Set if A = 0
-		 * I 	    Interrupt Disable 	Not affected
-		 * D 	Decimal Mode Flag 	Not affected
-		 * B 	Break Command 	Not affected
-		 * V 	Overflow Flag 	Set if sign bit is incorrect
-		 * N 	Negative Flag 	Set if bit 7 set
-		 * 
-		 * [Return to Main Page] The Overflow (V) Flag Explained by Bruce Clark
+		// When the addition result is greater than 255, the carry is set.
+		if (result > 255 ) {
+			c.CFLAG.set();
+		} else {
+			c.CFLAG.clear();
+	}
+		
+	
+		try {
+			c.a.set(result & 0xff);
+		} catch (zflagException e) {
+			// TODO Auto-generated catch block
+			c.ZFLAG.set();
+			c.NFLAG.clear();
+		} catch (nflagException e) {
+			// TODO Auto-generated catch block
+			c.NFLAG.set();
+			c.ZFLAG.clear();
+		
+		}
+		c.pc += 2;
+	}
+}
+
+// TODO Auto-generated method stub
+// http://www.obelisk.me.uk/6502/reference.html#ADC
+	//
+// Addressing Mode 	Opcode  Bytes	Cycles
+// Zero Page	X              $75		2		    4
+
+/*ADC - Add with Carry
+ *  A,Z,C,N = A+M+C
+ * This instruction adds the contents of a memory 
+ * location to the accumulator together with the 
+ * carry bit. If overflow occurs the carry bit is set, 
+ * this enables multiple byte addition to be performed.
+ * 
+ * Processor Status after use:
+ * 
+ * C 	Carry Flag 	Set if overflow in bit 7
+ * Z 	Zero Flag 	Set if A = 0
+ * I 	    Interrupt Disable 	Not affected
+ * D 	Decimal Mode Flag 	Not affected
+ * B 	Break Command 	Not affected
+ * V 	Overflow Flag 	Set if sign bit is incorrect
+ * N 	Negative Flag 	Set if bit 7 set
+ * 
+ * [Return to Main Page] The Overflow (V) Flag Explained by Bruce Clark
 [Up to Tutorials and Aids]
 Table of Contents
 
@@ -113,14 +161,14 @@ The ADC and SBC instructions not only return the result of the addition or subtr
 
 The name "carry" comes from the first purpose, and it means the same thing that "carrying the one" did when you learned addition in school. For example, when adding:
 
-    38
-  + 27
+38
++ 27
 you add the 8 and 7, which is 15, giving you the first digit, 5, and you carry the one:
-    1
-    38
-  + 27
-    --
-     5
+1
+38
++ 27
+--
+5
 then you add the 1, 3, and 2 to get the next and final digit 6, giving you the result 65. In this way, the carry can be used to extend an addition or a subtraction beyond 8 bits. This allows you to work with, for example, 16-bit unsigned numbers, $0000 to $FFFF, which range from 0 to 65535.
 As stated above, the second purpose of the carry flag is to indicate when the result of the addition or subtraction is outside the range 0 to 255, specifically:
 
@@ -150,81 +198,81 @@ Note that it is necessary to be aware of the "width" of a twos complement number
 
 Remember the two purposes of the carry flag? The first purpose was to allow addition and subtraction to be extended beyond 8 bits. The carry is still used for this purpose when adding or subtracting twos complement numbers. For example:
 
-  CLC       ; RESULT = NUM1 + NUM2
-  LDA NUM1L
-  ADC NUM2L
-  STA RESULTL
-  LDA NUM1H
-  ADC NUM2H
-  STA RESULTH
+CLC       ; RESULT = NUM1 + NUM2
+LDA NUM1L
+ADC NUM2L
+STA RESULTL
+LDA NUM1H
+ADC NUM2H
+STA RESULTH
 The carry from the ADC NUM2L is used by the ADC NUM2H.
 The second purpose was to indicate when the number was outside the (unsigned) range, 0 to 255. But the range of a 8-bit twos complement number is -128 to 127, and the carry does not indicate whether the result is outside this range, as the following examples illustrate:
 
-  CLC      ; 1 + 1 = 2, returns C = 0
-  LDA #$01
-  ADC #$01
+CLC      ; 1 + 1 = 2, returns C = 0
+LDA #$01
+ADC #$01
 
-  CLC      ; 1 + -1 = 0, returns C = 1
-  LDA #$01
-  ADC #$FF
+CLC      ; 1 + -1 = 0, returns C = 1
+LDA #$01
+ADC #$FF
 
-  CLC      ; 127 + 1 = 128, returns C = 0
-  LDA #$7F
-  ADC #$01
+CLC      ; 127 + 1 = 128, returns C = 0
+LDA #$7F
+ADC #$01
 
-  CLC      ; -128 + -1 = -129, returns C = 1
-  LDA #$80
-  ADC #$FF
+CLC      ; -128 + -1 = -129, returns C = 1
+LDA #$80
+ADC #$FF
 This is where V comes in. V indicates whether the result of an addition or subraction is outside the range -128 to 127, i.e. whether there is a twos complement overflow. A few examples are in order:
-  CLC      ; 1 + 1 = 2, returns V = 0
-  LDA #$01
-  ADC #$01
+CLC      ; 1 + 1 = 2, returns V = 0
+LDA #$01
+ADC #$01
 
-  CLC      ; 1 + -1 = 0, returns V = 0
-  LDA #$01
-  ADC #$FF
+CLC      ; 1 + -1 = 0, returns V = 0
+LDA #$01
+ADC #$FF
 
-  CLC      ; 127 + 1 = 128, returns V = 1
-  LDA #$7F
-  ADC #$01
+CLC      ; 127 + 1 = 128, returns V = 1
+LDA #$7F
+ADC #$01
 
-  CLC      ; -128 + -1 = -129, returns V = 1
-  LDA #$80
-  ADC #$FF
+CLC      ; -128 + -1 = -129, returns V = 1
+LDA #$80
+ADC #$FF
 
-  SEC      ; 0 - 1 = -1, returns V = 0
-  LDA #$00
-  SBC #$01
+SEC      ; 0 - 1 = -1, returns V = 0
+LDA #$00
+SBC #$01
 
-  SEC      ; -128 - 1 = -129, returns V = 1
-  LDA #$80
-  SBC #$01
+SEC      ; -128 - 1 = -129, returns V = 1
+LDA #$80
+SBC #$01
 
-  SEC      ; 127 - -1 = 128, returns V = 1
-  LDA #$7F
-  SBC #$FF
+SEC      ; 127 - -1 = 128, returns V = 1
+LDA #$7F
+SBC #$FF
 Remember that ADC and SBC not only affect the carry flag, but they also use the value of the carry flag (i.e. the value before the ADC or SBC), and this will affect the result and will affect V. For example:
-  SEC      ; Note: SEC, not CLC
-  LDA #$3F ; 63 + 64 + 1 = 128, returns V = 1
-  ADC #$40
+SEC      ; Note: SEC, not CLC
+LDA #$3F ; 63 + 64 + 1 = 128, returns V = 1
+ADC #$40
 
-  CLC      ; Note: CLC, not SEC
-  LDA #$C0 ; -64 - 64 - 1 = -129, returns V = 1
-  SBC #$40
+CLC      ; Note: CLC, not SEC
+LDA #$C0 ; -64 - 64 - 1 = -129, returns V = 1
+SBC #$40
 The same principles apply when adding or subtracting 16-bit two complement numbers. For example:
-  SEC         ; RESULT = NUM1 - NUM2
-  LDA NUM1L   ; After the SBC NUM2H instruction:
-  SBC NUM2L   ;   V = 0 if -32768 <= RESULT <= 32767
-  STA RESULTL ;   V = 1 if RESULT < -32768 or RESULT > 32767
-  LDA NUM1H
-  SBC NUM2H
-  STA RESULTH
+SEC         ; RESULT = NUM1 - NUM2
+LDA NUM1L   ; After the SBC NUM2H instruction:
+SBC NUM2L   ;   V = 0 if -32768 <= RESULT <= 32767
+STA RESULTL ;   V = 1 if RESULT < -32768 or RESULT > 32767
+LDA NUM1H
+SBC NUM2H
+STA RESULTH
 3 THE HARDWARE CAVEAT: THE SO PIN
 
 The previous section detailed the ways in which software can affect V; however, the 6502 and the 65C02 have a seldom-used pin that allows the hardware to affect V (independently of the software). This pin is called the SO pin, which stands for Set Overflow. Ironically, despite the popularity of the 6502, there isn't a consistent nomenclature for the SO pin in 6502 documentation, so you may see any of the following names for the SO pin (or combinations thereof):
 
-  __
-  SO   /SO   -SO   *SO   SOB   SOBAR   S.O.
+__
+SO   /SO   -SO   *SO   SOB   SOBAR   S.O.
 In a (40-pin) DIP, the SO pin is pin 38. As its name implies, the SO pin sets V. It does this on a negative transition, i.e. when the voltage on the SO pin goes from high to low. So if V is being set when you don't expect it, one thing to check is the SO pin and whatever circuitry is connected to it. Note that the 65C02 has an internal pull-up on the SO pin, which means that the SO pin is unused (and therefore doesn't affect V) when nothing is connected to it. However, it is still recommended that the SO pin be pulled high (or pulled low) when unused.
 Although the SO pin is something to be aware of, the software usually doesn't have to bother with it. First, as stated above, the SO pin is almost never used. Second, when it is used, it will be used to set V at a specific time, for a specific purpose, i.e. it won't be setting V at random times. In that case, it won't be interfering with V when the software doesn't expect it. The rule of thumb is: don't worry about the SO pin, because it's probably not used, but when in doubt, check the SO pin.
 
@@ -234,13 +282,13 @@ For the more adventurous, here is one way the SO pin could be used. In 6502 circ
 
 There are applications where the software must wait until a hardware event has occured. One method for doing this is called polling, which means that the software keeps checking for the hardware event, continuing only after that event has occured. This typically looks something like this:
 
-  LOOP BIT FLAG ; test the hardware flag
-       BMI LOOP ; loop until the hardware flag goes low
+LOOP BIT FLAG ; test the hardware flag
+BMI LOOP ; loop until the hardware flag goes low
 When FLAG is an absolute address (it usually is), this loop takes 7 cycles, 4 for the BIT instruction, and 3 for the branch (assuming it doesn't cross a page boundary).
 An alternative is to use the SO pin. In this case, V must be cleared by software, since the hardware has no way of doing it. The software will look something like this:
 
-       CLV
-  LOOP BVC LOOP ; loop until the hardware sets V
+CLV
+LOOP BVC LOOP ; loop until the hardware sets V
 Notice that the address FLAG is no longer necessary, and could be used for some other purpose. Note also that the loop is 3 cycles (again, assuming a page boundary is not crossed), which means that the software can respond to the hardware event slightly faster than when checking FLAG. However, the hardware event must cause a negative transition on the SO pin. Using FLAG allows greater hardware flexibility. Certainly it is much easier to adapt the software (to the FLAG hardware) than to adapt the hardware (to the SO pin).
 Of course this SO pin example is a bit farfetched, but use of the SO pin is rare.
 
@@ -252,15 +300,15 @@ First, the 65816 has no SO pin, so there is no need to worry about any of that n
 
 Second, the 65816 has two additional opcodes that can affect V: REP and SEP, which are typically used to clear or set the m and x flags, rather than V. If bit 6 of the REP operand is set, V will be clear, otherwise V will not be affected. If bit 6 of the SEP operand is set, V will be set, otherwise V will not be affected. Here are a few examples:
 
-  REP #$40 ; clear V (2 bytes, 3 cycles, but otherwise the same as CLV)
+REP #$40 ; clear V (2 bytes, 3 cycles, but otherwise the same as CLV)
 
-  REP #$41 ; clear V and clear the carry flag
+REP #$41 ; clear V and clear the carry flag
 
-  SEP #$40 ; set V (without affecting anything else!)
+SEP #$40 ; set V (without affecting anything else!)
 
-  SEP #$41 ; set V and set the carry flag
+SEP #$41 ; set V and set the carry flag
 
-  SEP #$01 ; set the carry flag (V is unaffected)
+SEP #$01 ; set the carry flag (V is unaffected)
 Third, when the m flag is 0, remember that the 65816 is operating on 16-bit data. This means that after, for example, BIT MEM, V contains bit 14 of MEM, instead of bit 6. So, oddly enough, when the m flag is 0, a BIT $F0 instruction has the same effect on V that a BIT $F1 instruction does when the m flag is 1, since bit 14 of memory location $F0 is bit 6 of memory location $F1. Also, note that when the m flag is 0, ADC and SBC add and subtract 16-bit numbers, so V indicates whether the result is outside the range -32768 ($8000) to 32767 ($7FFF).
 5 WHY SHOULD I TAKE YOUR WORD FOR IT?
 
@@ -272,31 +320,31 @@ The approach is relatively straightforward: test every case for 8-bit numbers. A
 
 The overflow flag from the twos complement addition is compared to the result of the unsigned addition. Remember that:
 
-  V = 0 when S1 + S2 >= -128 and S1 + S2 <= 127
-  V = 1 when S1 + S2 <  -128 or  S1 + S2 >  127
+V = 0 when S1 + S2 >= -128 and S1 + S2 <= 127
+V = 1 when S1 + S2 <  -128 or  S1 + S2 >  127
 but since U1 = S1 + 128 and U2 = S2 + 128:
-  U1 + U2 = (S1 + 128) + (S2 + 128) = S1 + S2 + 256
+U1 + U2 = (S1 + 128) + (S2 + 128) = S1 + S2 + 256
 so:
-  S1 + S2 = U1 + U2 - 256
+S1 + S2 = U1 + U2 - 256
 therefore:
-  V = 0 when U1 + U2 - 256 >= -128 and U1 + U2 - 256 <= 127
-  V = 1 when U1 + U2 - 256 <  -128 or  U1 + U2 - 256 >  127
+V = 0 when U1 + U2 - 256 >= -128 and U1 + U2 - 256 <= 127
+V = 1 when U1 + U2 - 256 <  -128 or  U1 + U2 - 256 >  127
 thus:
-  V = 0 when U1 + U2 >= 128 and U1 + U2 <= 383 ($17F)
-  V = 1 when U1 + U2 <  128 or  U1 + U2 >  383 ($17F)
+V = 0 when U1 + U2 >= 128 and U1 + U2 <= 383 ($17F)
+V = 1 when U1 + U2 <  128 or  U1 + U2 >  383 ($17F)
 The overflow flag from the twos complement subtraction is also compared to the result of the unsigned subtraction. Remember that:
-  V = 0 when S1 - S2 >= -128 and S1 - S2 <= 127
-  V = 1 when S1 - S2 <  -128 or  S1 - S2 >  127
+V = 0 when S1 - S2 >= -128 and S1 - S2 <= 127
+V = 1 when S1 - S2 <  -128 or  S1 - S2 >  127
 To ensure that the unsigned result will be a positive number, the unsigned subtraction that is performed is:
-  (65280 + U1) - U2
+(65280 + U1) - U2
 (Note that 65280 = $FF00.) Since U1 = S1 + 128 and U2 = S2 + 128:
-  U1 - U2 = S1 + 128 - (S2 + 128) = S1 + 128 - S2 - 128 = S1 - S2
+U1 - U2 = S1 + 128 - (S2 + 128) = S1 + 128 - S2 - 128 = S1 - S2
 so:
-  V = 0 when U1 - U2 >= -128 and U1 - U2 <= 127
-  V = 1 when U1 - U2 <  -128 or  U1 - U2 >  127
+V = 0 when U1 - U2 >= -128 and U1 - U2 <= 127
+V = 1 when U1 - U2 <  -128 or  U1 - U2 >  127
 thus:
-  V = 0 when (65280 + U1) - U2 >= 65152 and (65280 + U1) - U2 <= 65407
-  V = 1 when (65280 + U1) - U2 <  65152 or  (65280 + U1) - U2 >  65407
+V = 0 when (65280 + U1) - U2 >= 65152 and (65280 + U1) - U2 <= 65407
+V = 1 when (65280 + U1) - U2 <  65152 or  (65280 + U1) - U2 >  65407
 (Note: 65152 = $FE80 and 65407 = $FF7F)
 The program below takes about 16 seconds to complete at 1 MHz.
 
@@ -308,31 +356,31 @@ The program below takes about 16 seconds to complete at 1 MHz.
 ; which can be located anywhere convenient in RAM
 ;
 TEST CLD       ; Clear decimal mode (just in case) for test
-     LDA #1
-     STA ERROR ; Store 1 in ERROR until test passes
-     LDA #$80
-     STA S1    ; Initalize S1 and S2 to -128 ($80)
-     STA S2
-     LDA #0
-     STA U1    ; Initialize U1 and U2 to 0
-     STA U2
-     LDY #1    ; Initialize Y (used to set and clear the carry flag) to 1
+LDA #1
+STA ERROR ; Store 1 in ERROR until test passes
+LDA #$80
+STA S1    ; Initalize S1 and S2 to -128 ($80)
+STA S2
+LDA #0
+STA U1    ; Initialize U1 and U2 to 0
+STA U2
+LDY #1    ; Initialize Y (used to set and clear the carry flag) to 1
 LOOP JSR ADD   ; Test ADC
-     CPX #1
-     BEQ DONE  ; End if V and unsigned result do not agree (X = 1)
-     JSR SUB   ; Test SBC
-     CPX #1
-     BEQ DONE  ; End if V and unsigned result do not agree (X = 1)
-     INC S1
-     INC U1
-     BNE LOOP  ; Loop until all 256 possibilities of S1 and U1 are tested
-     INC S2
-     INC U2
-     BNE LOOP  ; Loop until all 256 possibilities of S2 and U2 are tested
-     DEY
-     BPL LOOP  ; Loop until both possiblities of the carry flag are tested
-     LDA #0
-     STA ERROR ; All tests pass, so store 0 in ERROR
+CPX #1
+BEQ DONE  ; End if V and unsigned result do not agree (X = 1)
+JSR SUB   ; Test SBC
+CPX #1
+BEQ DONE  ; End if V and unsigned result do not agree (X = 1)
+INC S1
+INC U1
+BNE LOOP  ; Loop until all 256 possibilities of S1 and U1 are tested
+INC S2
+INC U2
+BNE LOOP  ; Loop until all 256 possibilities of S2 and U2 are tested
+DEY
+BPL LOOP  ; Loop until both possiblities of the carry flag are tested
+LDA #0
+STA ERROR ; All tests pass, so store 0 in ERROR
 DONE RTS
 ;
 ; Test ADC
@@ -345,20 +393,20 @@ DONE RTS
 ; not agree X will be incremented once (returning X = 1)
 ;
 ADD  CPY #1   ; Set carry when Y = 1, clear carry when Y = 0
-     LDA S1   ; Test twos complement addition
-     ADC S2
-     LDX #0   ; Initialize X to 0
-     BVC ADD1
-     INX      ; Increment X if V = 1
+LDA S1   ; Test twos complement addition
+ADC S2
+LDX #0   ; Initialize X to 0
+BVC ADD1
+INX      ; Increment X if V = 1
 ADD1 CPY #1   ; Set carry when Y = 1, clear carry when Y = 0
-     LDA U1   ; Test unsigned addition
-     ADC U2
-     BCS ADD3 ; Carry is set if U1 + U2 >= 256
-     BMI ADD2 ; U1 + U2 < 256, A >= 128 if U1 + U2 >= 128
-     INX      ; Increment X if U1 + U2 < 128
+LDA U1   ; Test unsigned addition
+ADC U2
+BCS ADD3 ; Carry is set if U1 + U2 >= 256
+BMI ADD2 ; U1 + U2 < 256, A >= 128 if U1 + U2 >= 128
+INX      ; Increment X if U1 + U2 < 128
 ADD2 RTS
 ADD3 BPL ADD4 ; U1 + U2 >= 256, A <= 127 if U1 + U2 <= 383 ($17F)
-     INX      ; Increment X if U1 + U2 > 383
+INX      ; Increment X if U1 + U2 > 383
 ADD4 RTS
 ;
 ; Test SBC
@@ -371,27 +419,27 @@ ADD4 RTS
 ; not agree X will be incremented once (returning X = 1)
 ;
 SUB  CPY #1   ; Set carry when Y = 1, clear carry when Y = 0
-     LDA S1   ; Test twos complement subtraction
-     SBC S2
-     LDX #0   ; Initialize X to 0
-     BVC SUB1
-     INX      ; Increment X if V = 1
+LDA S1   ; Test twos complement subtraction
+SBC S2
+LDX #0   ; Initialize X to 0
+BVC SUB1
+INX      ; Increment X if V = 1
 SUB1 CPY #1   ; Set carry when Y = 1, clear carry when Y = 0
-     LDA U1   ; Test unsigned subtraction
-     SBC U2
-     PHA      ; Save the low byte of result on the stack
-     LDA #$FF
-     SBC #$00 ; result = (65280 + U1) - U2, 65280 = $FF00
-     CMP #$FE
-     BNE SUB4 ; Branch if result >= 65280 ($FF00) or result < 65024 ($FE00)
-     PLA      ; Get the low byte of result
-     BMI SUB3 ; result < 65280 ($FF00), A >= 128 if result >= 65152 ($FE80)
+LDA U1   ; Test unsigned subtraction
+SBC U2
+PHA      ; Save the low byte of result on the stack
+LDA #$FF
+SBC #$00 ; result = (65280 + U1) - U2, 65280 = $FF00
+CMP #$FE
+BNE SUB4 ; Branch if result >= 65280 ($FF00) or result < 65024 ($FE00)
+PLA      ; Get the low byte of result
+BMI SUB3 ; result < 65280 ($FF00), A >= 128 if result >= 65152 ($FE80)
 SUB2 INX      ; Increment X if result < 65152 ($FE80)
 SUB3 RTS
 SUB4 PLA      ; Get the low byte of result (does not affect the carry flag)
-     BCC SUB2 ; The carry flag is clear if result < 65024 ($FE00)
-     BPL SUB5 ; result >= 65280 ($FF00), A <= 127 if result <= 65407 ($FF7F)
-     INX      ; Increment X if result > 65407 ($FF7F)
+BCC SUB2 ; The carry flag is clear if result < 65024 ($FE00)
+BPL SUB5 ; result >= 65280 ($FF00), A <= 127 if result <= 65407 ($FF7F)
+INX      ; Increment X if result > 65407 ($FF7F)
 SUB5 RTS
 APPENDIX A: ANOTHER WAY OF THINKING ABOUT TWOS COMPLEMENT
 
@@ -439,136 +487,90 @@ There isn't likely to be much use for V with BCD addition or subtraction, but he
 
 After:
 
-  SED
-  SBC NUM
+SED
+SBC NUM
 the V flag is the same as after:
-  CLD
-  SBC NUM
+CLD
+SBC NUM
 assuming, of course, that the carry flag (before the SBC), the accumulator, and NUM are the same in both cases. The result (accumulator) will be different, so for the purpose of determining what V will be, perform the subtraction as though the numbers being subtracted were twos complement numbers, rather than BCD numbers. Remember that this is true even when the numbers are not valid BCD numbers.
 ADC is a little more complicated. Its effect on V doesn't make much sense, but that effect can be determined by working one digit at time.
 
 First, add the lower (least significant) digits. If the result is greater than 9, then carry a one. For example:
 
-    24
-  + 56
+24
++ 56
 4 + 6 = 10, which is greater than 9, so carry the one:
-    1
-    24
-  + 56
-    --
-     0
+1
+24
++ 56
+--
+0
 Then add the upper digits (carrying the one, when dictated by the lower digit result), treating the upper digits as 4-bit twos complement numbers (which can range from -8 to 7). V indicates whether there is an overflow from adding the upper digits (i.e. whether the upper digit result is outside the range -8 to 7). Continuing the example, 1 + 2 + 5 = 8, which is outside the range -8 to 7, so V = 1.
 A second example:
 
-    93
-  + 82
+93
++ 82
 3 + 2 = 5. Note that a one is not carried.
-    93
-  + 82
-    --
-     5
+93
++ 82
+--
+5
 Remember that 9 and 8 must be treated as 4-bit twos complement numbers, so 9 + 8 is really -7 + -8 = -15, so V = 1.
 A third example:
 
-    89
-  + 76
+89
++ 76
 9 + 6 = 15, so carry the one:
-    1
-    89
-  + 76
-    --
-     5
+1
+89
++ 76
+--
+5
 8 (and 7) must be treated as twos complement numbers, so 1 + 8 + 7 is really 1 + -8 + 7 = 0, so V = 0.
 Remember that this is true even when the numbers being added are not valid BCD numbers. For example:
 
-    80
-  + F0
+80
++ F0
 0 + 0 = 0. Note that a one is NOT carried.
-    80
-  + F0
-    --
-     0
+80
++ F0
+--
+0
 8 and F must be treated as twos complement numbers, so 8 + F is really -8 + -1 = -9, so V = 1.
 Another example:
 
-    80
-  + FA
+80
++ FA
 0 + A is really 0 + 10 = 10, so carry the one:
-    1
-    80
-    FA
-    --
-     0
+1
+80
+FA
+--
+0
 8 and F must be treated as twos complement numbers, so 1 + 8 + F is really 1 + -8 + -1 = -8, so V = 0.
 Also, note that when at least one of lower digits is invalid, it is possible that adding the lower digits will produce a result greater than 19. However, in this case, you still carry a one, NOT a two or a three. For example:
 
-    2F
-  + 4F
+2F
++ 4F
 F + F is really 15 + 15, which is 30, but carry a one, NOT a three:
-    1
-    2F
-  + 4F
-    --
+1
+2F
++ 4F
+--
 1 + 2 + 4 = 7, so V = 0. (As an aside, the lower digit of the result -- i.e. the accumulator -- will be 4, rather than 0. When the lower digit result is greater than 9, the 4 least significant bits of the accumulator will be the 4 least significant bits of the sum of 6 plus the lower digit result, i.e. $F + $F + 6 = $24)
 Finally, don't forget to account for value of the carry flag before the ADC when doing the addition to determine the effect on V.
 
 Last Updated April 4, 2004.
 V = 0 when S1 + S2 >= -128 and S1 + S2 <= 127
-  V = 1 when S1 + S2 <  -128 or  S1 + S2 >  127
+V = 1 when S1 + S2 <  -128 or  S1 + S2 >  127
 but since U1 = S1 + 128 and U2 = S2 + 128:
-  U1 + U2 = (S1 + 128) + (S2 + 128) = S1 + S2 + 256
+U1 + U2 = (S1 + 128) + (S2 + 128) = S1 + S2 + 256
 so:
-  S1 + S2 = U1 + U2 - 256
+S1 + S2 = U1 + U2 - 256
 therefore:
-  V = 0 when U1 + U2 - 256 >= -128 and U1 + U2 - 256 <= 127
-  V = 1 when U1 + U2 - 256 <  -128 or  U1 + U2 - 256 >  127
+V = 0 when U1 + U2 - 256 >= -128 and U1 + U2 - 256 <= 127
+V = 1 when U1 + U2 - 256 <  -128 or  U1 + U2 - 256 >  127
 thus:
-  V = 0 when U1 + U2 >= 128 and U1 + U2 <= 383 ($17F)
-  V = 1 when U1 + U2 <  128 or  U1 + U2 >  383 ($17F)
-		 */
-		int address = getAbsoluteAddress(c);
-		int m = (byte)(c.bus.read(address) & 0xff);
-		
-		int a = c.a.get();
-
-		
-		
-		int carryValue  = 0;
-		if (c.CFLAG.isSet() ) {
-			carryValue = 1;
-		}
-	//	V = 0 when U1 + U2 >= 128 and U1 + U2 <= 383 ($17F)
-	//  V = 1 when U1 + U2 <  128 or  U1 + U2 >  383 ($17F)
-		int result = a  - m - (1- carryValue);
-	//   V = 1 when S1 + S2 <  -128 or  S1 + S2 >  127
-		// V = 1 when U1 + U2 <  128 or  U1 + U2 >  383 ($17F)
-		if ((result < 128 ) || (result > 383)) {
-			c.OFLAG.clear();
-		}
-		if ((result <= 383 )&& (result >= 128)) {
-			c.OFLAG.set();
-		}
-	
-		// When the addition result is greater than 255, the carry is set.
-		if (result > 255 ) {
-			c.CFLAG.set();
-		} else {
-			c.CFLAG.clear();
-	}
-		
-	
-		try {
-			c.a.set(result & 0xff);
-		} catch (zflagException e) {
-			// TODO Auto-generated catch block
-			c.ZFLAG.set();
-			c.NFLAG.clear();
-		} catch (nflagException e) {
-			// TODO Auto-generated catch block
-			c.NFLAG.set();
-			c.ZFLAG.clear();
-		
-		}
-		c.pc += 2;
-	}
-}
+V = 0 when U1 + U2 >= 128 and U1 + U2 <= 383 ($17F)
+V = 1 when U1 + U2 <  128 or  U1 + U2 >  383 ($17F)
+ */

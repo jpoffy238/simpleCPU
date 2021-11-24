@@ -10,7 +10,7 @@ public abstract class Math_Abstract extends Instruction {
 	public Math_Abstract(byte opcode) {
 		super(opcode);
 	}
-	protected int convertToBinary(int bcdValue) {
+	private int convertToBinary(int bcdValue) {
 		// bcdValue is only a byte value
 		int result = 0;
 		int AcUppNib = (bcdValue & 0x00f0) >> 4;
@@ -20,7 +20,7 @@ public abstract class Math_Abstract extends Instruction {
 		return result;
 	}
 	
-	protected int convertToBDC(int binaryValue) {
+	private int convertToBDC(int binaryValue) {
 		int result = 0;
 		int remainderlower = binaryValue%10;
 		int upperValue = (binaryValue - remainderlower) / 10;
@@ -148,41 +148,7 @@ public abstract class Math_Abstract extends Instruction {
 	}
 
 	
-//	protected void AddBCD(CPU c, int m) {
-//		// BDC math
-//		int a = c.a.get();
-//		int AcUppNib;
-//		int AcLowNib;
-//		int OprUppNib;
-//		int OprLowNib;
-//		AcLowNib = a & 0x000f;
-//		AcUppNib = (a & 0x00f0) >> 4;
-//		OprUppNib = (m & 0x00f0) >> 4;
-//		OprLowNib = m & 0x000f;
-//		int carry = c.CFLAG.isSet() ? 1 : 0;
-//		int ncarry = 0;
-//		int result = AcLowNib + OprLowNib + carry;
-//		if (result > 9) {
-//			result = result - 10;
-//			ncarry = 1;
-//		}
-//		AcLowNib = result;
-//		result = AcUppNib + OprUppNib + ncarry;
-//		if (result > 9) {
-//			result = result - 10;
-//			c.CFLAG.set();
-//		}
-//		try {
-//			c.a.set((result << 4) + AcLowNib);
-//		} catch (zflagException e) {
-//			c.ZFLAG.set();
-//			c.NFLAG.clear();
-//		} catch (nflagException e) {
-//			c.ZFLAG.clear();
-//			c.NFLAG.clear();
-//		}
-//
-//	}
+
 	protected void AddBCD2(CPU c, int m) {
 		// BDC math
 		int a = c.a.get();
