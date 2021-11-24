@@ -19,7 +19,9 @@ public class RTC extends Thread implements Device {
 	private AddressRange mr = new AddressRange(0xa000, 0xa000 + 21);
 	private char[] time = new char[mr.size()];
 	PBus bus;
-	
+	private final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
+	private Calendar cal;
+	private SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
 	
 	public RTC(PBus bus) {
 		this.bus = bus;
@@ -84,18 +86,17 @@ public class RTC extends Thread implements Device {
 	}
 
 	public void now() {
-		final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
-		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
+		cal =  Calendar.getInstance();
 		String tmp = sdf.format(cal.getTime());
+		cal = null;
 		readLock.lock();
 		for (int i = 0; i < tmp.length(); i++) {
-			time[i] = tmp.trim().charAt(i);
+			time[i] = tmp.charAt(i);
 			
 		}
 		readLock.unlock();
-		String t = new String(time);
-		logger.debug("RTC-NOW: " + t);
+		
+		logger.debug("RTC-NOW: " + tmp);
 	}
 
 	@Override
