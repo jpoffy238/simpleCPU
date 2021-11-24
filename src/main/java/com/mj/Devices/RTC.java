@@ -19,11 +19,12 @@ public class RTC extends Thread implements Device {
 	private AddressRange mr = new AddressRange(0xa000, 0xa000 + 21);
 	private char[] time = new char[mr.size()];
 	PBus bus;
+	
+	
 	public RTC(PBus bus) {
 		this.bus = bus;
 		now();
 	}
-
 
 	public DEVTYPE getDeviceType() {
 		// TODO Auto-generated method stub
@@ -68,7 +69,8 @@ public class RTC extends Thread implements Device {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		while (true) {
+		
+		while (!Thread.currentThread().isInterrupted()) {
 			now();
 			bus.raiseInterupt();
 			try {

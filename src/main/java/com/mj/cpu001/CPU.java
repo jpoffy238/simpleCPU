@@ -89,7 +89,7 @@ public Decoder getDecoder() {
 		long previous = System.currentTimeMillis();
 		long difftime;
 		boolean RUN=true;
-		while (RUN) {
+		while (RUN && !Thread.currentThread().isInterrupted()) {
 			instructionCount++;
 			current = System.currentTimeMillis();
 			difftime = current - previous;
