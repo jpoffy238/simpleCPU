@@ -6,7 +6,7 @@ import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
-public interface Device   {
+public interface Device    {
 	 public DEVTYPE getDeviceType();
 	 public BussId getBusId();
 	 public AddressRange getAddressRange();	 
