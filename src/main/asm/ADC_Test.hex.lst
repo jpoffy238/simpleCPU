@@ -1,4 +1,4 @@
-Crasm 1.10:                                                   page  1
+Crasm 1.8:                                                   page  1
 
                          1  ; Demonstrate that the V flag works as described
                          2  ;
@@ -64,7 +64,7 @@ Crasm 1.10:                                                   page  1
   icts an overflow
 
 
-Crasm 1.10:                                                   page  2
+Crasm 1.8:                                                   page  2
 
                         49  ; Therefore, if the V flag and the unsigned resu
   lt agree, X will be
@@ -130,7 +130,7 @@ Crasm 1.10:                                                   page  2
 1082 68                 94       PLA      ; Get the low byte of result
 
 
-Crasm 1.10:                                                   page  3
+Crasm 1.8:                                                   page  3
 
 1083 3001               95       BMI SUB3 ; result < 65280 ($FF00), A >= 128
                 if result >= 65152 ($FE80)
@@ -196,7 +196,7 @@ Successful assembly...
 
 
 
-Crasm 1.10:                                                   page  4
+Crasm 1.8:                                                   page  4
 
 ^1045   Abs ADD                                              
 ^1052   Abs ADD1                                             
