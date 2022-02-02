@@ -4,6 +4,7 @@ import java.io.Console;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +19,7 @@ import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 
-public class ConsoleDevice extends Thread implements charDevice {
+public class ConsoleDevice extends Thread implements PBus {
 	// Console Device usage:
 	// Console device uses 2 bytes of memory address space:
 	// o The even byte (LSb=0) is used to read from OR write to
@@ -201,6 +202,122 @@ public class ConsoleDevice extends Thread implements charDevice {
 	public void reset() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void startDevices() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void stopDevices() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void write(BussId bus, int address, byte data)
+			throws ROException, illegalAddressException, DeviceUnavailable {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public byte read(BussId bus, int destAddress) throws illegalAddressException, DeviceUnavailable {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void blockWrite(BussId bus, int address, byte[] data)
+			throws ROException, illegalAddressException, DeviceUnavailable {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public byte[] blockRead(BussId bus, int destAddress) throws illegalAddressException, DeviceUnavailable {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void resetDevice() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void raiseInterupt() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void raiseNMInterupt() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void raisepowerOnReset() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void clearInterupt() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void clearNMInterupt() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void clearpowerOnReset() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void registerDevice(Device deviceHandler) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void unregisterDevice(Device deviceHandler) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<Device> getDevices() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean IsInterruptRaised() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean IsNMInterruptRaised() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean IsPowerOnResetRased() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
