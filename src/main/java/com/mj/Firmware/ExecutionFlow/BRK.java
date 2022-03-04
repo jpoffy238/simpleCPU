@@ -49,7 +49,7 @@ the BVC instruction will take 3 cycles no matter what address it is located at.
 	
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
+		
 		int upper = (((c.pc) & 0xff00) >> 8);
 		int lower = (((c.pc) & 0x00ff));
 		c.sp--;

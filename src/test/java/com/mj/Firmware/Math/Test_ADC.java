@@ -43,15 +43,15 @@ public class Test_ADC {
 			c.bus.write(i++, OpCodes.HLT.code());
 
 		} catch (illegalAddressException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 			assert (false);
 		} catch (DeviceUnavailable e) {
-			// TODO Auto-generated catch block
+		
 			e.printStackTrace();
 			assert (false);
 		} catch (ROException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		}
@@ -82,16 +82,16 @@ public class Test_ADC {
 			c.bus.write(i++, OpCodes.HLT.code());
 
 		} catch (illegalAddressException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 
 		} catch (DeviceUnavailable e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		} catch (ROException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		}
@@ -122,15 +122,15 @@ public class Test_ADC {
 			c.bus.write(i++, OpCodes.HLT.code());
 
 		} catch (illegalAddressException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		} catch (DeviceUnavailable e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		} catch (ROException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		}
@@ -163,15 +163,15 @@ public class Test_ADC {
 			c.bus.write(i++, OpCodes.HLT.code());
 
 		} catch (illegalAddressException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		} catch (DeviceUnavailable e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		} catch (ROException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		}
@@ -270,15 +270,15 @@ public class Test_ADC {
 			c.bus.write(i++, OpCodes.HLT.code());
 
 		} catch (illegalAddressException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		} catch (DeviceUnavailable e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		} catch (ROException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			assert (false);
 		}
@@ -306,7 +306,7 @@ public class Test_ADC {
 		try {
 			code = testCode.read("LDA_IMM_TEST.hex");
 		} catch (IOException | IntelHexFileChecksumMisMatchException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		for (int x = 0; x < code.size(); x++) {
@@ -317,11 +317,11 @@ public class Test_ADC {
 					c.bus.write(i + idx, program[idx]);
 				}
 			} catch (illegalAddressException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 				assert (false);
 			} catch (DeviceUnavailable e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 				assert (false);
 			} catch (ROException e) {

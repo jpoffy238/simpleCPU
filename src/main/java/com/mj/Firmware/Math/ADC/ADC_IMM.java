@@ -1,17 +1,16 @@
 package com.mj.Firmware.Math.ADC;
 
-import com.mj.Firmware.Framework.Instruction;
+
 import com.mj.Firmware.Math.Math_Abstract;
 import com.mj.cpu001.CPU;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.illegalAddressException;
-import com.mj.exceptions.nflagException;
-import com.mj.exceptions.zflagException;
+
 
 public class ADC_IMM extends Math_Abstract {
 	public ADC_IMM() {
 		super((byte)0x69);
-		// TODO Auto-generated constructor stub
+		
 		setProperty(KEY_MNEMONIC, "ADC");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_IMM);
 		setProperty(KEY_OPCODE, "0x69");

@@ -183,7 +183,9 @@ public class ConsoleDevice extends Thread implements charDevice {
 					peekresults = reader.peek(10);
 					if (peekresults > 0) {
 						int value = reader.read();
-						input.add(new Integer(value));
+						Integer i;
+						i = Integer.valueOf(value);
+						input.add( i);
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

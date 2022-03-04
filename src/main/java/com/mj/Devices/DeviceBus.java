@@ -23,7 +23,7 @@ public class DeviceBus implements PBus {
 	protected boolean raiseNMInterupt = false;
 	protected boolean powerOnReset = false;
 	public void write(int address, byte data) throws ROException, illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub
+		
 		logger.trace("WRITE: " + String.format("%04x %02x: " , address, data));
 		Device d = getDevice(address);
 		if (null == d) {
@@ -35,7 +35,7 @@ public class DeviceBus implements PBus {
 	}
 
 	public byte read(int destAddress) throws illegalAddressException, DeviceUnavailable  {
-		// TODO Auto-generated method stub
+		
 		logger.trace("READ: " + String.format("%04x" , destAddress));
 		Device d = getDevice(destAddress);
 		if (null == d) {
@@ -47,29 +47,29 @@ public class DeviceBus implements PBus {
 	}
 
 	public boolean IsInterruptRaised() {
-		// TODO Auto-generated method stub
+		
 		
 		return interuptRaised;
 	}
 
 	public boolean IsNMInterruptRaised() {
-		// TODO Auto-generated method stub
+	
 		return raiseNMInterupt;
 	}
 
 	public boolean IsPowerOnResetRased() {
-		// TODO Auto-generated method stub
+		
 		return powerOnReset;
 	}
 
 	public void write(BussId bus, int address, byte data)
 			throws ROException, illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub
+		
 
 	}
 
 	public byte read(BussId bus, int destAddress) throws illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub
+	
 		return 0;
 	}
 
