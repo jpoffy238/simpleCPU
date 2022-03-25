@@ -24,7 +24,7 @@ public class Test_LDA_ABS {
 		c = CPU_CreateUtil.getCPU();
 		try {
 		
-			//CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/LDA_IMM_TEST.hex", 0);
+			
 			CPU_CreateUtil.load(c.bus, "LDA_IMM_TEST.hex", 0);
 		} catch (illegalAddressException | ROException | DeviceUnavailable | IOException e) {
 			// TODO Auto-generated catch block

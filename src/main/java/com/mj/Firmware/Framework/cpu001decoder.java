@@ -1,5 +1,7 @@
 package com.mj.Firmware.Framework;
 
+import java.util.Map;
+
 import com.mj.exceptions.illegalOpCodeException;
 
 public class cpu001decoder implements Decoder {
@@ -16,5 +18,18 @@ public class cpu001decoder implements Decoder {
 		}
 		return m;
 	}
-
+	
+	public void listCounts() {
+		Map<Integer, machineState> map = DecoderMap.getMap();
+		for ( machineState m :map.values() ) {
+			byte i = m.getOpCode();
+			Class<? extends machineState> inst = m.getClass();
+			String name = inst.getCanonicalName();
+			
+			long excount = m.getExecutionCount();
+			if (excount > 0 ) {
+				System.out.println(name  + " : " + excount);;
+			}
+		}
+	}
 }

@@ -18,11 +18,8 @@ public STX_ABS() {
 	setProperty(KEY_DESCRIPTION ,"M = X  Stores the contents of the accumulator into memory.");
 }
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
-		
 		
 		int address = getAbsoluteAddress(c);
-		
 		c.bus.write(address, (byte)(c.x.get() & 0xff));
 		c.pc+=2;
 	}

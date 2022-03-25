@@ -16,6 +16,7 @@ public abstract class Instruction implements machineState {
 
 	protected final  Logger logger = LogManager.getLogger(Instruction.class);
 	private byte opCode;
+	private long executionCount;
 	protected AddressMode addressMode;
 	public final String KEY_OPCODE = "opcode";
 	public final String KEY_MNEMONIC = "Mnemonic";
@@ -54,7 +55,9 @@ public abstract class Instruction implements machineState {
 	public void exeute(CPU c) throws illegalOpCodeException, illegalAddressException, DeviceUnavailable, ROException {
 		
 	}
-
+	public void incrementExecutionCount() {
+		executionCount++;
+	}
 	public byte getOpCode() {
 		return opCode;
 	}
@@ -308,5 +311,15 @@ public abstract class Instruction implements machineState {
 			c.CFLAG.set();
 		}
 	}
+
+	public long getExecutionCount() {
+		return executionCount;
+	}
+
+	public void setExecutionCount(long executionCount) {
+		this.executionCount = executionCount;
+	}
 	
+
+
 }

@@ -30,7 +30,7 @@ public class Test_JMP {
 	@Test
 	public void Test_JMPABS() {
 		try {
-		CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/JMP_ABS.hex", 0);
+		CPU_CreateUtil.load(c.bus, "JMP_ABS.hex", 0);
 		
 		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {
 			// TODO Auto-generated catch block
@@ -67,7 +67,7 @@ public class Test_JMP {
 	public void Test_JMPIND() {
 		
 		try {
-			CPU_CreateUtil.load(c.bus, "/home/jpoffen/git/simpleCPU/src/main/asm/JMP_IND.hex", 0);
+			CPU_CreateUtil.load(c.bus, "JMP_IND.hex", 0);
 			
 			
 		} catch (IOException | illegalAddressException | ROException | DeviceUnavailable e) {

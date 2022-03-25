@@ -104,7 +104,7 @@ public Decoder getDecoder() {
 				String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
 				currentState += dump();
 				logger.debug(currentState);
-				
+				state.incrementExecutionCount();
 				state.exeute(this);
 			} catch (illegalOpCodeException e) {
 				// TODO Auto-generated catch block
@@ -126,6 +126,8 @@ public Decoder getDecoder() {
 			}
 			
 		}
+		decoder.listCounts();
+		
 	}
 	public void step() throws illegalAddressException, DeviceUnavailable, illegalOpCodeException, ROException {
 
@@ -176,4 +178,5 @@ public Decoder getDecoder() {
 		return (byte) value;
 	}
 
+	
 }

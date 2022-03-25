@@ -9,7 +9,8 @@ import com.mj.exceptions.illegalOpCodeException;
 public interface machineState {
 		public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, illegalOpCodeException, ROException;
 		public byte getOpCode();
-		
+		public void incrementExecutionCount();
+		public long getExecutionCount();
 }
 
 /*  Machine States
