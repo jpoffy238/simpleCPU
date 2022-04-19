@@ -20,6 +20,8 @@ public class cpu001decoder implements Decoder {
 	}
 	
 	public void listCounts() {
+		long totalTime = 0;
+		long totalInstructions =0;
 		Map<Integer, machineState> map = DecoderMap.getMap();
 		for ( machineState m :map.values() ) {
 			byte i = m.getOpCode();
@@ -27,9 +29,17 @@ public class cpu001decoder implements Decoder {
 			String name = inst.getCanonicalName();
 			
 			long excount = m.getExecutionCount();
+			totalInstructions += excount;
+			totalTime +=  m.getTotalExecutionTime();
 			if (excount > 0 ) {
-				System.out.println(name  + " : " + excount);;
+				System.out.println(name + " : " + excount );;
+				System.out.println(name + " :  Total Time : " + m.getTotalExecutionTime());
+				System.out.println(name + " :  Average Exec Time : " + (float)m.getTotalExecutionTime()/(float)excount);
+				
 			}
 		}
+		System.out.println("Total Execution Time : " + totalTime);
+		System.out.println("Total Instruction Count : " + totalInstructions);
+		System.out.println("Average instruction execution time: " + (float) totalTime / (float)totalInstructions);
 	}
 }

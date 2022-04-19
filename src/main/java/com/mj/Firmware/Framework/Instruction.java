@@ -17,6 +17,7 @@ public abstract class Instruction implements machineState {
 	protected final  Logger logger = LogManager.getLogger(Instruction.class);
 	private byte opCode;
 	private long executionCount;
+	private long totalExecutionTime;
 	protected AddressMode addressMode;
 	public final String KEY_OPCODE = "opcode";
 	public final String KEY_MNEMONIC = "Mnemonic";
@@ -320,6 +321,11 @@ public abstract class Instruction implements machineState {
 		this.executionCount = executionCount;
 	}
 	
-
+	public long getTotalExecutionTime() {
+		return totalExecutionTime;
+	}
+	public void setExecutionTime(long time) {
+		totalExecutionTime += time;
+	}
 
 }

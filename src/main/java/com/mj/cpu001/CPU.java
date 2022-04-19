@@ -43,6 +43,11 @@ public class CPU extends Thread {
 	private Decoder decoder;
 	public int clockState;
 	machineState state;
+	long instructionCount = 0;
+    long beginTime = System.currentTimeMillis();
+	long current  = System.currentTimeMillis();	
+	
+	long previous = System.currentTimeMillis();
 
 public Decoder getDecoder() {
 	return decoder;
@@ -82,11 +87,11 @@ public Decoder getDecoder() {
 
 	public void run() {
 		reset();
-		long instructionCount = 0;
-       long beginTime = System.currentTimeMillis();
-		long current  = System.currentTimeMillis();	
+		 instructionCount = 0;
+        beginTime = System.currentTimeMillis();
+		 current  = System.currentTimeMillis();	
 	
-		long previous = System.currentTimeMillis();
+		 previous = System.currentTimeMillis();
 		long difftime;
 		boolean RUN=true;
 		while (RUN && !isInterrupted()) {
@@ -105,7 +110,10 @@ public Decoder getDecoder() {
 				currentState += dump();
 				logger.debug(currentState);
 				state.incrementExecutionCount();
+				long ctime = System.currentTimeMillis();
 				state.exeute(this);
+				long afterTime = System.currentTimeMillis();
+				state.setExecutionTime(afterTime-ctime);
 			} catch (illegalOpCodeException e) {
 				// TODO Auto-generated catch block
 				logger.error("[" + (int) (opcode & 0xff) + "] BAD OPCODE : " + dump());
@@ -127,6 +135,13 @@ public Decoder getDecoder() {
 			
 		}
 		decoder.listCounts();
+		current = System.currentTimeMillis();
+		difftime =  current - beginTime;
+		float x = (float)instructionCount / (float)difftime;
+
+		logger.debug("CPU MIPS: " + x);
+		logger.debug("Instruction Count: " + instructionCount);
+		logger.debug("Total time in ms: " + difftime);
 		
 	}
 	public void step() throws illegalAddressException, DeviceUnavailable, illegalOpCodeException, ROException {

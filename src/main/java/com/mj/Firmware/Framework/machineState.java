@@ -11,6 +11,8 @@ public interface machineState {
 		public byte getOpCode();
 		public void incrementExecutionCount();
 		public long getExecutionCount();
+		public long getTotalExecutionTime();
+		public void setExecutionTime(long executionTime);
 }
 
 /*  Machine States
