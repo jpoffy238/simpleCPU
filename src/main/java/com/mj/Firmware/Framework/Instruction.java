@@ -54,7 +54,7 @@ public abstract class Instruction implements machineState {
 	}
 
 	public void exeute(CPU c) throws illegalOpCodeException, illegalAddressException, DeviceUnavailable, ROException {
-		
+		throw new illegalOpCodeException();
 	}
 	public void incrementExecutionCount() {
 		executionCount++;

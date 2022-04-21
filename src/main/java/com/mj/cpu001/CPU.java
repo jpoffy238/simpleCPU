@@ -88,15 +88,15 @@ public Decoder getDecoder() {
 	public void run() {
 		reset();
 		 instructionCount = 0;
-        beginTime = System.currentTimeMillis();
-		 current  = System.currentTimeMillis();	
+        beginTime = System.nanoTime();
+		 current  = System.nanoTime();	
 	
-		 previous = System.currentTimeMillis();
+		 previous = System.nanoTime();
 		long difftime;
 		boolean RUN=true;
 		while (RUN && !isInterrupted()) {
 			instructionCount++;
-			current = System.currentTimeMillis();
+			current = System.nanoTime();
 			difftime = current - previous;
 			previous = current;
 			logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
@@ -110,9 +110,9 @@ public Decoder getDecoder() {
 				currentState += dump();
 				logger.debug(currentState);
 				state.incrementExecutionCount();
-				long ctime = System.currentTimeMillis();
+				long ctime = System.nanoTime();
 				state.exeute(this);
-				long afterTime = System.currentTimeMillis();
+				long afterTime = System.nanoTime();
 				state.setExecutionTime(afterTime-ctime);
 			} catch (illegalOpCodeException e) {
 				// TODO Auto-generated catch block
@@ -135,7 +135,7 @@ public Decoder getDecoder() {
 			
 		}
 		decoder.listCounts();
-		current = System.currentTimeMillis();
+		current = System.nanoTime();
 		difftime =  current - beginTime;
 		float x = (float)instructionCount / (float)difftime;
 
@@ -147,13 +147,13 @@ public Decoder getDecoder() {
 	public void step() throws illegalAddressException, DeviceUnavailable, illegalOpCodeException, ROException {
 
 		long instructionCount = 0;
-       long beginTime = System.currentTimeMillis();
-		long current  = System.currentTimeMillis();
-		long previous = System.currentTimeMillis();
+       long beginTime = System.nanoTime();
+		long current  = System.nanoTime();
+		long previous = System.nanoTime();
 		long difftime;
 		
 			instructionCount++;
-			current = System.currentTimeMillis();
+			current = System.nanoTime();
 			difftime = current - previous;
 			previous = current;
 			logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
