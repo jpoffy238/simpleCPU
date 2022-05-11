@@ -1,0 +1,132 @@
+Crasm 1.8:                                                   page  1
+
+                         1  ;;PROCESSOR=6502
+                         2  ;;ORG=$1000
+                         3  ;;VALUE=$2000
+                         4  CPU 6502
+                         5  OUTPUT HEX
+  1000                   6  * = $1000
+1000 A90A                7          LDA #$0A     ;; lOAD 10 into acc
+1002 200B10              8          JSR ADDONE   ;; Just to sub to add 1
+1005 8D0020              9          STA VALUE    ;; store new value in value
+                      .
+1008 EA                 10          NOP
+1009 EA                 11          NOP
+100A 3F                 12  HLT DB $3F
+                        13  
+100B 6901               14  ADDONE  ADC #$01
+100D 60                 15          RTS
+100E EA                 16          NOP
+100F EA                 17          NOP
+1010 3F                 18  HLT2 DB $3F
+                        19  
+  2000                  20  VALUE = $2000
+                        21  
+                        22  
+
+ERRORS:       0
+WARNINGS:     0
+
+Successful assembly...
+ Last address     1010 (4112)
+ Code length        22 (34)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Crasm 1.8:                                                   page  2
+
+^100B   Abs ADDONE                                           
+?100A   Abs HLT                                              
+?1010   Abs HLT2                                             
+^2000   Abs VALUE                                            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

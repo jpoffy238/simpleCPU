@@ -1,10 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mj</groupId>
-	<artifactId>java-emu</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>emu6502</artifactId>
+	<version>0.0.7-SNAPSHOT</version>
 	<name>SimpleCPUEmulator</name>
-	<packaging>pom</packaging>
 	<properties>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
@@ -244,8 +243,4 @@
 			<version>3.5.1</version>
 		</dependency>
 	</dependencies>
-	<modules>
-		<module>modules/cpu/6502</module>
-		<module>modules/Disk</module>
-	</modules>
 </project>
