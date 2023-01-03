@@ -11,13 +11,13 @@ public interface PBus extends CPUBus {
 		MEMROY, DEVICE, INTERUPT, CPU
 	}
 
-	enum DEVTYPE {
-		BLOCK, CHAR
-	}
+	
 
-	enum IOALLOW {
-		RO, RW, WO
-	}
+	
+	public BussId getBussId() ;
+	
+	
+	
 	public void startDevices();
 	public void stopDevices();
 	public void write(BussId bus, int address, byte data)
@@ -28,15 +28,15 @@ public interface PBus extends CPUBus {
 	public void blockWrite(BussId bus, int address, byte data[])
 			throws ROException, illegalAddressException, DeviceUnavailable;
 
-	public byte[] blockRead(BussId bus, int destAddress) throws illegalAddressException, DeviceUnavailable;
+	public byte[] blockRead(BussId bus, int destAddress, int length) throws illegalAddressException, DeviceUnavailable;
 
 	public void resetDevice();
 	
-	public void raiseInterupt();
+	public void raiseInterupt(Device deviceHandler);
 
-	public void raiseNMInterupt();
+	public void raiseNMInterupt(Device deviceHandler);
 
-	public void raisepowerOnReset();
+	public void raisepowerOnReset(Device deviceHandler);
 
 	public void clearInterupt();
 

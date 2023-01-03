@@ -109,8 +109,13 @@ public class DeviceBus implements PBus {
 
 	public void unregisterDevice(Device deviceHandler) {
 		// TODO Auto-generated method stub
+		logger.debug("UnregisterDevice" + deviceHandler.getBusId() + ":" + deviceHandler.getAddressRange().baseAddress());
+		AddressRange ar = deviceHandler.getAddressRange();
+		if (devices.containsKey(ar)) {
+			devices.remove(ar);
+		}
 
-					logger.trace("Unregister Device " + deviceHandler.getClass().getCanonicalName());
+		logger.trace("Unregister Device " + deviceHandler.getClass().getCanonicalName());
 	}
 
 	private Device getDevice(int address) {
@@ -155,7 +160,10 @@ public class DeviceBus implements PBus {
 		for ( AddressRange r : s) {
 			d = devices.get(r);
 			if (d instanceof Thread) {
-				((Thread) d).start();
+				Thread.State state = ((Thread) d).getState();
+				if (state == Thread.State.NEW ) {
+					((Thread) d).start();
+				}
 			}
 	}
 	}
@@ -171,7 +179,12 @@ public class DeviceBus implements PBus {
 	}
 	@Override
 	public void resetDevice() {
-		// TODO Auto-generated method stub
+		Device d = null;
+		Set<AddressRange> s = devices.keySet();
+		for ( AddressRange r : s) {
+			d = devices.get(r);
+			d.reset();
+		}
 		
 	}
 

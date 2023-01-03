@@ -14,6 +14,15 @@ public class DEC_ABS extends Instruction {
 
 	public DEC_ABS() {
 		super((byte)0xce);
+		setProperty(KEY_MNEMONIC, "DEC");
+		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_ABS);
+		setProperty(KEY_OPCODE, "0xce");
+		setProperty(KEY_INSTRUCTION_SIZE, "3");
+		setProperty(KEY_CYCLES, "3");
+		setProperty(KEY_FLAGS_EFFECTED, "Z,N");
+		setProperty(KEY_WEB,"http://www.obelisk.me.uk/6502/reference.html#DEC" );
+		setProperty(KEY_DESCRIPTION, "A,Z,N = M - Decements  memory address value by 1 "
+				+ " setting the zero and negative flags as appropriate.");
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		int address = getAbsoluteAddress(c);
