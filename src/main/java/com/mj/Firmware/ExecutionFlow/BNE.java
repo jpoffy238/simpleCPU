@@ -53,8 +53,9 @@ the BVC instruction will take 3 cycles no matter what address it is located at.
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
-		byte offset = (byte) (c.bus.read(c.pc) & 0x00ff);
+		byte offset;
 		if ( ! c.ZFLAG.isSet()) {
+			offset = (byte) (c.bus.read(c.pc) & 0x00ff);
 			String currentState = String.format("%-10s $(%-2x) Value[ %-4x] BANCHING", getProperty(KEY_MNEMONIC), offset , (int)(c.pc+offset));
 			logger.debug(currentState);
 			c.pc = (int)(c.pc+offset+1);
