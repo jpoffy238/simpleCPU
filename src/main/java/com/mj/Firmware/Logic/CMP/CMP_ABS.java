@@ -46,24 +46,24 @@ of and the sign (i.e. A>=$80) of the accumulator.
 		int absAddress = getAbsoluteAddress(c);
 		int m = c.bus.read( absAddress);
 		int a = c.a.get();
-		
+		c.cp += 2;	
+		c.ZFLAG.clear();
+		c.NFLAG.clear();
+		c.CFLAG.clear();
+
 		int result = a - m;
 		if (result == 0) {
 			c.ZFLAG.set();
-			c.NFLAG.clear();
-			c.CFLAG.clear();
-		} else {
-			if (result < 0) {
-				c.NFLAG.set();
-				c.ZFLAG.clear();
-				c.CFLAG.clear();
-			}  else {
-				c.NFLAG.clear();
-				c.ZFLAG.clear();
-				c.CFLAG.set();
-			}
+			return;
+		} 
+		if (result < 0) {
+			c.NFLAG.set();
+			return;
 		}
-		c.pc += 2;
+	        if (result > 0 ) {	
+			c.CFLAG.set();
+			return;
+		}
 	}
 
 	
