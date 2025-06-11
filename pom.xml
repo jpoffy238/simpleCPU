@@ -244,8 +244,5 @@
 			<version>3.23.0</version>
 		</dependency>
 	</dependencies>
-	<modules>
-		<module>modules/cpu/6502</module>
-		<module>modules/Disk</module>
-	</modules>
+
 </project>

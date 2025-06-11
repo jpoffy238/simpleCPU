@@ -9,9 +9,8 @@ public class cpu001decoder implements Decoder {
 	static OpCodes nop = OpCodes.NOP;
 	public machineState decode(byte instruction) throws illegalOpCodeException {
 		int i = (instruction & 0x00ff);
-		Integer in;
-		in = Integer.valueOf(i);
-		machineState m = DecoderMap.getMap().get(in);
+		
+		machineState m = DecoderMap.getMap()[i];
 
 		if (null == m) {
 			throw new illegalOpCodeException();
@@ -19,22 +18,23 @@ public class cpu001decoder implements Decoder {
 		return m;
 	}
 	
+	
 	public void listCounts() {
 		long totalTime = 0;
 		long totalInstructions =0;
-		Map<Integer, machineState> map = DecoderMap.getMap();
-		for ( machineState m :map.values() ) {
-			byte i = m.getOpCode();
-			Class<? extends machineState> inst = m.getClass();
+		machineState[] m = DecoderMap.getMap();
+		for ( int i = 0; i < 256; i++) {
+			byte i = m[i].getOpCode();
+			Class<? extends machineState> inst = m[i].getClass();
 			String name = inst.getCanonicalName();
 			
-			long excount = m.getExecutionCount();
+			long excount = m[i].getExecutionCount();
 			totalInstructions += excount;
-			totalTime +=  m.getTotalExecutionTime();
+			totalTime +=  m[i].getTotalExecutionTime();
 			if (excount > 0 ) {
 				System.out.println(name + " : " + excount );;
-				System.out.println(name + " :  Total Time : " + m.getTotalExecutionTime());
-				System.out.println(name + " :  Average Exec Time : " + (float)m.getTotalExecutionTime()/(float)excount);
+				System.out.println(name + " :  Total Time : " + m[i].getTotalExecutionTime());
+				System.out.println(name + " :  Average Exec Time : " + (float)m[i].getTotalExecutionTime()/(float)excount);
 				
 			}
 		}

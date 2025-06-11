@@ -1,17 +1,18 @@
 package com.mj.Firmware.Framework;
 
-import java.util.Map;
+
 
 import com.mj.exceptions.illegalOpCodeException;
 
 public class cpu001decoder implements Decoder {
 	
-	static OpCodes nop = OpCodes.NOP;
+
+	static machineState[] decoder = DecoderMap.getMap();
+	
 	public machineState decode(byte instruction) throws illegalOpCodeException {
-		int i = (instruction & 0x00ff);
-		Integer in;
-		in = Integer.valueOf(i);
-		machineState m = DecoderMap.getMap().get(in);
+		
+		
+		machineState m = decoder[m.getOpCode()] ;
 
 		if (null == m) {
 			throw new illegalOpCodeException();
@@ -22,8 +23,8 @@ public class cpu001decoder implements Decoder {
 	public void listCounts() {
 		long totalTime = 0;
 		long totalInstructions =0;
-		Map<Integer, machineState> map = DecoderMap.getMap();
-		for ( machineState m :map.values() ) {
+		
+		for ( machineState m :decoder ) {
 			byte i = m.getOpCode();
 			Class<? extends machineState> inst = m.getClass();
 			String name = inst.getCanonicalName();

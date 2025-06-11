@@ -31,11 +31,11 @@ public class CPU extends Thread {
 	public registerFlags BFLAG = new registerFlags("B");
 	public registerFlags OFLAG = new registerFlags("O");
 	public registerFlags NFLAG = new registerFlags("N");
-	public generalPurpose a = new gpregister();
-	public generalPurpose b = new gpregister();
+	public generalPurpose a = new gpregister('A', 0);
+	public generalPurpose b = new gpregister('B', 0);
 
-	public generalPurpose x = new gpregister();
-	public generalPurpose y = new gpregister();
+	public generalPurpose x = new gpregister('X', 0);
+	public generalPurpose y = new gpregister('Y', 0);
 
 	public int pc;
 	public int sp;
