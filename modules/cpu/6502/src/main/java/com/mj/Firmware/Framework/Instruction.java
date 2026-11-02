@@ -122,14 +122,14 @@ public abstract class Instruction implements machineState {
 
 	protected int getAbsoluteAddressY(CPU c) throws illegalAddressException, DeviceUnavailable {
 		int loadAddress = getAbsoluteAddress(c);
-		loadAddress += c.y.get();
-		return loadAddress;
+		loadAddress += c.y.get() & 0xff;
+		return loadAddress & 0xffff;
 	}
 
 	protected int getAbsoluteAddressX(CPU c) throws illegalAddressException, DeviceUnavailable {
 		int loadAddress = getAbsoluteAddress(c);
-		loadAddress += c.x.get();
-		return loadAddress;
+		loadAddress += c.x.get() & 0xff;
+		return loadAddress & 0xffff;
 	}
 
 	protected int getZeroPageAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
@@ -151,12 +151,15 @@ public abstract class Instruction implements machineState {
 	}
 
 	protected int getIndirect(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int lower = c.bus.read(c.pc);
-		int upper = c.bus.read(c.pc + 1);
-		int PCAddress = ((upper & 0xff) << 8) + (lower & 0xff);
-		lower = c.bus.read(PCAddress);
-		upper = c.bus.read(PCAddress + 1);
-		int lookupAddress = ((upper & 0xff) << 8 ) + (lower & 0xff);
+		int lower = c.bus.read(c.pc) & 0xff;
+		int upper = c.bus.read((c.pc + 1) & 0xffff) & 0xff;
+		int PCAddress = (upper << 8) + lower;
+		// NMOS 6502 quirk: the pointer's high byte is fetched from the same page,
+		// so JMP ($30FF) reads $30FF and $3000 (not $3100).
+		int highAddress = (PCAddress & 0xff00) | ((PCAddress + 1) & 0x00ff);
+		lower = c.bus.read(PCAddress) & 0xff;
+		upper = c.bus.read(highAddress) & 0xff;
+		int lookupAddress = (upper << 8) + lower;
 		logger.debug(String.format("IndirectAddress PC[%04x] -> To Address [%04x]",PCAddress , lookupAddress));
 
 		return lookupAddress;
@@ -212,16 +215,34 @@ public abstract class Instruction implements machineState {
 		 * this mode's target address is not wrapped - it can be anywhere in the 16-bit
 		 * address space.
 		 */
-		int address;
 		int operand = c.bus.read(c.pc);
 		int pageZero = (operand) & 0x00ff;
-		int lower = c.bus.read(pageZero);
-		int upper = c.bus.read(pageZero + 1);
-		address = (upper & 0x00ff) << 8 ;
-		address += lower & 0x00ff;
+		int lower = c.bus.read(pageZero) & 0xff;
+		int upper = c.bus.read((pageZero + 1) & 0x00ff) & 0xff;   // pointer wraps within zero page
+		int address = (upper << 8) + lower;
 		address += (c.y.get() & 0x00ff);
-		return address;
+		return address & 0xffff;
 	}
+
+	/**
+	 * Common relative-branch handling. The PC points at the offset byte on entry.
+	 * Wraps the PC to 16 bits and records whether a taken branch crossed a page.
+	 */
+	protected void branch(CPU c, boolean taken) throws illegalAddressException, DeviceUnavailable {
+		byte offset = (byte) c.bus.read(c.pc);
+		int next = (c.pc + 1) & 0xffff;          // address of the following instruction
+		if (taken) {
+			int target = (next + offset) & 0xffff;
+			branchPageCrossed = (target & 0xff00) != (next & 0xff00);
+			c.pc = target;
+		} else {
+			branchPageCrossed = false;
+			c.pc = next;
+		}
+	}
+
+	/** True if the most recently executed taken branch crossed a page boundary. */
+	protected boolean branchPageCrossed;
 
 	protected void handleZException(CPU c) {
 		c.ZFLAG.set();

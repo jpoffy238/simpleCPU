@@ -112,6 +112,7 @@ public Decoder getDecoder() {
 				state.incrementExecutionCount();
 				long ctime = System.nanoTime();
 				state.exeute(this);
+				pc &= 0xffff;   // the PC is a 16-bit register and wraps
 				long afterTime = System.nanoTime();
 				state.setExecutionTime(afterTime-ctime);
 			} catch (illegalOpCodeException e) {
@@ -167,6 +168,7 @@ public Decoder getDecoder() {
 				currentState += dump();
 				logger.debug(currentState);	
 				state.exeute(this);
+				pc &= 0xffff;
 	}
 
 	private byte fetchInstruction() throws illegalAddressException, DeviceUnavailable {
@@ -188,7 +190,7 @@ public Decoder getDecoder() {
 		
 		} else {
 			value = (int) (bus.read(pc) & 0xff);
-			pc++;
+			pc = (pc + 1) & 0xffff;
 		}
 		return (byte) value;
 	}

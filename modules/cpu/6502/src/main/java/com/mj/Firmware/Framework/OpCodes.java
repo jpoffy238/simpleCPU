@@ -195,6 +195,7 @@ public  enum OpCodes {
 	BVC(new BVC()),
 	BVS(new BVS()),
 	BMI(new BMI()),
+	BPL(new BPL()),
 	BIT_ZP(new BIT_ZP()),
 	BIT_ABS(new BIT_ABS()),
 	AND_IMM(new AND_IMM()),
