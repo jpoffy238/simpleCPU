@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.mj.Firmware.Table.InstructionTable;
 import com.mj.Firmware.ExecutionFlow.BCC;
 import com.mj.Firmware.ExecutionFlow.BCS;
 import com.mj.Firmware.ExecutionFlow.BEQ;
@@ -23,14 +24,6 @@ import com.mj.Firmware.ExecutionFlow.NOP;
 import com.mj.Firmware.ExecutionFlow.RTS;
 import com.mj.Firmware.ExecutionFlow.RTI;
 
-import com.mj.Firmware.Load.Accumulator.LDA_ABS;
-import com.mj.Firmware.Load.Accumulator.LDA_ABSX;
-import com.mj.Firmware.Load.Accumulator.LDA_ABSY;
-import com.mj.Firmware.Load.Accumulator.LDA_IMM;
-import com.mj.Firmware.Load.Accumulator.LDA_INDX;
-import com.mj.Firmware.Load.Accumulator.LDA_INDY;
-import com.mj.Firmware.Load.Accumulator.LDA_ZP;
-import com.mj.Firmware.Load.Accumulator.LDA_ZX;
 import com.mj.Firmware.Load.IndexX.LDX_ABS;
 import com.mj.Firmware.Load.IndexX.LDX_ABSY;
 import com.mj.Firmware.Load.IndexX.LDX_IMM;
@@ -135,14 +128,14 @@ public  enum OpCodes {
 	MIH(new MIH()),  // Special instruction to handle interrupts
 	
 	NOP( new NOP()),
-	LDA_IMM( new LDA_IMM()), // Immediate 
-	LDA_ABS(new LDA_ABS()),
-	LDA_ABSX(new LDA_ABSX()),
-	LDA_ABSY(new LDA_ABSY()),
-	LDA_INDX(new LDA_INDX()),
-	LDA_INDY(new LDA_INDY()),
-	LDA_ZP(new LDA_ZP()),
-	LDA_ZX(new LDA_ZX()),
+	LDA_IMM(InstructionTable.LDA_IMM), // Immediate 
+	LDA_ABS(InstructionTable.LDA_ABS),
+	LDA_ABSX(InstructionTable.LDA_ABSX),
+	LDA_ABSY(InstructionTable.LDA_ABSY),
+	LDA_INDX(InstructionTable.LDA_INDX),
+	LDA_INDY(InstructionTable.LDA_INDY),
+	LDA_ZP(InstructionTable.LDA_ZP),
+	LDA_ZX(InstructionTable.LDA_ZX),
 	
 	LDX_ABS(new LDX_ABS()),
 	LDX_ABSY(new LDX_ABSY()),
