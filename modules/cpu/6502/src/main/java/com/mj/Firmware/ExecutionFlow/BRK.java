@@ -57,7 +57,8 @@ the BVC instruction will take 3 cycles no matter what address it is located at.
 		c.sp--;
 		c.bus.write(c.sp, (byte) (lower & 0xff));
 		c.sp--;
-		c.bus.write(c.sp, psr(c));
+		c.bus.write(c.sp, psr(c, true));   // software interrupt: B bit set
+		c.IFLAG.set();
 
 		int IntAddress = getInterruptHandlerAddress(c);
 		c.pc = IntAddress;

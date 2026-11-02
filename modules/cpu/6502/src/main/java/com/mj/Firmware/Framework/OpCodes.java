@@ -67,6 +67,8 @@ import com.mj.Firmware.Logic.Shift.ROL.*;
 import com.mj.Firmware.Logic.Shift.ROR.*;
 import com.mj.Firmware.Stack.PHA;
 import com.mj.Firmware.Stack.PLA;
+import com.mj.Firmware.Stack.PHP;
+import com.mj.Firmware.Stack.PLP;
 import com.mj.Firmware.Transfers.TAX;
 import com.mj.Firmware.Transfers.TAY;
 import com.mj.Firmware.Transfers.TSX;
@@ -119,6 +121,7 @@ public  enum OpCodes {
 	ADC_ABSX(new ADC_ABSX()),
 	ADC_ABSY(new ADC_ABSY()),
 	ADC_INX(new ADC_INX()),
+	ADC_INY(new ADC_INY()),
 	SBC_ABS(new SBC_ABS()),
 	SBC_ZPX(new SBC_ZPX()),
 	SBC_ABSX(new SBC_ABSX()),
@@ -221,6 +224,7 @@ public  enum OpCodes {
 	ORA_ZP(new ORA_ZP()),
 	ORA_INY(new ORA_INY()),
 	ORA_IMM(new ORA_IMM()),
+	ORA_INX(new ORA_INX()),
 	ORA_ABSY(new ORA_ABSY()),
 	ASL(new ASL()),
 	ASL_ZP(new ASL_ZP()),
@@ -252,6 +256,8 @@ public  enum OpCodes {
 	PLA(new PLA()),
 
 	PHA(new PHA()),
+	PHP(new PHP()),
+	PLP(new PLP()),
 	
 	CLC(new CLC()),
 	CLD(new CLD()),

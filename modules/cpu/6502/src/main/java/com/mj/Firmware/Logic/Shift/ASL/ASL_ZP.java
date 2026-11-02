@@ -49,30 +49,10 @@ public class ASL_ZP extends Instruction {
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
 		int address = getZeroPageAddress(c);
-		int a = c.bus.read(address);
-		c.ZFLAG.clear();
-		c.NFLAG.clear();
-
-		int result = a << 1;
-		if ((a & 0x80) != 0) {
-			c.CFLAG.set();
-		} else { 
-			if ( result == 0) {
-				c.ZFLAG.set();
-			} else { 
-				if ((result & 0x80)  == 0x80 ){
-					c.NFLAG.set();
-				}
-			}
-		}
-		
-			
-				c.bus.write(address,(byte)(result & 0xff));
-		
-		
-		c.pc +=1;
+		int result = aslAndSetFlags(c, c.bus.read(address));
+		c.bus.write(address, (byte) result);
+		c.pc += 1;
 	}
 
 }

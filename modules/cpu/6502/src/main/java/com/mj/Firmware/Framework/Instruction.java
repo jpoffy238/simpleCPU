@@ -254,84 +254,80 @@ public abstract class Instruction implements machineState {
 		c.ZFLAG.clear();
 	}
 
-	protected byte psr(CPU c) {
-		int status = 0;
-		if (c.CFLAG.isSet()) {
-			status = 1;
-		}
-		status <<= 1;
-		if (c.ZFLAG.isSet()) {
-			status += 1;
-		}
-		status <<= 1;
-		if (c.IFLAG.isSet()) {
-			status += 1;
-		}
-		status <<= 1;
-		if (c.DFLAG.isSet()) {
-			status += 1;
-		}
-		status <<= 1;
-		if (c.BFLAG.isSet()) {
-			status += 1;
-		}
-		status <<= 1;
-		if (c.OFLAG.isSet()) {
-			status += 1;
-		}
-		status <<= 1;
-		if (c.NFLAG.isSet()) {
-			status += 1;
-		}
+	// 6502 processor status register layout:  N V 1 B D I Z C  (bit 7 .. bit 0)
+	public static final int SR_C = 0x01;
+	public static final int SR_Z = 0x02;
+	public static final int SR_I = 0x04;
+	public static final int SR_D = 0x08;
+	public static final int SR_B = 0x10;   // exists only in pushed copies of the status
+	public static final int SR_UNUSED = 0x20;   // always reads as 1
+	public static final int SR_V = 0x40;
+	public static final int SR_N = 0x80;
 
-		return (byte) (status & 0xff);
+	/** Status byte as pushed by PHP / BRK (B bit set). */
+	protected byte psr(CPU c) {
+		return psr(c, true);
 	}
 
-	protected void setFlags(CPU c, byte sr) {
-		int tmpsr = (int) (sr & 0xff);
-		int mask = 1;
+	/**
+	 * Build the status byte for pushing on the stack.
+	 * 
+	 * @param breakFlag true for PHP/BRK (software), false for IRQ/NMI (hardware)
+	 */
+	protected byte psr(CPU c, boolean breakFlag) {
+		int status = SR_UNUSED;
+		if (c.CFLAG.isSet()) status |= SR_C;
+		if (c.ZFLAG.isSet()) status |= SR_Z;
+		if (c.IFLAG.isSet()) status |= SR_I;
+		if (c.DFLAG.isSet()) status |= SR_D;
+		if (breakFlag)       status |= SR_B;
+		if (c.OFLAG.isSet()) status |= SR_V;
+		if (c.NFLAG.isSet()) status |= SR_N;
+		return (byte) status;
+	}
 
-		if ((tmpsr & mask) == 0) {
-			c.NFLAG.clear();
+	/** Load the flags from a status byte (PLP / RTI). B and the unused bit are ignored. */
+	protected void setFlags(CPU c, byte sr) {
+		int v = sr & 0xff;
+		setFlag(c.CFLAG, (v & SR_C) != 0);
+		setFlag(c.ZFLAG, (v & SR_Z) != 0);
+		setFlag(c.IFLAG, (v & SR_I) != 0);
+		setFlag(c.DFLAG, (v & SR_D) != 0);
+		setFlag(c.OFLAG, (v & SR_V) != 0);
+		setFlag(c.NFLAG, (v & SR_N) != 0);
+	}
+
+	private void setFlag(com.mj.Registers.registerFlags f, boolean on) {
+		if (on) {
+			f.set();
 		} else {
-			c.NFLAG.set();
+			f.clear();
 		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.OFLAG.clear();
-		} else {
-			c.OFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.BFLAG.clear();
-		} else {
-			c.BFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.DFLAG.clear();
-		} else {
-			c.DFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.IFLAG.clear();
-		} else {
-			c.IFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.ZFLAG.clear();
-		} else {
-			c.ZFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.CFLAG.clear();
-		} else {
+	}
+
+	/**
+	 * Arithmetic shift left of a memory/register value: C takes bit 7, N and Z
+	 * reflect the 8-bit result. Returns the shifted byte value.
+	 */
+	protected int aslAndSetFlags(CPU c, int value) {
+		value &= 0xff;
+		int result = (value << 1) & 0xff;
+		if ((value & 0x80) != 0) {
 			c.CFLAG.set();
+		} else {
+			c.CFLAG.clear();
 		}
+		if (result == 0) {
+			c.ZFLAG.set();
+		} else {
+			c.ZFLAG.clear();
+		}
+		if ((result & 0x80) != 0) {
+			c.NFLAG.set();
+		} else {
+			c.NFLAG.clear();
+		}
+		return result;
 	}
 
 	public long getExecutionCount() {

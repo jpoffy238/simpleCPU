@@ -74,7 +74,6 @@ EXEC
 		    
 			int newpc =( (upper  &  0xff) << 8) + (int)(lower & 0x00ff);
 			c.pc = newpc;
-			c.IFLAG.clear();
 			
 		}
 }

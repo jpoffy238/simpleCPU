@@ -24,7 +24,6 @@ public class MIH extends Instruction {
 				logger.debug("INT/BRK === INTERRUPT=============================================================");
 				
 				interuptHandlerAddress = getInterruptHandlerAddress(c);
-				c.IFLAG.set();
 				c.bus.clearInterupt();
 			} else {
 				if (c.bus.IsPowerOnResetRased()) {
@@ -49,7 +48,8 @@ public class MIH extends Instruction {
 			c.sp--;
 			c.bus.write(c.sp, (byte) (lower & 0xff));
 			c.sp--;
-			c.bus.write(c.sp, psr(c));
+			c.bus.write(c.sp, psr(c, false));   // hardware interrupt: B bit clear
+			c.IFLAG.set();                       // I is set after the old status is saved
 			logger.debug(String.format("Interrupt Address = %04x " , interuptHandlerAddress));
 			c.pc = interuptHandlerAddress;
 			

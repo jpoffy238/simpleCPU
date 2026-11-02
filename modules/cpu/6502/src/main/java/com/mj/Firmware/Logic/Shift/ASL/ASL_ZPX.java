@@ -49,29 +49,9 @@ public class ASL_ZPX extends Instruction {
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
-		int address = (getZeroPageXAddress(c) & 0xff);
-		int a = c.bus.read(address);
-		c.ZFLAG.clear();
-		c.NFLAG.clear();
-
-		int result = a << 1;
-		if ((a & 0x80) != 0) {
-			c.CFLAG.set();
-		} else {
-			if (result == 0) {
-				c.ZFLAG.set();
-				c.NFLAG.clear();
-			} else {
-				if ((result & 0x80) == 0x80) {
-					c.NFLAG.set();
-					c.ZFLAG.clear();
-				}
-			}
-		}
-
-		c.bus.write(address, (byte) (result & 0xff));
-
+		int address = getZeroPageXAddress(c);
+		int result = aslAndSetFlags(c, c.bus.read(address));
+		c.bus.write(address, (byte) result);
 		c.pc += 1;
 	}
 

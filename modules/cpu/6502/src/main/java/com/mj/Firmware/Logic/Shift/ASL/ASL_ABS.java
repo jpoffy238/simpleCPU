@@ -49,28 +49,10 @@ public class ASL_ABS extends Instruction {
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
-		int address =  (getAbsoluteAddress(c) );
-		int a = c.bus.read(address);
-		c.ZFLAG.clear();
-		c.NFLAG.clear();
-
-		int result = a << 1;
-		if ((a & 0x80) != 0) {
-			c.CFLAG.set();
-		} else { 
-			if ( result == 0) {
-				c.ZFLAG.set();
-				c.NFLAG.clear();
-			} else { 
-				if ((result & 0x80)  == 0x80 ){
-					c.NFLAG.set();
-					c.ZFLAG.clear();
-				}
-			}
-		c.pc +=2;
-		}
-		c.bus.write(address, (byte)(result & 0xff));
+		int address = getAbsoluteAddress(c);
+		int result = aslAndSetFlags(c, c.bus.read(address));
+		c.bus.write(address, (byte) result);
+		c.pc += 2;
 	}
 
 }

@@ -58,6 +58,8 @@ public class ASL extends Instruction {
 		int result = a << 1;
 		if ((a & 0x80) != 0) {
 			c.CFLAG.set();
+		} else {
+			c.CFLAG.clear();
 		}
 		try {
 			c.a.set(result& 0xff);

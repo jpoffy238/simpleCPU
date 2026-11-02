@@ -53,34 +53,10 @@ public class ASL_ABSX extends Instruction {
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
-		int address =  getAbsoluteAddressX(c);
-		int a = (c.bus.read(address)) &0xff;
-		logger.debug(String.format("Address : [%04x] Value: [%02x]", address, a));
-		int result = a << 1 ;
-		logger.debug(String.format("Compute Value : [%04x] ",result));
-		result &= 0x00ff;
-		c.ZFLAG.clear();
-		c.NFLAG.clear();
-
-		if ((a & 0x80) != 0) {
-			c.CFLAG.set();
-		} else { 
-			if ( result == 0) {
-				c.ZFLAG.set();
-				c.NFLAG.clear();
-			} else { 
-				if ((result & 0x80)  == 0x80 ) {
-					c.NFLAG.set();
-					c.ZFLAG.clear();
-				}
-			}
-	
-		}
-		c.bus.write(address, (byte)(result ));
-		int x = c.bus.read(address);
-		logger.debug(String.format("Address [%04x] w [%04x]  r [%04x]", address, result, x));
-		c.pc +=2;
+		int address = getAbsoluteAddressX(c);
+		int result = aslAndSetFlags(c, c.bus.read(address));
+		c.bus.write(address, (byte) result);
+		c.pc += 2;
 	}
 
 }
