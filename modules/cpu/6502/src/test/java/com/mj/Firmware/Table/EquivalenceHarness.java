@@ -175,7 +175,16 @@ public class EquivalenceHarness {
 	 */
 	public static List<Diff> compare(Supplier<machineState> legacy, machineState table, int scenarios,
 			KnownDifference known) throws Exception {
-		if (legacy.get().getOpCode() != table.getOpCode()) {
+		return compare(legacy, table, scenarios, known, true);
+	}
+
+	/**
+	 * @param checkOpcode false only where the legacy class was registered under the
+	 *                    wrong opcode but its behavior matches the table row
+	 */
+	public static List<Diff> compare(Supplier<machineState> legacy, machineState table, int scenarios,
+			KnownDifference known, boolean checkOpcode) throws Exception {
+		if (checkOpcode && legacy.get().getOpCode() != table.getOpCode()) {
 			throw new AssertionError("opcode mismatch");
 		}
 		Rig legacyRig = new Rig();

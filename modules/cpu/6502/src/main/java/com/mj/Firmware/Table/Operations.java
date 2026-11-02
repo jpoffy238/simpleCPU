@@ -26,4 +26,14 @@ public final class Operations {
 				Registers.put(c.y, v);
 				Registers.setNZ(c, v);
 			});
+
+	// ---- Stores ----------------------------------------------------------------
+	public static final Operation STA = Operation.store("STA", "none",
+			"M = A - Stores the contents of the accumulator into memory.", c -> c.a.get());
+
+	public static final Operation STX = Operation.store("STX", "none",
+			"M = X - Stores the contents of the X register into memory.", c -> c.x.get());
+
+	public static final Operation STY = Operation.store("STY", "none",
+			"M = Y - Stores the contents of the Y register into memory.", c -> c.y.get());
 }

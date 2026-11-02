@@ -70,19 +70,6 @@ import com.mj.Firmware.incdec.INC_ZP;
 import com.mj.Firmware.incdec.INC_ZPX;
 import com.mj.Firmware.incdec.INX;
 import com.mj.Firmware.incdec.INY;
-import com.mj.Firmware.store.Accumulator.STA_ABS;
-import com.mj.Firmware.store.Accumulator.STA_ABX;
-import com.mj.Firmware.store.Accumulator.STA_ABY;
-import com.mj.Firmware.store.Accumulator.STA_INX;
-import com.mj.Firmware.store.Accumulator.STA_INY;
-import com.mj.Firmware.store.Accumulator.STA_ZP;
-import com.mj.Firmware.store.Accumulator.STA_ZPX;
-import com.mj.Firmware.store.IndexX.STX_ABS;
-import com.mj.Firmware.store.IndexX.STX_ZP;
-import com.mj.Firmware.store.IndexX.STX_ZPY;
-import com.mj.Firmware.store.IndexY.STY_ABS;
-import com.mj.Firmware.store.IndexY.STY_ZP;
-import com.mj.Firmware.store.IndexY.STY_ZPX;
 import com.mj.Firmware.StatusFlags.*;
 import com.mj.Firmware.Math.ADC.*;
 import com.mj.Firmware.Logic.Shift.LSR.*;
@@ -139,22 +126,22 @@ public  enum OpCodes {
 	LDY_ZP(InstructionTable.LDY_ZP),
 	LDY_ZPX(InstructionTable.LDY_ZPX),
 	
-	STA_ABS(new STA_ABS()),
-	STA_ABX(new STA_ABX()),
-	STA_ABY(new STA_ABY()),
-	STA_INX(new STA_INX()),
-	STA_INY(new STA_INY()),
-	STA_ZP(new STA_ZP()),
-	STA_ZPX(new STA_ZPX()),// TODO Auto-generated catch block
+	STA_ABS(InstructionTable.STA_ABS),
+	STA_ABX(InstructionTable.STA_ABX),
+	STA_ABY(InstructionTable.STA_ABY),
+	STA_INX(InstructionTable.STA_INX),
+	STA_INY(InstructionTable.STA_INY),
+	STA_ZP(InstructionTable.STA_ZP),
+	STA_ZPX(InstructionTable.STA_ZPX),// TODO Auto-generated catch block
 
 
-	STX_ABS(new STX_ABS()),
-	STX_ZP(new STX_ZP()),
-	STX_ZPY(new STX_ZPY()),
+	STX_ABS(InstructionTable.STX_ABS),
+	STX_ZP(InstructionTable.STX_ZP),
+	STX_ZPY(InstructionTable.STX_ZPY),
 	
-	STY_ABS(new STY_ABS()),
-	STY_ZP(new STY_ZP()),
-	STY_ZPX(new STY_ZPX()),
+	STY_ABS(InstructionTable.STY_ABS),
+	STY_ZP(InstructionTable.STY_ZP),
+	STY_ZPX(InstructionTable.STY_ZPX),
 	
 	TAX(new TAX()),
 	TAY(new TAY()),
