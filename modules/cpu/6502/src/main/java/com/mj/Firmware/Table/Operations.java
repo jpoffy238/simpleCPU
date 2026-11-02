@@ -36,4 +36,22 @@ public final class Operations {
 
 	public static final Operation STY = Operation.store("STY", "none",
 			"M = Y - Stores the contents of the Y register into memory.", c -> c.y.get());
+
+	// ---- Logical ---------------------------------------------------------------
+	public static final Operation AND = Operation.read("AND", "Z,N",
+			"A,Z,N = A&M - A logical AND is performed, bit by bit, on the accumulator contents using the contents of a byte of memory.",
+			(c, v) -> logical(c, c.a.get() & v));
+
+	public static final Operation ORA = Operation.read("ORA", "Z,N",
+			"A,Z,N = A|M - An inclusive OR is performed, bit by bit, on the accumulator contents using the contents of a byte of memory.",
+			(c, v) -> logical(c, c.a.get() | v));
+
+	public static final Operation EOR = Operation.read("EOR", "Z,N",
+			"A,Z,N = A^M - An exclusive OR is performed, bit by bit, on the accumulator contents using the contents of a byte of memory.",
+			(c, v) -> logical(c, c.a.get() ^ v));
+
+	private static void logical(com.mj.cpu001.CPU c, int result) {
+		Registers.put(c.a, result);
+		Registers.setNZ(c, result);
+	}
 }

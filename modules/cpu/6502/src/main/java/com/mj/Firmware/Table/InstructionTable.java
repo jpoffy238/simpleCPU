@@ -68,4 +68,34 @@ public final class InstructionTable {
 	public static final TableInstruction STY_ZP = row(0x84, Operations.STY, ZERO_PAGE, 3);
 	public static final TableInstruction STY_ZPX = row(0x94, Operations.STY, ZERO_PAGE_X, 4);
 	public static final TableInstruction STY_ABS = row(0x8C, Operations.STY, ABSOLUTE, 4);
+
+	// ---- AND ------------------------------------------------------------
+	public static final TableInstruction AND_IMM = row(0x29, Operations.AND, IMMEDIATE, 2);
+	public static final TableInstruction AND_ZP = row(0x25, Operations.AND, ZERO_PAGE, 3);
+	public static final TableInstruction AND_ZPX = row(0x35, Operations.AND, ZERO_PAGE_X, 4);
+	public static final TableInstruction AND_ABS = row(0x2D, Operations.AND, ABSOLUTE, 4);
+	public static final TableInstruction AND_ABX = row(0x3D, Operations.AND, ABSOLUTE_X, 4);
+	public static final TableInstruction AND_ABY = row(0x39, Operations.AND, ABSOLUTE_Y, 4);
+	public static final TableInstruction AND_INX = row(0x21, Operations.AND, INDEXED_INDIRECT, 6);
+	public static final TableInstruction AND_INY = row(0x31, Operations.AND, INDIRECT_INDEXED, 5);
+
+	// ---- ORA ------------------------------------------------------------
+	public static final TableInstruction ORA_IMM = row(0x09, Operations.ORA, IMMEDIATE, 2);
+	public static final TableInstruction ORA_ZP = row(0x05, Operations.ORA, ZERO_PAGE, 3);
+	public static final TableInstruction ORA_ZPX = row(0x15, Operations.ORA, ZERO_PAGE_X, 4);
+	public static final TableInstruction ORA_ABS = row(0x0D, Operations.ORA, ABSOLUTE, 4);
+	public static final TableInstruction ORA_ABSX = row(0x1D, Operations.ORA, ABSOLUTE_X, 4);
+	public static final TableInstruction ORA_ABSY = row(0x19, Operations.ORA, ABSOLUTE_Y, 4);
+	public static final TableInstruction ORA_INX = row(0x01, Operations.ORA, INDEXED_INDIRECT, 6);
+	public static final TableInstruction ORA_INY = row(0x11, Operations.ORA, INDIRECT_INDEXED, 5);
+
+	// ---- EOR ------------------------------------------------------------
+	public static final TableInstruction EOR_IMM = row(0x49, Operations.EOR, IMMEDIATE, 2);
+	public static final TableInstruction EOR_ZP = row(0x45, Operations.EOR, ZERO_PAGE, 3);
+	public static final TableInstruction EOR_ZPX = row(0x55, Operations.EOR, ZERO_PAGE_X, 4);
+	public static final TableInstruction EOR_ABS = row(0x4D, Operations.EOR, ABSOLUTE, 4);
+	public static final TableInstruction EOR_ABSX = row(0x5D, Operations.EOR, ABSOLUTE_X, 4);
+	public static final TableInstruction EOR_ABSY = row(0x59, Operations.EOR, ABSOLUTE_Y, 4);
+	public static final TableInstruction EOR_INX = row(0x41, Operations.EOR, INDEXED_INDIRECT, 6);
+	public static final TableInstruction EOR_INY = row(0x51, Operations.EOR, INDIRECT_INDEXED, 5);
 }

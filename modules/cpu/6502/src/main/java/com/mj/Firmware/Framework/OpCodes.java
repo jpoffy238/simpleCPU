@@ -25,22 +25,6 @@ import com.mj.Firmware.ExecutionFlow.RTS;
 import com.mj.Firmware.ExecutionFlow.RTI;
 
 import com.mj.Firmware.Logic.*;
-import com.mj.Firmware.Logic.AND.AND_ABS;
-import com.mj.Firmware.Logic.AND.AND_ABX;
-import com.mj.Firmware.Logic.AND.AND_ABY;
-import com.mj.Firmware.Logic.AND.AND_IMM;
-import com.mj.Firmware.Logic.AND.AND_INX;
-import com.mj.Firmware.Logic.AND.AND_INY;
-import com.mj.Firmware.Logic.AND.AND_ZP;
-import com.mj.Firmware.Logic.AND.AND_ZPX;
-import com.mj.Firmware.Logic.EOR.EOR_ABS;
-import com.mj.Firmware.Logic.EOR.EOR_ABSX;
-import com.mj.Firmware.Logic.EOR.EOR_ABSY;
-import com.mj.Firmware.Logic.EOR.EOR_IMM;
-import com.mj.Firmware.Logic.EOR.EOR_ZP;
-import com.mj.Firmware.Logic.EOR.EOR_ZPX;
-import com.mj.Firmware.Logic.EOR.EOR_INX;
-import com.mj.Firmware.Logic.EOR.EOR_INY;
 import com.mj.Firmware.Logic.Shift.ASL.ASL;
 import com.mj.Firmware.Logic.Shift.ASL.ASL_ABS;
 import com.mj.Firmware.Logic.Shift.ASL.ASL_ABSX;
@@ -76,7 +60,6 @@ import com.mj.Firmware.Logic.Shift.LSR.*;
 import com.mj.Firmware.Math.SBC.*;
 import com.mj.Firmware.Math.ADC.ADC_IMM;
 import com.mj.Firmware.Logic.CMP.*;
-import com.mj.Firmware.Logic.ORA.*;
 
 /*
  * 
@@ -172,31 +155,31 @@ public  enum OpCodes {
 	BPL(new BPL()),
 	BIT_ZP(new BIT_ZP()),
 	BIT_ABS(new BIT_ABS()),
-	AND_IMM(new AND_IMM()),
-	AND_ZP(new AND_ZP()),
-	AND_ZPX(new AND_ZPX()),
-	AND_ABS(new AND_ABS()),
-	AND_ABX(new AND_ABX()),
-	AND_ABY(new AND_ABY()),
-	AND_INX(new AND_INX()),
-	AND_INY(new AND_INY()),
+	AND_IMM(InstructionTable.AND_IMM),
+	AND_ZP(InstructionTable.AND_ZP),
+	AND_ZPX(InstructionTable.AND_ZPX),
+	AND_ABS(InstructionTable.AND_ABS),
+	AND_ABX(InstructionTable.AND_ABX),
+	AND_ABY(InstructionTable.AND_ABY),
+	AND_INX(InstructionTable.AND_INX),
+	AND_INY(InstructionTable.AND_INY),
 	
-	EOR_ABS(new EOR_ABS()),
-	EOR_IMM(new EOR_IMM()),
-	EOR_ZP(new EOR_ZP()),
-	EOR_ZPX(new EOR_ZPX()),
-	EOR_ABSX(new EOR_ABSX()),
-	EOR_ABSY(new EOR_ABSY()),
-	EOR_INX(new EOR_INX()),
-	EOR_INY(new EOR_INY()),
-	ORA_ABS(new ORA_ABS()),
-	ORA_ABSX(new ORA_ABSX()),
-	ORA_ZPX(new ORA_ZPX()),
-	ORA_ZP(new ORA_ZP()),
-	ORA_INY(new ORA_INY()),
-	ORA_IMM(new ORA_IMM()),
-	ORA_INX(new ORA_INX()),
-	ORA_ABSY(new ORA_ABSY()),
+	EOR_ABS(InstructionTable.EOR_ABS),
+	EOR_IMM(InstructionTable.EOR_IMM),
+	EOR_ZP(InstructionTable.EOR_ZP),
+	EOR_ZPX(InstructionTable.EOR_ZPX),
+	EOR_ABSX(InstructionTable.EOR_ABSX),
+	EOR_ABSY(InstructionTable.EOR_ABSY),
+	EOR_INX(InstructionTable.EOR_INX),
+	EOR_INY(InstructionTable.EOR_INY),
+	ORA_ABS(InstructionTable.ORA_ABS),
+	ORA_ABSX(InstructionTable.ORA_ABSX),
+	ORA_ZPX(InstructionTable.ORA_ZPX),
+	ORA_ZP(InstructionTable.ORA_ZP),
+	ORA_INY(InstructionTable.ORA_INY),
+	ORA_IMM(InstructionTable.ORA_IMM),
+	ORA_INX(InstructionTable.ORA_INX),
+	ORA_ABSY(InstructionTable.ORA_ABSY),
 	ASL(new ASL()),
 	ASL_ZP(new ASL_ZP()),
 	ASL_ZPX(new ASL_ZPX()),
