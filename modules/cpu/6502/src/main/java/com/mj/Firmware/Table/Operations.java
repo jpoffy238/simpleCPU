@@ -140,4 +140,119 @@ public final class Operations {
 				Registers.setNZ(c, r);
 				return r;
 			});
+
+	// ---- Compares --------------------------------------------------------------
+	public static final Operation CMP = Operation.read("CMP", "Z,C,N",
+			"Z,C,N = A-M - Compares the accumulator with a memory value, setting the flags as if a subtraction had been carried out.",
+			(c, v) -> compare(c, c.a.get(), v));
+
+	public static final Operation CPX = Operation.read("CPX", "Z,C,N",
+			"Z,C,N = X-M - Compares the X register with a memory value, setting the flags as if a subtraction had been carried out.",
+			(c, v) -> compare(c, c.x.get(), v));
+
+	public static final Operation CPY = Operation.read("CPY", "Z,C,N",
+			"Z,C,N = Y-M - Compares the Y register with a memory value, setting the flags as if a subtraction had been carried out.",
+			(c, v) -> compare(c, c.y.get(), v));
+
+	/** C = register >= operand (unsigned), Z = equal, N = bit 7 of the 8-bit difference. V is unaffected. */
+	private static void compare(com.mj.cpu001.CPU c, int register, int operand) {
+		register &= 0xff;
+		operand &= 0xff;
+		Registers.setCarry(c, register >= operand);
+		Registers.setNZ(c, register - operand);
+	}
+
+	// ---- Add and subtract with carry --------------------------------------------
+	//
+	// NMOS 6502 behavior, following Bruce Clark's "Decimal Mode" appendix
+	// (http://www.6502.org/tutorials/decimal_mode.html). In decimal mode the accumulator
+	// and carry use the BCD correction sequences, but N, V and Z come from different
+	// intermediate values (ADC) or from the binary result (SBC).
+
+	public static final Operation ADC = Operation.read("ADC", "Z,C,V,N",
+			"A,Z,C,N,V = A+M+C - Adds the contents of a memory location to the accumulator together with the carry bit. "
+					+ "Honors the decimal flag (NMOS behavior).",
+			(c, m) -> addWithCarry(c, m));
+
+	public static final Operation SBC = Operation.read("SBC", "Z,C,V,N",
+			"A,Z,C,N,V = A-M-(1-C) - Subtracts the contents of a memory location from the accumulator together with the "
+					+ "not of the carry bit. Honors the decimal flag (NMOS behavior).",
+			(c, m) -> subtractWithBorrow(c, m));
+
+	private static void setOverflow(com.mj.cpu001.CPU c, boolean on) {
+		if (on) {
+			c.OFLAG.set();
+		} else {
+			c.OFLAG.clear();
+		}
+	}
+
+	private static void addWithCarry(com.mj.cpu001.CPU c, int m) {
+		int a = c.a.get() & 0xff;
+		m &= 0xff;
+		int carry = c.CFLAG.isSet() ? 1 : 0;
+		int binary = a + m + carry;
+
+		if (!c.DFLAG.isSet()) {
+			int result = binary & 0xff;
+			Registers.setCarry(c, binary > 0xff);
+			setOverflow(c, ((~(a ^ m)) & (a ^ binary) & 0x80) != 0);
+			Registers.put(c.a, result);
+			Registers.setNZ(c, result);
+			return;
+		}
+
+		// decimal mode
+		int low = (a & 0x0f) + (m & 0x0f) + carry;
+		if (low >= 0x0a) {
+			low = ((low + 0x06) & 0x0f) + 0x10;
+		}
+		int sum = (a & 0xf0) + (m & 0xf0) + low;
+		// N and V come from the sum before the high-digit correction
+		if ((sum & 0x80) != 0) {
+			c.NFLAG.set();
+		} else {
+			c.NFLAG.clear();
+		}
+		setOverflow(c, ((~(a ^ m)) & (a ^ sum) & 0x80) != 0);
+		// Z comes from the binary sum, not the BCD result (an NMOS quirk)
+		if ((binary & 0xff) == 0) {
+			c.ZFLAG.set();
+		} else {
+			c.ZFLAG.clear();
+		}
+		if (sum >= 0xa0) {
+			sum += 0x60;
+		}
+		Registers.setCarry(c, sum > 0xff);
+		Registers.put(c.a, sum & 0xff);
+	}
+
+	private static void subtractWithBorrow(com.mj.cpu001.CPU c, int m) {
+		int a = c.a.get() & 0xff;
+		m &= 0xff;
+		int carry = c.CFLAG.isSet() ? 1 : 0;
+		int binary = a - m - (1 - carry);
+		int binaryResult = binary & 0xff;
+
+		// all flags are the binary ones, in both modes
+		Registers.setCarry(c, binary >= 0);
+		setOverflow(c, ((a ^ m) & (a ^ binary) & 0x80) != 0);
+		Registers.setNZ(c, binaryResult);
+
+		if (!c.DFLAG.isSet()) {
+			Registers.put(c.a, binaryResult);
+			return;
+		}
+
+		int low = (a & 0x0f) - (m & 0x0f) + carry - 1;
+		if (low < 0) {
+			low = ((low - 0x06) & 0x0f) - 0x10;
+		}
+		int result = (a & 0xf0) - (m & 0xf0) + low;
+		if (result < 0) {
+			result -= 0x60;
+		}
+		Registers.put(c.a, result & 0xff);
+	}
 }

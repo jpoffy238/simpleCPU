@@ -36,10 +36,6 @@ import com.mj.Firmware.Transfers.TXA;
 import com.mj.Firmware.Transfers.TXS;
 import com.mj.Firmware.Transfers.TYA;
 import com.mj.Firmware.StatusFlags.*;
-import com.mj.Firmware.Math.ADC.*;
-import com.mj.Firmware.Math.SBC.*;
-import com.mj.Firmware.Math.ADC.ADC_IMM;
-import com.mj.Firmware.Logic.CMP.*;
 
 /*
  * 
@@ -48,22 +44,22 @@ import com.mj.Firmware.Logic.CMP.*;
 
 public  enum OpCodes {
 	
-	ADC_IMM(new ADC_IMM()),
-	ADC_ZP(new ADC_ZP()),
-	ADC_ZPX(new ADC_ZPX()),
-	ADC_ABS(new ADC_ABS()),
-	ADC_ABSX(new ADC_ABSX()),
-	ADC_ABSY(new ADC_ABSY()),
-	ADC_INX(new ADC_INX()),
-	ADC_INY(new ADC_INY()),
-	SBC_ABS(new SBC_ABS()),
-	SBC_ZPX(new SBC_ZPX()),
-	SBC_ABSX(new SBC_ABSX()),
-	SBC_ZP(new SBC_ZP()),
-	SBC_INY(new SBC_INY()),
-	SBC_INX(new SBC_INX()),
-	SBC_IMM(new SBC_IMM()),
-	SBC_ABSY(new SBC_ABSY()),
+	ADC_IMM(InstructionTable.ADC_IMM),
+	ADC_ZP(InstructionTable.ADC_ZP),
+	ADC_ZPX(InstructionTable.ADC_ZPX),
+	ADC_ABS(InstructionTable.ADC_ABS),
+	ADC_ABSX(InstructionTable.ADC_ABSX),
+	ADC_ABSY(InstructionTable.ADC_ABSY),
+	ADC_INX(InstructionTable.ADC_INX),
+	ADC_INY(InstructionTable.ADC_INY),
+	SBC_ABS(InstructionTable.SBC_ABS),
+	SBC_ZPX(InstructionTable.SBC_ZPX),
+	SBC_ABSX(InstructionTable.SBC_ABSX),
+	SBC_ZP(InstructionTable.SBC_ZP),
+	SBC_INY(InstructionTable.SBC_INY),
+	SBC_INX(InstructionTable.SBC_INX),
+	SBC_IMM(InstructionTable.SBC_IMM),
+	SBC_ABSY(InstructionTable.SBC_ABSY),
 	
 	MIH(new MIH()),  // Special instruction to handle interrupts
 	
@@ -205,20 +201,20 @@ public  enum OpCodes {
 	SEC(new SEC()),
 	SED(new SED()),
 	SEI(new SEI()),
-	CMP_IMM(new CMP_IMM()),
-	CMP_ABS(new CMP_ABS()),
-	CMP_ZP(new CMP_ZP()),
-	CMP_ZPX(new CMP_ZPX()),
-	CMP_ABX(new CMP_ABX()),
-	CMP_ABY(new CMP_ABY()),
-	CMP_INX(new CMP_INX()),
-	CMP_INY(new CMP_INY()),
-	CPX_ABS(new CPX_ABS()),
-	CPX_IMM(new CPX_IMM()),
-	CPX_ZP(new CPX_ZP()),
-	CPY_IMM(new CPY_IMM()),
-	CPY_ABS(new CPY_ABS()),
-	CPY_ZP(new CPY_ZP()),
+	CMP_IMM(InstructionTable.CMP_IMM),
+	CMP_ABS(InstructionTable.CMP_ABS),
+	CMP_ZP(InstructionTable.CMP_ZP),
+	CMP_ZPX(InstructionTable.CMP_ZPX),
+	CMP_ABX(InstructionTable.CMP_ABX),
+	CMP_ABY(InstructionTable.CMP_ABY),
+	CMP_INX(InstructionTable.CMP_INX),
+	CMP_INY(InstructionTable.CMP_INY),
+	CPX_ABS(InstructionTable.CPX_ABS),
+	CPX_IMM(InstructionTable.CPX_IMM),
+	CPX_ZP(InstructionTable.CPX_ZP),
+	CPY_IMM(InstructionTable.CPY_IMM),
+	CPY_ABS(InstructionTable.CPY_ABS),
+	CPY_ZP(InstructionTable.CPY_ZP),
 	//TEST(new TEST()),
 	
 HLT( new HLT());

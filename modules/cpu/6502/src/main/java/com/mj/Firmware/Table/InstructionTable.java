@@ -136,4 +136,38 @@ public final class InstructionTable {
 	public static final TableInstruction ROR_ZPX = row(0x76, Operations.ROR, ZERO_PAGE_X, 6);
 	public static final TableInstruction ROR_ABS = row(0x6E, Operations.ROR, ABSOLUTE, 6);
 	public static final TableInstruction ROR_ABX = row(0x7E, Operations.ROR, ABSOLUTE_X, 7);
+
+	// ---- CMP / CPX / CPY -------------------------------------------------------
+	public static final TableInstruction CMP_IMM = row(0xC9, Operations.CMP, IMMEDIATE, 2);
+	public static final TableInstruction CMP_ZP = row(0xC5, Operations.CMP, ZERO_PAGE, 3);
+	public static final TableInstruction CMP_ZPX = row(0xD5, Operations.CMP, ZERO_PAGE_X, 4);
+	public static final TableInstruction CMP_ABS = row(0xCD, Operations.CMP, ABSOLUTE, 4);
+	public static final TableInstruction CMP_ABX = row(0xDD, Operations.CMP, ABSOLUTE_X, 4);
+	public static final TableInstruction CMP_ABY = row(0xD9, Operations.CMP, ABSOLUTE_Y, 4);
+	public static final TableInstruction CMP_INX = row(0xC1, Operations.CMP, INDEXED_INDIRECT, 6);
+	public static final TableInstruction CMP_INY = row(0xD1, Operations.CMP, INDIRECT_INDEXED, 5);
+	public static final TableInstruction CPX_IMM = row(0xE0, Operations.CPX, IMMEDIATE, 2);
+	public static final TableInstruction CPX_ZP = row(0xE4, Operations.CPX, ZERO_PAGE, 3);
+	public static final TableInstruction CPX_ABS = row(0xEC, Operations.CPX, ABSOLUTE, 4);
+	public static final TableInstruction CPY_IMM = row(0xC0, Operations.CPY, IMMEDIATE, 2);
+	public static final TableInstruction CPY_ZP = row(0xC4, Operations.CPY, ZERO_PAGE, 3);
+	public static final TableInstruction CPY_ABS = row(0xCC, Operations.CPY, ABSOLUTE, 4);
+
+	// ---- ADC / SBC -------------------------------------------------------------
+	public static final TableInstruction ADC_IMM = row(0x69, Operations.ADC, IMMEDIATE, 2);
+	public static final TableInstruction ADC_ZP = row(0x65, Operations.ADC, ZERO_PAGE, 3);
+	public static final TableInstruction ADC_ZPX = row(0x75, Operations.ADC, ZERO_PAGE_X, 4);
+	public static final TableInstruction ADC_ABS = row(0x6D, Operations.ADC, ABSOLUTE, 4);
+	public static final TableInstruction ADC_ABSX = row(0x7D, Operations.ADC, ABSOLUTE_X, 4);
+	public static final TableInstruction ADC_ABSY = row(0x79, Operations.ADC, ABSOLUTE_Y, 4);
+	public static final TableInstruction ADC_INX = row(0x61, Operations.ADC, INDEXED_INDIRECT, 6);
+	public static final TableInstruction ADC_INY = row(0x71, Operations.ADC, INDIRECT_INDEXED, 5);
+	public static final TableInstruction SBC_IMM = row(0xE9, Operations.SBC, IMMEDIATE, 2);
+	public static final TableInstruction SBC_ZP = row(0xE5, Operations.SBC, ZERO_PAGE, 3);
+	public static final TableInstruction SBC_ZPX = row(0xF5, Operations.SBC, ZERO_PAGE_X, 4);
+	public static final TableInstruction SBC_ABS = row(0xED, Operations.SBC, ABSOLUTE, 4);
+	public static final TableInstruction SBC_ABSX = row(0xFD, Operations.SBC, ABSOLUTE_X, 4);
+	public static final TableInstruction SBC_ABSY = row(0xF9, Operations.SBC, ABSOLUTE_Y, 4);
+	public static final TableInstruction SBC_INX = row(0xE1, Operations.SBC, INDEXED_INDIRECT, 6);
+	public static final TableInstruction SBC_INY = row(0xF1, Operations.SBC, INDIRECT_INDEXED, 5);
 }

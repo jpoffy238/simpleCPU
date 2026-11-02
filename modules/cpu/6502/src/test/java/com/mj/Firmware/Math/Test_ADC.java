@@ -186,8 +186,9 @@ public class Test_ADC {
 
 		assert ((byte) (result & 0xff) == ((byte) (200 + 127) & 0xff));
 		assert (!c.ZFLAG.isSet());
-		assert (c.NFLAG.isSet());
-		assert (c.OFLAG.isSet());
+		assert (!c.NFLAG.isSet());   // 200 + 127 = 327 = $147, result $47
+		assert (!c.OFLAG.isSet());   // -56 + 127 = 71: no signed overflow
+		
 		assert (c.CFLAG.isSet());
 
 	}
@@ -295,7 +296,7 @@ public class Test_ADC {
 		assert (c.ZFLAG.isSet());
 		assert (!c.NFLAG.isSet());
 		assert (c.CFLAG.isSet());
-		assert (c.OFLAG.isSet());
+		assert (!c.OFLAG.isSet());   // 1 + (-1) = 0: no signed overflow
 
 	}
 
@@ -340,10 +341,13 @@ public class Test_ADC {
 	 * agrees with the unsigned result. The program stores 1 in ERROR when it starts and
 	 * 0 only after every case passes, so a sentinel is pre-loaded to make sure the
 	 * program really ran to completion.
+	 *
+	 * SLOW (minutes): the arithmetic itself is already verified exhaustively and quickly by
+	 * Test_AddSub_Exhaustive, so this is a second opinion run as real machine code. It is opt-in.
 	 */
-	@org.junit.jupiter.api.Disabled("KNOWN FAILURE - exposes real emulator bugs: (1) CMP/CPX/CPY clear carry when the operands are "
-			+ "equal, (2) ADC/SBC sign-extend memory operands >= $80 in every mode except immediate, (3) the ADC V-flag formula is "
-			+ "wrong. Re-enable when the ADC/SBC and CMP/CPX/CPY families are converted and fixed.")
+	@org.junit.jupiter.api.Tag("slow")
+	@org.junit.jupiter.api.condition.EnabledIfSystemProperty(named = "slowTests", matches = "true",
+			disabledReason = "Runs Clark's 131,072-case program through the full CPU loop (minutes). Opt in with: mvn test -DslowTests=true")
 	@Test
 	public void Test_ADC_Advanced() throws Exception {
 		final int ERROR = 0x2000;
