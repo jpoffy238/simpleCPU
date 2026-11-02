@@ -35,4 +35,18 @@ public final class InstructionTable {
 	public static final TableInstruction LDA_ABSY = row(0xB9, Operations.LDA, ABSOLUTE_Y, 4);
 	public static final TableInstruction LDA_INDX = row(0xA1, Operations.LDA, INDEXED_INDIRECT, 6);
 	public static final TableInstruction LDA_INDY = row(0xB1, Operations.LDA, INDIRECT_INDEXED, 5);
+
+	// ---- LDX -------------------------------------------------------------------
+	public static final TableInstruction LDX_IMM = row(0xA2, Operations.LDX, IMMEDIATE, 2);
+	public static final TableInstruction LDX_ZP = row(0xA6, Operations.LDX, ZERO_PAGE, 3);
+	public static final TableInstruction LDX_ZPY = row(0xB6, Operations.LDX, ZERO_PAGE_Y, 4);
+	public static final TableInstruction LDX_ABS = row(0xAE, Operations.LDX, ABSOLUTE, 4);
+	public static final TableInstruction LDX_ABSY = row(0xBE, Operations.LDX, ABSOLUTE_Y, 4);
+
+	// ---- LDY -------------------------------------------------------------------
+	public static final TableInstruction LDY_IMM = row(0xA0, Operations.LDY, IMMEDIATE, 2);
+	public static final TableInstruction LDY_ZP = row(0xA4, Operations.LDY, ZERO_PAGE, 3);
+	public static final TableInstruction LDY_ZPX = row(0xB4, Operations.LDY, ZERO_PAGE_X, 4);
+	public static final TableInstruction LDY_ABS = row(0xAC, Operations.LDY, ABSOLUTE, 4);
+	public static final TableInstruction LDY_ABSX = row(0xBC, Operations.LDY, ABSOLUTE_X, 4);
 }

@@ -12,4 +12,18 @@ public final class Operations {
 				Registers.put(c.a, v);
 				Registers.setNZ(c, v);
 			});
+
+	public static final Operation LDX = Operation.read("LDX", "Z,N",
+			"X,Z,N = M - Loads a byte of memory into the X register setting the zero and negative flags as appropriate.",
+			(c, v) -> {
+				Registers.put(c.x, v);
+				Registers.setNZ(c, v);
+			});
+
+	public static final Operation LDY = Operation.read("LDY", "Z,N",
+			"Y,Z,N = M - Loads a byte of memory into the Y register setting the zero and negative flags as appropriate.",
+			(c, v) -> {
+				Registers.put(c.y, v);
+				Registers.setNZ(c, v);
+			});
 }

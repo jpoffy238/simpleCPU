@@ -24,16 +24,6 @@ import com.mj.Firmware.ExecutionFlow.NOP;
 import com.mj.Firmware.ExecutionFlow.RTS;
 import com.mj.Firmware.ExecutionFlow.RTI;
 
-import com.mj.Firmware.Load.IndexX.LDX_ABS;
-import com.mj.Firmware.Load.IndexX.LDX_ABSY;
-import com.mj.Firmware.Load.IndexX.LDX_IMM;
-import com.mj.Firmware.Load.IndexX.LDX_ZP;
-import com.mj.Firmware.Load.IndexX.LDX_ZPY;
-import com.mj.Firmware.Load.IndexY.LDY_ABS;
-import com.mj.Firmware.Load.IndexY.LDY_ABSX;
-import com.mj.Firmware.Load.IndexY.LDY_IMM;
-import com.mj.Firmware.Load.IndexY.LDY_ZP;
-import com.mj.Firmware.Load.IndexY.LDY_ZPX;
 import com.mj.Firmware.Logic.*;
 import com.mj.Firmware.Logic.AND.AND_ABS;
 import com.mj.Firmware.Logic.AND.AND_ABX;
@@ -137,17 +127,17 @@ public  enum OpCodes {
 	LDA_ZP(InstructionTable.LDA_ZP),
 	LDA_ZX(InstructionTable.LDA_ZX),
 	
-	LDX_ABS(new LDX_ABS()),
-	LDX_ABSY(new LDX_ABSY()),
-	LDX_IMM(new LDX_IMM()),
-	LDX_ZP(new LDX_ZP()),
-	LDX_ZPY(new LDX_ZPY()),
+	LDX_ABS(InstructionTable.LDX_ABS),
+	LDX_ABSY(InstructionTable.LDX_ABSY),
+	LDX_IMM(InstructionTable.LDX_IMM),
+	LDX_ZP(InstructionTable.LDX_ZP),
+	LDX_ZPY(InstructionTable.LDX_ZPY),
 	
-	LDY_ABS(new LDY_ABS()),
-	LDY_ABSX(new LDY_ABSX()),
-	LDY_IMM(new LDY_IMM()),
-	LDY_ZP(new LDY_ZP()),
-	LDY_ZPX(new LDY_ZPX()),
+	LDY_ABS(InstructionTable.LDY_ABS),
+	LDY_ABSX(InstructionTable.LDY_ABSX),
+	LDY_IMM(InstructionTable.LDY_IMM),
+	LDY_ZP(InstructionTable.LDY_ZP),
+	LDY_ZPX(InstructionTable.LDY_ZPX),
 	
 	STA_ABS(new STA_ABS()),
 	STA_ABX(new STA_ABX()),
