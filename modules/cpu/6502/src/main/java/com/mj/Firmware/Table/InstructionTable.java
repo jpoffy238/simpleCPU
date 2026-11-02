@@ -114,4 +114,26 @@ public final class InstructionTable {
 	public static final TableInstruction INY = row(0xC8, Operations.INY, IMPLIED, 2);
 	public static final TableInstruction DEX = row(0xCA, Operations.DEX, IMPLIED, 2);
 	public static final TableInstruction DEY = row(0x88, Operations.DEY, IMPLIED, 2);
+
+	// ---- Shifts and rotates ------------------------------------------------------
+	public static final TableInstruction ASL = row(0x0A, Operations.ASL, ACCUMULATOR, 2);
+	public static final TableInstruction ASL_ZP = row(0x06, Operations.ASL, ZERO_PAGE, 5);
+	public static final TableInstruction ASL_ZPX = row(0x16, Operations.ASL, ZERO_PAGE_X, 6);
+	public static final TableInstruction ASL_ABS = row(0x0E, Operations.ASL, ABSOLUTE, 6);
+	public static final TableInstruction ASL_ABSX = row(0x1E, Operations.ASL, ABSOLUTE_X, 7);
+	public static final TableInstruction LSR_ACC = row(0x4A, Operations.LSR, ACCUMULATOR, 2);
+	public static final TableInstruction LSR_ZP = row(0x46, Operations.LSR, ZERO_PAGE, 5);
+	public static final TableInstruction LSR_ZPX = row(0x56, Operations.LSR, ZERO_PAGE_X, 6);
+	public static final TableInstruction LSR_ABS = row(0x4E, Operations.LSR, ABSOLUTE, 6);
+	public static final TableInstruction LSR_ABX = row(0x5E, Operations.LSR, ABSOLUTE_X, 7);
+	public static final TableInstruction ROL_ACC = row(0x2A, Operations.ROL, ACCUMULATOR, 2);
+	public static final TableInstruction ROL_ZP = row(0x26, Operations.ROL, ZERO_PAGE, 5);
+	public static final TableInstruction ROL_ZPX = row(0x36, Operations.ROL, ZERO_PAGE_X, 6);
+	public static final TableInstruction ROL_ABS = row(0x2E, Operations.ROL, ABSOLUTE, 6);
+	public static final TableInstruction ROL_ABX = row(0x3E, Operations.ROL, ABSOLUTE_X, 7);
+	public static final TableInstruction ROR_ACC = row(0x6A, Operations.ROR, ACCUMULATOR, 2);
+	public static final TableInstruction ROR_ZP = row(0x66, Operations.ROR, ZERO_PAGE, 5);
+	public static final TableInstruction ROR_ZPX = row(0x76, Operations.ROR, ZERO_PAGE_X, 6);
+	public static final TableInstruction ROR_ABS = row(0x6E, Operations.ROR, ABSOLUTE, 6);
+	public static final TableInstruction ROR_ABX = row(0x7E, Operations.ROR, ABSOLUTE_X, 7);
 }

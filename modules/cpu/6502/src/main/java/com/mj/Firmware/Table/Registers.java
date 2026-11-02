@@ -33,4 +33,12 @@ public final class Registers {
 			c.NFLAG.clear();
 		}
 	}
+
+	public static void setCarry(CPU c, boolean on) {
+		if (on) {
+			c.CFLAG.set();
+		} else {
+			c.CFLAG.clear();
+		}
+	}
 }

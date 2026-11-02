@@ -103,4 +103,41 @@ public final class Operations {
 				Registers.put(c.y, r);
 				Registers.setNZ(c, r);
 			});
+
+	// ---- Shifts and rotates ----------------------------------------------------
+	public static final Operation ASL = Operation.modify("ASL", "Z,C,N",
+			"A,C = A*2 or M,C = M*2 - Shifts all the bits one place to the left. Bit 7 is shifted into the carry flag and bit 0 is set to zero.",
+			(c, v) -> {
+				int r = (v << 1) & 0xff;
+				Registers.setCarry(c, (v & 0x80) != 0);
+				Registers.setNZ(c, r);
+				return r;
+			});
+
+	public static final Operation LSR = Operation.modify("LSR", "Z,C,N",
+			"A,C = A/2 or M,C = M/2 - Shifts all the bits one place to the right. Bit 0 is shifted into the carry flag and bit 7 is set to zero.",
+			(c, v) -> {
+				int r = (v & 0xff) >> 1;
+				Registers.setCarry(c, (v & 0x01) != 0);
+				Registers.setNZ(c, r);
+				return r;
+			});
+
+	public static final Operation ROL = Operation.modify("ROL", "Z,C,N",
+			"Rotate Left - Moves all the bits one place to the left. Bit 0 is filled with the current carry and the old bit 7 becomes the new carry.",
+			(c, v) -> {
+				int r = ((v << 1) | (c.CFLAG.isSet() ? 1 : 0)) & 0xff;
+				Registers.setCarry(c, (v & 0x80) != 0);
+				Registers.setNZ(c, r);
+				return r;
+			});
+
+	public static final Operation ROR = Operation.modify("ROR", "Z,C,N",
+			"Rotate Right - Moves all the bits one place to the right. Bit 7 is filled with the current carry and the old bit 0 becomes the new carry.",
+			(c, v) -> {
+				int r = ((v & 0xff) >> 1) | (c.CFLAG.isSet() ? 0x80 : 0);
+				Registers.setCarry(c, (v & 0x01) != 0);
+				Registers.setNZ(c, r);
+				return r;
+			});
 }

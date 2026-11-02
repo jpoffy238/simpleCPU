@@ -25,13 +25,6 @@ import com.mj.Firmware.ExecutionFlow.RTS;
 import com.mj.Firmware.ExecutionFlow.RTI;
 
 import com.mj.Firmware.Logic.*;
-import com.mj.Firmware.Logic.Shift.ASL.ASL;
-import com.mj.Firmware.Logic.Shift.ASL.ASL_ABS;
-import com.mj.Firmware.Logic.Shift.ASL.ASL_ABSX;
-import com.mj.Firmware.Logic.Shift.ASL.ASL_ZP;
-import com.mj.Firmware.Logic.Shift.ASL.ASL_ZPX;
-import com.mj.Firmware.Logic.Shift.ROL.*;
-import com.mj.Firmware.Logic.Shift.ROR.*;
 import com.mj.Firmware.Stack.PHA;
 import com.mj.Firmware.Stack.PLA;
 import com.mj.Firmware.Stack.PHP;
@@ -44,7 +37,6 @@ import com.mj.Firmware.Transfers.TXS;
 import com.mj.Firmware.Transfers.TYA;
 import com.mj.Firmware.StatusFlags.*;
 import com.mj.Firmware.Math.ADC.*;
-import com.mj.Firmware.Logic.Shift.LSR.*;
 import com.mj.Firmware.Math.SBC.*;
 import com.mj.Firmware.Math.ADC.ADC_IMM;
 import com.mj.Firmware.Logic.CMP.*;
@@ -168,28 +160,28 @@ public  enum OpCodes {
 	ORA_IMM(InstructionTable.ORA_IMM),
 	ORA_INX(InstructionTable.ORA_INX),
 	ORA_ABSY(InstructionTable.ORA_ABSY),
-	ASL(new ASL()),
-	ASL_ZP(new ASL_ZP()),
-	ASL_ZPX(new ASL_ZPX()),
-	ASL_ABS(new ASL_ABS()),
-	ASL_ABSX(new ASL_ABSX()),
-	LSR_ACC(new LSR_ACC()),
-	LSR_ZP(new LSR_ZP()),
-	LSR_ZPX(new LSR_ZPX()),
-	LSR_ABS(new LSR_ABS()),
-	LSR_ABX(new LSR_ABX()),
-	ROL_ABS(new ROL_ABS()),
-	ROL_ACC(new ROL_ACC()),
-	ROL_ZP(new ROL_ZP()),
-	ROL_ZPX(new ROL_ZPX()),
-	ROL_ABX(new ROL_ABX()),
+	ASL(InstructionTable.ASL),
+	ASL_ZP(InstructionTable.ASL_ZP),
+	ASL_ZPX(InstructionTable.ASL_ZPX),
+	ASL_ABS(InstructionTable.ASL_ABS),
+	ASL_ABSX(InstructionTable.ASL_ABSX),
+	LSR_ACC(InstructionTable.LSR_ACC),
+	LSR_ZP(InstructionTable.LSR_ZP),
+	LSR_ZPX(InstructionTable.LSR_ZPX),
+	LSR_ABS(InstructionTable.LSR_ABS),
+	LSR_ABX(InstructionTable.LSR_ABX),
+	ROL_ABS(InstructionTable.ROL_ABS),
+	ROL_ACC(InstructionTable.ROL_ACC),
+	ROL_ZP(InstructionTable.ROL_ZP),
+	ROL_ZPX(InstructionTable.ROL_ZPX),
+	ROL_ABX(InstructionTable.ROL_ABX),
 	
 	
-	ROR_ABS(new ROR_ABS()),
-	ROR_ABX(new ROR_ABX()),
-	ROR_ACC(new ROR_ACC()),
-	ROR_ZP(new ROR_ZP()),
-	ROR_ZPX(new ROR_ZPX()),
+	ROR_ABS(InstructionTable.ROR_ABS),
+	ROR_ABX(InstructionTable.ROR_ABX),
+	ROR_ACC(InstructionTable.ROR_ACC),
+	ROR_ZP(InstructionTable.ROR_ZP),
+	ROR_ZPX(InstructionTable.ROR_ZPX),
 	
 	BNE(new BNE()),
 	JMP_ABS(new JMP_ABS()),
