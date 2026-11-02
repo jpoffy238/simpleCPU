@@ -16,6 +16,11 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.illegalOpCodeException;
 
 public class CPU extends Thread {
+	/** Hardware vectors (little-endian addresses stored at the top of memory). */
+	public static final int VECTOR_NMI = 0xfffa;
+	public static final int VECTOR_RESET = 0xfffc;
+	public static final int VECTOR_IRQ = 0xfffe;
+
 	public CPU(PBus bus, Decoder dcd) {
 		this.bus =bus;
 		decoder = dcd;
@@ -68,6 +73,17 @@ public Decoder getDecoder() {
 
 
 
+	/** Read a 16-bit little-endian vector from the bus. */
+	public int readVector(int vectorAddress) throws illegalAddressException, DeviceUnavailable {
+		int lower = bus.read(vectorAddress) & 0xff;
+		int upper = bus.read(vectorAddress + 1) & 0xff;
+		return (upper << 8) | lower;
+	}
+
+	/**
+	 * Reset: clear the registers, set the stack pointer and interrupt-disable
+	 * flag, and load the PC from the reset vector at $FFFC/$FFFD.
+	 */
 	public void reset() {
 		CFLAG.reset();
 		ZFLAG.reset();
@@ -81,11 +97,17 @@ public Decoder getDecoder() {
 		b.reset();
 		x.reset();
 		y.reset();
-		pc = 0x1000;
 		sp = 0xfd;
-		
+		IFLAG.set();          // interrupts are disabled after reset
+		try {
+			pc = readVector(VECTOR_RESET);
+		} catch (illegalAddressException | DeviceUnavailable e) {
+			logger.error("Unable to read the reset vector at $FFFC; PC left at $0000");
+			pc = 0;
+		}
+
 		logger.debug(dump());
-		
+
 	}
 
 	public String dump() {

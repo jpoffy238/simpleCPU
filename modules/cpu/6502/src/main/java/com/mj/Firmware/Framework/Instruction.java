@@ -72,42 +72,17 @@ public abstract class Instruction implements machineState {
 	}
 
 	protected int getInterruptHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower =  (int)(c.bus.read(0x00fffe) & 0x00ff);                     
-		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
-
-		int opperand_upper = (int) (c.bus.read (0x00ffff) & 0x00ff);
-		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
-
-		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
-		logger.debug(String.format("Final Address %04x ", loadAddress));
-		if (loadAddress != 0xf000) {
-			logger.debug("BAD ADDRESS for Interrupt");
-			throw new DeviceUnavailable (loadAddress);
-		}
-		return loadAddress;
+		return c.readVector(CPU.VECTOR_IRQ);
 	}
+
 	protected int getNMInterruptHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower =  (int)(c.bus.read(0x00fffa) & 0x00ff);                     
-		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
-
-		int opperand_upper = (int) (c.bus.read (0x00fffb) & 0x00ff);
-		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
-
-		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
-		logger.debug(String.format("Final Address %04x ", loadAddress));
-		return loadAddress;
+		return c.readVector(CPU.VECTOR_NMI);
 	}
+
 	protected int getResetHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower =  (int)(c.bus.read(0x00fffc) & 0x00ff);                     
-		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
-
-		int opperand_upper = (int) (c.bus.read (0x00fffd) & 0x00ff);
-		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
-
-		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
-		logger.debug(String.format("Final Address %04x ", loadAddress));
-		return loadAddress;
+		return c.readVector(CPU.VECTOR_RESET);
 	}
+
 	protected int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
 		int opperand_lower = c.bus.read(c.pc) & 0xff;
 		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));

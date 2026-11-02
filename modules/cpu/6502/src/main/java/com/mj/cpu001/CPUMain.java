@@ -30,9 +30,15 @@ public class CPUMain {
 					null, 0	));
 		
 		
-		bus.registerDevice(new basicROM(bus, 
+		basicROM rom = new basicROM(bus, 
 				new AddressRange(0xff00, 0xffff),
-				null, 0));
+				null, 0);
+		try {
+			rom.setVectors(0x1000, 0x1000, 0xf000);   // NMI, RESET (Echo.hex starts at $1000), IRQ
+		} catch (illegalAddressException e) {
+			e.printStackTrace();
+		}
+		bus.registerDevice(rom);
 		ConsoleDevice con = new ConsoleDevice(bus, new AddressRange(0xec00, 0xec01));
 		bus.registerDevice(con);
 		Decoder d =  new cpu001decoder();
