@@ -64,13 +64,9 @@ EXEC
 		// 
 		
 			
-			int lower = c.bus.read(c.sp);
-			c.sp++;
-			int upper = c.bus.read(c.sp);
-			c.sp++;
-				
-		    
-			int newpc =( (upper  &  0xff) << 8) + (int)(lower & 0x00ff);
-			c.pc = newpc;
+			int lower = c.pull() & 0xff;
+			int upper = c.pull() & 0xff;
+			// the pushed address is return address - 1
+			c.pc = (((upper << 8) | lower) + 1) & 0xffff;
 		}
 }

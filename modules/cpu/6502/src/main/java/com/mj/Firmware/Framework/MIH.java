@@ -42,13 +42,10 @@ public class MIH extends Instruction {
 			int upper = (((c.pc) & 0xff00) >> 8);
 			int lower = (((c.pc) & 0x00ff));
 
-			// push on stack
-			c.sp--;
-			c.bus.write(c.sp, (byte) (upper & 0xff));
-			c.sp--;
-			c.bus.write(c.sp, (byte) (lower & 0xff));
-			c.sp--;
-			c.bus.write(c.sp, psr(c, false));   // hardware interrupt: B bit clear
+			// push on stack: PCH, PCL, then status (B clear for hardware interrupts)
+			c.push((byte) (upper & 0xff));
+			c.push((byte) (lower & 0xff));
+			c.push(psr(c, false));
 			c.IFLAG.set();                       // I is set after the old status is saved
 			logger.debug(String.format("Interrupt Address = %04x " , interuptHandlerAddress));
 			c.pc = interuptHandlerAddress;

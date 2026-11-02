@@ -32,25 +32,16 @@ public class JSR extends Instruction {
 				"on to the stack before transferring program control to the following address. Subroutines are normally terminated by a RTS op code.");
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// Jump to Subroutine  
-		// Push the high order PC+2 to stack 
-		// Push low order PC+2 to stack
-		// JMP to Immediate address next two bytes of this instruction
-		// Get the upper and lower PC + 2 (the return address)
-		    int upper = (((c.pc+2) & 0xff00 )>> 8); 
-		    int  lower = (((c.pc+2) & 0x00ff));
-			
-		    // push on stack
-		    c.sp--;
-			c.bus.write(c.sp, (byte)(upper & 0xff));
-			c.sp--;
-			c.bus.write(c.sp, (byte)(lower & 0xff));
-			
-			
+		// Jump to Subroutine: push the address of the last byte of the JSR
+		// instruction (return address - 1), high byte first, then jump.
+		int ret = (c.pc + 1) & 0xffff;
+		c.push((byte) ((ret >> 8) & 0xff));
+		c.push((byte) (ret & 0xff));
+
 			// Load new jmp address into PC
-		    lower = (c.bus.read(c.pc)  & 0xff);
+		    int lower = (c.bus.read(c.pc)  & 0xff);
 		    c.pc++;
-		    upper = (c.bus.read(c.pc) & 0xff);
+		    int upper = (c.bus.read(c.pc) & 0xff);
 			int newpc =( (upper & 0x00ff) << 8) + (int)(lower & 0x00ff);
 			c.pc = newpc;
 		}

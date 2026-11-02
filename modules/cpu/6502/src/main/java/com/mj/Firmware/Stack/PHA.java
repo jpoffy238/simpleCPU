@@ -16,10 +16,7 @@ public class PHA extends Instruction {
 		
 		
 		
-		c.sp--;
-		byte data = (byte)(c.a.get() & 0xff);
-		
-		c.bus.write(c.sp, data);
+		c.push((byte) (c.a.get() & 0xff));
 			
 	}
 

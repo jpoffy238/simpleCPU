@@ -49,25 +49,10 @@ public class ROR_ZP extends Instruction {
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
-		int address =  (getZeroPageAddress(c) );
-		int a = c.bus.read(address);
-		c.ZFLAG.clear();
-		c.NFLAG.clear();
-
-		int result = a >> 1;
-		if (c.CFLAG.isSet()) {
-			result += 0x80; // Pull in Carry Flag if set
-			c.CFLAG.clear(); // Clear it
-			c.NFLAG.set();
-		}
-		if (result == 0) {
-			c.ZFLAG.set();
-			c.NFLAG.clear();
-		}
+		int address = getZeroPageAddress(c);
+		int result = rorAndSetFlags(c, c.bus.read(address));
+		c.bus.write(address, (byte) result);
 		c.pc += 1;
-		c.bus.write(address, (byte) (result & 0xff));
 	}
-	
 
 }

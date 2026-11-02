@@ -330,6 +330,58 @@ public abstract class Instruction implements machineState {
 		return result;
 	}
 
+	protected void setNZ(CPU c, int result) {
+		if (result == 0) {
+			c.ZFLAG.set();
+		} else {
+			c.ZFLAG.clear();
+		}
+		if ((result & 0x80) != 0) {
+			c.NFLAG.set();
+		} else {
+			c.NFLAG.clear();
+		}
+	}
+
+	/** ROL: rotate left through carry. C = old bit 7, bit 0 = old C. */
+	protected int rolAndSetFlags(CPU c, int value) {
+		value &= 0xff;
+		int result = ((value << 1) | (c.CFLAG.isSet() ? 1 : 0)) & 0xff;
+		if ((value & 0x80) != 0) {
+			c.CFLAG.set();
+		} else {
+			c.CFLAG.clear();
+		}
+		setNZ(c, result);
+		return result;
+	}
+
+	/** ROR: rotate right through carry. C = old bit 0, bit 7 = old C. */
+	protected int rorAndSetFlags(CPU c, int value) {
+		value &= 0xff;
+		int result = (value >> 1) | (c.CFLAG.isSet() ? 0x80 : 0);
+		if ((value & 0x01) != 0) {
+			c.CFLAG.set();
+		} else {
+			c.CFLAG.clear();
+		}
+		setNZ(c, result);
+		return result;
+	}
+
+	/** LSR: logical shift right. C = old bit 0, bit 7 = 0 (so N is always clear). */
+	protected int lsrAndSetFlags(CPU c, int value) {
+		value &= 0xff;
+		int result = value >> 1;
+		if ((value & 0x01) != 0) {
+			c.CFLAG.set();
+		} else {
+			c.CFLAG.clear();
+		}
+		setNZ(c, result);
+		return result;
+	}
+
 	public long getExecutionCount() {
 		return executionCount;
 	}

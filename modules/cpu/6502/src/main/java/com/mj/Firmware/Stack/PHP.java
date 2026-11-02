@@ -16,10 +16,7 @@ public class PHP extends Instruction {
 		
 		
 		
-		c.sp--;
-		byte data = (byte)( psr(c)& 0xff);
-		
-		c.bus.write(c.sp, data);
+		c.push(psr(c, true));   // PHP pushes B set
 			
 	}
 

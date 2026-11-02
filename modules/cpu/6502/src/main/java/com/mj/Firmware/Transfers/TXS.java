@@ -15,6 +15,6 @@ public class TXS extends Instruction {
 		setProperty(KEY_DESCRIPTION ,"X = A  Stores the contents of the accumulator X.");
 	}
 	public void exeute(CPU c) {
-		c.sp = (c.x.get()&0xff + 0x0100);
+		c.sp = c.x.get() & 0xff;   // TXS does not affect flags
 	}
 }

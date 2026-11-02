@@ -51,27 +51,12 @@ public class ROR_ACC extends Instruction {
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
-
-		int a = c.a.get();
-		c.ZFLAG.clear();
-		c.NFLAG.clear();
-
-		int result = a >> 1;
-		if (c.CFLAG.isSet()) {
-			result += 0x80; // Pull in Carry Flag if set
-			c.CFLAG.clear(); // Clear it
-		}
+		int result = rorAndSetFlags(c, c.a.get());
 		try {
-			c.a.set(result & 0xff);
-		} catch (zflagException e) {
-			// TODO Auto-generated catch block
-			handleZException(c);
-		} catch (nflagException e) {
-			// TODO Auto-generated catch block
-			handleNException(c);
+			c.a.set(result);
+		} catch (zflagException | nflagException e) {
+			// flags were already set by rorAndSetFlags
 		}
-
 	}
 
 }

@@ -38,6 +38,7 @@ public class CPU extends Thread {
 	public generalPurpose y = new gpregister();
 
 	public int pc;
+	/** 8-bit stack pointer; the stack lives in page 1 ($0100-$01FF). */
 	public int sp;
 	public PBus bus;
 	private Decoder decoder;
@@ -48,6 +49,18 @@ public class CPU extends Thread {
 	long current  = System.currentTimeMillis();	
 	
 	long previous = System.currentTimeMillis();
+
+/** Push a byte: write at $0100+SP, then decrement SP (wrapping within page 1). */
+public void push(byte data) throws illegalAddressException, DeviceUnavailable, ROException {
+	bus.write(0x0100 | (sp & 0xff), data);
+	sp = (sp - 1) & 0xff;
+}
+
+/** Pull a byte: increment SP (wrapping within page 1), then read at $0100+SP. */
+public byte pull() throws illegalAddressException, DeviceUnavailable {
+	sp = (sp + 1) & 0xff;
+	return bus.read(0x0100 | sp);
+}
 
 public Decoder getDecoder() {
 	return decoder;
@@ -69,7 +82,7 @@ public Decoder getDecoder() {
 		x.reset();
 		y.reset();
 		pc = 0x1000;
-		sp = (0x01ff);
+		sp = 0xfd;
 		
 		logger.debug(dump());
 		
@@ -80,7 +93,7 @@ public Decoder getDecoder() {
 				+ DFLAG.toString() + IFLAG.toString() + BFLAG.toString() + "]\tA[ " + String.format("%02x", a.get())
 				+ "]\tB[" + String.format("%02xs", b.get()) + "]\tX[" + String.format("%02x", x.get()) + "]\tY[ "
 				+ String.format("%02x", y.get()) + "]\tPC[" + String.format("%04x", pc) + "]\tSP["
-				+ String.format("%04x", sp) + "]";
+				+ String.format("%02x", sp & 0xff) + "]";
 		return flagStatus;
 
 	}

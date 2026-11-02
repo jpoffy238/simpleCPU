@@ -46,20 +46,13 @@ $68
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
 		// TODO Auto-generated method stub
 			
-		try {	
-			c.a.set(c.bus.read(c.sp));
-		} catch (zflagException z) {
-			c.ZFLAG.set();
-		} catch (nflagException e) {
-			// TODO Auto-generated catch block
-			c.NFLAG.set();
+		int value = c.pull() & 0xff;
+		try {
+			c.a.set(value);
+		} catch (zflagException | nflagException e) {
+			// flags are set below
 		}
-		
-		c.sp++;
-		
-		
-	
-
+		setNZ(c, value);
 	}
 
 

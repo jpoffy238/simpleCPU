@@ -20,13 +20,13 @@ public class Test_StatusRegister {
 		c = CPU_CreateUtil.getCPU();
 		c.step();                 // consume pending power-on reset
 		c.pc = 0x1000;
-		c.sp = 0x01ff;
+		c.sp = 0xff;
 		c.CFLAG.clear(); c.ZFLAG.clear(); c.IFLAG.clear();
 		c.DFLAG.clear(); c.OFLAG.clear(); c.NFLAG.clear();
 	}
 
 	private int pushedStatus() throws Exception {
-		return c.bus.read(c.sp) & 0xff;
+		return c.bus.read(0x0100 | ((c.sp + 1) & 0xff)) & 0xff;   // last pushed byte
 	}
 
 	@Test
@@ -57,8 +57,8 @@ public class Test_StatusRegister {
 
 	@Test
 	public void plpLoadsFlagsAndIgnoresBreakBit() throws Exception {
-		c.sp = 0x01fe;
-		c.bus.write(c.sp, (byte) 0xC3);          // N V - - - - Z C
+		c.sp = 0xfd;
+		c.bus.write(0x01fe, (byte) 0xC3);          // N V - - - - Z C
 		c.bus.write(0x1000, (byte) PLP);
 		c.step();
 		assertTrue(c.NFLAG.isSet());
@@ -100,12 +100,11 @@ public class Test_StatusRegister {
 		// Case 1: interrupt taken with I clear -> I clear after RTI
 		c.bus.write(0x1000, (byte) BRK);
 		c.step();
-		int returnPc = c.pc;
 		c.pc = 0x1100;
 		c.bus.write(0x1100, (byte) RTI);
 		c.step();
 		assertFalse(c.IFLAG.isSet());
-		assertEquals(0x1001, c.pc);
+		assertEquals(0x1002, c.pc);   // BRK returns to BRK address + 2
 
 		// Case 2: I already set before the interrupt -> I stays set after RTI
 		setup();

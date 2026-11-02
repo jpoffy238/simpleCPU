@@ -49,32 +49,10 @@ public class ROL_ZPX extends Instruction {
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
-		int address =  (getZeroPageXAddress(c) );
-		int a = c.bus.read(address);
-		c.ZFLAG.clear();
-		c.NFLAG.clear();
-
-		int result = a << 1;
-		if (c.CFLAG.isSet()) {
-			result += 1; // Pull in Carry Flag if set
-			c.CFLAG.clear();  // Clear it
-		}
-		if ((a & 0x80) != 0) {
-			c.CFLAG.set(); 
-		} else { 
-			if ( result == 0) {
-				c.ZFLAG.set();
-				c.NFLAG.clear();
-			} else { 
-				if ((result & 0x80)  == 0x80 ){
-					c.NFLAG.set();
-					c.ZFLAG.clear();
-				}
-			}
-		c.pc +=1;
-		}
-		c.bus.write(address, (byte)(result & 0xff));
+		int address = getZeroPageXAddress(c);
+		int result = rolAndSetFlags(c, c.bus.read(address));
+		c.bus.write(address, (byte) result);
+		c.pc += 1;
 	}
 
 }

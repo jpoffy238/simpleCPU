@@ -51,36 +51,11 @@ public class ROL_ACC extends Instruction {
 	}
 
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
-		c.ZFLAG.clear();
-		c.NFLAG.clear();
-
-		int a = c.a.get();
-		
-		int result = a << 1;
-		if (c.CFLAG.isSet()) {
-			result += 1; // Pull in Carry Flag if set
-			c.CFLAG.clear();  // Clear it
-		}
-		if ((a & 0x80) != 0) {
-			c.CFLAG.set(); 
-		} else { 
-			if ( result == 0) {
-				c.ZFLAG.set();
-				c.NFLAG.clear();
-			} else { 
-				if ((result & 0x80)  == 0x80 ){
-					c.NFLAG.set();
-					c.ZFLAG.clear();
-				}
-			}
-		
-		}
+		int result = rolAndSetFlags(c, c.a.get());
 		try {
-			c.a.set(result & 0xff);
+			c.a.set(result);
 		} catch (zflagException | nflagException e) {
-			// TODO Auto-generated catch block
-			
+			// flags were already set by rolAndSetFlags
 		}
 	}
 

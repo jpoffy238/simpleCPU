@@ -102,6 +102,7 @@ import com.mj.Firmware.store.IndexY.STY_ZP;
 import com.mj.Firmware.store.IndexY.STY_ZPX;
 import com.mj.Firmware.StatusFlags.*;
 import com.mj.Firmware.Math.ADC.*;
+import com.mj.Firmware.Logic.Shift.LSR.*;
 import com.mj.Firmware.Math.SBC.*;
 import com.mj.Firmware.Math.ADC.ADC_IMM;
 import com.mj.Firmware.Logic.CMP.*;
@@ -231,6 +232,11 @@ public  enum OpCodes {
 	ASL_ZPX(new ASL_ZPX()),
 	ASL_ABS(new ASL_ABS()),
 	ASL_ABSX(new ASL_ABSX()),
+	LSR_ACC(new LSR_ACC()),
+	LSR_ZP(new LSR_ZP()),
+	LSR_ZPX(new LSR_ZPX()),
+	LSR_ABS(new LSR_ABS()),
+	LSR_ABX(new LSR_ABX()),
 	ROL_ABS(new ROL_ABS()),
 	ROL_ACC(new ROL_ACC()),
 	ROL_ZP(new ROL_ZP()),

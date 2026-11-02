@@ -16,11 +16,7 @@ public class PLP extends Instruction {
 		
 	
 		
-		byte data;
-		
-		data = c.bus.read(c.sp);
-		c.sp++;
-		setFlags(c, data);
+		setFlags(c, c.pull());
 		
 	}
 
