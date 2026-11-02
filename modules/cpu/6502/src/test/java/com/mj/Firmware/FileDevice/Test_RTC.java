@@ -1,6 +1,7 @@
 package com.mj.Firmware.FileDevice;
 
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -107,8 +108,12 @@ public class Test_RTC {
 		logger.debug("RTC_Time  " + ouput);
 		
 
-		logger.error ( "Comparing RTC " + ouput  + " to " + tmp);
-		assert(tmp.equals(ouput));
+		// The program runs for ~2 seconds of wall-clock time, so the minute may have rolled over:
+		// accept the minute at the start or at the end of the run.
+		String after = sdf.format(Calendar.getInstance().getTime());
+		logger.debug("Comparing RTC " + ouput + " to " + tmp + " / " + after);
+		assertTrue(ouput.equals(tmp) || ouput.equals(after),
+				"RTC copy '" + ouput + "' should equal '" + tmp + "' or '" + after + "'");
 		
 		
 

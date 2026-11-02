@@ -3,7 +3,14 @@
 ; Returns with ERROR = 0 if the test passes, ERROR = 1 if the test fails
 ;
 ; Five (additional) memory locations are used: ERROR, S1, S2, U1, and U2
-; which can be located anywhere convenient in RAM
+; which can be located anywhere convenient in RAM. They are fixed here so the
+; unit test can read the result (ERROR) at a known address.
+;
+ERROR = $2000
+S1    = $2001
+S2    = $2002
+U1    = $2003
+U2    = $2004
 ;
 CPU 6502
 OUTPUT HEX
@@ -37,7 +44,8 @@ LOOP JSR ADD   ; Test ADC
      INC U2
      BNE LOOP  ; Loop until all 256 possibilities of S2 and U2 are tested
      DEY
-     BPL LOOP  ; Loop until both possiblities of the carry flag are tested LDA #0
+     BPL LOOP  ; Loop until both possiblities of the carry flag are tested
+     LDA #0
      STA ERROR ; All tests pass, so store 0 in ERROR
 DONE RTS
 ;
@@ -101,10 +109,4 @@ SUB4 PLA      ; Get the low byte of result (does not affect the carry flag)
      INX      ; Increment X if result > 65407 ($FF7F)
 SUB5 RTS
 
-
-ERROR DB  0
-S1 DB  0
-S2 DB  0
-U1 DB  0
-U2 DB  0
 
