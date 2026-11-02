@@ -66,6 +66,10 @@ public class TableInstruction extends Instruction {
 			c.bus.write(mode.address(c), (byte) operation.storeOp().value(c));
 			break;
 		}
+		case IMPLIED: {
+			operation.impliedOp().apply(c);
+			break;
+		}
 		}
 		c.pc += mode.operandBytes();
 	}

@@ -54,4 +54,53 @@ public final class Operations {
 		Registers.put(c.a, result);
 		Registers.setNZ(c, result);
 	}
+
+	// ---- Increments and decrements ---------------------------------------------
+	public static final Operation INC = Operation.modify("INC", "Z,N",
+			"M,Z,N = M+1 - Adds one to the value held at a specified memory location setting the zero and negative flags as appropriate.",
+			(c, v) -> {
+				int r = (v + 1) & 0xff;
+				Registers.setNZ(c, r);
+				return r;
+			});
+
+	public static final Operation DEC = Operation.modify("DEC", "Z,N",
+			"M,Z,N = M-1 - Subtracts one from the value held at a specified memory location setting the zero and negative flags as appropriate.",
+			(c, v) -> {
+				int r = (v - 1) & 0xff;
+				Registers.setNZ(c, r);
+				return r;
+			});
+
+	public static final Operation INX = Operation.implied("INX", "Z,N",
+			"X,Z,N = X+1 - Adds one to the X register setting the zero and negative flags as appropriate.",
+			c -> {
+				int r = (c.x.get() + 1) & 0xff;
+				Registers.put(c.x, r);
+				Registers.setNZ(c, r);
+			});
+
+	public static final Operation INY = Operation.implied("INY", "Z,N",
+			"Y,Z,N = Y+1 - Adds one to the Y register setting the zero and negative flags as appropriate.",
+			c -> {
+				int r = (c.y.get() + 1) & 0xff;
+				Registers.put(c.y, r);
+				Registers.setNZ(c, r);
+			});
+
+	public static final Operation DEX = Operation.implied("DEX", "Z,N",
+			"X,Z,N = X-1 - Subtracts one from the X register setting the zero and negative flags as appropriate.",
+			c -> {
+				int r = (c.x.get() - 1) & 0xff;
+				Registers.put(c.x, r);
+				Registers.setNZ(c, r);
+			});
+
+	public static final Operation DEY = Operation.implied("DEY", "Z,N",
+			"Y,Z,N = Y-1 - Subtracts one from the Y register setting the zero and negative flags as appropriate.",
+			c -> {
+				int r = (c.y.get() - 1) & 0xff;
+				Registers.put(c.y, r);
+				Registers.setNZ(c, r);
+			});
 }

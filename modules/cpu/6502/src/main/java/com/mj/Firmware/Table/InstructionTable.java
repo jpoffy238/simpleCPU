@@ -98,4 +98,20 @@ public final class InstructionTable {
 	public static final TableInstruction EOR_ABSY = row(0x59, Operations.EOR, ABSOLUTE_Y, 4);
 	public static final TableInstruction EOR_INX = row(0x41, Operations.EOR, INDEXED_INDIRECT, 6);
 	public static final TableInstruction EOR_INY = row(0x51, Operations.EOR, INDIRECT_INDEXED, 5);
+
+	// ---- INC / DEC -------------------------------------------------------------
+	public static final TableInstruction INC_ZP = row(0xE6, Operations.INC, ZERO_PAGE, 5);
+	public static final TableInstruction INC_ZPX = row(0xF6, Operations.INC, ZERO_PAGE_X, 6);
+	public static final TableInstruction INC_ABS = row(0xEE, Operations.INC, ABSOLUTE, 6);
+	public static final TableInstruction INC_ABX = row(0xFE, Operations.INC, ABSOLUTE_X, 7);
+	public static final TableInstruction DEC_ZP = row(0xC6, Operations.DEC, ZERO_PAGE, 5);
+	public static final TableInstruction DEC_ZPX = row(0xD6, Operations.DEC, ZERO_PAGE_X, 6);
+	public static final TableInstruction DEC_ABS = row(0xCE, Operations.DEC, ABSOLUTE, 6);
+	public static final TableInstruction DEC_ABX = row(0xDE, Operations.DEC, ABSOLUTE_X, 7);
+
+	// ---- register increments / decrements --------------------------------------
+	public static final TableInstruction INX = row(0xE8, Operations.INX, IMPLIED, 2);
+	public static final TableInstruction INY = row(0xC8, Operations.INY, IMPLIED, 2);
+	public static final TableInstruction DEX = row(0xCA, Operations.DEX, IMPLIED, 2);
+	public static final TableInstruction DEY = row(0x88, Operations.DEY, IMPLIED, 2);
 }

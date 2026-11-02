@@ -42,18 +42,6 @@ import com.mj.Firmware.Transfers.TSX;
 import com.mj.Firmware.Transfers.TXA;
 import com.mj.Firmware.Transfers.TXS;
 import com.mj.Firmware.Transfers.TYA;
-import com.mj.Firmware.incdec.DEC_ABS;
-import com.mj.Firmware.incdec.DEC_ABX;
-import com.mj.Firmware.incdec.DEC_ZP;
-import com.mj.Firmware.incdec.DEC_ZPX;
-import com.mj.Firmware.incdec.DEX;
-import com.mj.Firmware.incdec.DEY;
-import com.mj.Firmware.incdec.INC_ABS;
-import com.mj.Firmware.incdec.INC_ABX;
-import com.mj.Firmware.incdec.INC_ZP;
-import com.mj.Firmware.incdec.INC_ZPX;
-import com.mj.Firmware.incdec.INX;
-import com.mj.Firmware.incdec.INY;
 import com.mj.Firmware.StatusFlags.*;
 import com.mj.Firmware.Math.ADC.*;
 import com.mj.Firmware.Logic.Shift.LSR.*;
@@ -133,18 +121,18 @@ public  enum OpCodes {
 	TXS(new TXS()),
 	TYA(new TYA()),
 
-	DEC_ABS(new DEC_ABS()),
-	DEC_ABX(new DEC_ABX()),
-	DEC_ZP(new DEC_ZP()),
-	DEC_ZPX(new DEC_ZPX()),
-	INC_ABS(new INC_ABS()),
-	INC_ABX(new INC_ABX()),
-	INC_ZP(new INC_ZP()),
-	INC_ZPX(new INC_ZPX()),
-	DEX(new DEX()),
-	DEY(new DEY()),
-	INX(new INX()),
-	INY(new INY()),
+	DEC_ABS(InstructionTable.DEC_ABS),
+	DEC_ABX(InstructionTable.DEC_ABX),
+	DEC_ZP(InstructionTable.DEC_ZP),
+	DEC_ZPX(InstructionTable.DEC_ZPX),
+	INC_ABS(InstructionTable.INC_ABS),
+	INC_ABX(InstructionTable.INC_ABX),
+	INC_ZP(InstructionTable.INC_ZP),
+	INC_ZPX(InstructionTable.INC_ZPX),
+	DEX(InstructionTable.DEX),
+	DEY(InstructionTable.DEY),
+	INX(InstructionTable.INX),
+	INY(InstructionTable.INY),
 	
 	BEQ(new BEQ()),
 	BCC(new BCC()),

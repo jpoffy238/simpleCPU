@@ -14,7 +14,9 @@ public final class Operation {
 		/** Transforms the operand and writes it back (ASL, INC, ...). */
 		MODIFY,
 		/** Writes a register to the operand address (STA, STX, STY). */
-		STORE
+		STORE,
+		/** Acts on registers or flags only, with no operand (INX, DEY, TAX, CLC, ...). */
+		IMPLIED
 	}
 
 	@FunctionalInterface
@@ -32,6 +34,11 @@ public final class Operation {
 		int value(CPU c);
 	}
 
+	@FunctionalInterface
+	public interface ImpliedOp {
+		void apply(CPU c);
+	}
+
 	private final Kind kind;
 	private final String mnemonic;
 	private final String flags;
@@ -39,8 +46,10 @@ public final class Operation {
 	private final ReadOp readOp;
 	private final ModifyOp modifyOp;
 	private final StoreOp storeOp;
+	private final ImpliedOp impliedOp;
 
-	private Operation(Kind kind, String mnemonic, String flags, String description, ReadOp r, ModifyOp m, StoreOp s) {
+	private Operation(Kind kind, String mnemonic, String flags, String description, ReadOp r, ModifyOp m, StoreOp s,
+			ImpliedOp i) {
 		this.kind = kind;
 		this.mnemonic = mnemonic;
 		this.flags = flags;
@@ -48,18 +57,23 @@ public final class Operation {
 		this.readOp = r;
 		this.modifyOp = m;
 		this.storeOp = s;
+		this.impliedOp = i;
 	}
 
 	public static Operation read(String mnemonic, String flags, String description, ReadOp op) {
-		return new Operation(Kind.READ, mnemonic, flags, description, op, null, null);
+		return new Operation(Kind.READ, mnemonic, flags, description, op, null, null, null);
 	}
 
 	public static Operation modify(String mnemonic, String flags, String description, ModifyOp op) {
-		return new Operation(Kind.MODIFY, mnemonic, flags, description, null, op, null);
+		return new Operation(Kind.MODIFY, mnemonic, flags, description, null, op, null, null);
 	}
 
 	public static Operation store(String mnemonic, String flags, String description, StoreOp op) {
-		return new Operation(Kind.STORE, mnemonic, flags, description, null, null, op);
+		return new Operation(Kind.STORE, mnemonic, flags, description, null, null, op, null);
+	}
+
+	public static Operation implied(String mnemonic, String flags, String description, ImpliedOp op) {
+		return new Operation(Kind.IMPLIED, mnemonic, flags, description, null, null, null, op);
 	}
 
 	public Kind kind() {
@@ -84,6 +98,10 @@ public final class Operation {
 
 	ModifyOp modifyOp() {
 		return modifyOp;
+	}
+
+	ImpliedOp impliedOp() {
+		return impliedOp;
 	}
 
 	StoreOp storeOp() {
