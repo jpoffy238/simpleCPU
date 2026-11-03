@@ -245,6 +245,7 @@
 		</dependency>
 	</dependencies>
 	<modules>
+		<module>modules/Devices</module>
 		<module>modules/cpu/6502</module>
 		<module>modules/Disk</module>
 	</modules>
