@@ -10,6 +10,7 @@ import com.mj.Devices.DeviceBus;
 import com.mj.Devices.AddressRange;
 import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.PBus;
+import com.mj.Devices.VIA6522;
 import com.mj.Firmware.Framework.Decoder;
 import com.mj.Firmware.Framework.OpCodes;
 import com.mj.Firmware.Framework.cpu001decoder;
@@ -39,7 +40,9 @@ public class CPUMain {
 			e.printStackTrace();
 		}
 		bus.registerDevice(rom);
-		ConsoleDevice con = new ConsoleDevice(bus, new AddressRange(0xec00, 0xec01));
+		VIA6522 via = new VIA6522(bus, new AddressRange(0x9000, 0x900f));
+		bus.registerDevice(via);
+		ConsoleDevice con = new ConsoleDevice(via, new AddressRange(0xec00, 0xec01));
 		bus.registerDevice(con);
 		Decoder d =  new cpu001decoder();
 		
@@ -52,7 +55,7 @@ public class CPUMain {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		con.start();
+		con.show();
 		c.start();
 		}
 	
