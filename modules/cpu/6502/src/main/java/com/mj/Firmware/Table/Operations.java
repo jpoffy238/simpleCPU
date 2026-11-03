@@ -255,4 +255,74 @@ public final class Operations {
 		}
 		Registers.put(c.a, result & 0xff);
 	}
+
+	// ---- BIT -------------------------------------------------------------------
+	public static final Operation BIT = Operation.read("BIT", "Z,V,N",
+			"A & M, N = M7, V = M6 - Tests whether bits are set in a memory location: Z from A AND M, N and V copied from bits 7 and 6 of M.",
+			(c, v) -> {
+				if ((c.a.get() & v & 0xff) == 0) {
+					c.ZFLAG.set();
+				} else {
+					c.ZFLAG.clear();
+				}
+				setOverflow(c, (v & 0x40) != 0);
+				if ((v & 0x80) != 0) {
+					c.NFLAG.set();
+				} else {
+					c.NFLAG.clear();
+				}
+			});
+
+	// ---- Register transfers ----------------------------------------------------
+	public static final Operation TAX = transfer("TAX", "X = A", c -> c.a.get(), (c, v) -> Registers.put(c.x, v));
+	public static final Operation TAY = transfer("TAY", "Y = A", c -> c.a.get(), (c, v) -> Registers.put(c.y, v));
+	public static final Operation TXA = transfer("TXA", "A = X", c -> c.x.get(), (c, v) -> Registers.put(c.a, v));
+	public static final Operation TYA = transfer("TYA", "A = Y", c -> c.y.get(), (c, v) -> Registers.put(c.a, v));
+	public static final Operation TSX = transfer("TSX", "X = SP", c -> c.sp & 0xff, (c, v) -> Registers.put(c.x, v));
+
+	/** TXS is the one transfer that does not affect the flags. */
+	public static final Operation TXS = Operation.implied("TXS", "none",
+			"SP = X - Copies the X register into the stack pointer. No flags are affected.",
+			c -> c.sp = c.x.get() & 0xff);
+
+	private static Operation transfer(String mnemonic, String what, java.util.function.ToIntFunction<com.mj.cpu001.CPU> source,
+			java.util.function.BiConsumer<com.mj.cpu001.CPU, Integer> sink) {
+		return Operation.implied(mnemonic, "Z,N", what + " - Copies a register and sets the zero and negative flags as appropriate.",
+				c -> {
+					int v = source.applyAsInt(c) & 0xff;
+					sink.accept(c, v);
+					Registers.setNZ(c, v);
+				});
+	}
+
+	// ---- Flag instructions -----------------------------------------------------
+	public static final Operation CLC = Operation.implied("CLC", "C", "C = 0 - Clear the carry flag.", c -> c.CFLAG.clear());
+	public static final Operation SEC = Operation.implied("SEC", "C", "C = 1 - Set the carry flag.", c -> c.CFLAG.set());
+	public static final Operation CLI = Operation.implied("CLI", "I", "I = 0 - Clear the interrupt disable flag; interrupts are enabled.", c -> c.IFLAG.clear());
+	public static final Operation SEI = Operation.implied("SEI", "I", "I = 1 - Set the interrupt disable flag; maskable interrupts are ignored.", c -> c.IFLAG.set());
+	public static final Operation CLD = Operation.implied("CLD", "D", "D = 0 - Clear the decimal mode flag.", c -> c.DFLAG.clear());
+	public static final Operation SED = Operation.implied("SED", "D", "D = 1 - Set the decimal mode flag.", c -> c.DFLAG.set());
+	public static final Operation CLV = Operation.implied("CLV", "V", "V = 0 - Clear the overflow flag.", c -> c.OFLAG.clear());
+
+	public static final Operation NOP = Operation.implied("NOP", "none", "No operation.", c -> {
+	});
+
+	// ---- Stack -----------------------------------------------------------------
+	public static final Operation PHA = Operation.implied("PHA", "none", "Pushes a copy of the accumulator on to the stack.",
+			c -> c.push((byte) c.a.get()));
+
+	public static final Operation PHP = Operation.implied("PHP", "none",
+			"Pushes a copy of the status flags on to the stack (with the B bit set).",
+			c -> c.push(com.mj.Firmware.Framework.StatusRegister.pack(c, true)));
+
+	public static final Operation PLA = Operation.implied("PLA", "Z,N",
+			"Pulls an 8 bit value from the stack into the accumulator, setting Z and N.", c -> {
+				int v = c.pull() & 0xff;
+				Registers.put(c.a, v);
+				Registers.setNZ(c, v);
+			});
+
+	public static final Operation PLP = Operation.implied("PLP", "all",
+			"Pulls an 8 bit value from the stack into the processor flags.",
+			c -> com.mj.Firmware.Framework.StatusRegister.load(c, c.pull()));
 }

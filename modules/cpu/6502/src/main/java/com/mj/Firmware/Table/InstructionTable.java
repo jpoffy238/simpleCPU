@@ -170,4 +170,26 @@ public final class InstructionTable {
 	public static final TableInstruction SBC_ABSY = row(0xF9, Operations.SBC, ABSOLUTE_Y, 4);
 	public static final TableInstruction SBC_INX = row(0xE1, Operations.SBC, INDEXED_INDIRECT, 6);
 	public static final TableInstruction SBC_INY = row(0xF1, Operations.SBC, INDIRECT_INDEXED, 5);
+
+	// ---- BIT, transfers, flags, NOP and stack operations ---------------------------
+	public static final TableInstruction BIT_ZP = row(0x24, Operations.BIT, ZERO_PAGE, 3);
+	public static final TableInstruction BIT_ABS = row(0x2C, Operations.BIT, ABSOLUTE, 4);
+	public static final TableInstruction TAX = row(0xAA, Operations.TAX, IMPLIED, 2);
+	public static final TableInstruction TAY = row(0xA8, Operations.TAY, IMPLIED, 2);
+	public static final TableInstruction TXA = row(0x8A, Operations.TXA, IMPLIED, 2);
+	public static final TableInstruction TYA = row(0x98, Operations.TYA, IMPLIED, 2);
+	public static final TableInstruction TSX = row(0xBA, Operations.TSX, IMPLIED, 2);
+	public static final TableInstruction TXS = row(0x9A, Operations.TXS, IMPLIED, 2);
+	public static final TableInstruction CLC = row(0x18, Operations.CLC, IMPLIED, 2);
+	public static final TableInstruction SEC = row(0x38, Operations.SEC, IMPLIED, 2);
+	public static final TableInstruction CLI = row(0x58, Operations.CLI, IMPLIED, 2);
+	public static final TableInstruction SEI = row(0x78, Operations.SEI, IMPLIED, 2);
+	public static final TableInstruction CLD = row(0xD8, Operations.CLD, IMPLIED, 2);
+	public static final TableInstruction SED = row(0xF8, Operations.SED, IMPLIED, 2);
+	public static final TableInstruction CLV = row(0xB8, Operations.CLV, IMPLIED, 2);
+	public static final TableInstruction NOP = row(0xEA, Operations.NOP, IMPLIED, 2);
+	public static final TableInstruction PHA = row(0x48, Operations.PHA, IMPLIED, 3);
+	public static final TableInstruction PHP = row(0x08, Operations.PHP, IMPLIED, 3);
+	public static final TableInstruction PLA = row(0x68, Operations.PLA, IMPLIED, 4);
+	public static final TableInstruction PLP = row(0x28, Operations.PLP, IMPLIED, 4);
 }

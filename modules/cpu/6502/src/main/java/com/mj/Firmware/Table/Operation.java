@@ -1,6 +1,9 @@
 package com.mj.Firmware.Table;
 
 import com.mj.cpu001.CPU;
+import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
+import com.mj.exceptions.illegalAddressException;
 
 /**
  * What an instruction does with its operand, independent of addressing mode.
@@ -36,7 +39,7 @@ public final class Operation {
 
 	@FunctionalInterface
 	public interface ImpliedOp {
-		void apply(CPU c);
+		void apply(CPU c) throws illegalAddressException, DeviceUnavailable, ROException;
 	}
 
 	private final Kind kind;

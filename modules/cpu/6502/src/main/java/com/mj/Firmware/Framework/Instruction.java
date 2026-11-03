@@ -151,55 +151,19 @@ public abstract class Instruction implements machineState {
 		c.ZFLAG.clear();
 	}
 
-	// 6502 processor status register layout:  N V 1 B D I Z C  (bit 7 .. bit 0)
-	public static final int SR_C = 0x01;
-	public static final int SR_Z = 0x02;
-	public static final int SR_I = 0x04;
-	public static final int SR_D = 0x08;
-	public static final int SR_B = 0x10;   // exists only in pushed copies of the status
-	public static final int SR_UNUSED = 0x20;   // always reads as 1
-	public static final int SR_V = 0x40;
-	public static final int SR_N = 0x80;
-
 	/** Status byte as pushed by PHP / BRK (B bit set). */
 	protected byte psr(CPU c) {
-		return psr(c, true);
+		return StatusRegister.pack(c, true);
 	}
 
-	/**
-	 * Build the status byte for pushing on the stack.
-	 * 
-	 * @param breakFlag true for PHP/BRK (software), false for IRQ/NMI (hardware)
-	 */
+	/** Status byte for pushing: B set for PHP/BRK (software), clear for IRQ/NMI (hardware). */
 	protected byte psr(CPU c, boolean breakFlag) {
-		int status = SR_UNUSED;
-		if (c.CFLAG.isSet()) status |= SR_C;
-		if (c.ZFLAG.isSet()) status |= SR_Z;
-		if (c.IFLAG.isSet()) status |= SR_I;
-		if (c.DFLAG.isSet()) status |= SR_D;
-		if (breakFlag)       status |= SR_B;
-		if (c.OFLAG.isSet()) status |= SR_V;
-		if (c.NFLAG.isSet()) status |= SR_N;
-		return (byte) status;
+		return StatusRegister.pack(c, breakFlag);
 	}
 
-	/** Load the flags from a status byte (PLP / RTI). B and the unused bit are ignored. */
+	/** Load the flags from a status byte (PLP / RTI). */
 	protected void setFlags(CPU c, byte sr) {
-		int v = sr & 0xff;
-		setFlag(c.CFLAG, (v & SR_C) != 0);
-		setFlag(c.ZFLAG, (v & SR_Z) != 0);
-		setFlag(c.IFLAG, (v & SR_I) != 0);
-		setFlag(c.DFLAG, (v & SR_D) != 0);
-		setFlag(c.OFLAG, (v & SR_V) != 0);
-		setFlag(c.NFLAG, (v & SR_N) != 0);
-	}
-
-	private void setFlag(com.mj.Registers.registerFlags f, boolean on) {
-		if (on) {
-			f.set();
-		} else {
-			f.clear();
-		}
+		StatusRegister.load(c, sr);
 	}
 
 	protected void setNZ(CPU c, int result) {

@@ -20,22 +20,9 @@ import com.mj.Firmware.ExecutionFlow.HLT;
 import com.mj.Firmware.ExecutionFlow.JMP_ABS;
 import com.mj.Firmware.ExecutionFlow.JMP_IND;
 import com.mj.Firmware.ExecutionFlow.JSR;
-import com.mj.Firmware.ExecutionFlow.NOP;
 import com.mj.Firmware.ExecutionFlow.RTS;
 import com.mj.Firmware.ExecutionFlow.RTI;
 
-import com.mj.Firmware.Logic.*;
-import com.mj.Firmware.Stack.PHA;
-import com.mj.Firmware.Stack.PLA;
-import com.mj.Firmware.Stack.PHP;
-import com.mj.Firmware.Stack.PLP;
-import com.mj.Firmware.Transfers.TAX;
-import com.mj.Firmware.Transfers.TAY;
-import com.mj.Firmware.Transfers.TSX;
-import com.mj.Firmware.Transfers.TXA;
-import com.mj.Firmware.Transfers.TXS;
-import com.mj.Firmware.Transfers.TYA;
-import com.mj.Firmware.StatusFlags.*;
 
 /*
  * 
@@ -63,7 +50,7 @@ public  enum OpCodes {
 	
 	MIH(new MIH()),  // Special instruction to handle interrupts
 	
-	NOP( new NOP()),
+	NOP(InstructionTable.NOP),
 	LDA_IMM(InstructionTable.LDA_IMM), // Immediate 
 	LDA_ABS(InstructionTable.LDA_ABS),
 	LDA_ABSX(InstructionTable.LDA_ABSX),
@@ -102,12 +89,12 @@ public  enum OpCodes {
 	STY_ZP(InstructionTable.STY_ZP),
 	STY_ZPX(InstructionTable.STY_ZPX),
 	
-	TAX(new TAX()),
-	TAY(new TAY()),
-	TSX(new TSX()),
-	TXA(new TXA()),
-	TXS(new TXS()),
-	TYA(new TYA()),
+	TAX(InstructionTable.TAX),
+	TAY(InstructionTable.TAY),
+	TSX(InstructionTable.TSX),
+	TXA(InstructionTable.TXA),
+	TXS(InstructionTable.TXS),
+	TYA(InstructionTable.TYA),
 
 	DEC_ABS(InstructionTable.DEC_ABS),
 	DEC_ABX(InstructionTable.DEC_ABX),
@@ -129,8 +116,8 @@ public  enum OpCodes {
 	BVS(new BVS()),
 	BMI(new BMI()),
 	BPL(new BPL()),
-	BIT_ZP(new BIT_ZP()),
-	BIT_ABS(new BIT_ABS()),
+	BIT_ZP(InstructionTable.BIT_ZP),
+	BIT_ABS(InstructionTable.BIT_ABS),
 	AND_IMM(InstructionTable.AND_IMM),
 	AND_ZP(InstructionTable.AND_ZP),
 	AND_ZPX(InstructionTable.AND_ZPX),
@@ -188,19 +175,19 @@ public  enum OpCodes {
 	
 	BRK(new BRK()),
 
-	PLA(new PLA()),
+	PLA(InstructionTable.PLA),
 
-	PHA(new PHA()),
-	PHP(new PHP()),
-	PLP(new PLP()),
+	PHA(InstructionTable.PHA),
+	PHP(InstructionTable.PHP),
+	PLP(InstructionTable.PLP),
 	
-	CLC(new CLC()),
-	CLD(new CLD()),
-	CLV(new CLV()),
-	CLI(new CLI()),
-	SEC(new SEC()),
-	SED(new SED()),
-	SEI(new SEI()),
+	CLC(InstructionTable.CLC),
+	CLD(InstructionTable.CLD),
+	CLV(InstructionTable.CLV),
+	CLI(InstructionTable.CLI),
+	SEC(InstructionTable.SEC),
+	SED(InstructionTable.SED),
+	SEI(InstructionTable.SEI),
 	CMP_IMM(InstructionTable.CMP_IMM),
 	CMP_ABS(InstructionTable.CMP_ABS),
 	CMP_ZP(InstructionTable.CMP_ZP),
