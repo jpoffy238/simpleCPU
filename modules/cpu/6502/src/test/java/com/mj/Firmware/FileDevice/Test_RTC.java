@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -74,48 +72,40 @@ public class Test_RTC {
 
 			}
 		}
-		final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm";
-
-		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
-		String tmp = sdf.format(cal.getTime());
+		int before = (int) (System.currentTimeMillis() / 1000L);
 		logger.debug("Starting CPU");
 		c.start();
 		c.bus.startDevices();
-		
-	
+
+
 		try {
 			Thread.sleep(2000);
-			
+
 		} catch ( InterruptedException e1) {
 			// TODO Auto-generated catch block
-		
+
 		}
 		c.bus.stopDevices();
 		c.interrupt();
 		logger.debug("CPU Terminated");
-		byte []  results = new byte[DATE_FORMAT_NOW.length()];
-		for (i=0; i < DATE_FORMAT_NOW.length() ; i++) {
+		int after = (int) (System.currentTimeMillis() / 1000L);
+
+		int uTime = 0;
+		for (i = 0; i < 4; i++) {
 			try {
-				results[i] = (byte)c.bus.read(0x4000 + i);
-				logger.debug("results[" + i + "] = " + String.format("%02x",results[i]));
+				int b = c.bus.read(0x4000 + i) & 0xff;
+				uTime = (uTime << 8) | b;
 			} catch (illegalAddressException | DeviceUnavailable e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		String ouput = new String(results);
-		logger.debug("RTC_Time  " + ouput);
-		
+		logger.debug(String.format("RTC u_time copied by RTCInt: %d (wall clock %d..%d)", uTime, before, after));
 
-		// The program runs for ~2 seconds of wall-clock time, so the minute may have rolled over:
-		// accept the minute at the start or at the end of the run.
-		String after = sdf.format(Calendar.getInstance().getTime());
-		logger.debug("Comparing RTC " + ouput + " to " + tmp + " / " + after);
-		assertTrue(ouput.equals(tmp) || ouput.equals(after),
-				"RTC copy '" + ouput + "' should equal '" + tmp + "' or '" + after + "'");
-		
-		
+		// The program runs for ~2 seconds of wall-clock time, so the copy may land
+		// anywhere between the epoch second measured before and after the run.
+		assertTrue(uTime >= before && uTime <= after,
+				"RTC copy " + uTime + " should be between " + before + " and " + after);
 
 }
 }

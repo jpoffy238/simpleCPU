@@ -1,7 +1,5 @@
 package com.mj.Devices;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.logging.log4j.LogManager;
@@ -16,21 +14,19 @@ import com.mj.exceptions.illegalAddressException;
 public class RTC extends Thread implements Device {
 	private Lock readLock = new ReentrantLock();
 	static Logger logger = LogManager.getLogger(RTC.class);
-	private AddressRange mr = new AddressRange(0xa000, 0xa000 + 21);
-	private char[] time = new char[mr.size()];
-	PBus bus;
-	private final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
-	private Calendar cal;
-	private SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_NOW);
-	
-	public RTC(PBus bus) {
-		this.bus = bus;
+	private AddressRange mr = new AddressRange(0xa000, 0xa003);
+	// Big-endian u_time: seconds since the Unix epoch (UTC), updated once a second.
+	// Calendar/display conversion is firmware's job, not this device's.
+	private byte[] time = new byte[mr.size()];
+	VIA6522 via;
+
+	public RTC(VIA6522 via) {
+		this.via = via;
 		now();
 	}
 
 	public DEVTYPE getDeviceType() {
-		// TODO Auto-generated method stub
-		return DEVTYPE.CHAR;
+		return DEVTYPE.BLOCK;
 	}
 
 	@Override
@@ -53,12 +49,13 @@ public class RTC extends Thread implements Device {
 
 	@Override
 	public byte read(int address) throws illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub
 		int localAddress = address - mr.startAddressRange;
 		readLock.lock();
-		byte value = (byte) time[localAddress];
-		logger.debug(String.format("Address %04x Virtual Address %04x Value %02x", localAddress, address, value));
+		byte value = time[localAddress];
 		readLock.unlock();
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("Address %04x Virtual Address %04x Value %02x", localAddress, address, value));
+		}
 		return value;
 	}
 
@@ -74,7 +71,7 @@ public class RTC extends Thread implements Device {
 		
 		while (!isInterrupted()) {
 			now();
-			bus.raiseInterupt();
+			via.requestInterrupt(VIA6522.FLAG_T1);
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -86,17 +83,17 @@ public class RTC extends Thread implements Device {
 	}
 
 	public void now() {
-		cal =  Calendar.getInstance();
-		String tmp = sdf.format(cal.getTime());
-		cal = null;
+		int epochSeconds = (int) (System.currentTimeMillis() / 1000L);
 		readLock.lock();
-		for (int i = 0; i < tmp.length(); i++) {
-			time[i] = tmp.charAt(i);
-			
-		}
+		time[0] = (byte) (epochSeconds >>> 24);
+		time[1] = (byte) (epochSeconds >>> 16);
+		time[2] = (byte) (epochSeconds >>> 8);
+		time[3] = (byte) epochSeconds;
 		readLock.unlock();
-		
-		logger.debug("RTC-NOW: " + tmp);
+
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("RTC-NOW: %08x", epochSeconds));
+		}
 	}
 
 	@Override

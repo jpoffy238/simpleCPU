@@ -1,48 +1,25 @@
 ;; Test app for RTC
-;; Spins until the interrupt handler (RTCInt) has copied the RTC registers to TIME,
-;; then halts.  STRLN measures the length of the zero-terminated string at TIME and
-;; leaves it in STL; the loop ends as soon as the string is non-empty.
+;; Spins until the interrupt handler (RTCInt) has copied the RTC's raw u_time
+;; to TIME and set FLAG, then halts.
 CPU 6502
 OUTPUT HEX
 
-STL  = $00		;; zero page: string length computed by STRLN
-TIME = $4000		;; RTCInt copies the RTC registers (a text date/time) here
+TIME = $4000		;; RTCInt copies the 4-byte big-endian u_time here
+FLAG = $4004		;; RTCInt sets this to 1 after each copy
+VIA_IER = $900E
 
 * = $1000
 
+		LDA #$C0		;; set-mode (bit7) + T1 (bit6): enable the RTC tick interrupt
+		STA VIA_IER
 		CLI			;; ensure interrupts are handled.
 LOOP	LDX #$1F		;; Count down register
-		JSR STRLN		;; get length of string $00 terminated
-		LDA #0			;; Load the value to compare null char
-		CMP STL			;; if String length is not 0 then halt - test done
-		BNE HLT
+		LDA FLAG
+		BNE HLT			;; FLAG set - RTCInt has run, test done
 
 WAIT	NOP			;; do nothing waste time
 		DEX
 		BNE WAIT		;; delay for some cycles
-		BEQ LOOP		;; if wait is over check string length again
+		BEQ LOOP		;; if wait is over check FLAG again
 
 HLT		DB $3F
-
-STRLN	SEI			;; don't allow interrupts while computing the string length
-		PHA			;; save A, Y and X
-		TYA
-		PHA
-		TXA
-		PHA
-		LDY #0
-		LDA #0
-		LDX #20			;; max string size
-LOOP1	CMP TIME,Y		;; is this the end of the string
-		BEQ EOS			;; null terminator found - go to exit code
-		INY			;; did not find it so next char
-		DEX			;; one less char to check
-		BNE LOOP1		;; not at end, check next char
-EOS		STY STL			;; string length is in Y, so store it
-		PLA			;; restore X, Y and A
-		TAX
-		PLA
-		TAY
-		PLA
-		CLI			;; allow interrupts
-		RTS

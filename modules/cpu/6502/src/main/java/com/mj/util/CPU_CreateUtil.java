@@ -8,6 +8,7 @@ import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
 import com.mj.Devices.RTC;
+import com.mj.Devices.VIA6522;
 import com.mj.Firmware.Framework.cpu001decoder;
 import com.mj.IntelHex.BasicIntelHexFiles;
 import com.mj.IntelHex.common.IntelHexFileChecksumMisMatchException;
@@ -26,13 +27,16 @@ public class CPU_CreateUtil {
 	public static CPU getCPU() {
 
 		PBus bus = new DeviceBus();
-		rtc = new RTC(bus);
+		VIA6522 via = new VIA6522(bus, new AddressRange(0x9000, 0x900f));
+		bus.registerDevice(via);
+
+		rtc = new RTC(via);
 		bus.registerDevice(new basicMemory(bus, new AddressRange(0, 32 * 1024), null, 0));
 		basicROM rom = new basicROM(bus, new AddressRange(0xf000, 0xffff), "RTCInt.hex", 0);
 
 		bus.registerDevice(rom);
 
-		bus.registerDevice(new ConsoleDevice(bus, new AddressRange(0xe000, 0xe001)));
+		bus.registerDevice(new ConsoleDevice(via, new AddressRange(0xe000, 0xe001)));
 		bus.registerDevice(rtc);
 
 		return new CPU(bus, new cpu001decoder());
