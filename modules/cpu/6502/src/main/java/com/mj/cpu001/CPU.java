@@ -166,7 +166,7 @@ public Decoder getDecoder() {
 				logger.error("Device Unavailable : " + dump());
 				logger.error(String.format("Error Address: %04x",e.getAddress()));
 				logger.error(e);
-				//RUN=false;
+				RUN=false;
 			} catch (ROException e) {
 				// TODO Auto-generated catch block
 				logger.error("RO Memory Write attempt : " + dump());

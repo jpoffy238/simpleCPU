@@ -35,7 +35,10 @@ public class CPUMain {
 				new AddressRange(0xff00, 0xffff),
 				null, 0);
 		try {
-			rom.setVectors(0x1000, 0x1000, 0xf000);   // NMI, RESET (BIOS.hex starts at $1000), IRQ
+			// NMI, RESET and IRQ all point at BIOS.hex's entry ($1000): nothing is mapped at the old
+			// $f000 IRQ target (ROM here only covers $ff00-$ffff), and the BIOS never enables/uses
+			// interrupts anyway, so a safe restart is the right fallback if one ever fires.
+			rom.setVectors(0x1000, 0x1000, 0x1000);
 		} catch (illegalAddressException e) {
 			e.printStackTrace();
 		}
