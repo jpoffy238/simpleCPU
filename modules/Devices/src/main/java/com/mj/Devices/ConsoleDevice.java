@@ -51,6 +51,8 @@ public class ConsoleDevice implements charDevice {
 	// Bit 4-7: (Upper nibble) Number of Characters Available for reading (0-15)
 	//
 	//
+	private static final int STATUS_DATA_AVAILABLE = 0x01;
+	private static final int STATUS_MODE_BLOCK = 0x02;
 	private static final int STATUS_INTERRUPT_MODE = 0x04;
 	private static final int COLUMNS = 80;
 	private static final int ROWS = 24;
@@ -107,6 +109,22 @@ public class ConsoleDevice implements charDevice {
 		if (frame != null) {
 			frame.setVisible(true);
 			screen.requestFocusInWindow();
+		}
+	}
+
+	/** Feeds characters into the input queue exactly as real keystrokes would - for
+	 * tests to drive firmware that reads from the console, since there's no window
+	 * to type into under a headless run. */
+	public void type(String text) {
+		for (int i = 0; i < text.length(); i++) {
+			handleKeyPress(text.charAt(i));
+		}
+	}
+
+	private void handleKeyPress(char c) {
+		input.add((int) c);
+		if ((status & STATUS_INTERRUPT_MODE) != 0) {
+			raiseInterrupt();
 		}
 	}
 
@@ -199,7 +217,16 @@ public class ConsoleDevice implements charDevice {
 
 	@Override
 	public int status() throws DeviceUnavailable {
-		return (byte) status;
+		// Bit 0 and bits 4-7 reflect live hardware state (is there input queued, and how
+		// much) - they're computed here, not stored, so they can't go stale. Bits 1-2
+		// (blocking mode, interrupt mode) are genuinely CPU-controlled, set via control().
+		int computed = status & (STATUS_MODE_BLOCK | STATUS_INTERRUPT_MODE);
+		int queued = input.size();
+		if (queued > 0) {
+			computed |= STATUS_DATA_AVAILABLE;
+			computed |= Math.min(queued, 15) << 4;
+		}
+		return (byte) computed;
 	}
 
 	@Override
@@ -235,10 +262,7 @@ public class ConsoleDevice implements charDevice {
 			addKeyListener(new KeyAdapter() {
 				@Override
 				public void keyTyped(KeyEvent e) {
-					input.add((int) e.getKeyChar());
-					if ((status & STATUS_INTERRUPT_MODE) != 0) {
-						raiseInterrupt();
-					}
+					handleKeyPress(e.getKeyChar());
 				}
 			});
 		}

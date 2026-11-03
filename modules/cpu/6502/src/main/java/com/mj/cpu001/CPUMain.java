@@ -35,7 +35,7 @@ public class CPUMain {
 				new AddressRange(0xff00, 0xffff),
 				null, 0);
 		try {
-			rom.setVectors(0x1000, 0x1000, 0xf000);   // NMI, RESET (Echo.hex starts at $1000), IRQ
+			rom.setVectors(0x1000, 0x1000, 0xf000);   // NMI, RESET (BIOS.hex starts at $1000), IRQ
 		} catch (illegalAddressException e) {
 			e.printStackTrace();
 		}
@@ -50,7 +50,7 @@ public class CPUMain {
 		logger.error(String.format("Number of Opcodes = %d ", OpCodes.getMap().size()));
 		//CPU_CreateUtil.load(bus, fileName, startAddress);
 		try {
-			CPU_CreateUtil.load(bus,  "Echo.hex", 0);
+			CPU_CreateUtil.load(bus,  "BIOS.hex", 0);
 		} catch (illegalAddressException | ROException | DeviceUnavailable | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
