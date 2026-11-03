@@ -56,7 +56,7 @@ public class Test_MemoryFaults {
 	@Test
 	public void readFromUnmappedAddressRaisesDeviceUnavailableAndDoesNotLoad() throws Exception {
 		a(0x5a);
-		program(OpCodes.LDA_ABS, 0x00, 0x90);          // $9000 has no device on the bus
+		program(OpCodes.LDA_ABS, 0x00, 0x91);          // $9100 has no device on the bus (the VIA occupies $9000-$900F)
 		assertThrows(DeviceUnavailable.class, () -> c.step());
 		assertEquals(0x5a, c.a.get(), "A is untouched when the read faults");
 	}
