@@ -24,24 +24,36 @@ public class DeviceBus implements PBus {
 	protected boolean powerOnReset = false;
 	public void write(int address, byte data) throws ROException, illegalAddressException, DeviceUnavailable {
 		
-		logger.trace("WRITE: " + String.format("%04x %02x: " , address, data));
+		if (logger.isTraceEnabled()) {
+		
+			logger.trace("WRITE: " + String.format("%04x %02x: " , address, data));
+		
+		}
 		Device d = getDevice(address);
 		if (null == d) {
 			throw new DeviceUnavailable(address);
 		}
-		logger.trace ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
+		if (logger.isTraceEnabled()) {
+			logger.trace ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
+		}
 		d.write(address, data);
 
 	}
 
 	public byte read(int destAddress) throws illegalAddressException, DeviceUnavailable  {
 		
-		logger.trace("READ: " + String.format("%04x" , destAddress));
+		if (logger.isTraceEnabled()) {
+		
+			logger.trace("READ: " + String.format("%04x" , destAddress));
+		
+		}
 		Device d = getDevice(destAddress);
 		if (null == d) {
 			throw new DeviceUnavailable(destAddress);
 		}
-		logger.trace ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
+		if (logger.isTraceEnabled()) {
+			logger.trace ( String.format(formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
+		}
 		byte value = d.read(destAddress);
 		return value;
 	}
@@ -110,7 +122,11 @@ public class DeviceBus implements PBus {
 	public void unregisterDevice(Device deviceHandler) {
 		// TODO Auto-generated method stub
 
-					logger.trace("Unregister Device " + deviceHandler.getClass().getCanonicalName());
+					if (logger.isTraceEnabled()) {
+
+						logger.trace("Unregister Device " + deviceHandler.getClass().getCanonicalName());
+
+					}
 	}
 
 	private Device getDevice(int address) {
@@ -118,11 +134,14 @@ public class DeviceBus implements PBus {
 		Device d = null;
 		Set<AddressRange> s = devices.keySet();
 		for ( AddressRange r : s) {
-			logger.trace(r.toString());
-			
+			if (logger.isTraceEnabled()) {
+				logger.trace(r.toString());
+			}
 			if (r.contains(address) ) {
 				d = devices.get(r);
-				logger.trace ( String.format("Device Match: " + formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
+				if (logger.isTraceEnabled()) {
+					logger.trace ( String.format("Device Match: " + formater,  d.getDeviceType().name(), d.getBusId().name(),  d.getClass().getCanonicalName())) ;
+				}
 				break;
 			}
 		}

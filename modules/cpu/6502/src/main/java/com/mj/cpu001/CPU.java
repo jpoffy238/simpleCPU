@@ -134,16 +134,20 @@ public Decoder getDecoder() {
 			current = System.nanoTime();
 			difftime = current - previous;
 			previous = current;
-			logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
+			}
 			
 			byte opcode = 0;
 			try {
 				opcode = 0;
 				opcode = fetchInstruction();
 				state = decoder.decode(opcode);
-				String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
-				currentState += dump();
-				logger.debug(currentState);
+				if (logger.isDebugEnabled()) {
+					String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
+					currentState += dump();
+					logger.debug(currentState);
+				}
 				state.incrementExecutionCount();
 				long ctime = System.nanoTime();
 				state.exeute(this);
@@ -192,16 +196,20 @@ public Decoder getDecoder() {
 			current = System.nanoTime();
 			difftime = current - previous;
 			previous = current;
-			logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
+			}
 			
 			byte opcode = 0;
 		
 				opcode = 0;
 				opcode = fetchInstruction();
 				state = decoder.decode(opcode);
-				String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
-				currentState += dump();
-				logger.debug(currentState);	
+				if (logger.isDebugEnabled()) {
+					String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
+					currentState += dump();
+					logger.debug(currentState);
+				}	
 				state.exeute(this);
 				pc &= 0xffff;
 	}
