@@ -45,10 +45,14 @@ NEWLINE	LDA #$0A
 	JSR PUTCH
 	RTS
 
-;; ---- read a line into INBUF, echoing, until CR; null terminate; reset INPTR ----
+;; ---- read a line into INBUF, echoing, until CR or LF; null terminate; reset INPTR.
+;;      Swing's keyTyped for Enter isn't consistently '\r' across platforms/toolkits,
+;;      so both line endings are accepted here rather than just $0D. ----
 READLINE LDY #0
 RL_LOOP	JSR GETCH
 	CMP #$0D
+	BEQ RL_DONE
+	CMP #$0A
 	BEQ RL_DONE
 	STA INBUF,Y
 	JSR PUTCH
@@ -103,10 +107,19 @@ HD_LOWER CMP #'a'
 HD_FAIL	LDA #$FF
 	RTS
 
+;; ---- skip a single optional leading '$' (the usual 6502 hex-literal marker) at INPTR ----
+SKIPDOLLAR LDY INPTR
+	LDA INBUF,Y
+	CMP #'$'
+	BNE SD_DONE
+	INC INPTR
+SD_DONE	RTS
+
 ;; ---- parse hex digits starting at INPTR into ADDRLO/ADDRHI (16-bit) ----
 PARSEADDR LDA #0
 	STA ADDRLO
 	STA ADDRHI
+	JSR SKIPDOLLAR
 PA_LOOP	JSR HEXDIGIT
 	CMP #$FF
 	BEQ PA_DONE
@@ -128,6 +141,7 @@ PA_DONE	RTS
 ;; ---- parse hex digits starting at INPTR into BYTEVAL (8-bit) ----
 PARSEBYTE LDA #0
 	STA BYTEVAL
+	JSR SKIPDOLLAR
 PB_LOOP	JSR HEXDIGIT
 	CMP #$FF
 	BEQ PB_DONE

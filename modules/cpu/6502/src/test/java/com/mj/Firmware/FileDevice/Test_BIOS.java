@@ -74,4 +74,23 @@ public class Test_BIOS {
 		assertEquals(0x49, c.bus.read(0x2001) & 0xff);
 		assertEquals(0x4a, c.bus.read(0x2002) & 0xff);
 	}
+
+	@Test
+	public void lineFeedAloneAlsoTerminatesTheLine() throws Exception {
+		// Swing's keyTyped for Enter isn't consistently '\r' across platforms - a real
+		// interactive run got stuck here waiting for a '\r' that never arrived.
+		console.type("W 2000 48\n");
+		runBriefly();
+
+		assertEquals(0x48, c.bus.read(0x2000) & 0xff);
+	}
+
+	@Test
+	public void dollarPrefixIsAcceptedOnAddressesAndBytes() throws Exception {
+		console.type("W $2000 $48 $49\r");
+		runBriefly();
+
+		assertEquals(0x48, c.bus.read(0x2000) & 0xff, "a bare '$' shouldn't make the address default to 0");
+		assertEquals(0x49, c.bus.read(0x2001) & 0xff);
+	}
 }
