@@ -11,8 +11,12 @@
 ;;   F [fill]                    format every track on the selected drive (default fill $00)
 ;;   L <track> <sector> <addr>   load one 128-byte sector into memory
 ;;   P <track> <sector> <addr>   write (put) one 128-byte sector from memory to disk
-;;   B                           boot: load track 0 sector 1 from the selected drive
-;;                               to $0300 and JSR there
+;;   B                           boot: load a boot image from the selected drive's
+;;                               track 0 to $0300 and JSR there. Track 0 sector 1
+;;                               is a 1-byte header (how many code sectors follow,
+;;                               capped at 25 - track 0 is boot/system-reserved,
+;;                               and must never spill into the filesystem's data
+;;                               area on tracks 1+); sectors 2 onward are the code.
 CPU 6502
 OUTPUT HEX
 
@@ -26,8 +30,14 @@ BIOS_FORMAT_TRACK = $F00F	;; A = track, X = fill byte
 BIOS_RESTORE      = $F012	;; no params - homes the selected drive to track 0
 
 TRACKS = 76			;; IBM3740 geometry - the only drive type this BIOS knows about
-BOOTADDR = $0300		;; where B loads the boot sector - past INBUF ($0200-$0226), well
-				;; clear of this program's own code at $F800+
+MAXBOOTSEC = 25			;; track 0 has 26 sectors; sector 1 is the boot header, leaving
+				;; sectors 2-26 (25 of them) for code - B clamps to this so an
+				;; oversized/malformed header byte can never read into track 1,
+				;; where the CP/M filesystem's own data blocks live
+BOOTADDR = $0300		;; where B loads the boot image - past INBUF ($0200-$0226), well
+				;; clear of this program's own code at $F800+. A full-size
+				;; (25-sector) boot image runs well past $0300 into the free
+				;; RAM region beyond it - that's expected, not a collision
 
 INPTR    = $00		;; zero page: current parse offset into INBUF
 ADDRLO   = $01		;; zero page: parsed address, low byte - doubles as an indirect
@@ -45,6 +55,9 @@ EXEC_JSR = $05		;; JSR opcode
 EXEC_LO  = $06		;; low byte of the call target
 EXEC_HI  = $07		;; high byte of the call target
 EXEC_RTS = $08		;; RTS opcode - where the called routine's own RTS lands
+
+BOOTCOUNT  = $09	;; zero page: B's remaining-sectors-to-load countdown
+BOOTSECTOR = $0A	;; zero page: B's current sector number on track 0
 
 INBUF = $0200
 ;; 39 was too short in practice - a W/P command listing even a dozen-ish hex bytes
@@ -356,20 +369,59 @@ DI_PUT	JSR SKIPSP
 	LDX BYTEVAL
 	JSR BIOS_WRITE_SECTOR
 	RTS
-;; ---- B: boot - load track 0, sector 1 from the selected drive to BOOTADDR and JSR
-;;      there. Unlike E, BOOTADDR is a fixed, assemble-time constant, so this needs
-;;      none of E's self-modifying-JSR trick - just a direct "JSR BOOTADDR". A loaded
-;;      routine should end in RTS to return to the monitor, same convention as E; a
-;;      real boot sector meant to take over the machine entirely can simply never
-;;      return. ----
-DI_BOOT	LDA #$00
+;; ---- B: boot - load a boot image from track 0 of the selected drive to BOOTADDR
+;;      and JSR there. Sector 1 is a 1-byte header (how many code sectors follow,
+;;      clamped to MAXBOOTSEC - track 0 only has 25 sectors left after the header,
+;;      and must never spill into track 1+, where the CP/M filesystem's own data
+;;      blocks live); sectors 2 onward are the code itself, read consecutively
+;;      into BOOTADDR, BOOTADDR+128, BOOTADDR+256, and so on. Unlike E, BOOTADDR
+;;      is a fixed, assemble-time constant, so this needs none of E's self-
+;;      modifying-JSR trick - just a direct "JSR BOOTADDR" once loading is done.
+;;      A loaded routine should end in RTS to return to the monitor, same
+;;      convention as E; a real boot image meant to take over the machine
+;;      entirely can simply never return. ----
+DI_BOOT	LDA #0
+	JSR BIOS_SELECT
+	JSR BIOS_RESTORE
+
+	;; read the header sector into BOOTADDR just to learn the code-sector
+	;; count - the loop below overwrites it with real code right after
+	LDA #$00
 	STA ADDRLO
 	LDA #$03
 	STA ADDRHI
 	LDA #0
 	LDX #1
 	JSR BIOS_READ_SECTOR
-	JSR BOOTADDR
+	LDA BOOTADDR
+	CMP #MAXBOOTSEC
+	BCC DB_COUNTOK		;; count < 25 - use as-is
+	BEQ DB_COUNTOK		;; count == 25 - also fine as-is
+	LDA #MAXBOOTSEC		;; count > 25 - clamp
+DB_COUNTOK STA BOOTCOUNT
+	BEQ DB_RUN		;; a zero-sector header means "nothing to load" -
+				;; just run whatever's already sitting at BOOTADDR
+
+	LDA #2
+	STA BOOTSECTOR
+	LDA #$00
+	STA ADDRLO
+	LDA #$03
+	STA ADDRHI
+DB_LOOP	LDA #0
+	LDX BOOTSECTOR
+	JSR BIOS_READ_SECTOR
+	LDA ADDRLO
+	CLC
+	ADC #$80		;; next 128-byte chunk
+	STA ADDRLO
+	BCC DB_NOCARRY
+	INC ADDRHI
+DB_NOCARRY INC BOOTSECTOR
+	DEC BOOTCOUNT
+	BNE DB_LOOP
+
+DB_RUN	JSR BOOTADDR
 DI_DONE	RTS
 
 HUH	LDA #'?'

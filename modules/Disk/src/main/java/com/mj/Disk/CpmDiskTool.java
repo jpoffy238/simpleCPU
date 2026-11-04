@@ -6,10 +6,12 @@ import java.util.List;
 
 import com.mj.Disk.EightInch.IBM3740;
 
-/** A small host-side command-line tool for preparing CP/M-formatted disk images
- * before any 6502-resident DOS exists to do it from inside the emulator - format
- * a blank image, copy files in and out, list what's there. Only IBM3740 geometry
- * is supported, since that's the only drive type this project has so far.
+/** A small host-side command-line tool for preparing disk images before any
+ * 6502-resident DOS exists to do it from inside the emulator - format a blank
+ * image, copy CP/M files in and out, list what's there, or write a raw binary
+ * onto track 0 as a boot image for MONITOR.asm's B command. Only IBM3740
+ * geometry is supported, since that's the only drive type this project has
+ * so far.
  *
  * Run via, e.g.:
  *   mvn -pl modules/Disk exec:java -Dexec.mainClass=com.mj.Disk.CpmDiskTool \
@@ -44,6 +46,9 @@ public class CpmDiskTool {
 			get(imagePath, args[2], args[3]);
 		} else if ("list".equals(command)) {
 			list(imagePath);
+		} else if ("bootimage".equals(command)) {
+			requireArgs(args, 3, "bootimage <image> <host-file>");
+			bootImage(imagePath, args[2]);
 		} else {
 			printUsage();
 			System.exit(1);
@@ -85,6 +90,38 @@ public class CpmDiskTool {
 		System.out.println("Read " + data.length + " bytes (rounded up to the nearest 128-byte record) from " + cpmName);
 	}
 
+	/** Writes a raw binary (e.g. a cc65-built .bin) to track 0 as a boot image:
+	 * sector 1 becomes a 1-byte header (how many code sectors follow), sectors 2
+	 * onward hold the binary itself. Mirrors MONITOR.asm's B command/DI_BOOT -
+	 * the 25-sector cap here must stay in sync with MAXBOOTSEC there. */
+	private static void bootImage(String imagePath, String hostFile) throws Exception {
+		IBM3740 drive = openExisting(imagePath);
+		int sectorSize = drive.getGeometry().getSectorSize();
+		byte[] data = Files.readAllBytes(Paths.get(hostFile));
+		int codeSectors = (data.length + sectorSize - 1) / sectorSize;
+		if (codeSectors > 25) {
+			throw new Exception(hostFile + " is " + data.length + " bytes (" + codeSectors
+					+ " sectors) - B only supports up to 25 code sectors on track 0");
+		}
+
+		byte[] header = new byte[sectorSize];
+		header[0] = (byte) codeSectors;
+		drive.setTrack(0);
+		drive.setSector(1);
+		drive.write(header);
+
+		for (int i = 0; i < codeSectors; i++) {
+			byte[] sector = new byte[sectorSize];
+			int offset = i * sectorSize;
+			int length = Math.min(sectorSize, data.length - offset);
+			System.arraycopy(data, offset, sector, 0, length);
+			drive.setTrack(0);
+			drive.setSector(2 + i);
+			drive.write(sector);
+		}
+		System.out.println("Wrote boot image: " + data.length + " bytes across " + codeSectors + " code sector(s)");
+	}
+
 	private static void list(String imagePath) throws Exception {
 		IBM3740 drive = openExisting(imagePath);
 		List<String> names = new CpmFileSystem(drive).listFiles();
@@ -103,5 +140,6 @@ public class CpmDiskTool {
 		System.err.println("  put <image> <host-file> <cpm-name>");
 		System.err.println("  get <image> <cpm-name> <host-file>");
 		System.err.println("  list <image>");
+		System.err.println("  bootimage <image> <host-file>");
 	}
 }

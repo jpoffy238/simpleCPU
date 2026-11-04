@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -301,18 +302,25 @@ public class Test_BIOS {
 
 	@Test
 	public void bootLoadsTrackZeroSectorOneAndJumpsToIt() throws Exception {
-		// LDA #$99 / STA $2000 / RTS - the same tiny subroutine the E test uses, but
-		// planted directly on the "disk" at track 0, sector 1, where B expects it.
-		byte[] bootSector = new byte[128];
-		bootSector[0] = (byte) 0xA9;
-		bootSector[1] = (byte) 0x99;
-		bootSector[2] = (byte) 0x8D;
-		bootSector[3] = (byte) 0x00;
-		bootSector[4] = (byte) 0x20;
-		bootSector[5] = (byte) 0x60;
+		// Track 0 sector 1 is the boot header (1 code sector follows); the code
+		// itself - LDA #$99 / STA $2000 / RTS, the same tiny subroutine the E test
+		// uses - lives in sector 2, where B expects it.
+		byte[] header = new byte[128];
+		header[0] = 1;
 		drive0.setTrack(0);
 		drive0.setSector(1);
-		drive0.write(bootSector);
+		drive0.write(header);
+
+		byte[] codeSector = new byte[128];
+		codeSector[0] = (byte) 0xA9;
+		codeSector[1] = (byte) 0x99;
+		codeSector[2] = (byte) 0x8D;
+		codeSector[3] = (byte) 0x00;
+		codeSector[4] = (byte) 0x20;
+		codeSector[5] = (byte) 0x60;
+		drive0.setTrack(0);
+		drive0.setSector(2);
+		drive0.write(codeSector);
 
 		console.type("B\r");
 		console.type("D 2000\r");
@@ -333,9 +341,16 @@ public class Test_BIOS {
 	@Test
 	public void bootedProgramCanPrintThroughTheBiosPutchPrimitive() throws Exception {
 		// LDA #char / JSR BIOS_PUTCH ($F000), repeated per character, then RTS - a
-		// boot sector that actually calls back into the primitives ROM rather than
+		// boot image that actually calls back into the primitives ROM rather than
 		// just poking memory directly, proving out the whole B -> BIOS_READ_SECTOR ->
 		// JSR BOOTADDR -> BIOS_PUTCH round trip with a real (if tiny) loaded program.
+		// Still fits in one code sector, so the header (sector 1) just says "1".
+		byte[] header = new byte[128];
+		header[0] = 1;
+		drive0.setTrack(0);
+		drive0.setSector(1);
+		drive0.write(header);
+
 		int[] program = {
 				0xA9, 0x48, 0x20, 0x00, 0xF0,	// LDA #'H' / JSR BIOS_PUTCH
 				0xA9, 0x65, 0x20, 0x00, 0xF0,	// LDA #'e' / JSR BIOS_PUTCH
@@ -344,18 +359,54 @@ public class Test_BIOS {
 				0xA9, 0x6F, 0x20, 0x00, 0xF0,	// LDA #'o' / JSR BIOS_PUTCH
 				0x60							// RTS
 		};
-		byte[] bootSector = new byte[128];
+		byte[] codeSector = new byte[128];
 		for (int i = 0; i < program.length; i++) {
-			bootSector[i] = (byte) program[i];
+			codeSector[i] = (byte) program[i];
 		}
 		drive0.setTrack(0);
-		drive0.setSector(1);
-		drive0.write(bootSector);
+		drive0.setSector(2);
+		drive0.write(codeSector);
 
 		console.type("B\r");
 		runBriefly();
 
 		assertTrue(console.getRow(1).contains("Hello"), "got: [" + console.getRow(1) + "]");
+	}
+
+	@Test
+	public void bootLoadsMultipleCodeSectorsConsecutively() throws Exception {
+		// Header says 2 code sectors follow. The first code sector is 128 NOPs
+		// ($EA) with no RTS/JMP at all - the only way execution reaches the real
+		// routine in the second code sector is if the loader placed it exactly at
+		// BOOTADDR+128, right after the first sector's last NOP falls through.
+		byte[] header = new byte[128];
+		header[0] = 2;
+		drive0.setTrack(0);
+		drive0.setSector(1);
+		drive0.write(header);
+
+		byte[] firstCodeSector = new byte[128];
+		Arrays.fill(firstCodeSector, (byte) 0xEA); // NOP
+		drive0.setTrack(0);
+		drive0.setSector(2);
+		drive0.write(firstCodeSector);
+
+		byte[] secondCodeSector = new byte[128];
+		secondCodeSector[0] = (byte) 0xA9; // LDA #$99
+		secondCodeSector[1] = (byte) 0x99;
+		secondCodeSector[2] = (byte) 0x8D; // STA $2000
+		secondCodeSector[3] = (byte) 0x00;
+		secondCodeSector[4] = (byte) 0x20;
+		secondCodeSector[5] = (byte) 0x60; // RTS
+		drive0.setTrack(0);
+		drive0.setSector(3);
+		drive0.write(secondCodeSector);
+
+		console.type("B\r");
+		runBriefly();
+
+		assertEquals(0x99, c.bus.read(0x2000) & 0xff,
+				"execution should fall through from the NOP-filled first sector into the second");
 	}
 
 	@Test
