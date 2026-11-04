@@ -329,4 +329,32 @@ public class Test_BIOS {
 		}
 		assertTrue(recovered, "the monitor should still be alive after the boot routine returns via RTS");
 	}
+
+	@Test
+	public void bootedProgramCanPrintThroughTheBiosPutchPrimitive() throws Exception {
+		// LDA #char / JSR BIOS_PUTCH ($F000), repeated per character, then RTS - a
+		// boot sector that actually calls back into the primitives ROM rather than
+		// just poking memory directly, proving out the whole B -> BIOS_READ_SECTOR ->
+		// JSR BOOTADDR -> BIOS_PUTCH round trip with a real (if tiny) loaded program.
+		int[] program = {
+				0xA9, 0x48, 0x20, 0x00, 0xF0,	// LDA #'H' / JSR BIOS_PUTCH
+				0xA9, 0x65, 0x20, 0x00, 0xF0,	// LDA #'e' / JSR BIOS_PUTCH
+				0xA9, 0x6C, 0x20, 0x00, 0xF0,	// LDA #'l' / JSR BIOS_PUTCH
+				0xA9, 0x6C, 0x20, 0x00, 0xF0,	// LDA #'l' / JSR BIOS_PUTCH
+				0xA9, 0x6F, 0x20, 0x00, 0xF0,	// LDA #'o' / JSR BIOS_PUTCH
+				0x60							// RTS
+		};
+		byte[] bootSector = new byte[128];
+		for (int i = 0; i < program.length; i++) {
+			bootSector[i] = (byte) program[i];
+		}
+		drive0.setTrack(0);
+		drive0.setSector(1);
+		drive0.write(bootSector);
+
+		console.type("B\r");
+		runBriefly();
+
+		assertTrue(console.getRow(1).contains("Hello"), "got: [" + console.getRow(1) + "]");
+	}
 }
