@@ -82,8 +82,9 @@ $0000-$00FF   Zero page (monitor-private vars + the BIOS-call ABI's
               ADDRLO/ADDRHI parameter-passing slot)
 $0100-$01FF   Stack (fixed by 6502 hardware)
 $0200-$02FF   INBUF (the monitor's command-line buffer)
-$0300-$03FF   Boot-sector landing area (BOOTADDR) - where B loads a sector
-$0400-$7FFF   Free RAM - future boot-loaded programs land here eventually
+$0300-$7FFF   BOOTADDR onward - where B loads a boot image; a full-size (25-
+              sector) image runs well past the $0300-$03FF page into the
+              free RAM beyond it, which is expected, not a collision
 $8000-$8FFF   Unmapped (a bus access here faults, recoverably - exercised
               directly by Test_BIOS's fault-recovery test)
 $9000-$900F   VIA6522
@@ -162,7 +163,15 @@ Commands:
 | `F` | `F [fill]` | format every track on the selected drive |
 | `L` | `L <track> <sector> <addr>` | load one sector into memory |
 | `P` | `P <track> <sector> <addr>` | write one sector from memory to disk |
-| `B` | `B` | boot: load track 0 sector 1 to `$0300` and JSR there |
+| `B` | `B` | boot: load a boot image from track 0 to `BOOTADDR` and JSR there |
+
+`B`'s boot image format: track 0 sector 1 is a 1-byte header (how many code
+sectors follow, clamped to 25); sectors 2 onward are the code itself, read
+consecutively into `BOOTADDR` and beyond. Capped at 25 code sectors (3200
+bytes) because track 0 is exclusively reserved for boot/system use - tracks
+1-75 are the CP/M filesystem's data area, and boot loading must never spill
+into it. A cc65-compiled "hello world" is already 192 bytes (see below), so
+this was a near-term necessity, not a hypothetical one.
 
 Both ROMs load via `basicROM`'s privileged constructor-time path (the file
 is read and written directly into the backing array, bypassing the normal
@@ -230,6 +239,65 @@ they just drain/feed the Data register in a tight loop, which works
 because the whole transfer is already complete by the time the triggering
 `STA FD_STATUS`/`BIOS_READ_SECTOR` call returns.
 
+## CP/M filesystem (host-side reference implementation)
+
+`CpmFileSystem` (`modules/Disk`) is a CP/M-style filesystem - the obvious,
+well-documented, genuinely simple choice given the IBM 3740 geometry this
+project already emulates *is* the classic CP/M 8" SSSD disk format. It's a
+flat directory (no subdirectories) of 32-byte entries ("FCBs"), 1KB
+allocation blocks (8 sectors each), track 0 reserved for boot/system use
+(see `B` above), tracks 1-75 as the data area with blocks 0-1 of that area
+as a 64-entry directory. Files are capped at one "extent" (16 block
+pointers per directory entry = 16KB) - real CP/M's multi-extent mechanism
+for bigger files isn't implemented. Record counts, and so file lengths
+read back, are only tracked to the nearest 128-byte record, same
+limitation as real CP/M.
+
+This operates directly on a `FloppyDevice` - no `FloppyController`/VIA
+needed, since it's pure filesystem logic over raw sector read/write, not
+hardware register access. Crucially, **it never runs inside the emulated
+6502** - there's no bridge between the JVM and the CPU's instruction
+stream. It exists to validate the on-disk byte format (especially the one
+genuinely fiddly bit: block<->(track,sector) translation, since 26
+sectors/track isn't divisible by 8 sectors/block, so blocks routinely span
+a track boundary) against something other than hand-written 6502 code, and
+as `CpmDiskTool`'s host-side CLI (`format`/`put`/`get`/`list`) for
+preparing disk images before any 6502-resident DOS exists to do it from
+inside the emulator. The real DOS - `DIR`/read/write/delete at the monitor
+prompt - is still unwritten 6502-side code (now likely C, see below), which
+would implement the *same* format independently, the way one prototypes an
+algorithm on a host before porting it to the real embedded target.
+
+## cc65 (C on the 6502 side)
+
+More advanced 6502-side work - the DOS layer above, chiefly - is planned to
+be written in C via `cc65` rather than hand assembly, specifically because
+the block<->(track,sector) division above is exactly the kind of thing
+that's natural in C and genuinely awkward in 6502 asm (no divide
+instruction). `modules/cpu/6502/src/main/c/` has a validated starting
+point:
+
+- **`bios_glue.s`/`bios.h`** bridge C to `BIOS.asm`'s jump table. Multi-
+  parameter primitives (read/write sector, format track) are split into a
+  "stage one value, then trigger" sequence rather than one function taking
+  every parameter at once, since correctly popping more than one cc65
+  software-stack parameter in hand-written glue isn't worth the risk;
+  `__fastcall__` for a single parameter (received directly in A, no
+  software stack involved) is simple and well-documented.
+- **`simplecpu.cfg`** is a custom cc65 linker config (not a stock cc65
+  target - this is fully custom hardware). Its `ZEROPAGE` segment starts
+  at `$09`, right after `MONITOR.asm`'s own `$00-$08` - for debugging
+  clarity, not functional necessity: DOS and the monitor never run
+  concurrently (it's a sequential handoff via `B`, not interleaved
+  execution), so there's no actual zero page to divide between them.
+- **`hello.c`** is a build smoke test, validated end-to-end against the
+  real toolchain (not just planned) - it compiles and links into a
+  192-byte binary. That number is also what originally confirmed the
+  multi-sector boot problem above was real and immediate, not
+  hypothetical.
+
+Not yet done: actually running cc65-compiled code inside the emulator.
+
 ## Console
 
 `ConsoleDevice` (`modules/Devices`) is a Swing-backed 80x24 text window -
@@ -245,15 +313,14 @@ never go stale.
 
 ## Where this is headed
 
-- **Multi-sector boot.** `B` currently loads exactly one 128-byte sector to
-  `$0300` and jumps there - fine for small test routines, but any real
-  DOS-like program won't fit in one sector. Making `B`/reset actually boot
-  something substantial needs either a known sector-count convention or a
-  proper two-stage loader.
-- **A DOS/filesystem layer.** The eventual goal is for `B` to load a real
-  disk operating system - file create/edit, maybe on-machine compilation -
+- **A real DOS.** The eventual goal is for `B` to load a real disk
+  operating system - file create/edit, maybe on-machine compilation -
   sitting entirely on top of the primitives ROM's raw sector read/write,
   the same way the monitor does today. The primitives ROM deliberately
   knows nothing about filesystems, directories, or files; that's additive
-  on top, not a reason to change what's there now.
+  on top, not a reason to change what's there now. The on-disk filesystem
+  format is validated (see CP/M filesystem above) and the C toolchain is
+  validated (see cc65 above) - what's left is writing the actual 6502-side
+  commands (`DIR`/read/write/delete at the monitor prompt) and running them
+  for real inside the emulator, which hasn't been attempted yet.
 - **`modules/Video`** is reserved but unstarted.
