@@ -17,6 +17,14 @@
     <artifactId>maven-surefire-plugin</artifactId>
     <version>2.22.2</version>
 </plugin>
+<!-- Not bound to any phase - just pins a version so "mvn exec:java -Dexec.mainClass=..."
+     (e.g. to run CpmDiskTool) resolves deterministically instead of Maven picking
+     whatever the latest exec-maven-plugin release happens to be. -->
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>exec-maven-plugin</artifactId>
+    <version>3.0.0</version>
+</plugin>
  <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-dependency-plugin</artifactId>
