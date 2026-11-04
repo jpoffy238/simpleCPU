@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.Decoder;
 import com.mj.Firmware.Framework.OpCodes;
+import com.mj.Firmware.Framework.StatusRegister;
 import com.mj.Firmware.Framework.machineState;
 import com.mj.Registers.generalPurpose;
 import com.mj.Registers.gpregister;
@@ -20,6 +21,11 @@ public class CPU extends Thread {
 	public static final int VECTOR_NMI = 0xfffa;
 	public static final int VECTOR_RESET = 0xfffc;
 	public static final int VECTOR_IRQ = 0xfffe;
+	/** Project-specific extension (real NMOS 6502 doesn't define this address): a bus
+	 * fault - reading/writing an address with no device behind it - jumps here instead
+	 * of halting the emulated machine outright, the same way a real interrupt would,
+	 * so firmware gets a chance to recover instead of the whole session dying. */
+	public static final int VECTOR_FAULT = 0xfff8;
 
 	public CPU(PBus bus, Decoder dcd) {
 		this.bus =bus;
@@ -165,8 +171,20 @@ public Decoder getDecoder() {
 			} catch (DeviceUnavailable e) {
 				logger.error("Device Unavailable : " + dump());
 				logger.error(String.format("Error Address: %04x",e.getAddress()));
-				logger.error(e);
-				RUN=false;
+				// A bus fault is recoverable, the same way a real interrupt is: push the
+				// return state and vector through it, rather than killing the whole
+				// emulated machine. If even that fails (e.g. the fault vector or the
+				// stack itself isn't mapped), there's nothing left to do but halt.
+				try {
+					push((byte) ((pc >> 8) & 0xff));
+					push((byte) (pc & 0xff));
+					push(StatusRegister.pack(this, false));
+					IFLAG.set();
+					pc = readVector(VECTOR_FAULT);
+				} catch (illegalAddressException | DeviceUnavailable | ROException fatal) {
+					logger.error("Unable to enter the fault handler; halting", fatal);
+					RUN=false;
+				}
 			} catch (ROException e) {
 				// TODO Auto-generated catch block
 				logger.error("RO Memory Write attempt : " + dump());

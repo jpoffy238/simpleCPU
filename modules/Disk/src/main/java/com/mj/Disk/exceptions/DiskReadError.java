@@ -7,6 +7,10 @@ public class DiskReadError extends Exception {
 	public DiskReadError() {
 	}
 
+	public DiskReadError(String message) {
+		super(message);
+	}
+
 	public DiskReadError(String message, Throwable cause) {
 		super(message, cause);
 	}

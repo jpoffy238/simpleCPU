@@ -158,7 +158,10 @@
 				<executions>
 					<execution>
 						<id>asm</id>
-						<phase>compile</phase>
+						<!-- Must run before process-resources (which copies src/main/resources into
+							target/classes), not compile (which runs after it) - otherwise every build
+							ships target/classes a run behind, since it copies last run's output. -->
+						<phase>generate-resources</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
@@ -217,6 +220,11 @@
 		<dependency>
 			<groupId>com.mj</groupId>
 			<artifactId>Devices</artifactId>
+			<version>0.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mj</groupId>
+			<artifactId>FloppyDisk</artifactId>
 			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>

@@ -1,5 +1,7 @@
 package com.mj.Disk;
 
+import java.util.Arrays;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -152,6 +154,11 @@ public class FloppyController implements Device {
 		case 0xa0: // Write Sector
 			beginWrite();
 			break;
+		case 0xf0: // Format Track: fill every sector on the current track with the byte
+			// staged in the Data register (real WD179x Write Track, simplified - no
+			// gap/sync/CRC bytes, one completion interrupt instead of a per-byte DRQ dance)
+			formatTrack(drive);
+			break;
 		default:
 			logger.debug(String.format("Unsupported floppy command %02x", command));
 			status = STATUS_RECORD_NOT_FOUND;
@@ -169,6 +176,23 @@ public class FloppyController implements Device {
 			status = STATUS_RECORD_NOT_FOUND;
 		}
 		via.requestInterrupt(VIA6522.FLAG_CB1);
+	}
+
+	private void formatTrack(FloppyDevice drive) {
+		try {
+			drive.setTrack(trackRegister);
+			byte[] fillBuffer = new byte[drive.getGeometry().getSectorSize()];
+			Arrays.fill(fillBuffer, (byte) dataRegister);
+			int sectorCount = drive.getGeometry().getSectors();
+			for (int sector = 1; sector <= sectorCount; sector++) {
+				drive.setSector(sector);
+				drive.write(fillBuffer);
+			}
+			status = 0;
+		} catch (GeometryException | DiskWriteError e) {
+			status = STATUS_RECORD_NOT_FOUND;
+		}
+		via.requestInterrupt(VIA6522.FLAG_CB1); // single completion interrupt, Type-I style
 	}
 
 	private void beginRead(FloppyDevice drive) {

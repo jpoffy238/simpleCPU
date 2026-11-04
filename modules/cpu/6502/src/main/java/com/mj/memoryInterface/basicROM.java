@@ -32,6 +32,11 @@ public class basicROM extends AbstractMemoryLayer {
 		poke(CPU.VECTOR_IRQ, irq);
 	}
 
+	/** Program the project-specific bus-fault vector ($FFF8) - see CPU.VECTOR_FAULT. */
+	public void setFaultVector(int handler) throws illegalAddressException {
+		poke(CPU.VECTOR_FAULT, handler);
+	}
+
 	private void poke(int vectorAddress, int target) throws illegalAddressException {
 		memory[addressMapper(vectorAddress)] = (byte) (target & 0xff);
 		memory[addressMapper(vectorAddress + 1)] = (byte) ((target >> 8) & 0xff);

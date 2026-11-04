@@ -34,6 +34,7 @@ public class Test_FloppyController {
 	private static final int CMD_SEEK = 0x10;
 	private static final int CMD_READ_SECTOR = 0x80;
 	private static final int CMD_WRITE_SECTOR = 0xA0;
+	private static final int CMD_FORMAT_TRACK = 0xF0;
 
 	private static final int STATUS_BUSY = 0x01;
 	private static final int STATUS_DRQ = 0x02;
@@ -202,5 +203,34 @@ public class Test_FloppyController {
 
 		assertEquals(STATUS_NOT_READY, status());
 		assertFalse(bus.IsInterruptRaised(), "nothing is actually happening, so nothing should interrupt");
+	}
+
+	@Test
+	public void formatTrackFillsEverySectorOnTheCurrentTrackWithTheDataRegisterByte() throws Exception {
+		IBM3740 drive = newDrive("drive0.img");
+		controller.attachDrive(0, drive);
+
+		bus.write(REG_TRACK, (byte) 7);
+		bus.write(REG_DATA, (byte) 0xAA);
+		bus.clearInterupt();
+		bus.write(REG_STATUS_COMMAND, (byte) CMD_FORMAT_TRACK);
+
+		assertEquals(0, status(), "format should complete synchronously, like Seek/Restore");
+		assertTrue(bus.IsInterruptRaised(), "a single completion interrupt, Type-I style");
+
+		for (int sector = 1; sector <= 26; sector++) {
+			bus.write(REG_SECTOR, (byte) sector);
+			byte[] data = readSector();
+			for (byte b : data) {
+				assertEquals((byte) 0xAA, b, "sector " + sector + " should have been formatted");
+			}
+		}
+	}
+
+	@Test
+	public void formatTrackOnAnUnattachedDriveReportsNotReady() throws Exception {
+		bus.write(REG_STATUS_COMMAND, (byte) CMD_FORMAT_TRACK);
+
+		assertEquals(STATUS_NOT_READY, status());
 	}
 }

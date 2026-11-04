@@ -135,6 +135,13 @@ public class ConsoleDevice implements charDevice {
 				cursorCol = 0;
 			} else if (c == '\n') {
 				newline();
+			} else if (c == '\b') {
+				// Pure cursor-left; firmware erases visually by following this with a
+				// space (overwrite) and a second backspace (reposition) - same as any
+				// real dumb terminal.
+				if (cursorCol > 0) {
+					cursorCol--;
+				}
 			} else {
 				grid[cursorRow][cursorCol] = c;
 				cursorCol++;

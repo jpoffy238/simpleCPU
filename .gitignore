@@ -23,6 +23,7 @@ logs/
 *.tar.gz
 *.rar
 *.hex
+*.img
 target/
 *.lst
 *.hex.lst

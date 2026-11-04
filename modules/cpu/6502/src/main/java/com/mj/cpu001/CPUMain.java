@@ -11,6 +11,8 @@ import com.mj.Devices.AddressRange;
 import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.PBus;
 import com.mj.Devices.VIA6522;
+import com.mj.Disk.FloppyController;
+import com.mj.Disk.EightInch.IBM3740;
 import com.mj.Firmware.Framework.Decoder;
 import com.mj.Firmware.Framework.OpCodes;
 import com.mj.Firmware.Framework.cpu001decoder;
@@ -39,6 +41,7 @@ public class CPUMain {
 			// $f000 IRQ target (ROM here only covers $ff00-$ffff), and the BIOS never enables/uses
 			// interrupts anyway, so a safe restart is the right fallback if one ever fires.
 			rom.setVectors(0x1000, 0x1000, 0x1000);
+			rom.setFaultVector(0x1800);   // BIOS.asm's FAULT handler
 		} catch (illegalAddressException e) {
 			e.printStackTrace();
 		}
@@ -47,6 +50,21 @@ public class CPUMain {
 		bus.registerDevice(via);
 		ConsoleDevice con = new ConsoleDevice(via, new AddressRange(0xec00, 0xec01));
 		bus.registerDevice(con);
+
+		FloppyController fdc = new FloppyController(via, new AddressRange(0x9010, 0x9014));
+		bus.registerDevice(fdc);
+		for (int drive = 0; drive < 4; drive++) {
+			String imageName = "disk" + drive + ".img";
+			try {
+				// Created fresh (with a valid header) on first run if it doesn't exist yet.
+				IBM3740 disk = new IBM3740();
+				disk.setVirtualDiskFile(imageName);
+				fdc.attachDrive(drive, disk);
+			} catch (Exception e) {
+				logger.error("Unable to mount " + imageName + " - drive " + drive + " will report not-ready", e);
+			}
+		}
+
 		Decoder d =  new cpu001decoder();
 		
 		CPU c = new CPU(bus, d);
