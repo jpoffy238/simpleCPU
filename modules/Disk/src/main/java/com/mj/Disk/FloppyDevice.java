@@ -5,7 +5,7 @@ import com.mj.Disk.exceptions.DiskWriteError;
 
 public interface FloppyDevice {
 	public DiskGeometry getGeometry();
-	public void setVirutalDiskFile(String fname);
+	public void setVirtualDiskFile(String fname) throws DiskReadError, DiskWriteError;
 	public void format() throws GeometryException, DiskWriteError;
 	public void setHead(int headId) throws GeometryException;
 	public void setTrack(int trackId) throws GeometryException;

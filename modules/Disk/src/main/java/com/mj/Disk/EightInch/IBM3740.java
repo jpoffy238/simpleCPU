@@ -1,12 +1,15 @@
 package com.mj.Disk.EightInch;
 
+import java.io.File;
+
 import com.mj.Disk.DiskGeometry;
+import com.mj.Disk.FileVirtualDisk;
 import com.mj.Disk.FloppyDevice;
+import com.mj.Disk.VirtualDisk;
 import com.mj.Disk.exceptions.DiskReadError;
 import com.mj.Disk.exceptions.DiskWriteError;
 import com.mj.Disk.exceptions.GeometryException;
 
-public abstract class IBM3740 implements FloppyDevice {
 /*
  * SSSD 26 Each 128 Byte Sector Track Format
 This is an IBM 3740 Standard format.
@@ -16,7 +19,7 @@ Gap I	  40	0xFF	NA	0xFF
 Sync I	   6	0x00	NA	0x00
 IM	1	0xFC	0xD7	0xFC
 GAP III	  26	0xFF	NA	0xFF
-Following repeated 26 times to ***		
+Following repeated 26 times to ***
 Sync III   6	0x00	NA	0x00
 AM 1	   1	0xFE	0xC7	0xFE
 Cyl #	   1	0-76	NA	0-76
@@ -32,69 +35,105 @@ CRC	       2     CRC	NA	0xF7 (generates both CRC bytes)
 GAP III	  27	0xFF	NA	0xFF
 ***
 GAP IV	~221	0xFF	NA	0xFF
-Total Bytes/Sector	189			
-Total Bytes/Track	5208			
+Total Bytes/Sector	189
+Total Bytes/Track	5208
  */
-	
+
+// Only the 128-byte sector payload is emulated; gap/sync/AM/CRC bytes above are
+// the real IBM 3740 wire format and are not simulated.
+public class IBM3740 implements FloppyDevice {
+
 	private DiskGeometry geometry;
-	private byte[] buffer;
-	
+	private VirtualDisk disk = new FileVirtualDisk();
+	private String fileName;
+	private int head;
+	private int track;
+	private int sector = 1;
+
 	public IBM3740() {
 		geometry = new DiskGeometry();
 		geometry.setHeads(1);
 		geometry.setSectors(26);
 		geometry.setTracks(76);
 		geometry.setSectorSize(128);
-		buffer = new byte[128];
 	}
-	
+
 	@Override
 	public DiskGeometry getGeometry() {
-		// TODO Auto-generated method stub
-		return null;
+		return geometry;
 	}
 
 	@Override
-	public void setVirutalDiskFile(String fname) {
-		// TODO Auto-generated method stub
-
+	public void setVirtualDiskFile(String fname) throws DiskReadError, DiskWriteError {
+		fileName = fname;
+		if (new File(fname).exists()) {
+			disk.open(geometry, fname);
+		} else {
+			disk.create(geometry, fname);
+		}
 	}
 
 	@Override
 	public void format() throws GeometryException, DiskWriteError {
-		// TODO Auto-generated method stub
-
+		disk.create(geometry, fileName);
 	}
 
 	@Override
 	public void setHead(int headId) throws GeometryException {
-		// TODO Auto-generated method stub
-
+		if (!geometry.isValidHead(headId)) {
+			throw new GeometryException("Invalid head " + headId);
+		}
+		head = headId;
 	}
 
 	@Override
 	public void setTrack(int trackId) throws GeometryException {
-		// TODO Auto-generated method stub
-
+		if (!geometry.isValidTrack(trackId)) {
+			throw new GeometryException("Invalid track " + trackId);
+		}
+		track = trackId;
 	}
 
 	@Override
 	public void setSector(int sectorId) throws GeometryException {
-		// TODO Auto-generated method stub
+		if (!geometry.isValidSector(sectorId)) {
+			throw new GeometryException("Invalid sector " + sectorId);
+		}
+		sector = sectorId;
+	}
 
+	@Override
+	public void spinUp() {
+	}
+
+	@Override
+	public void spinDown() {
+	}
+
+	@Override
+	public void loadHead() {
+	}
+
+	@Override
+	public void unloadHead() {
 	}
 
 	@Override
 	public byte[] read() throws DiskReadError {
-		// TODO Auto-generated method stub
-		return buffer;
+		try {
+			return disk.read(head, track, sector);
+		} catch (GeometryException e) {
+			throw new DiskReadError(e.getMessage(), e);
+		}
 	}
 
 	@Override
 	public void write(byte[] data) throws DiskWriteError {
-		buffer = data.clone();
-		
-
+		try {
+			disk.write(head, track, sector, data);
+		} catch (GeometryException e) {
+			throw new DiskWriteError(e.getMessage(), e);
+		}
 	}
 
 }

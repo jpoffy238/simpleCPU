@@ -28,6 +28,7 @@ public class Test_SBC {
 	public void Test_SBC_Basic01() {
 		int i = 0x1000;
 		try {
+			c.bus.write(i++, OpCodes.SEC.code());   // carry set = no borrow (the standard SBC idiom)
 			c.bus.write( i++, OpCodes.LDA_IMM.code());
 			c.bus.write(i++, (byte)0x0a);
 			c.bus.write(i++, OpCodes.SBC_IMM.code());
@@ -61,12 +62,14 @@ public class Test_SBC {
 		assert (!c.ZFLAG.isSet());
 		assert(!c.NFLAG.isSet());
 		assert(!c.OFLAG.isSet());
+		assert(c.CFLAG.isSet());   // 10 - 1 needs no borrow
 
 	}
 	@Test
 	public void Test_SBC_Basic02() {
 		int i = 0x1000;
 		try {
+			c.bus.write(i++, OpCodes.SEC.code());   // carry set = no borrow (the standard SBC idiom)
 			c.bus.write( i++, OpCodes.LDA_IMM.code());
 			c.bus.write(i++, (byte)0x0a);
 			c.bus.write(i++, OpCodes.SBC_IMM.code());

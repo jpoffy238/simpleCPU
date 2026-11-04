@@ -63,18 +63,10 @@ EXEC
 		// pop  high  order PC from  stack
 		// 
 		
-			byte cpstatus = c.bus.read(c.sp);
-			c.sp++;
+			byte cpstatus = c.pull();
 			setFlags(c, cpstatus);
-			int lower = c.bus.read(c.sp);
-			c.sp++;
-			int upper = c.bus.read(c.sp);
-			c.sp++;
-				
-		    
-			int newpc =( (upper  &  0xff) << 8) + (int)(lower & 0x00ff);
-			c.pc = newpc;
-			c.IFLAG.clear();
-			
+			int lower = c.pull() & 0xff;
+			int upper = c.pull() & 0xff;
+			c.pc = (upper << 8) | lower;
 		}
 }

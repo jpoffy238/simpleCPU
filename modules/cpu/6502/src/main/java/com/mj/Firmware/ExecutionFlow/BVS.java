@@ -36,27 +36,19 @@ A page boundary crossing occurs (i.e. the BCS takes 4 cycles) when (the address 
 the BVC instruction will take 3 cycles no matter what address it is located at.
  */
 	public BVS() {
-		super((byte)(0x50));
-		setProperty(KEY_MNEMONIC, "BVC");
+		super((byte)(0x70));
+		setProperty(KEY_MNEMONIC, "BVS");
 		setProperty(KEY_ADDRESSING_MODE, VALUE_ADDM_REL);
-		setProperty(KEY_OPCODE, "0x50");
+		setProperty(KEY_OPCODE, "0x70");
 		setProperty(KEY_INSTRUCTION_SIZE, "2");
 		setProperty(KEY_CYCLES, "3");
 		setProperty(KEY_FLAGS_EFFECTED, "NONE");
-		setProperty(KEY_WEB,"http://6502.org/tutorials/6502opcodes.html#BVC" );
-		setProperty(KEY_DESCRIPTION, "BCC  (Branch on Carry NOT set )  If Carry NOT flag is set");
+		setProperty(KEY_WEB,"http://6502.org/tutorials/6502opcodes.html#BVS" );
+		setProperty(KEY_DESCRIPTION, "BVS (Branch on oVerflow Set) - branch if the Overflow flag is set");
 	
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable {
-		// TODO Auto-generated method stub
-		if (! c.OFLAG.isSet()) {
-			byte offset = (byte) (c.bus.read(c.pc) & 0x00ff);
-			c.pc = (int)(c.pc+offset+1);
-		} else {
-			c.pc++;
-		}
+		branch(c, c.OFLAG.isSet());
 	}
-
-	
 
 }

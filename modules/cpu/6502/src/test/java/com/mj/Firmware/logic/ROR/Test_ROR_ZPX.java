@@ -111,7 +111,7 @@ public class Test_ROR_ZPX {
 		assert ((result & 0xff) == 0xaa);
 		assert (!c.ZFLAG.isSet());
 		assert(c.NFLAG.isSet());
-		assert(!c.CFLAG.isSet());
+		assert(c.CFLAG.isSet());   // ROR: carry takes old bit 0 of $55
 
 	}
 

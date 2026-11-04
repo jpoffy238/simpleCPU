@@ -11,50 +11,37 @@ public class MIH extends Instruction {
 		super((byte) (0xfb));
 	}
 
+	/**
+	 * Machine interrupt handler. Priority is RESET, then NMI, then IRQ (which is
+	 * ignored while the I flag is set). RESET loads the PC from the reset vector
+	 * without touching the stack; NMI and IRQ push PCH, PCL and the status (B
+	 * clear), set I, and load the PC from their vector.
+	 */
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
-		// TODO Auto-generated method stub
-		int interuptHandlerAddress = 0; 
-		logger.debug("INTERRUPT=============================================================");
-		if (c.bus.IsNMInterruptRaised()) {
-			logger.debug("NM === INTERRUPT=============================================================");
-			interuptHandlerAddress = getNMInterruptHandlerAddress(c);
+		int vector;
+		if (c.bus.IsPowerOnResetRased()) {
+			logger.debug("RESET interrupt");
+			c.bus.clearpowerOnReset();
+			c.reset();                      // loads PC from the reset vector
+			return;
+		} else if (c.bus.IsNMInterruptRaised()) {
+			logger.debug("NMI interrupt");
+			vector = getNMInterruptHandlerAddress(c);
 			c.bus.clearNMInterupt();
+		} else if (c.bus.IsInterruptRaised() && !c.IFLAG.isSet()) {
+			logger.debug("IRQ interrupt");
+			vector = getInterruptHandlerAddress(c);
+			c.bus.clearInterupt();
 		} else {
-			if (c.bus.IsInterruptRaised() ) {
-				logger.debug("INT/BRK === INTERRUPT=============================================================");
-				
-				interuptHandlerAddress = getInterruptHandlerAddress(c);
-				c.IFLAG.set();
-				c.bus.clearInterupt();
-			} else {
-				if (c.bus.IsPowerOnResetRased()) {
-					logger.debug("RESET === INTERRUPT=============================================================");
-					interuptHandlerAddress = getResetHandlerAddress(c);
-					c.bus.clearpowerOnReset();
-					c.reset();
-					c.pc = interuptHandlerAddress;
-					// this is a special case -  need to not push cpu status on stack.
-					return;
-				}
-			}
+			return;                         // nothing to service (e.g. IRQ masked)
 		}
-		if (interuptHandlerAddress != 0) {
 
-			int upper = (((c.pc) & 0xff00) >> 8);
-			int lower = (((c.pc) & 0x00ff));
-
-			// push on stack
-			c.sp--;
-			c.bus.write(c.sp, (byte) (upper & 0xff));
-			c.sp--;
-			c.bus.write(c.sp, (byte) (lower & 0xff));
-			c.sp--;
-			c.bus.write(c.sp, psr(c));
-			logger.debug(String.format("Interrupt Address = %04x " , interuptHandlerAddress));
-			c.pc = interuptHandlerAddress;
-			
-			
-		}
+		c.push((byte) ((c.pc >> 8) & 0xff));
+		c.push((byte) (c.pc & 0xff));
+		c.push(psr(c, false));              // hardware interrupt: B bit clear
+		c.IFLAG.set();                      // I is set after the old status is saved
+		logger.debug(String.format("Interrupt Address = %04x ", vector));
+		c.pc = vector;
 	}
 
 }

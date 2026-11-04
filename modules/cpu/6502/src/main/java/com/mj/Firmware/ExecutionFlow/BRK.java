@@ -50,14 +50,12 @@ the BVC instruction will take 3 cycles no matter what address it is located at.
 	}
 	public void exeute(CPU c) throws illegalAddressException, DeviceUnavailable, ROException {
 		
-		int upper = (((c.pc) & 0xff00) >> 8);
-		int lower = (((c.pc) & 0x00ff));
-		c.sp--;
-		c.bus.write(c.sp, (byte) (upper & 0xff));
-		c.sp--;
-		c.bus.write(c.sp, (byte) (lower & 0xff));
-		c.sp--;
-		c.bus.write(c.sp, psr(c));
+		// BRK has a padding byte: the return address is the BRK address + 2
+		int ret = (c.pc + 1) & 0xffff;
+		c.push((byte) ((ret >> 8) & 0xff));
+		c.push((byte) (ret & 0xff));
+		c.push(psr(c, true));   // software interrupt: B bit set
+		c.IFLAG.set();
 
 		int IntAddress = getInterruptHandlerAddress(c);
 		c.pc = IntAddress;

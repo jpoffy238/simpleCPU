@@ -1,6 +1,6 @@
 # Compiled class file
 *.class
-
+nohup.out
 # Log file
 *.log
 .classpath
@@ -23,6 +23,7 @@ logs/
 *.tar.gz
 *.rar
 *.hex
+*.img
 target/
 *.lst
 *.hex.lst
@@ -30,3 +31,4 @@ target/
 hs_err_pid*
 *.lst
 /.apt_generated/
+modules/cpu/6502/testdata/

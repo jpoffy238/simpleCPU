@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import com.mj.Devices.PBus;
 import com.mj.Firmware.Framework.Decoder;
 import com.mj.Firmware.Framework.OpCodes;
+import com.mj.Firmware.Framework.StatusRegister;
 import com.mj.Firmware.Framework.machineState;
 import com.mj.Registers.generalPurpose;
 import com.mj.Registers.gpregister;
@@ -16,6 +17,16 @@ import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.illegalOpCodeException;
 
 public class CPU extends Thread {
+	/** Hardware vectors (little-endian addresses stored at the top of memory). */
+	public static final int VECTOR_NMI = 0xfffa;
+	public static final int VECTOR_RESET = 0xfffc;
+	public static final int VECTOR_IRQ = 0xfffe;
+	/** Project-specific extension (real NMOS 6502 doesn't define this address): a bus
+	 * fault - reading/writing an address with no device behind it - jumps here instead
+	 * of halting the emulated machine outright, the same way a real interrupt would,
+	 * so firmware gets a chance to recover instead of the whole session dying. */
+	public static final int VECTOR_FAULT = 0xfff8;
+
 	public CPU(PBus bus, Decoder dcd) {
 		this.bus =bus;
 		decoder = dcd;
@@ -38,6 +49,7 @@ public class CPU extends Thread {
 	public generalPurpose y = new gpregister();
 
 	public int pc;
+	/** 8-bit stack pointer; the stack lives in page 1 ($0100-$01FF). */
 	public int sp;
 	public PBus bus;
 	private Decoder decoder;
@@ -49,12 +61,35 @@ public class CPU extends Thread {
 	
 	long previous = System.currentTimeMillis();
 
+/** Push a byte: write at $0100+SP, then decrement SP (wrapping within page 1). */
+public void push(byte data) throws illegalAddressException, DeviceUnavailable, ROException {
+	bus.write(0x0100 | (sp & 0xff), data);
+	sp = (sp - 1) & 0xff;
+}
+
+/** Pull a byte: increment SP (wrapping within page 1), then read at $0100+SP. */
+public byte pull() throws illegalAddressException, DeviceUnavailable {
+	sp = (sp + 1) & 0xff;
+	return bus.read(0x0100 | sp);
+}
+
 public Decoder getDecoder() {
 	return decoder;
 }
 
 
 
+	/** Read a 16-bit little-endian vector from the bus. */
+	public int readVector(int vectorAddress) throws illegalAddressException, DeviceUnavailable {
+		int lower = bus.read(vectorAddress) & 0xff;
+		int upper = bus.read(vectorAddress + 1) & 0xff;
+		return (upper << 8) | lower;
+	}
+
+	/**
+	 * Reset: clear the registers, set the stack pointer and interrupt-disable
+	 * flag, and load the PC from the reset vector at $FFFC/$FFFD.
+	 */
 	public void reset() {
 		CFLAG.reset();
 		ZFLAG.reset();
@@ -68,11 +103,17 @@ public Decoder getDecoder() {
 		b.reset();
 		x.reset();
 		y.reset();
-		pc = 0x1000;
-		sp = (0x01ff);
-		
+		sp = 0xfd;
+		IFLAG.set();          // interrupts are disabled after reset
+		try {
+			pc = readVector(VECTOR_RESET);
+		} catch (illegalAddressException | DeviceUnavailable e) {
+			logger.error("Unable to read the reset vector at $FFFC; PC left at $0000");
+			pc = 0;
+		}
+
 		logger.debug(dump());
-		
+
 	}
 
 	public String dump() {
@@ -80,7 +121,7 @@ public Decoder getDecoder() {
 				+ DFLAG.toString() + IFLAG.toString() + BFLAG.toString() + "]\tA[ " + String.format("%02x", a.get())
 				+ "]\tB[" + String.format("%02xs", b.get()) + "]\tX[" + String.format("%02x", x.get()) + "]\tY[ "
 				+ String.format("%02x", y.get()) + "]\tPC[" + String.format("%04x", pc) + "]\tSP["
-				+ String.format("%04x", sp) + "]";
+				+ String.format("%02x", sp & 0xff) + "]";
 		return flagStatus;
 
 	}
@@ -99,19 +140,24 @@ public Decoder getDecoder() {
 			current = System.nanoTime();
 			difftime = current - previous;
 			previous = current;
-			logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
+			}
 			
 			byte opcode = 0;
 			try {
 				opcode = 0;
 				opcode = fetchInstruction();
 				state = decoder.decode(opcode);
-				String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
-				currentState += dump();
-				logger.debug(currentState);
+				if (logger.isDebugEnabled()) {
+					String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
+					currentState += dump();
+					logger.debug(currentState);
+				}
 				state.incrementExecutionCount();
 				long ctime = System.nanoTime();
 				state.exeute(this);
+				pc &= 0xffff;   // the PC is a 16-bit register and wraps
 				long afterTime = System.nanoTime();
 				state.setExecutionTime(afterTime-ctime);
 			} catch (illegalOpCodeException e) {
@@ -125,8 +171,20 @@ public Decoder getDecoder() {
 			} catch (DeviceUnavailable e) {
 				logger.error("Device Unavailable : " + dump());
 				logger.error(String.format("Error Address: %04x",e.getAddress()));
-				logger.error(e);
-				//RUN=false;
+				// A bus fault is recoverable, the same way a real interrupt is: push the
+				// return state and vector through it, rather than killing the whole
+				// emulated machine. If even that fails (e.g. the fault vector or the
+				// stack itself isn't mapped), there's nothing left to do but halt.
+				try {
+					push((byte) ((pc >> 8) & 0xff));
+					push((byte) (pc & 0xff));
+					push(StatusRegister.pack(this, false));
+					IFLAG.set();
+					pc = readVector(VECTOR_FAULT);
+				} catch (illegalAddressException | DeviceUnavailable | ROException fatal) {
+					logger.error("Unable to enter the fault handler; halting", fatal);
+					RUN=false;
+				}
 			} catch (ROException e) {
 				// TODO Auto-generated catch block
 				logger.error("RO Memory Write attempt : " + dump());
@@ -156,17 +214,22 @@ public Decoder getDecoder() {
 			current = System.nanoTime();
 			difftime = current - previous;
 			previous = current;
-			logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Instruction Count : " + instructionCount + "  Execution Time : " + difftime + "  Total Time: " + (current - beginTime));
+			}
 			
 			byte opcode = 0;
 		
 				opcode = 0;
 				opcode = fetchInstruction();
 				state = decoder.decode(opcode);
-				String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
-				currentState += dump();
-				logger.debug(currentState);	
+				if (logger.isDebugEnabled()) {
+					String currentState = String.format("%-40s", "[" + state.getClass().getName() + "]");
+					currentState += dump();
+					logger.debug(currentState);
+				}	
 				state.exeute(this);
+				pc &= 0xffff;
 	}
 
 	private byte fetchInstruction() throws illegalAddressException, DeviceUnavailable {
@@ -188,7 +251,7 @@ public Decoder getDecoder() {
 		
 		} else {
 			value = (int) (bus.read(pc) & 0xff);
-			pc++;
+			pc = (pc + 1) & 0xffff;
 		}
 		return (byte) value;
 	}

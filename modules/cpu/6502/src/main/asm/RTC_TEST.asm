@@ -1,47 +1,25 @@
-
-;; Test app for RTC	
+;; Test app for RTC
+;; Spins until the interrupt handler (RTCInt) has copied the RTC's raw u_time
+;; to TIME and set FLAG, then halts.
 CPU 6502
 OUTPUT HEX
 
+TIME = $4000		;; RTCInt copies the 4-byte big-endian u_time here
+FLAG = $4004		;; RTCInt sets this to 1 after each copy
+VIA_IER = $900E
+
 * = $1000
 
+		LDA #$C0		;; set-mode (bit7) + T1 (bit6): enable the RTC tick interrupt
+		STA VIA_IER
 		CLI			;; ensure interrupts are handled.
-LOOP
-		LDX #$1F      ;; Count down register
-		JSR STRLN   ;; get length of string $00 terminated
-		LDA #0                  ;; Load the value to compare null char
-		CMP STL               ;; if String length is not 0 then halt - test done
-		BNE HLT
-		
-WAIT	NOP              ;; do nothing waste time
+LOOP	LDX #$1F		;; Count down register
+		LDA FLAG
+		BNE HLT			;; FLAG set - RTCInt has run, test done
+
+WAIT	NOP			;; do nothing waste time
 		DEX
-		BNE WAIT	;; delay for some cycles
-		BEQ LOOP        ;;  if wait is over check string length again
+		BNE WAIT		;; delay for some cycles
+		BEQ LOOP		;; if wait is over check FLAG again
 
-HLT DB $3F
-
-STRLN
-		SEI  		;; don't allow interrupts got cmpute string length
-		PHA		;; Save current status of thing
-		TYA 
-		PHA
-		TXA
-		PHA
-		LDY #0		;;
-		LDA #0
-		LDX #20         ;; max string size
-LOOP1	CMP TIME,Y	;; is this the end of the string
-		BEQ EOS   ;; so if a null term char found - go to exit code
-		INY            ;; did not found it so next char
-		DEX           ;; one less char to check
-		BNE LOOP1	;; not at end check next char
-EOS		STY STL      ;; String length in Y so store in it 0 page mem
-		PLA              ;; restore registers
-		TAX
-		PLA
-		TYA
-		PLA
-		CLI   ;; allow interupts
-		RTS
-		
-
+HLT		DB $3F

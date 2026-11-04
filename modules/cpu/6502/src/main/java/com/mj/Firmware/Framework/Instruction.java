@@ -72,156 +72,74 @@ public abstract class Instruction implements machineState {
 	}
 
 	protected int getInterruptHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower =  (int)(c.bus.read(0x00fffe) & 0x00ff);                     
-		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
-
-		int opperand_upper = (int) (c.bus.read (0x00ffff) & 0x00ff);
-		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
-
-		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
-		logger.debug(String.format("Final Address %04x ", loadAddress));
-		if (loadAddress != 0xf000) {
-			logger.debug("BAD ADDRESS for Interrupt");
-			throw new DeviceUnavailable (loadAddress);
-		}
-		return loadAddress;
+		return c.readVector(CPU.VECTOR_IRQ);
 	}
+
 	protected int getNMInterruptHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower =  (int)(c.bus.read(0x00fffa) & 0x00ff);                     
-		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
-
-		int opperand_upper = (int) (c.bus.read (0x00fffb) & 0x00ff);
-		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
-
-		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
-		logger.debug(String.format("Final Address %04x ", loadAddress));
-		return loadAddress;
+		return c.readVector(CPU.VECTOR_NMI);
 	}
+
 	protected int getResetHandlerAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower =  (int)(c.bus.read(0x00fffc) & 0x00ff);                     
-		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
-
-		int opperand_upper = (int) (c.bus.read (0x00fffd) & 0x00ff);
-		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
-
-		int loadAddress = (((opperand_upper << 8) & 0xff00) + opperand_lower) & 0x0000ffff;
-		logger.debug(String.format("Final Address %04x ", loadAddress));
-		return loadAddress;
+		return c.readVector(CPU.VECTOR_RESET);
 	}
+
 	protected int getAbsoluteAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int opperand_lower = c.bus.read(c.pc) & 0xff;
-		logger.debug(String.format("ADDR: %04x Lower Operand = %02x", c.pc, opperand_lower));
-
-		int opperand_upper = (int) (c.bus.read(c.pc + 1) & 0xff);
-		logger.debug(String.format("ADDR: %04x Upper Operand = %02x", (c.pc + 1), opperand_upper));
-
-		int loadAddress = (((opperand_upper << 8) ) + opperand_lower) & 0x0ffff;
-		logger.debug(String.format("Final Address %04x ", loadAddress));
-		return loadAddress;
+		return Addressing.absolute(c);
 	}
 
 	protected int getAbsoluteAddressY(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int loadAddress = getAbsoluteAddress(c);
-		loadAddress += c.y.get();
-		return loadAddress;
+		return Addressing.absoluteY(c);
 	}
 
 	protected int getAbsoluteAddressX(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int loadAddress = getAbsoluteAddress(c);
-		loadAddress += c.x.get();
-		return loadAddress;
+		return Addressing.absoluteX(c);
 	}
 
 	protected int getZeroPageAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int operand = c.bus.read(c.pc);
-		int address = (int) (operand) & 0x00ff;
-		return address;
+		return Addressing.zeroPage(c);
 	}
 
 	protected int getZeroPageXAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int operand = c.bus.read(c.pc);
-		int address = (int) (operand + c.x.get()) & 0x00ff;
-		return address;
+		return Addressing.zeroPageX(c);
 	}
 
 	protected int getZeroPageYAddress(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int operand = c.bus.read(c.pc);
-		int address = (int) (operand + c.y.get()) & 0x00ff;
-		return address;
+		return Addressing.zeroPageY(c);
 	}
 
 	protected int getIndirect(CPU c) throws illegalAddressException, DeviceUnavailable {
-		int lower = c.bus.read(c.pc);
-		int upper = c.bus.read(c.pc + 1);
-		int PCAddress = ((upper & 0xff) << 8) + (lower & 0xff);
-		lower = c.bus.read(PCAddress);
-		upper = c.bus.read(PCAddress + 1);
-		int lookupAddress = ((upper & 0xff) << 8 ) + (lower & 0xff);
-		logger.debug(String.format("IndirectAddress PC[%04x] -> To Address [%04x]",PCAddress , lookupAddress));
-
-		return lookupAddress;
+		return Addressing.indirect(c);
 	}
 
+	/** Indexed indirect, (zp,X). See {@link Addressing}. */
 	protected int getIndexX(CPU c) throws illegalAddressException, DeviceUnavailable {
-		/*
-		 * Indexed Indirect
-		 * 
-		 * This mode is only used with the X register. Consider a situation where the
-		 * instruction is LDA ($20,X), X contains $04, and memory at $24 contains 0024:
-		 * 74 20, First, X is added to $20 to get $24. The target address will be
-		 * fetched from $24 resulting in a target address of $2074. Register A will be
-		 * loaded with the contents of memory at $2074.
-		 * 
-		 * If X + the immediate byte will wrap around to a zero-page address. So you
-		 * could code that like targetAddress = (X + opcode[1]) & 0xFF .
-		 * 
-		 * Indexed Indirect instructions are 2 bytes - the second byte is the zero-page
-		 * address - $20 in the example. Obviously the fetched address has to be stored
-		 * in the zero page.
-		 */
-		int address;
-		int operand = c.bus.read(c.pc) & 0xff;;
-		int pageZero = (operand + c.x.get()) & 0x00ff;
-		int lower = c.bus.read(pageZero)   & 0xff;
-		int upper = c.bus.read((pageZero + 1) & 0xff ) & 0xff;
-		address = (upper & 0x00ff) << 8;
-		address +=  (lower);
-		return address;
+		return Addressing.indexedIndirect(c);
 	}
 
+	/** Indirect indexed, (zp),Y. See {@link Addressing}. */
 	protected int getIndexY(CPU c) throws illegalAddressException, DeviceUnavailable {
-		/*
-		 * Indirect Indexed
-		 * 
-		 * This mode is only used with the Y register. It differs in the order that Y is
-		 * applied to the indirectly fetched address. An example instruction that uses
-		 * indirect index addressing is LDA ($86),Y . To calculate the target address,
-		 * the CPU will first fetch the address stored at zero page location $86. That
-		 * address will be added to register Y to get the final target address.
-		 * 
-		 * For LDA ($86),Y, if the address stored at $86 is $4028 (memory is 0086: 28
-		 * 40, remember little endian) and register Y contains $10, then the final
-		 * target address would be $4038. Register A will be loaded with the contents of
-		 * memory at $4038.
-		 * 
-		 * Indirect Indexed instructions are 2 bytes - the second byte is the zero-page
-		 * address - $20 in the example. (So the fetched address has to be stored in the
-		 * zero page.)
-		 * 
-		 * While indexed indirect addressing will only generate a zero-page address,
-		 * this mode's target address is not wrapped - it can be anywhere in the 16-bit
-		 * address space.
-		 */
-		int address;
-		int operand = c.bus.read(c.pc);
-		int pageZero = (operand) & 0x00ff;
-		int lower = c.bus.read(pageZero);
-		int upper = c.bus.read(pageZero + 1);
-		address = (upper & 0x00ff) << 8 ;
-		address += lower & 0x00ff;
-		address += (c.y.get() & 0x00ff);
-		return address;
+		return Addressing.indirectIndexed(c);
 	}
+
+	/**
+	 * Common relative-branch handling. The PC points at the offset byte on entry.
+	 * Wraps the PC to 16 bits and records whether a taken branch crossed a page.
+	 */
+	protected void branch(CPU c, boolean taken) throws illegalAddressException, DeviceUnavailable {
+		byte offset = (byte) c.bus.read(c.pc);
+		int next = (c.pc + 1) & 0xffff;          // address of the following instruction
+		if (taken) {
+			int target = (next + offset) & 0xffff;
+			branchPageCrossed = (target & 0xff00) != (next & 0xff00);
+			c.pc = target;
+		} else {
+			branchPageCrossed = false;
+			c.pc = next;
+		}
+	}
+
+	/** True if the most recently executed taken branch crossed a page boundary. */
+	protected boolean branchPageCrossed;
 
 	protected void handleZException(CPU c) {
 		c.ZFLAG.set();
@@ -233,83 +151,31 @@ public abstract class Instruction implements machineState {
 		c.ZFLAG.clear();
 	}
 
+	/** Status byte as pushed by PHP / BRK (B bit set). */
 	protected byte psr(CPU c) {
-		int status = 0;
-		if (c.CFLAG.isSet()) {
-			status = 1;
-		}
-		status <<= 1;
-		if (c.ZFLAG.isSet()) {
-			status += 1;
-		}
-		status <<= 1;
-		if (c.IFLAG.isSet()) {
-			status += 1;
-		}
-		status <<= 1;
-		if (c.DFLAG.isSet()) {
-			status += 1;
-		}
-		status <<= 1;
-		if (c.BFLAG.isSet()) {
-			status += 1;
-		}
-		status <<= 1;
-		if (c.OFLAG.isSet()) {
-			status += 1;
-		}
-		status <<= 1;
-		if (c.NFLAG.isSet()) {
-			status += 1;
-		}
-
-		return (byte) (status & 0xff);
+		return StatusRegister.pack(c, true);
 	}
 
-	protected void setFlags(CPU c, byte sr) {
-		int tmpsr = (int) (sr & 0xff);
-		int mask = 1;
+	/** Status byte for pushing: B set for PHP/BRK (software), clear for IRQ/NMI (hardware). */
+	protected byte psr(CPU c, boolean breakFlag) {
+		return StatusRegister.pack(c, breakFlag);
+	}
 
-		if ((tmpsr & mask) == 0) {
-			c.NFLAG.clear();
-		} else {
-			c.NFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.OFLAG.clear();
-		} else {
-			c.OFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.BFLAG.clear();
-		} else {
-			c.BFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.DFLAG.clear();
-		} else {
-			c.DFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.IFLAG.clear();
-		} else {
-			c.IFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.ZFLAG.clear();
-		} else {
+	/** Load the flags from a status byte (PLP / RTI). */
+	protected void setFlags(CPU c, byte sr) {
+		StatusRegister.load(c, sr);
+	}
+
+	protected void setNZ(CPU c, int result) {
+		if (result == 0) {
 			c.ZFLAG.set();
-		}
-		mask <<= 1;
-		if ((tmpsr & mask) == 0) {
-			c.CFLAG.clear();
 		} else {
-			c.CFLAG.set();
+			c.ZFLAG.clear();
+		}
+		if ((result & 0x80) != 0) {
+			c.NFLAG.set();
+		} else {
+			c.NFLAG.clear();
 		}
 	}
 
