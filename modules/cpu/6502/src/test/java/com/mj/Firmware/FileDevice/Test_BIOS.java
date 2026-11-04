@@ -21,10 +21,9 @@ import com.mj.Firmware.Framework.cpu001decoder;
 import com.mj.cpu001.CPU;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
-import com.mj.util.CPU_CreateUtil;
 
-/** Drives the real BIOS.hex monitor through a CPU + console, the same way a person
- * typing at the keyboard would, and checks the result through getRow()/the bus
+/** Drives the real BIOS.hex/MONITOR.hex ROMs through a CPU + console, the same way a
+ * person typing at the keyboard would, and checks the result through getRow()/the bus
  * rather than the CPU's internal state - this is testing the firmware, not the CPU. */
 public class Test_BIOS {
 	@TempDir
@@ -41,10 +40,11 @@ public class Test_BIOS {
 	public void setup() throws Exception {
 		bus = new DeviceBus();
 		bus.registerDevice(new basicMemory(bus, new AddressRange(0, 32 * 1024), null, 0));
-		basicROM rom = new basicROM(bus, new AddressRange(0xff00, 0xffff), null, 0);
-		rom.setVectors(0x1000, 0x1000, 0x1000);
-		rom.setFaultVector(0x1800);
-		bus.registerDevice(rom);
+		// Two ROM chips, same as CPUMain - BIOS.hex (primitives) and MONITOR.hex (the
+		// command interpreter, which carries its own vector table including the
+		// project-specific fault vector, so no setVectors()/setFaultVector() call here).
+		bus.registerDevice(new basicROM(bus, new AddressRange(0xf000, 0xf7ff), "BIOS.hex", 0));
+		bus.registerDevice(new basicROM(bus, new AddressRange(0xf800, 0xffff), "MONITOR.hex", 0));
 
 		VIA6522 via = new VIA6522(bus, new AddressRange(0x9000, 0x900f));
 		bus.registerDevice(via);
@@ -60,8 +60,6 @@ public class Test_BIOS {
 		drive1 = new IBM3740();
 		drive1.setVirtualDiskFile(tempDir.resolve("drive1.img").toString());
 		fdc.attachDrive(1, drive1);
-
-		CPU_CreateUtil.load(bus, "BIOS.hex", 0);
 
 		c = new CPU(bus, new cpu001decoder());
 	}

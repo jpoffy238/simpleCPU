@@ -4,7 +4,7 @@
 
 install: $(patsubst %.asm,%.hex,$(wildcard *.asm))
 	cp *.hex ../../test/resources
-	cp BIOS.hex ../../main/resources
+	cp BIOS.hex MONITOR.hex ../../main/resources
 
 clean: 
 	rm -f *.hex *.lst
