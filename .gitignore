@@ -24,6 +24,8 @@ logs/
 *.rar
 *.hex
 *.img
+*.o
+*.bin
 target/
 *.lst
 *.hex.lst
