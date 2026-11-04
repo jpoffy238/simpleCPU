@@ -118,6 +118,7 @@ or filesystem concepts. Exposes a fixed, frozen jump table at `$F000`:
 | `$F009` | `BIOS_READ_SECTOR`   | A = track, X = sector, ADDRLO/ADDRHI = dest |
 | `$F00C` | `BIOS_WRITE_SECTOR`  | A = track, X = sector, ADDRLO/ADDRHI = src |
 | `$F00F` | `BIOS_FORMAT_TRACK`  | A = track, X = fill byte (one track only) |
+| `$F012` | `BIOS_RESTORE`       | no parameters - homes the selected drive to track 0 |
 
 Each slot is a `JMP` to the real implementation below it - moving an
 implementation is always safe as long as its slot still jumps to the right
@@ -134,8 +135,20 @@ directly - only the jump table above. Also owns the hardware vector table
 (`$FFFA-$FFFF`) and the fault vector (`$FFF8`), embedded directly via `DW`
 directives, since reset should land in the monitor and fault recovery
 ("print `?`, return to the prompt") is monitor policy, not a hardware
-primitive. NMI and IRQ aren't meaningfully used by this system yet, so both
-just point back at the monitor's own entry point, same as RESET.
+primitive.
+
+NMI and RESET both vector through `RESET_INIT`, not straight to `LOOP`:
+it selects drive 0 and issues `BIOS_RESTORE` before falling into the normal
+prompt loop, so a reset always finds the hardware in a known state
+regardless of what a previous program (a future DOS, say) left the
+drive/track selection as. This is a belt-and-suspenders robustness measure,
+not a correctness requirement - the monitor's own ROM code never needs
+"restoring" after something else runs, since ROM is write-protected and the
+reset vector is unconditional (a reset always lands back here no matter
+what was executing), so the monitor was never actually torn down, just not
+the thing currently running. IRQ isn't meaningfully used by this system
+yet, and conceptually shouldn't re-init hardware mid-operation even if it
+were, so it goes straight to `LOOP`.
 
 Commands:
 

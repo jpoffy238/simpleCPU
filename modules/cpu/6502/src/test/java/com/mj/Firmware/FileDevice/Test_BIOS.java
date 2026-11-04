@@ -357,4 +357,20 @@ public class Test_BIOS {
 
 		assertTrue(console.getRow(1).contains("Hello"), "got: [" + console.getRow(1) + "]");
 	}
+
+	@Test
+	public void resetHomesTheDriveAndTrackRegardlessOfPriorState() throws Exception {
+		// Simulate a previous program (a future DOS, say) leaving the hardware
+		// selected to a different drive/track - direct register pokes, bypassing
+		// the monitor entirely, standing in for "whatever ran before this reset".
+		// c hasn't been started yet, so these pokes land before the CPU's own
+		// first-ever reset, which is exactly what we want to test against.
+		c.bus.write(0x9014, (byte) 1); // FD_DRIVE
+		c.bus.write(0x9011, (byte) 5); // FD_TRACK
+
+		runBriefly();
+
+		assertEquals(0, c.bus.read(0x9014) & 0xff, "reset should re-select drive 0");
+		assertEquals(0, c.bus.read(0x9011) & 0xff, "reset should restore to track 0");
+	}
 }

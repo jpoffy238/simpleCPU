@@ -23,6 +23,7 @@ BIOS_SELECT       = $F006	;; A = drive 0-3
 BIOS_READ_SECTOR  = $F009	;; A = track, X = sector, ADDRLO/ADDRHI = dest
 BIOS_WRITE_SECTOR = $F00C	;; A = track, X = sector, ADDRLO/ADDRHI = src
 BIOS_FORMAT_TRACK = $F00F	;; A = track, X = fill byte
+BIOS_RESTORE      = $F012	;; no params - homes the selected drive to track 0
 
 TRACKS = 76			;; IBM3740 geometry - the only drive type this BIOS knows about
 BOOTADDR = $0300		;; where B loads the boot sector - past INBUF ($0200-$0226), well
@@ -58,9 +59,25 @@ MAXLEN = 120
 
 * = $F800
 
-;; LOOP is the reset target (embedded directly in this ROM's own vector table
-;; below, loaded via basicROM's privileged constructor path - no separate
-;; Java-side setVectors() call needed, same as RTCInt.hex).
+;; ---- reset/NMI entry point (see the vector table at the bottom of this file):
+;;      puts hardware into a known state - drive 0, head restored to track 0 -
+;;      before falling into the normal prompt loop. Whatever a previous program
+;;      (a future DOS, say) left the drive/track selection as shouldn't carry
+;;      over across a reset, even though the monitor's own ROM code never
+;;      needed "restoring" itself (see Doc/Architecture.md - ROM is write-
+;;      protected and the reset vector is unconditional, so the monitor was
+;;      never actually torn down, just not the thing running). Plain LOOP
+;;      (reached by JMP from FAULT and from LOOP's own repeat) intentionally
+;;      skips this - those shouldn't re-home the drive on every command. ----
+RESET_INIT LDA #0
+	JSR BIOS_SELECT
+	JSR BIOS_RESTORE
+	JMP LOOP
+
+;; LOOP is also a reset/NMI target (indirectly, via RESET_INIT above) - embedded
+;; directly in this ROM's own vector table below, loaded via basicROM's
+;; privileged constructor path - no separate Java-side setVectors() call
+;; needed, same as RTCInt.hex.
 LOOP	JSR PROMPT
 	JSR READLINE
 	JSR DISPATCH
@@ -551,12 +568,14 @@ FAULT	PLA		;; discard the pushed PSR
 ;; Hardware vectors plus our project-specific fault vector, embedded directly:
 ;; this ROM loads via basicROM's privileged constructor-time path (bypassing
 ;; write protection), same as RTCInt.hex, so it carries its own vector table -
-;; no separate Java-side setVectors()/setFaultVector() call needed, and FAULT
-;; doesn't need to live at any particular fixed address - DW resolves its real
-;; one automatically. NMI/IRQ aren't meaningfully used by this system yet, so
-;; both just point back at the monitor's entry, same as RESET.
+;; no separate Java-side setVectors()/setFaultVector() call needed, and
+;; neither FAULT nor RESET_INIT need to live at any particular fixed address -
+;; DW resolves each one's real address automatically. NMI and RESET both go
+;; through RESET_INIT (a "start over" event should re-home the hardware);
+;; IRQ isn't meaningfully used by this system yet, and conceptually shouldn't
+;; re-init hardware mid-operation even if it were, so it goes straight to LOOP.
 * = $FFF8
 	DW FAULT	;; $FFF8 fault vector (CPU.VECTOR_FAULT, project-specific)
-	DW LOOP		;; $FFFA NMI
-	DW LOOP		;; $FFFC RESET
+	DW RESET_INIT	;; $FFFA NMI
+	DW RESET_INIT	;; $FFFC RESET
 	DW LOOP		;; $FFFE IRQ

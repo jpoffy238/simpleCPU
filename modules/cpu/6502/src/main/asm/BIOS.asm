@@ -14,6 +14,8 @@
 ;;   BIOS_WRITE_SECTOR  A = track, X = sector, zero-page ADDRLO/ADDRHI = src
 ;;   BIOS_FORMAT_TRACK  A = track, X = fill byte (one track only - a caller
 ;;                      wanting the whole disk formatted loops over tracks)
+;;   BIOS_RESTORE       no parameters - homes the selected drive's head back
+;;                      to track 0, the WD179x's canonical "known state" command
 CPU 6502
 OUTPUT HEX
 
@@ -44,6 +46,7 @@ ADDRHI = $02
 	JMP DO_READ_SECTOR	;; $F009 BIOS_READ_SECTOR
 	JMP DO_WRITE_SECTOR	;; $F00C BIOS_WRITE_SECTOR
 	JMP DO_FORMAT_TRACK	;; $F00F BIOS_FORMAT_TRACK
+	JMP DO_RESTORE		;; $F012 BIOS_RESTORE
 
 DO_PUTCH STA CONSOLE_DATA
 	RTS
@@ -97,5 +100,13 @@ DWS_LOOP LDA (ADDRLO),Y
 DO_FORMAT_TRACK STA FD_TRACK
 	STX FD_DATA
 	LDA #$F0
+	STA FD_STATUS
+	RTS
+
+;; ---- home the selected drive's head to track 0. No parameters - restore
+;;      doesn't need a target track like seek does. Used by the monitor's
+;;      reset path to put hardware into a known state regardless of whatever
+;;      a previous program left the drive/track selection as. ----
+DO_RESTORE LDA #$00
 	STA FD_STATUS
 	RTS
