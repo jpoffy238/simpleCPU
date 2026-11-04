@@ -46,7 +46,15 @@ EXEC_HI  = $07		;; high byte of the call target
 EXEC_RTS = $08		;; RTS opcode - where the called routine's own RTS lands
 
 INBUF = $0200
-MAXLEN = 39
+;; 39 was too short in practice - a W/P command listing even a dozen-ish hex bytes
+;; (e.g. a short boot routine, poked byte by byte) runs past it with no visible
+;; warning: READLINE silently stops echoing/accepting at MAXLEN, but the rest of
+;; what was typed is still queued and gets consumed as the START of the NEXT line,
+;; which usually doesn't begin with a valid command letter - hence an unexpected
+;; "?" after pressing enter. 120 comfortably covers that case and stays well
+;; within the reserved INBUF page ($0200-$02FF), without reaching into BOOTADDR's
+;; page at $0300.
+MAXLEN = 120
 
 * = $F800
 
