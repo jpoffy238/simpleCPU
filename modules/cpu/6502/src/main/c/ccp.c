@@ -83,6 +83,33 @@ static unsigned char try_drive_switch(unsigned char len) {
 	return 1;
 }
 
+/* Recognizes an optional "X:" drive prefix at the start of a filename -
+ * same drive-letter convention as try_drive_switch's bare "X:" at the CCP
+ * prompt, and real CP/M's own d:filename syntax - so COPY can name a drive
+ * other than the current one on either side. On a match, writes the drive
+ * index to *drive and returns a pointer past the prefix; with no prefix,
+ * *drive is set to current_drive and name is returned unchanged. A prefix
+ * whose letter is out of range sets *drive to 0xFF (never a valid drive
+ * index - see NUM_DRIVES), so the caller can tell "bad prefix" apart from
+ * "no prefix" without a second return channel. */
+static char *parse_drive_prefix(char *name, unsigned char *drive) {
+	char letter;
+	*drive = current_drive;
+	if (name[0] == '\0' || name[1] != ':') {
+		return name;
+	}
+	letter = name[0];
+	if (letter >= 'a' && letter <= 'z') {
+		letter -= ('a' - 'A');
+	}
+	if (letter < 'A' || letter >= 'A' + NUM_DRIVES) {
+		*drive = 0xFF;
+		return name;
+	}
+	*drive = letter - 'A';
+	return name + 2;
+}
+
 /* Case-insensitive exact match of line against word - not a prefix match,
  * so "DIRT" doesn't match "DIR". */
 static unsigned char matches(const char *word) {
@@ -262,10 +289,21 @@ static unsigned char parse_decimal(unsigned char from, unsigned int *out) {
  * bdos_create_file()/bdos_write_record()). The two files' BDOS state
  * (open_* for reading, write_* for writing) are independent - see bdos.c -
  * so interleaving one bdos_read_record()/bdos_write_record() pair per
- * record, rather than reading the whole source into memory first, is safe. */
+ * record, rather than reading the whole source into memory first, is safe.
+ *
+ * Either name may carry an "X:" prefix (parse_drive_prefix()) naming a
+ * drive other than the current one. Drive selection is a single global
+ * BIOS register, not per-file, so every BDOS call below is preceded by an
+ * explicit bios_select() for whichever side (source or dest) it touches -
+ * redundant when both names share a drive (the common case), but no
+ * costlier than that, since BIOS_SELECT just stores a register rather than
+ * seeking. current_drive itself (the CCP prompt's own notion of "the"
+ * drive) is restored before every return, so COPY never leaves the BIOS
+ * pointed at whichever drive it last touched. */
 static void cmd_copy(unsigned char arg_start) {
 	unsigned char space_index;
-	char *dest;
+	char *src, *dest;
+	unsigned char src_drive, dst_drive;
 	unsigned char record[128];
 
 	space_index = find_space(arg_start);
@@ -276,30 +314,46 @@ static void cmd_copy(unsigned char arg_start) {
 	}
 	dest = &line[space_index + 1];
 	line[space_index] = '\0'; /* split: line[arg_start..] is now just the source name */
+	src = &line[arg_start];
 
-	bios_set_buffer(&line[arg_start]);
-	if (!bdos_find_file()) {
-		print_string("NOT FOUND\n");
+	src = parse_drive_prefix(src, &src_drive);
+	dest = parse_drive_prefix(dest, &dst_drive);
+	if (src_drive == 0xFF || dst_drive == 0xFF) {
+		bios_putch('?');
+		bios_putch('\n');
 		return;
 	}
 
+	bios_select(src_drive);
+	bios_set_buffer(src);
+	if (!bdos_find_file()) {
+		print_string("NOT FOUND\n");
+		bios_select(current_drive);
+		return;
+	}
+
+	bios_select(dst_drive);
 	bios_set_buffer(dest);
 	if (!bdos_create_file()) {
 		print_string("CANNOT CREATE\n");
+		bios_select(current_drive);
 		return;
 	}
 
 	for (;;) {
+		bios_select(src_drive);
 		bios_set_buffer(record);
 		if (!bdos_read_record()) {
 			break;
 		}
+		bios_select(dst_drive);
 		bios_set_buffer(record);
 		if (!bdos_write_record()) {
 			print_string("DISK FULL\n");
 			break;
 		}
 	}
+	bios_select(current_drive);
 }
 
 /* REN newname=oldname - real CP/M's own argument order (new name first)
