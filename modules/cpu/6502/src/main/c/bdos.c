@@ -165,10 +165,24 @@ static void write_directory_entry(unsigned char sector_index, unsigned char offs
 
 /* Port of CpmFileSystem.encodeFileName() - "NAME" or "NAME.EXT" into the
  * 11-byte, space-padded, uppercase FCB name format. Silently truncates a
- * too-long name/extension rather than rejecting it. */
-static void encode_name(const char *filename, unsigned char *out_name) {
+ * too-long name/extension rather than rejecting it, but rejects (returns 0,
+ * leaving out_name untouched) a ':' anywhere in filename - that's the
+ * drive-letter separator (try_drive_switch()/parse_drive_prefix() in
+ * ccp.c), never a legal FCB character. Without this, a caller that hasn't
+ * stripped a drive prefix - or was simply handed one, the way the pre-fix
+ * cmd_copy() took "B:CCP.COM" as a literal destination name - would
+ * silently get a working file named "B:CCP" instead of a clear error. */
+static unsigned char encode_name(const char *filename, unsigned char *out_name) {
 	unsigned char i;
 	char c;
+	const char *scan;
+
+	for (scan = filename; *scan != '\0'; scan++) {
+		if (*scan == ':') {
+			return 0;
+		}
+	}
+
 	for (i = 0; i < 11; i++) {
 		out_name[i] = ' ';
 	}
@@ -194,6 +208,7 @@ static void encode_name(const char *filename, unsigned char *out_name) {
 			out_name[8 + i++] = c;
 		}
 	}
+	return 1;
 }
 
 void bdos_rewind_dir(void) {
@@ -283,7 +298,9 @@ static unsigned char find_extent(unsigned char extent) {
 unsigned char bdos_find_file(void) {
 	const char *filename = (const char *) TRANSFER;
 
-	encode_name(filename, fcb_name);
+	if (!encode_name(filename, fcb_name)) {
+		return 0;
+	}
 	return find_extent(0);
 }
 
@@ -405,7 +422,9 @@ unsigned char bdos_delete_file(void) {
 	unsigned char records;
 	unsigned char found_any = 0;
 
-	encode_name(filename, fcb_name);
+	if (!encode_name(filename, fcb_name)) {
+		return 0;
+	}
 
 	for (extent = 0; ; extent++) {
 		records = delete_extent(extent);
@@ -471,13 +490,17 @@ unsigned char bdos_rename_file(void) {
 	unsigned char records;
 	unsigned char found_any = 0;
 
-	encode_name(names, new_fcb_name);
+	if (!encode_name(names, new_fcb_name)) {
+		return 0;
+	}
 	old_filename = names;
 	while (*old_filename != '\0') {
 		old_filename++;
 	}
 	old_filename++;
-	encode_name(old_filename, fcb_name);
+	if (!encode_name(old_filename, fcb_name)) {
+		return 0;
+	}
 
 	for (sector_index = 0; sector_index < DIR_SECTORS; sector_index++) {
 		read_data_sector(sector_index);
@@ -525,7 +548,9 @@ unsigned char bdos_create_file(void) {
 	unsigned char free_sector = 0;
 	unsigned char free_offset = 0;
 
-	encode_name(filename, fcb_name);
+	if (!encode_name(filename, fcb_name)) {
+		return 0;
+	}
 
 	for (i = 0; i < 32; i++) {
 		block_bitmap[i] = 0;
