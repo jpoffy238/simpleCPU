@@ -9,6 +9,9 @@ import java.awt.Graphics;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -100,6 +103,8 @@ public class VideoController implements Device {
 	 * every unused bit position. */
 	private static final int CURSOR_MODE_OFF = 0x20;
 
+	private static final String PROPERTIES_RESOURCE = "video.properties";
+
 	private final Logger logger = LogManager.getLogger(VideoController.class);
 
 	private final AddressRange range;
@@ -111,6 +116,8 @@ public class VideoController implements Device {
 	private int addressRegister = 0;
 	private final Queue<Integer> input = new ConcurrentLinkedQueue<Integer>();
 
+	private final Properties properties;
+
 	private JFrame frame;
 	private Screen screen;
 	private Timer refreshTimer;
@@ -120,6 +127,7 @@ public class VideoController implements Device {
 		this.charRam = charRam;
 		this.charRamBase = charRam.getAddressRange().baseAddress();
 		this.charRamSize = charRam.getAddressRange().size();
+		this.properties = loadProperties();
 		reset();
 
 		if (GraphicsEnvironment.isHeadless()) {
@@ -138,6 +146,51 @@ public class VideoController implements Device {
 		}
 	}
 
+	/** Loads video.properties (cosmetic/runtime display settings only - never
+	 * the memory-map addresses, which stay compile-time constants shared with
+	 * BIOS.asm/MONITOR.asm/the cc65 configs). Classpath-first, same convention
+	 * AbstractMemoryLayer.loadBinary() uses - missing is not an error, just
+	 * falls back to every property's own default at each read below. */
+	private static Properties loadProperties() {
+		Properties props = new Properties();
+		try (InputStream in = VideoController.class.getClassLoader().getResourceAsStream(PROPERTIES_RESOURCE)) {
+			if (in != null) {
+				props.load(in);
+			}
+		} catch (IOException e) {
+			// fine - every property below has its own fallback default
+		}
+		return props;
+	}
+
+	private int intProperty(String key, int fallback) {
+		try {
+			return Integer.parseInt(properties.getProperty(key, String.valueOf(fallback)).trim());
+		} catch (NumberFormatException e) {
+			return fallback;
+		}
+	}
+
+	/** Parses "R,G,B" (0-255 each). java.awt.Color has no GOLD constant (that's
+	 * a JavaFX/CSS name, not AWT), so the default text color is expressed this
+	 * way rather than as a named Color constant. */
+	private Color colorProperty(String key, Color fallback) {
+		String value = properties.getProperty(key);
+		if (value == null) {
+			return fallback;
+		}
+		String[] parts = value.split(",");
+		if (parts.length != 3) {
+			return fallback;
+		}
+		try {
+			return new Color(Integer.parseInt(parts[0].trim()), Integer.parseInt(parts[1].trim()),
+					Integer.parseInt(parts[2].trim()));
+		} catch (NumberFormatException e) {
+			return fallback;
+		}
+	}
+
 	/** Makes the video window visible, gives it keyboard focus, and starts the
 	 * periodic repaint that stands in for a real CRTC's continuous raster scan.
 	 * Not called automatically - same "only an interactive entry point opts in"
@@ -149,7 +202,7 @@ public class VideoController implements Device {
 		frame.setVisible(true);
 		screen.requestFocusInWindow();
 		if (refreshTimer == null) {
-			refreshTimer = new Timer(33, e -> screen.repaint());
+			refreshTimer = new Timer(intProperty("video.refresh.ms", 33), e -> screen.repaint());
 			refreshTimer.start();
 		}
 	}
@@ -286,26 +339,27 @@ public class VideoController implements Device {
 
 	private class Screen extends JPanel {
 		private static final long serialVersionUID = 1L;
-		// java.awt.Color has no GOLD constant (that's a JavaFX/CSS name, not AWT) -
-		// this is the standard web "Gold" RGB value (255, 215, 0). Not static -
-		// Screen is a non-static inner class, and static fields there are only
-		// legal for true compile-time constants (primitives/String literals);
-		// `new Color(...)` doesn't qualify.
-		private final Color GOLD = new Color(255, 215, 0);
-		private final Font font = new Font(Font.MONOSPACED, Font.PLAIN, 16);
+		private final Font font;
 		private final int charWidth;
 		private final int charHeight;
+		private final int border;
 
 		Screen() {
+			font = new Font(properties.getProperty("video.font.name", Font.MONOSPACED), Font.PLAIN,
+					intProperty("video.font.size", 16));
+			border = intProperty("video.border", 5);
+
 			BufferedImage probe = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 			FontMetrics fm = probe.getGraphics().getFontMetrics(font);
 			charWidth = fm.charWidth('M');
 			charHeight = fm.getHeight();
 
 			setFont(font);
-			setBackground(Color.BLACK);
-			setForeground(GOLD);
-			setPreferredSize(new Dimension(charWidth * 80, charHeight * 24));
+			setBackground(colorProperty("video.color.background", Color.BLACK));
+			setForeground(colorProperty("video.color.text", new Color(255, 215, 0)));
+			int initialCols = intProperty("video.columns", 80);
+			int initialRows = intProperty("video.rows", 24);
+			setPreferredSize(new Dimension(2 * border + charWidth * initialCols, 2 * border + charHeight * initialRows));
 			setFocusable(true);
 			addKeyListener(new KeyAdapter() {
 				@Override
@@ -323,7 +377,7 @@ public class VideoController implements Device {
 			if (cols == 0 || rows == 0) {
 				return;
 			}
-			setPreferredSize(new Dimension(charWidth * cols, charHeight * rows));
+			setPreferredSize(new Dimension(2 * border + charWidth * cols, 2 * border + charHeight * rows));
 			for (int row = 0; row < rows; row++) {
 				for (int col = 0; col < cols; col++) {
 					char c;
@@ -332,7 +386,7 @@ public class VideoController implements Device {
 					} catch (illegalAddressException | DeviceUnavailable e) {
 						c = ' ';
 					}
-					g.drawChars(new char[] { c }, 0, 1, col * charWidth, (row + 1) * charHeight);
+					g.drawChars(new char[] { c }, 0, 1, border + col * charWidth, border + (row + 1) * charHeight);
 				}
 			}
 			if (cursorEnabled()) {
@@ -346,7 +400,7 @@ public class VideoController implements Device {
 					// rows down. Using plain cursorRow (no +1) here was the actual
 					// bug: it drew the cursor a full row above the text it should
 					// sit under, not a register-update problem.
-					g.fillRect(cursorCol * charWidth, (cursorRow + 1) * charHeight + 2, charWidth, 2);
+					g.fillRect(border + cursorCol * charWidth, border + (cursorRow + 1) * charHeight + 2, charWidth, 2);
 				}
 			}
 		}
