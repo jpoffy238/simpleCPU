@@ -6,7 +6,11 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
 import java.awt.Graphics;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -35,10 +39,22 @@ import com.mj.exceptions.illegalAddressException;
  * the visible window starts (R12/R13, so scrolling is "change two registers," not
  * "copy 1920 bytes") and where the cursor is (R14/R15, a RAM offset, not a row/col).
  *
- * Two bytes of address space, exactly the real 6845's addressing scheme:
+ * Four bytes of address space - the first two are exactly the real 6845's
+ * addressing scheme; the last two are a keyboard interface bolted on alongside,
+ * since Device only supports one AddressRange per device and a genuinely
+ * separate keyboard-chip class would have no way to reach this controller's own
+ * Screen panel to attach a KeyListener. Real CRTC-based machines (Kaypro,
+ * Osborne) also had keyboard input as a physically separate chip from the CRTC -
+ * bolting it on here is a pragmatic compromise around the interface constraint,
+ * not a claim that one real chip did both:
  *   +0  Address Register (write-only) - selects which of R0-R17 the next access
  *       to +1 refers to.
  *   +1  Data Register (read/write) - gets/sets the selected register's value.
+ *   +2  Keyboard Data (read) - dequeues the next keystroke, or 0 if none queued.
+ *   +3  Keyboard Status (read) - bit 0 set if a keystroke is queued. No control
+ *       bits (blocking/interrupt mode) like ConsoleDevice's status register -
+ *       BIOS_GETCH only ever busy-polls this one bit, same as it does for
+ *       ConsoleDevice today, so there's nothing else to model yet.
  *
  * All 18 real registers are readable/writable (real init code written against a
  * real 6845 would write every one of them in order, so even the irrelevant ones
@@ -66,6 +82,9 @@ import com.mj.exceptions.illegalAddressException;
 public class VideoController implements Device {
 	private static final int REG_ADDRESS = 0;
 	private static final int REG_DATA = 1;
+	private static final int REG_KEYBOARD_DATA = 2;
+	private static final int REG_KEYBOARD_STATUS = 3;
+	private static final int KEYBOARD_STATUS_DATA_AVAILABLE = 0x01;
 
 	private static final int R_H_DISPLAYED = 1;
 	private static final int R_V_DISPLAYED = 6;
@@ -90,6 +109,7 @@ public class VideoController implements Device {
 
 	private final byte[] registers = new byte[REGISTER_COUNT];
 	private int addressRegister = 0;
+	private final Queue<Integer> input = new ConcurrentLinkedQueue<Integer>();
 
 	private JFrame frame;
 	private Screen screen;
@@ -118,18 +138,33 @@ public class VideoController implements Device {
 		}
 	}
 
-	/** Makes the video window visible and starts the periodic repaint that stands
-	 * in for a real CRTC's continuous raster scan. Not called automatically - same
-	 * "only an interactive entry point opts in" convention as ConsoleDevice.show(). */
+	/** Makes the video window visible, gives it keyboard focus, and starts the
+	 * periodic repaint that stands in for a real CRTC's continuous raster scan.
+	 * Not called automatically - same "only an interactive entry point opts in"
+	 * convention as ConsoleDevice.show(). */
 	public void show() {
 		if (frame == null) {
 			return;
 		}
 		frame.setVisible(true);
+		screen.requestFocusInWindow();
 		if (refreshTimer == null) {
 			refreshTimer = new Timer(33, e -> screen.repaint());
 			refreshTimer.start();
 		}
+	}
+
+	/** Feeds characters into the keyboard queue exactly as real keystrokes would -
+	 * for tests to drive firmware that reads from it, since there's no window to
+	 * type into under a headless run. Same role as ConsoleDevice.type(). */
+	public void type(String text) {
+		for (int i = 0; i < text.length(); i++) {
+			handleKeyPress(text.charAt(i));
+		}
+	}
+
+	private void handleKeyPress(char c) {
+		input.add((int) c);
 	}
 
 	@Override
@@ -157,6 +192,9 @@ public class VideoController implements Device {
 				registers[addressRegister] = data;
 			}
 		}
+		// Keyboard Data/Status are read-only from the CPU's side - a write to
+		// either is simply ignored, same as writing CONSOLE_DATA's read path would
+		// be meaningless for ConsoleDevice.
 	}
 
 	@Override
@@ -164,6 +202,13 @@ public class VideoController implements Device {
 		int local = range.addressMapper(address);
 		if (local == REG_ADDRESS) {
 			return (byte) addressRegister;
+		}
+		if (local == REG_KEYBOARD_DATA) {
+			Integer key = input.poll();
+			return key == null ? 0 : (byte) (key.intValue() & 0xff);
+		}
+		if (local == REG_KEYBOARD_STATUS) {
+			return input.isEmpty() ? 0 : (byte) KEYBOARD_STATUS_DATA_AVAILABLE;
 		}
 		if (addressRegister < REGISTER_COUNT) {
 			return registers[addressRegister];
@@ -240,6 +285,13 @@ public class VideoController implements Device {
 			setBackground(Color.BLACK);
 			setForeground(Color.LIGHT_GRAY);
 			setPreferredSize(new Dimension(charWidth * 80, charHeight * 24));
+			setFocusable(true);
+			addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyTyped(KeyEvent e) {
+					handleKeyPress(e.getKeyChar());
+				}
+			});
 		}
 
 		@Override

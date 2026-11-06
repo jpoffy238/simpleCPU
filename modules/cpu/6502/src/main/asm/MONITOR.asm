@@ -27,6 +27,7 @@ BIOS_READ_SECTOR  = $F009	;; A = track, X = sector, ADDRLO/ADDRHI = dest
 BIOS_WRITE_SECTOR = $F00C	;; A = track, X = sector, ADDRLO/ADDRHI = src
 BIOS_FORMAT_TRACK = $F00F	;; A = track, X = fill byte
 BIOS_RESTORE      = $F012	;; no params - homes the selected drive to track 0
+BIOS_VIDEO_INIT   = $F015	;; no params - one-time Video setup, see BIOS.asm
 
 ;; BDOS ROM jump table (see bdos_jumptable.s/bdos.c) - a second, separately
 ;; assembled/compiled frozen ABI, same keep-in-sync contract as BIOS above.
@@ -81,6 +82,7 @@ MAXLEN = 120
 RESET_INIT LDA #0
 	JSR BIOS_SELECT
 	JSR BIOS_RESTORE
+	JSR BIOS_VIDEO_INIT
 	JMP LOOP
 
 ;; LOOP is also a reset/NMI target (indirectly, via RESET_INIT above) - embedded

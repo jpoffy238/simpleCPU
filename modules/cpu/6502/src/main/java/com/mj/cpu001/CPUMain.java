@@ -67,7 +67,7 @@ public class CPUMain {
 		// Sits right after BDOS's ROM in the free address space.
 		basicMemory videoRam = new basicMemory(bus, new AddressRange(0xb800, 0xbfff), null, 0);
 		bus.registerDevice(videoRam);
-		VideoController video = new VideoController(new AddressRange(0x9020, 0x9021), videoRam);
+		VideoController video = new VideoController(new AddressRange(0x9020, 0x9023), videoRam);
 		bus.registerDevice(video);
 
 		FloppyController fdc = new FloppyController(via, new AddressRange(0x9010, 0x9014));

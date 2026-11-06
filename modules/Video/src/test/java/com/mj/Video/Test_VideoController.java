@@ -30,7 +30,7 @@ public class Test_VideoController {
 	@BeforeEach
 	public void setup() {
 		charRam = new FakeMemory(new AddressRange(0xb800, 0xbfff));
-		video = new VideoController(new AddressRange(0x9020, 0x9021), charRam);
+		video = new VideoController(new AddressRange(0x9020, 0x9023), charRam);
 	}
 
 	private void setRegister(int index, int value) throws Exception {
@@ -133,6 +133,32 @@ public class Test_VideoController {
 		// cursor bar at R14/R15's own default of (0,0) before any software ever
 		// asked for one. 0x20 is CURSOR_MODE_OFF.
 		assertEquals(0x20, getRegister(R_CURSOR_START));
+	}
+
+	@Test
+	public void keyboardStatusReflectsWhetherAKeyIsQueued() throws Exception {
+		assertEquals(0, video.read(0x9023) & 0xff, "nothing typed yet");
+
+		video.type("A");
+
+		assertEquals(1, video.read(0x9023) & 0xff, "a key is now queued");
+	}
+
+	@Test
+	public void keyboardDataDequeuesInOrderThenReadsZero() throws Exception {
+		video.type("AB");
+
+		assertEquals('A', video.read(0x9022) & 0xff);
+		assertEquals('B', video.read(0x9022) & 0xff);
+		assertEquals(0, video.read(0x9022) & 0xff, "queue is empty now");
+	}
+
+	@Test
+	public void keyboardStatusGoesBackToZeroOnceDrained() throws Exception {
+		video.type("A");
+		video.read(0x9022);
+
+		assertEquals(0, video.read(0x9023) & 0xff);
 	}
 
 	/** Minimal standalone Device backing a flat byte array over one AddressRange -

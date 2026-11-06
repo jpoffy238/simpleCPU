@@ -23,6 +23,7 @@ import com.mj.Firmware.Framework.cpu001decoder;
 import com.mj.cpu001.CPU;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
+import com.mj.Video.VideoController;
 
 /** Drives the real BIOS.hex/MONITOR.hex ROMs through a CPU + console, the same way a
  * person typing at the keyboard would, and checks the result through getRow()/the bus
@@ -62,6 +63,14 @@ public class Test_BIOS {
 
 		console = new ConsoleDevice(via, new AddressRange(0xec00, 0xec01));
 		bus.registerDevice(console);
+
+		// Video, same as CPUMain - RESET_INIT now calls BIOS_VIDEO_INIT unconditionally
+		// on every boot, so this fixture needs both devices registered even for tests
+		// that never look at Video's own output, or that call faults on unmapped memory
+		// before the monitor prompt ever comes up.
+		basicMemory videoRam = new basicMemory(bus, new AddressRange(0xb800, 0xbfff), null, 0);
+		bus.registerDevice(videoRam);
+		bus.registerDevice(new VideoController(new AddressRange(0x9020, 0x9023), videoRam));
 
 		fdc = new FloppyController(via, new AddressRange(0x9010, 0x9014));
 		bus.registerDevice(fdc);
