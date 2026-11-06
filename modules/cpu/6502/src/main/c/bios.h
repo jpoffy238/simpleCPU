@@ -15,6 +15,14 @@
 
 void __fastcall__ bios_putch(char c);
 char bios_getch(void);
+
+/* Prints a null-terminated string one character at a time via bios_putch() -
+ * no new BIOS primitive behind this, just the loop every caller was already
+ * writing by hand (ccp.c's own print_string(), for one). Lives in
+ * bios_util.c, not bios_glue.s, since it's ordinary C calling an existing
+ * primitive repeatedly, not a new hardware operation needing its own
+ * jump-table slot. */
+void bios_putstr(const char *s);
 void __fastcall__ bios_select(unsigned char drive);
 
 /* Stages the sector-buffer pointer into ADDRLO/ADDRHI ahead of a read/write. */

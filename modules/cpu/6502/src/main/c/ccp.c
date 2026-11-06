@@ -20,12 +20,6 @@
 static unsigned char current_drive = 0;
 static char line[LINELEN];
 
-static void print_string(const char *s) {
-	while (*s != '\0') {
-		bios_putch(*s++);
-	}
-}
-
 static void print_prompt(void) {
 	bios_putch('A' + current_drive);
 	bios_putch('>');
@@ -210,11 +204,11 @@ static void cmd_dir(void) {
 		                                    * as a division by 8 instead of a multiply-then-
 		                                    * divide, since 128/1024 reduces to 1/8 exactly -
 		                                    * avoids overflowing unsigned int on a big file */
-		print_string("k ");
+		bios_putstr("k ");
 		found = 1;
 	}
 	if (!found) {
-		print_string("NO FILE");
+		bios_putstr("NO FILE");
 	}
 	bios_putch('\n');
 }
@@ -230,7 +224,7 @@ static void cmd_type(const char *filename) {
 
 	bios_set_buffer((void *) filename);
 	if (!bdos_find_file()) {
-		print_string("NOT FOUND\n");
+		bios_putstr("NOT FOUND\n");
 		return;
 	}
 
@@ -248,7 +242,7 @@ static void cmd_type(const char *filename) {
 static void cmd_era(const char *filename) {
 	bios_set_buffer((void *) filename);
 	if (!bdos_delete_file()) {
-		print_string("NOT FOUND\n");
+		bios_putstr("NOT FOUND\n");
 	}
 }
 
@@ -327,7 +321,7 @@ static void cmd_copy(unsigned char arg_start) {
 	bios_select(src_drive);
 	bios_set_buffer(src);
 	if (!bdos_find_file()) {
-		print_string("NOT FOUND\n");
+		bios_putstr("NOT FOUND\n");
 		bios_select(current_drive);
 		return;
 	}
@@ -335,7 +329,7 @@ static void cmd_copy(unsigned char arg_start) {
 	bios_select(dst_drive);
 	bios_set_buffer(dest);
 	if (!bdos_create_file()) {
-		print_string("CANNOT CREATE\n");
+		bios_putstr("CANNOT CREATE\n");
 		bios_select(current_drive);
 		return;
 	}
@@ -349,7 +343,7 @@ static void cmd_copy(unsigned char arg_start) {
 		bios_select(dst_drive);
 		bios_set_buffer(record);
 		if (!bdos_write_record()) {
-			print_string("DISK FULL\n");
+			bios_putstr("DISK FULL\n");
 			break;
 		}
 	}
@@ -367,7 +361,7 @@ static void cmd_ren(unsigned char arg_start) {
 			line[i] = '\0';
 			bios_set_buffer(&line[arg_start]);
 			if (!bdos_rename_file()) {
-				print_string("CANNOT RENAME\n");
+				bios_putstr("CANNOT RENAME\n");
 			}
 			return;
 		}
@@ -402,7 +396,7 @@ static void cmd_save(unsigned char arg_start) {
 
 	bios_set_buffer(&line[space_index + 1]);
 	if (!bdos_create_file()) {
-		print_string("CANNOT CREATE\n");
+		bios_putstr("CANNOT CREATE\n");
 		return;
 	}
 
@@ -411,11 +405,55 @@ static void cmd_save(unsigned char arg_start) {
 	for (i = 0; i < records; i++) {
 		bios_set_buffer(addr);
 		if (!bdos_write_record()) {
-			print_string("DISK FULL\n");
+			bios_putstr("DISK FULL\n");
 			break;
 		}
 		addr += 128;
 	}
+}
+
+static char run_name[LINELEN + 4];
+
+/* Tries to run a typed name as a program - real CP/M's own "type a
+ * program's name at the prompt to run it" behavior, the fallback for
+ * anything main()'s dispatch chain doesn't recognize as a built-in command.
+ * Defaults a missing extension to .COM, matching real CP/M (and letting
+ * "HELLO" find HELLO.COM without spelling out the extension every time) -
+ * encode_name() (bdos.c) never defaults one itself, since it has no way to
+ * know when a caller means a program name specifically versus any other
+ * kind of file. Stops at the first space, same as real CP/M splitting a
+ * command line into a program name and its arguments, even though nothing
+ * here does anything with an argument yet.
+ *
+ * Builds the candidate name into run_name rather than line itself - not for
+ * safety (bdos_run_file() fully consumes whatever buffer it's given, via
+ * bdos_find_file(), before BOOTADDR - which is what overwrites US - ever
+ * gets touched, so building in place would have been just as safe), just
+ * because line's own contents are still wanted for its length (len) after
+ * this returns 0. */
+static unsigned char try_run_program(unsigned char len) {
+	unsigned char i;
+	unsigned char has_dot = 0;
+
+	for (i = 0; i < len && i < LINELEN - 1; i++) {
+		if (line[i] == ' ') {
+			break;
+		}
+		if (line[i] == '.') {
+			has_dot = 1;
+		}
+		run_name[i] = line[i];
+	}
+	run_name[i] = '\0';
+	if (!has_dot) {
+		run_name[i++] = '.';
+		run_name[i++] = 'C';
+		run_name[i++] = 'O';
+		run_name[i++] = 'M';
+		run_name[i] = '\0';
+	}
+	bios_set_buffer(run_name);
+	return bdos_run_file();
 }
 
 int main(void) {
@@ -443,7 +481,7 @@ int main(void) {
 			cmd_ren(arg_start);
 		} else if ((arg_start = starts_with("SAVE")) != 0) {
 			cmd_save(arg_start);
-		} else if (!try_drive_switch(len)) {
+		} else if (!try_drive_switch(len) && !try_run_program(len)) {
 			bios_putch('?');
 			bios_putch('\n');
 		}

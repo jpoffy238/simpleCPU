@@ -42,6 +42,18 @@
  *                      two names and ADDRLO/ADDRHI only carries one
  *                      pointer, so the caller stages both in one buffer
  *                      rather than BDOS needing a second pointer ABI.
+ *   bdos_run_file()    ADDRLO/ADDRHI = a null-terminated filename to load
+ *                      to BOOTADDR and run - see bdos.c's file comment for
+ *                      why this can only safely be called by a program
+ *                      already running at BOOTADDR (CCP.COM, today), and
+ *                      why - unlike every other primitive here - it does
+ *                      not return normally if the file was found: control
+ *                      goes to the loaded program instead, and on that
+ *                      program's own return, BDOS reloads CCP.COM fresh
+ *                      (real CP/M's "warm boot") rather than returning to
+ *                      a caller whose own code may no longer exist. Only
+ *                      returns 0 (not found) if nothing was ever
+ *                      overwritten in the first place.
  * Every primitive above returns unsigned char (1 = succeeded/found, 0 =
  * not found/no more/failed) via cc65's standard single-byte return in A -
  * no different from bios_getch()'s existing return-a-value-in-A precedent -
@@ -59,5 +71,6 @@ unsigned char bdos_create_file(void);
 unsigned char bdos_write_record(void);
 unsigned int bdos_entry_size(void);
 unsigned char bdos_rename_file(void);
+unsigned char bdos_run_file(void);
 
 #endif

@@ -531,6 +531,70 @@ unsigned char bdos_rename_file(void) {
 	return found_any;
 }
 
+#define BOOTADDR ((unsigned char *) 0x0300)
+#define CCP_NAME "CCP.COM"
+
+/* Loads name's content to BOOTADDR record by record and jumps into it.
+ * Returns 0 if name isn't found (nothing was touched - the caller's own
+ * code, if it's the thing currently running at BOOTADDR, is still
+ * completely intact); never returns normally if the file WAS found and
+ * run, since BOOTADDR (and so the caller's own code, if that's what lives
+ * there) may no longer exist by the time the loaded program's own RTS
+ * comes back here. */
+static unsigned char load_and_run(const char *name) {
+	unsigned char *dest = BOOTADDR;
+
+	bios_set_buffer((void *) name);
+	if (!bdos_find_file()) {
+		return 0;
+	}
+	for (;;) {
+		bios_set_buffer(dest);
+		if (!bdos_read_record()) {
+			break;
+		}
+		dest += 128;
+	}
+	((void (*)(void)) BOOTADDR)();
+	return 1;
+}
+
+/* Finds and runs the file named at ADDRLO/ADDRHI (same convention as
+ * bdos_find_file()) - real CP/M's own "type a program's name at the CCP
+ * prompt to run it" behavior, generalized from what DI_BOOT (MONITOR.asm)
+ * already does for CCP.COM specifically at cold boot.
+ *
+ * This can only safely be called by a program currently running AT
+ * BOOTADDR (CCP.COM, today) wanting to hand off to another program also
+ * loaded there - load_and_run() overwrites BOOTADDR with the new program's
+ * bytes while the CALLER's own code (also at BOOTADDR) is still the thing
+ * executing the copy loop up above in BDOS's ROM, not at BOOTADDR itself,
+ * so that part is safe regardless - but the instant the new program's RTS
+ * comes back here, the caller's original code is gone. So rather than
+ * attempt a normal return in that case, this does the real CP/M "warm boot"
+ * thing: reload CCP.COM itself fresh and jump into THAT instead, getting
+ * back to a working shell instead of jumping into whatever garbage is left
+ * where the caller used to be. Only returns at all (0) if the ORIGINAL
+ * requested file was never found - the caller's own code is guaranteed
+ * intact in that case, since nothing was ever overwritten. */
+unsigned char bdos_run_file(void) {
+	const char *filename = (const char *) TRANSFER;
+
+	if (!load_and_run(filename)) {
+		return 0;
+	}
+	/* the loaded program returned - warm boot: BOOTADDR is in an unknown
+	 * state (whatever the just-run program left behind), so there is
+	 * nothing safe to do here except reload the shell fresh. If even
+	 * that fails, there's no code left anywhere safe to return control
+	 * to - loop on bios_getch() forever rather than run off into
+	 * whatever garbage is sitting at BOOTADDR. */
+	load_and_run(CCP_NAME);
+	for (;;) {
+		bios_getch();
+	}
+}
+
 /* Creates a new, zero-length file named by ADDRLO/ADDRHI, immediately
  * visible to bdos_next_entry()/bdos_find_file() even before any
  * bdos_write_record() call - same as real CP/M's F_MAKE. Fails (0) if the

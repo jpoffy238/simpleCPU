@@ -10,11 +10,12 @@
 # MONITOR.hex use), so "install" copies it into the resource directories
 # the same way the asm Makefile already does for those two.
 #
-# Every app links against both bios_glue.s and bdos_glue.s unconditionally,
-# even one like hello.c that calls neither - cl65 includes an explicitly
-# listed input file's code wholesale, unlike library linking, so this costs
-# a handful of unused bytes per app in exchange for one simple rule instead
-# of a per-app list of which glue files it happens to need.
+# Every app links against bios_glue.s, bdos_glue.s, and bios_util.c
+# unconditionally, even one like hello.c that doesn't call everything there -
+# cl65 includes an explicitly listed input file's code wholesale, unlike
+# library linking, so this costs a handful of unused bytes per app in
+# exchange for one simple rule instead of a per-app list of which files it
+# happens to need.
 #
 # Apps aren't installed anywhere by this Makefile - unlike BDOS, they're
 # not loaded by Java at all. They become CCP.COM (or whatever) by hand, via
@@ -34,8 +35,8 @@ all: bdos.bin $(patsubst %,%.bin,$(APPS))
 bdos.bin: bdos.c bdos_jumptable.s bios_glue.s bdos.cfg bios.h
 	$(CC65) $(CFLAGS) -C bdos.cfg -m bdos.map -o bdos.bin bdos.c bdos_jumptable.s bios_glue.s
 
-%.bin: %.c bios_glue.s bdos_glue.s simplecpu.cfg bios.h bdos.h
-	$(CC65) $(CFLAGS) -C simplecpu.cfg -m $*.map -o $@ $< bios_glue.s bdos_glue.s
+%.bin: %.c bios_glue.s bdos_glue.s bios_util.c simplecpu.cfg bios.h bdos.h
+	$(CC65) $(CFLAGS) -C simplecpu.cfg -m $*.map -o $@ $< bios_glue.s bdos_glue.s bios_util.c
 
 install: bdos.bin
 	cp bdos.bin ../../main/resources

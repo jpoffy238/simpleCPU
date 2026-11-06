@@ -19,10 +19,11 @@ BDOS_CREATE_FILE = $A00F
 BDOS_WRITE_RECORD = $A012
 BDOS_ENTRY_SIZE   = $A015
 BDOS_RENAME_FILE  = $A018
+BDOS_RUN_FILE     = $A01B
 
 .export _bdos_rewind_dir, _bdos_next_entry, _bdos_find_file, _bdos_read_record
 .export _bdos_delete_file, _bdos_create_file, _bdos_write_record
-.export _bdos_entry_size, _bdos_rename_file
+.export _bdos_entry_size, _bdos_rename_file, _bdos_run_file
 
 .segment "CODE"
 
@@ -61,3 +62,8 @@ _bdos_entry_size:
 ; unsigned char bdos_rename_file(void) - return value comes back in A
 _bdos_rename_file:
 	jmp BDOS_RENAME_FILE
+
+; unsigned char bdos_run_file(void) - return value comes back in A. Only
+; ever returns at all if the named file wasn't found - see bdos.c's comment.
+_bdos_run_file:
+	jmp BDOS_RUN_FILE
