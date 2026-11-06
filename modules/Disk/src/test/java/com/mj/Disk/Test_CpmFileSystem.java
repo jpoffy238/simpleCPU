@@ -202,6 +202,40 @@ public class Test_CpmFileSystem {
 	}
 
 	@Test
+	public void directoryFullsBeforeDiskDoesWithManySmallFiles() throws Exception {
+		// Each file here needs exactly one block (well under the 241 free data
+		// blocks - see totalBlocks()) and exactly one extent, so the 64-entry
+		// directory (DIRECTORY_ENTRIES), not block allocation, is what actually
+		// runs out first.
+		for (int i = 0; i < CpmFileSystem.DIRECTORY_ENTRIES; i++) {
+			fs.createFile("F" + i + ".TXT", "x".getBytes());
+		}
+
+		assertEquals(CpmFileSystem.DIRECTORY_ENTRIES, fs.listFiles().size());
+		FileSystemException e = assertThrows(FileSystemException.class,
+				() -> fs.createFile("ONEMORE.TXT", "x".getBytes()));
+		assertTrue(e.getMessage().contains("Directory"), "expected a directory-full error, got: " + e.getMessage());
+	}
+
+	@Test
+	public void singleFileFillingEveryFreeBlockLeavesNoRoomForAnother() throws Exception {
+		// 241 free data blocks (totalBlocks() - DIRECTORY_BLOCKS) * 1024 bytes/block,
+		// sized to land on an exact block boundary - needs ceil(241/16) = 16 extents,
+		// well under the 64-entry directory, so this exercises block exhaustion
+		// specifically, not the directory cap the test above covers.
+		byte[] data = new byte[241 * 1024];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = (byte) i;
+		}
+		fs.createFile("HUGE.BIN", data);
+
+		assertArrayEquals(data, fs.readFile("HUGE.BIN"));
+		FileSystemException e = assertThrows(FileSystemException.class,
+				() -> fs.createFile("ONEMORE.TXT", "x".getBytes()));
+		assertTrue(e.getMessage().contains("space"), "expected a disk-full error, got: " + e.getMessage());
+	}
+
+	@Test
 	public void fileNameLongerThanEightDotThreeThrows() {
 		assertThrows(FileSystemException.class, () -> fs.createFile("WAYTOOLONG.TXT", "x".getBytes()));
 		assertThrows(FileSystemException.class, () -> fs.createFile("OK.TOOLONG", "x".getBytes()));
