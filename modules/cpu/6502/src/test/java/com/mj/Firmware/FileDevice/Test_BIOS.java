@@ -16,6 +16,7 @@ import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
 import com.mj.Devices.VIA6522;
+import com.mj.Disk.CpmFileSystem;
 import com.mj.Disk.FloppyController;
 import com.mj.Disk.EightInch.IBM3740;
 import com.mj.Firmware.Framework.cpu001decoder;
@@ -46,6 +47,15 @@ public class Test_BIOS {
 		// project-specific fault vector, so no setVectors()/setFaultVector() call here).
 		bus.registerDevice(new basicROM(bus, new AddressRange(0xf000, 0xf7ff), "BIOS.hex", 0));
 		bus.registerDevice(new basicROM(bus, new AddressRange(0xf800, 0xffff), "MONITOR.hex", 0));
+
+		// BDOS, same as CPUMain - see AbstractMemoryLayer.loadBinary()/bdos.cfg for why
+		// this is a raw-binary load rather than the other two ROMs' Intel-hex path, and
+		// why $8000-$80FF needs its own plain basicMemory (BDOS's writable working
+		// state) alongside the $A000-$A7FF ROM (BDOS's actual code).
+		bus.registerDevice(new basicMemory(bus, new AddressRange(0x8000, 0x81ff), null, 0));
+		basicROM bdos = new basicROM(bus, new AddressRange(0xa000, 0xb7ff), null, 0);
+		bdos.loadBinary("bdos.bin");
+		bus.registerDevice(bdos);
 
 		VIA6522 via = new VIA6522(bus, new AddressRange(0x9000, 0x900f));
 		bus.registerDevice(via);
@@ -119,13 +129,14 @@ public class Test_BIOS {
 	public void unmappedMemoryAccessFaultsAndRecoversToThePrompt() throws Exception {
 		c.bus.write(0x2000, (byte) 'H');
 
-		// $A000 has no device registered on this bus - dumping it should fault partway
+		// $9100 has no device registered on this bus (BDOS now claims $A000-$A7FF,
+		// which this probed before BDOS existed) - dumping it should fault partway
 		// through the first line instead of taking down the whole emulated machine.
-		console.type("D A000\r");
+		console.type("D 9100\r");
 		console.type("D 2000\r");
 		runBriefly();
 
-		assertTrue(console.getRow(1).contains("A000"), "the dump should start before faulting");
+		assertTrue(console.getRow(1).contains("9100"), "the dump should start before faulting");
 		assertTrue(console.getRow(1).contains("?"), "the fault handler's error marker");
 
 		boolean recovered = false;
@@ -229,13 +240,13 @@ public class Test_BIOS {
 	}
 
 	@Test
-	public void formatWithNoArgumentDefaultsToZero() throws Exception {
+	public void formatWithNoArgumentDefaultsToE5() throws Exception {
 		console.type("S 0\r");
 		console.type("F\r");
 		runBriefly();
 
 		for (byte b : drive0.read()) {
-			assertEquals(0, b, "no fill byte given should default to $00");
+			assertEquals((byte) 0xE5, b, "no fill byte given should default to CP/M's STATUS_EMPTY ($E5)");
 		}
 	}
 
@@ -301,26 +312,20 @@ public class Test_BIOS {
 	}
 
 	@Test
-	public void bootLoadsTrackZeroSectorOneAndJumpsToIt() throws Exception {
-		// Track 0 sector 1 is the boot header (1 code sector follows); the code
-		// itself - LDA #$99 / STA $2000 / RTS, the same tiny subroutine the E test
-		// uses - lives in sector 2, where B expects it.
-		byte[] header = new byte[128];
-		header[0] = 1;
-		drive0.setTrack(0);
-		drive0.setSector(1);
-		drive0.write(header);
-
-		byte[] codeSector = new byte[128];
-		codeSector[0] = (byte) 0xA9;
-		codeSector[1] = (byte) 0x99;
-		codeSector[2] = (byte) 0x8D;
-		codeSector[3] = (byte) 0x00;
-		codeSector[4] = (byte) 0x20;
-		codeSector[5] = (byte) 0x60;
-		drive0.setTrack(0);
-		drive0.setSector(2);
-		drive0.write(codeSector);
+	public void bootFindsAndLoadsCcpComFromTheFilesystem() throws Exception {
+		// B no longer reads track 0 at all - it asks BDOS to find a file named
+		// CCP.COM and load its content, same as real CP/M's cold loader. The
+		// content here is the same tiny LDA #$99 / STA $2000 / RTS subroutine the
+		// E test uses, written through the same CpmFileSystem (modules/Disk) that
+		// validates this on-disk format, standing in for what CpmDiskTool's "put"
+		// subcommand would do with a real cl65-built CCP.COM.
+		byte[] program = {
+				(byte) 0xA9, (byte) 0x99,	// LDA #$99
+				(byte) 0x8D, (byte) 0x00, (byte) 0x20,	// STA $2000
+				(byte) 0x60	// RTS
+		};
+		new CpmFileSystem(drive0).format();
+		new CpmFileSystem(drive0).createFile("CCP.COM", program);
 
 		console.type("B\r");
 		console.type("D 2000\r");
@@ -339,33 +344,42 @@ public class Test_BIOS {
 	}
 
 	@Test
+	public void bootPrintsQuestionMarkAndRecoversWhenCcpComIsMissing() throws Exception {
+		new CpmFileSystem(drive0).format(); // formatted, but no CCP.COM written
+
+		console.type("B\r");
+		console.type("D 2000\r");
+		runBriefly();
+
+		assertTrue(console.getRow(1).startsWith("?"), "got: [" + console.getRow(1) + "]");
+
+		boolean recovered = false;
+		for (int row = 0; row <= 18; row++) {
+			if (console.getRow(row).startsWith("2000")) {
+				recovered = true;
+				break;
+			}
+		}
+		assertTrue(recovered, "the monitor should still be alive after a failed boot");
+	}
+
+	@Test
 	public void bootedProgramCanPrintThroughTheBiosPutchPrimitive() throws Exception {
 		// LDA #char / JSR BIOS_PUTCH ($F000), repeated per character, then RTS - a
 		// boot image that actually calls back into the primitives ROM rather than
-		// just poking memory directly, proving out the whole B -> BIOS_READ_SECTOR ->
-		// JSR BOOTADDR -> BIOS_PUTCH round trip with a real (if tiny) loaded program.
-		// Still fits in one code sector, so the header (sector 1) just says "1".
-		byte[] header = new byte[128];
-		header[0] = 1;
-		drive0.setTrack(0);
-		drive0.setSector(1);
-		drive0.write(header);
-
-		int[] program = {
-				0xA9, 0x48, 0x20, 0x00, 0xF0,	// LDA #'H' / JSR BIOS_PUTCH
-				0xA9, 0x65, 0x20, 0x00, 0xF0,	// LDA #'e' / JSR BIOS_PUTCH
-				0xA9, 0x6C, 0x20, 0x00, 0xF0,	// LDA #'l' / JSR BIOS_PUTCH
-				0xA9, 0x6C, 0x20, 0x00, 0xF0,	// LDA #'l' / JSR BIOS_PUTCH
-				0xA9, 0x6F, 0x20, 0x00, 0xF0,	// LDA #'o' / JSR BIOS_PUTCH
+		// just poking memory directly, proving out the whole B -> BDOS_FIND_FILE/
+		// BDOS_READ_RECORD -> JSR BOOTADDR -> BIOS_PUTCH round trip with a real (if
+		// tiny) loaded program.
+		byte[] program = {
+				(byte) 0xA9, 0x48, 0x20, 0x00, (byte) 0xF0,	// LDA #'H' / JSR BIOS_PUTCH
+				(byte) 0xA9, 0x65, 0x20, 0x00, (byte) 0xF0,	// LDA #'e' / JSR BIOS_PUTCH
+				(byte) 0xA9, 0x6C, 0x20, 0x00, (byte) 0xF0,	// LDA #'l' / JSR BIOS_PUTCH
+				(byte) 0xA9, 0x6C, 0x20, 0x00, (byte) 0xF0,	// LDA #'l' / JSR BIOS_PUTCH
+				(byte) 0xA9, 0x6F, 0x20, 0x00, (byte) 0xF0,	// LDA #'o' / JSR BIOS_PUTCH
 				0x60							// RTS
 		};
-		byte[] codeSector = new byte[128];
-		for (int i = 0; i < program.length; i++) {
-			codeSector[i] = (byte) program[i];
-		}
-		drive0.setTrack(0);
-		drive0.setSector(2);
-		drive0.write(codeSector);
+		new CpmFileSystem(drive0).format();
+		new CpmFileSystem(drive0).createFile("CCP.COM", program);
 
 		console.type("B\r");
 		runBriefly();
@@ -374,35 +388,26 @@ public class Test_BIOS {
 	}
 
 	@Test
-	public void bootLoadsMultipleCodeSectorsConsecutively() throws Exception {
-		// Header says 2 code sectors follow. The first code sector is 128 NOPs
-		// ($EA) with no RTS/JMP at all - the only way execution reaches the real
-		// routine in the second code sector is if the loader placed it exactly at
-		// BOOTADDR+128, right after the first sector's last NOP falls through.
-		byte[] header = new byte[128];
-		header[0] = 2;
-		drive0.setTrack(0);
-		drive0.setSector(1);
-		drive0.write(header);
-
-		byte[] firstCodeSector = new byte[128];
-		Arrays.fill(firstCodeSector, (byte) 0xEA); // NOP
-		drive0.setTrack(0);
-		drive0.setSector(2);
-		drive0.write(firstCodeSector);
-
-		byte[] secondCodeSector = new byte[128];
-		secondCodeSector[0] = (byte) 0xA9; // LDA #$99
-		secondCodeSector[1] = (byte) 0x99;
-		secondCodeSector[2] = (byte) 0x8D; // STA $2000
-		secondCodeSector[3] = (byte) 0x00;
-		secondCodeSector[4] = (byte) 0x20;
-		secondCodeSector[5] = (byte) 0x60; // RTS
-		drive0.setTrack(0);
-		drive0.setSector(3);
-		drive0.write(secondCodeSector);
+	public void bootLoadsMultipleRecordsConsecutively() throws Exception {
+		// A 256-byte CCP.COM: the first 128 bytes are NOPs ($EA) with no RTS/JMP at
+		// all - the only way execution reaches the real routine in the second
+		// 128-byte record is if BDOS_READ_RECORD's caller (DI_BOOT) advanced the
+		// destination pointer by exactly 128 between the two BDOS_READ_RECORD
+		// calls, landing the second record right after the first's last NOP falls
+		// through.
+		byte[] program = new byte[256];
+		Arrays.fill(program, 0, 128, (byte) 0xEA); // NOP
+		program[128] = (byte) 0xA9; // LDA #$99
+		program[129] = (byte) 0x99;
+		program[130] = (byte) 0x8D; // STA $2000
+		program[131] = (byte) 0x00;
+		program[132] = (byte) 0x20;
+		program[133] = (byte) 0x60; // RTS
+		new CpmFileSystem(drive0).format();
+		new CpmFileSystem(drive0).createFile("CCP.COM", program);
 
 		console.type("B\r");
+		console.type("D 2000\r");
 		runBriefly();
 
 		assertEquals(0x99, c.bus.read(0x2000) & 0xff,

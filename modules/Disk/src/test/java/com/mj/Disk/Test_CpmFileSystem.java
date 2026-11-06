@@ -105,10 +105,100 @@ public class Test_CpmFileSystem {
 	}
 
 	@Test
-	public void fileLargerThanOneExtentThrows() {
-		byte[] tooBig = new byte[CpmFileSystem.MAX_BLOCKS_PER_FILE * 1024 + 1];
+	public void deletedFileNoLongerAppearsOrReads() throws Exception {
+		fs.createFile("GONE.TXT", "temporary".getBytes());
 
-		assertThrows(FileSystemException.class, () -> fs.createFile("BIG.BIN", tooBig));
+		fs.deleteFile("GONE.TXT");
+
+		assertTrue(fs.listFiles().isEmpty());
+		assertThrows(FileSystemException.class, () -> fs.readFile("GONE.TXT"));
+	}
+
+	@Test
+	public void deletingAFileFreesItsBlocksForReuse() throws Exception {
+		byte[] data = new byte[3000]; // spans blocks 2-4, same as the track-boundary test
+		fs.createFile("BIG.BIN", data);
+		fs.deleteFile("BIG.BIN");
+
+		// Re-creating a same-size file should succeed by reusing the freed blocks,
+		// not fail as if the disk were still full of BIG.BIN's old allocation.
+		fs.createFile("AGAIN.BIN", data);
+
+		assertArrayEquals(data, Arrays.copyOf(fs.readFile("AGAIN.BIN"), data.length));
+	}
+
+	@Test
+	public void deletingAMissingFileThrows() {
+		assertThrows(FileSystemException.class, () -> fs.deleteFile("NOPE.TXT"));
+	}
+
+	@Test
+	public void deletingAndRecreatingTheSameNameWorks() throws Exception {
+		fs.createFile("DUP.TXT", "first".getBytes());
+		fs.deleteFile("DUP.TXT");
+
+		fs.createFile("DUP.TXT", "second".getBytes());
+
+		assertArrayEquals("second".getBytes(), Arrays.copyOf(fs.readFile("DUP.TXT"), 6));
+	}
+
+	@Test
+	public void fileSpanningTwoExtentsRoundTrips() throws Exception {
+		// One extent holds MAX_BLOCKS_PER_FILE * 1024 = 16384 bytes - this needs a
+		// second extent (and so a second directory entry sharing BIG.BIN's name,
+		// distinguished by EX) to hold the rest.
+		byte[] data = new byte[20000];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = (byte) i;
+		}
+		fs.createFile("BIG.BIN", data);
+
+		byte[] readBack = fs.readFile("BIG.BIN");
+
+		assertEquals(20096, readBack.length, "rounded up to the nearest 128-byte record");
+		assertArrayEquals(data, Arrays.copyOf(readBack, data.length));
+	}
+
+	@Test
+	public void fileSpanningThreeExtentsRoundTrips() throws Exception {
+		// Three full-ish extents - makes sure the "every extent but the last is
+		// full" chaining logic isn't accidentally special-cased to exactly two.
+		byte[] data = new byte[40000];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = (byte) (i * 7);
+		}
+		fs.createFile("THREE.BIN", data);
+
+		byte[] readBack = fs.readFile("THREE.BIN");
+
+		assertArrayEquals(data, Arrays.copyOf(readBack, data.length));
+	}
+
+	@Test
+	public void multiExtentFileAppearsOnceInListFiles() throws Exception {
+		fs.createFile("BIG.BIN", new byte[20000]);
+		fs.createFile("SMALL.TXT", "tiny".getBytes());
+
+		List<String> names = fs.listFiles();
+
+		assertEquals(2, names.size(), "BIG.BIN's second extent shouldn't add a duplicate entry");
+		assertTrue(names.contains("BIG.BIN"));
+		assertTrue(names.contains("SMALL.TXT"));
+	}
+
+	@Test
+	public void deletingAMultiExtentFileFreesAllItsExtentsForReuse() throws Exception {
+		byte[] data = new byte[20000];
+		fs.createFile("BIG.BIN", data);
+
+		fs.deleteFile("BIG.BIN");
+
+		assertTrue(fs.listFiles().isEmpty());
+		assertThrows(FileSystemException.class, () -> fs.readFile("BIG.BIN"));
+		// Re-creating a same-size file should succeed by reusing every block freed
+		// across both extents, not just the first one.
+		fs.createFile("AGAIN.BIN", data);
+		assertArrayEquals(data, Arrays.copyOf(fs.readFile("AGAIN.BIN"), data.length));
 	}
 
 	@Test

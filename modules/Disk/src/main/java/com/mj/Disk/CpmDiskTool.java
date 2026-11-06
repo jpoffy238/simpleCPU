@@ -6,12 +6,11 @@ import java.util.List;
 
 import com.mj.Disk.EightInch.IBM3740;
 
-/** A small host-side command-line tool for preparing disk images before any
- * 6502-resident DOS exists to do it from inside the emulator - format a blank
- * image, copy CP/M files in and out, list what's there, or write a raw binary
- * onto track 0 as a boot image for MONITOR.asm's B command. Only IBM3740
- * geometry is supported, since that's the only drive type this project has
- * so far.
+/** A small host-side command-line tool for preparing disk images - format a
+ * blank image, copy CP/M files in and out, erase one, list what's there, or
+ * (predating BDOS/CCP.COM's own ERA/COPY commands) write a raw binary onto
+ * track 0 as a boot image for MONITOR.asm's B command. Only IBM3740 geometry
+ * is supported, since that's the only drive type this project has so far.
  *
  * Run via, e.g.:
  *   mvn -pl modules/Disk exec:java -Dexec.mainClass=com.mj.Disk.CpmDiskTool \
@@ -46,6 +45,9 @@ public class CpmDiskTool {
 			get(imagePath, args[2], args[3]);
 		} else if ("list".equals(command)) {
 			list(imagePath);
+		} else if ("erase".equals(command)) {
+			requireArgs(args, 3, "erase <image> <cpm-name>");
+			erase(imagePath, args[2]);
 		} else if ("bootimage".equals(command)) {
 			requireArgs(args, 3, "bootimage <image> <host-file>");
 			bootImage(imagePath, args[2]);
@@ -122,6 +124,12 @@ public class CpmDiskTool {
 		System.out.println("Wrote boot image: " + data.length + " bytes across " + codeSectors + " code sector(s)");
 	}
 
+	private static void erase(String imagePath, String cpmName) throws Exception {
+		IBM3740 drive = openExisting(imagePath);
+		new CpmFileSystem(drive).deleteFile(cpmName);
+		System.out.println("Erased " + cpmName);
+	}
+
 	private static void list(String imagePath) throws Exception {
 		IBM3740 drive = openExisting(imagePath);
 		List<String> names = new CpmFileSystem(drive).listFiles();
@@ -140,6 +148,7 @@ public class CpmDiskTool {
 		System.err.println("  put <image> <host-file> <cpm-name>");
 		System.err.println("  get <image> <cpm-name> <host-file>");
 		System.err.println("  list <image>");
+		System.err.println("  erase <image> <cpm-name>");
 		System.err.println("  bootimage <image> <host-file>");
 	}
 }

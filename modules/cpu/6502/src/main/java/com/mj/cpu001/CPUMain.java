@@ -36,6 +36,22 @@ public class CPUMain {
 		bus.registerDevice(new basicROM(bus, new AddressRange(0xf000, 0xf7ff), "BIOS.hex", 0));
 		bus.registerDevice(new basicROM(bus, new AddressRange(0xf800, 0xffff), "MONITOR.hex", 0));
 
+		// BDOS: a third ROM, this one cc65-compiled rather than hand-assembled, so it
+		// loads as a raw binary (loadBinary()) rather than through the constructor's
+		// Intel-hex path - see AbstractMemoryLayer.loadBinary() and bdos.cfg for why.
+		// $8000-$80FF is BDOS's own working RAM (its directory-scan position, open-
+		// file state, sector buffer) - plain basicMemory, not basicROM, since BDOS's
+		// C code writes to it at runtime; see bdos.cfg's file comment for the full
+		// ROM/RAM split.
+		bus.registerDevice(new basicMemory(bus, new AddressRange(0x8000, 0x81ff), null, 0));
+		basicROM bdos = new basicROM(bus, new AddressRange(0xa000, 0xb7ff), null, 0);
+		try {
+			bdos.loadBinary("bdos.bin");
+		} catch (java.io.IOException e) {
+			logger.error("Unable to load bdos.bin - BDOS-dependent commands (B, and anything CCP.COM calls) will fault", e);
+		}
+		bus.registerDevice(bdos);
+
 		VIA6522 via = new VIA6522(bus, new AddressRange(0x9000, 0x900f));
 		bus.registerDevice(via);
 		ConsoleDevice con = new ConsoleDevice(via, new AddressRange(0xec00, 0xec01));

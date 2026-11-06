@@ -130,6 +130,10 @@ public class ConsoleDevice implements charDevice {
 
 	public void write(int data) throws DeviceUnavailable {
 		char c = (char) (data & 0xff);
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("console write: 0x%02X '%s'", data & 0xff,
+					(c >= 0x20 && c < 0x7f) ? String.valueOf(c) : "."));
+		}
 		synchronized (gridLock) {
 			if (c == '\r') {
 				cursorCol = 0;

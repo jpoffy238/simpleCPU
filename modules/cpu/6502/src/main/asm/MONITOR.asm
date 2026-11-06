@@ -8,15 +8,14 @@
 ;;   H                           list commands
 ;;   E <addr>                    execute code (JSR); the routine should end in RTS
 ;;   S <drive>                   select floppy drive 0-3
-;;   F [fill]                    format every track on the selected drive (default fill $00)
+;;   F [fill]                    format every track on the selected drive (default fill $E5)
 ;;   L <track> <sector> <addr>   load one 128-byte sector into memory
 ;;   P <track> <sector> <addr>   write (put) one 128-byte sector from memory to disk
-;;   B                           boot: load a boot image from the selected drive's
-;;                               track 0 to $0300 and JSR there. Track 0 sector 1
-;;                               is a 1-byte header (how many code sectors follow,
-;;                               capped at 25 - track 0 is boot/system-reserved,
-;;                               and must never spill into the filesystem's data
-;;                               area on tracks 1+); sectors 2 onward are the code.
+;;   B                           boot: find CCP.COM in the filesystem (via BDOS -
+;;                               see bdos.c) and load it to $0300, then JSR there.
+;;                               Track 0 is no longer read at all - CCP.COM is a
+;;                               regular file on tracks 1+, found by name, the
+;;                               same way real CP/M's cold loader worked.
 CPU 6502
 OUTPUT HEX
 
@@ -29,15 +28,15 @@ BIOS_WRITE_SECTOR = $F00C	;; A = track, X = sector, ADDRLO/ADDRHI = src
 BIOS_FORMAT_TRACK = $F00F	;; A = track, X = fill byte
 BIOS_RESTORE      = $F012	;; no params - homes the selected drive to track 0
 
+;; BDOS ROM jump table (see bdos_jumptable.s/bdos.c) - a second, separately
+;; assembled/compiled frozen ABI, same keep-in-sync contract as BIOS above.
+BDOS_FIND_FILE    = $A006	;; ADDRLO/ADDRHI = null-terminated filename to find;
+				;; returns A = 1 found / 0 not found
+BDOS_READ_RECORD  = $A009	;; ADDRLO/ADDRHI = 128-byte dest; returns A = 1 read / 0 done
+
 TRACKS = 76			;; IBM3740 geometry - the only drive type this BIOS knows about
-MAXBOOTSEC = 25			;; track 0 has 26 sectors; sector 1 is the boot header, leaving
-				;; sectors 2-26 (25 of them) for code - B clamps to this so an
-				;; oversized/malformed header byte can never read into track 1,
-				;; where the CP/M filesystem's own data blocks live
-BOOTADDR = $0300		;; where B loads the boot image - past INBUF ($0200-$0226), well
-				;; clear of this program's own code at $F800+. A full-size
-				;; (25-sector) boot image runs well past $0300 into the free
-				;; RAM region beyond it - that's expected, not a collision
+BOOTADDR = $0300		;; where B loads CCP.COM's content - past INBUF ($0200-$0226),
+				;; well clear of this program's own code at $F800+
 
 INPTR    = $00		;; zero page: current parse offset into INBUF
 ADDRLO   = $01		;; zero page: parsed address, low byte - doubles as an indirect
@@ -55,9 +54,6 @@ EXEC_JSR = $05		;; JSR opcode
 EXEC_LO  = $06		;; low byte of the call target
 EXEC_HI  = $07		;; high byte of the call target
 EXEC_RTS = $08		;; RTS opcode - where the called routine's own RTS lands
-
-BOOTCOUNT  = $09	;; zero page: B's remaining-sectors-to-load countdown
-BOOTSECTOR = $0A	;; zero page: B's current sector number on track 0
 
 INBUF = $0200
 ;; 39 was too short in practice - a W/P command listing even a dozen-ish hex bytes
@@ -330,9 +326,12 @@ DI_SELECT JSR SKIPSP
 	JSR BIOS_SELECT
 	RTS
 ;; ---- F: format every track on the selected drive. An optional fill byte follows
-;;      the command letter; if INBUF is exhausted here, default to $00. ----
+;;      the command letter; if INBUF is exhausted here, default to $E5 - CP/M's
+;;      own "empty" byte, so a bare F actually leaves a usable CP/M directory
+;;      behind (STATUS_EMPTY in bdos.c) rather than one that reads as 64 bogus
+;;      user-0 files. ----
 DI_FORMAT JSR SKIPSP
-	LDA #0
+	LDA #$E5
 	STA BYTEVAL
 	LDY INPTR
 	LDA INBUF,Y
@@ -369,60 +368,93 @@ DI_PUT	JSR SKIPSP
 	LDX BYTEVAL
 	JSR BIOS_WRITE_SECTOR
 	RTS
-;; ---- B: boot - load a boot image from track 0 of the selected drive to BOOTADDR
-;;      and JSR there. Sector 1 is a 1-byte header (how many code sectors follow,
-;;      clamped to MAXBOOTSEC - track 0 only has 25 sectors left after the header,
-;;      and must never spill into track 1+, where the CP/M filesystem's own data
-;;      blocks live); sectors 2 onward are the code itself, read consecutively
-;;      into BOOTADDR, BOOTADDR+128, BOOTADDR+256, and so on. Unlike E, BOOTADDR
-;;      is a fixed, assemble-time constant, so this needs none of E's self-
-;;      modifying-JSR trick - just a direct "JSR BOOTADDR" once loading is done.
-;;      A loaded routine should end in RTS to return to the monitor, same
-;;      convention as E; a real boot image meant to take over the machine
+;; ---- B: boot - find CCP.COM by name via BDOS (see bdos.c/bdos_jumptable.s)
+;;      and load its content to BOOTADDR, then JSR there - real CP/M's cold
+;;      loader worked the same way (find the CCP in the directory, not a
+;;      fixed, hand-maintained boot area). Track 0 is no longer read by B at
+;;      all; CCP.COM is an ordinary file on tracks 1+, written there with
+;;      CpmDiskTool's "put" subcommand ahead of time. Unlike E, BOOTADDR is a
+;;      fixed, assemble-time constant, so this needs none of E's self-
+;;      modifying-JSR trick - just a direct "JSR BOOTADDR" once loading is
+;;      done. A loaded program should end in RTS to return to the monitor,
+;;      same convention as E; a real shell meant to take over the machine
 ;;      entirely can simply never return. ----
 DI_BOOT	LDA #0
 	JSR BIOS_SELECT
 	JSR BIOS_RESTORE
 
-	;; read the header sector into BOOTADDR just to learn the code-sector
-	;; count - the loop below overwrites it with real code right after
+	;; cc65's software stack pointer (zero page $0A/$0B, per bdos.map's
+	;; exports list) - BDOS's own crt0 never runs (nothing JSRs to its
+	;; STARTUP segment, only to its jump table), so nothing else ever
+	;; initializes this before BDOS's compiled code needs it for parameter
+	;; passing and the track/sector division - BDOS_FIND_FILE's first-ever
+	;; call would otherwise run with a garbage stack pointer, scribbling
+	;; wherever that garbage address happens to point (caught via a
+	;; "RO Memory Write attempt" flood at runtime). $8000 matches
+	;; simplecpu.cfg's own __STACKSTART__, so CCP.COM's crt0 will set the
+	;; exact same value once it's running - set only here, at the first-
+	;; ever BDOS call, not on every DI_BOOT entry or call into BDOS, since
+	;; resetting it after CCP.COM has pushed its own data would corrupt
+	;; CCP's in-progress stack frame.
 	LDA #$00
-	STA ADDRLO
-	LDA #$03
-	STA ADDRHI
-	LDA #0
-	LDX #1
-	JSR BIOS_READ_SECTOR
-	LDA BOOTADDR
-	CMP #MAXBOOTSEC
-	BCC DB_COUNTOK		;; count < 25 - use as-is
-	BEQ DB_COUNTOK		;; count == 25 - also fine as-is
-	LDA #MAXBOOTSEC		;; count > 25 - clamp
-DB_COUNTOK STA BOOTCOUNT
-	BEQ DB_RUN		;; a zero-sector header means "nothing to load" -
-				;; just run whatever's already sitting at BOOTADDR
+	STA $0A
+	LDA #$80
+	STA $0B
 
-	LDA #2
-	STA BOOTSECTOR
-	LDA #$00
+	LDA CCPNAME_PTR
 	STA ADDRLO
-	LDA #$03
+	LDA CCPNAME_PTR+1
 	STA ADDRHI
-DB_LOOP	LDA #0
-	LDX BOOTSECTOR
-	JSR BIOS_READ_SECTOR
-	LDA ADDRLO
+	JSR BDOS_FIND_FILE
+	CMP #0
+	BEQ DB_NOTFOUND
+
+	;; BYTEVAL/TRACKVAL track the running destination address here - not
+	;; ADDRLO/ADDRHI directly. BDOS_READ_RECORD's own implementation calls
+	;; BIOS_READ_SECTOR internally (to pull the next disk sector into its
+	;; own buffer), which stages ITS OWN pointer into ADDRLO/ADDRHI before
+	;; returning - so by the time control comes back here, ADDRLO/ADDRHI
+	;; points at BDOS's sector buffer, not wherever we last told it to
+	;; write. Restaged into ADDRLO/ADDRHI fresh before every call instead
+	;; (same reason ccp.c's cmd_dir/cmd_type restage bios_set_buffer()
+	;; before every bdos_next_entry()/bdos_read_record() call). BYTEVAL/
+	;; TRACKVAL are free during B - neither is used until a byte/track
+	;; value actually needs parsing, which B's own command syntax has none
+	;; of.
+	LDA #$00
+	STA BYTEVAL
+	LDA #$03
+	STA TRACKVAL
+DB_LOOP	LDA BYTEVAL
+	STA ADDRLO
+	LDA TRACKVAL
+	STA ADDRHI
+	JSR BDOS_READ_RECORD
+	CMP #0
+	BEQ DB_RUN		;; no more records - loading is done
+	LDA BYTEVAL
 	CLC
 	ADC #$80		;; next 128-byte chunk
-	STA ADDRLO
+	STA BYTEVAL
 	BCC DB_NOCARRY
-	INC ADDRHI
-DB_NOCARRY INC BOOTSECTOR
-	DEC BOOTCOUNT
-	BNE DB_LOOP
+	INC TRACKVAL
+DB_NOCARRY JMP DB_LOOP
+
+DB_NOTFOUND LDA #'?'
+	JSR BIOS_PUTCH
+	JSR NEWLINE
+	RTS
 
 DB_RUN	JSR BOOTADDR
 DI_DONE	RTS
+
+;; CCPNAME_PTR holds CCP.COM's own address, computed by crasm itself at
+;; assembly time (same DW mechanism the vector table at the bottom of this
+;; file already relies on) - avoids needing any "load the low/high byte of
+;; a label" immediate-operand syntax, which the rest of this file never
+;; uses either.
+CCPNAME_PTR DW CCPNAME
+CCPNAME	ASC "CCP.COM\0"
 
 HUH	LDA #'?'
 	JSR BIOS_PUTCH
@@ -503,10 +535,10 @@ HELPW	ASC "W addr byte...  write one or more bytes\0"
 HELPH	ASC "H               this help\0"
 HELPE	ASC "E addr          execute (JSR); return via RTS\0"
 HELPS	ASC "S drive         select floppy drive 0-3\0"
-HELPF	ASC "F [fill]        format every track (default $00)\0"
+HELPF	ASC "F [fill]        format every track (default $E5)\0"
 HELPL	ASC "L track sec addr  load one sector into memory\0"
 HELPP	ASC "P track sec addr  write one sector from memory\0"
-HELPB	ASC "B               boot track 0 sector 1 from the drive\0"
+HELPB	ASC "B               boot: find and run CCP.COM\0"
 
 ;; ---- D: dump 256 bytes starting at ADDRHI:ADDRLO, hexdump -C style ----
 CMD_DUMP LDX #16
