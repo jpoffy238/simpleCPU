@@ -14,7 +14,7 @@
 #include "bdos.h"
 
 #define NUM_DRIVES 4
-#define LINELEN 40
+#define LINELEN 80
 #define ENTRY_SIZE 32
 
 static unsigned char current_drive = 0;

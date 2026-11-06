@@ -3,7 +3,7 @@ Modules list:
 ccp.o:
     CODE              Offs=000000  Size=000832  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=00005A  Align=00001  Fill=0000
-    BSS               Offs=000000  Size=000028  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=000050  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000001  Align=00001  Fill=0000
 bios_glue.o:
     CODE              Offs=000832  Size=000028  Align=00001  Fill=0000
@@ -94,12 +94,12 @@ ONCE                  000317  000322  00000C  00001
 CODE                  000323  000DB6  000A94  00001
 RODATA                000DB7  000E10  00005A  00001
 DATA                  000E11  000E36  000026  00001
-BSS                   000E37  000E5E  000028  00001
+BSS                   000E37  000E86  000050  00001
 
 
 Exports list by name:
 ---------------------
-__BSS_RUN__               000E37 RLA    __BSS_SIZE__              000028 REA    
+__BSS_RUN__               000E37 RLA    __BSS_SIZE__              000050 REA    
 __CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     000317 RLA    
 __DESTRUCTOR_COUNT__      000000 REA    __DESTRUCTOR_TABLE__      000317 RLA    
 __STACKSTART__            008000 REA    __STARTUP__               000001 REA    
@@ -141,7 +141,7 @@ __CONSTRUCTOR_COUNT__     000000 REA    __DESTRUCTOR_COUNT__      000000 REA
 __STARTUP__               000001 REA    sp                        00000F RLZ    
 sreg                      000011 RLZ    ptr1                      000017 RLZ    
 ptr4                      00001D RLZ    tmp1                      00001F RLZ    
-__BSS_SIZE__              000028 REA    __CONSTRUCTOR_TABLE__     000317 RLA    
+__BSS_SIZE__              000050 REA    __CONSTRUCTOR_TABLE__     000317 RLA    
 __DESTRUCTOR_TABLE__      000317 RLA    initlib                   000317 RLA    
 _main                     000A92 RLA    _bios_putch               000B55 RLA    
 _bios_getch               000B59 RLA    _bios_select              000B5C RLA    
