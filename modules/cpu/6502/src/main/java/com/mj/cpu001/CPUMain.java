@@ -16,6 +16,7 @@ import com.mj.Firmware.Framework.OpCodes;
 import com.mj.Firmware.Framework.cpu001decoder;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
+import com.mj.Video.VideoController;
 
 public class CPUMain {
 	private static final Logger logger = LogManager.getLogger(CPUMain.class);
@@ -57,6 +58,18 @@ public class CPUMain {
 		ConsoleDevice con = new ConsoleDevice(via, new AddressRange(0xec00, 0xec01));
 		bus.registerDevice(con);
 
+		// Video: a CRTC-style display controller (see VideoController's class comment),
+		// separate from and in addition to ConsoleDevice - the character RAM it scans
+		// out is plain basicMemory, registered on the bus in its own right (the CPU
+		// pokes ASCII bytes straight into it at ordinary addresses, no register call
+		// needed) but also handed directly to VideoController's constructor, since
+		// nothing else gives its renderer a way to read those bytes back for display.
+		// Sits right after BDOS's ROM in the free address space.
+		basicMemory videoRam = new basicMemory(bus, new AddressRange(0xb800, 0xbfff), null, 0);
+		bus.registerDevice(videoRam);
+		VideoController video = new VideoController(new AddressRange(0x9020, 0x9023), videoRam);
+		bus.registerDevice(video);
+
 		FloppyController fdc = new FloppyController(via, new AddressRange(0x9010, 0x9014));
 		bus.registerDevice(fdc);
 		for (int drive = 0; drive < 4; drive++) {
@@ -76,6 +89,7 @@ public class CPUMain {
 		CPU c = new CPU(bus, d);
 		logger.error(String.format("Number of Opcodes = %d ", OpCodes.getMap().size()));
 		con.show();
+		video.show();
 		c.start();
 		}
 

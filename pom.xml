@@ -198,5 +198,6 @@
 		<module>modules/Devices</module>
 		<module>modules/cpu/6502</module>
 		<module>modules/Disk</module>
+		<module>modules/Video</module>
 	</modules>
 </project>
