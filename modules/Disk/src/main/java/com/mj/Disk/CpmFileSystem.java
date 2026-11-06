@@ -30,11 +30,14 @@ import com.mj.Disk.exceptions.GeometryException;
  *   Blocks 0-1               the directory: 2KB = 64 entries of 32 bytes.
  *   Blocks 2+                file data.
  *
- * v1 scope, deliberately: files are capped at one "extent" (16 block pointers per
- * directory entry = 16KB max), matching real CP/M's directory entry format but not
- * yet its multi-extent mechanism for bigger files. No delete, no rename, no
- * subdirectories - real CP/M didn't have subdirectories either, but delete/rename
- * are reasonable later additions deliberately left out of this first pass.
+ * A file bigger than one "extent" (16 block pointers per directory entry = 16KB)
+ * spans multiple directory entries sharing the same name, distinguished by the EX
+ * (extent number) field at byte 12 - real CP/M's own mechanism for this, not a
+ * project-specific extension. Every extent but the last is exactly full (128
+ * records); a record count below 128 is how a reader knows it just read the last
+ * one, without needing a separate end-of-file marker. No rename, no subdirectories -
+ * real CP/M didn't have subdirectories either, and rename is a reasonable later
+ * addition deliberately left out of this pass (delete exists - see deleteFile()).
  *
  * Record counts (and so file lengths read back via readFile()) are only tracked to
  * the nearest 128-byte record, exactly like real CP/M - a file whose length isn't a
@@ -49,6 +52,9 @@ public class CpmFileSystem {
 	public static final int DIRECTORY_ENTRIES = 64;
 	public static final int ENTRY_SIZE = 32;
 	public static final int STATUS_EMPTY = 0xE5;
+	/** Block pointers (and so records: MAX_BLOCKS_PER_FILE * SECTORS_PER_BLOCK)
+	 * per extent - not a whole-file cap anymore now that createFile()/readFile()/
+	 * deleteFile() all walk multiple extents for a bigger file. */
 	public static final int MAX_BLOCKS_PER_FILE = 16;
 
 	private final FloppyDevice drive;
@@ -75,16 +81,15 @@ public class CpmFileSystem {
 
 	public void createFile(String fileName, byte[] data)
 			throws DiskReadError, DiskWriteError, GeometryException, FileSystemException {
-		if (data.length > MAX_BLOCKS_PER_FILE * blockSize) {
-			throw new FileSystemException(
-					"File too large for a single extent (max " + (MAX_BLOCKS_PER_FILE * blockSize) + " bytes): " + fileName);
-		}
 		byte[] fcbName = encodeFileName(fileName);
-		if (findEntry(fcbName) >= 0) {
+		if (findEntry(fcbName, 0) >= 0) {
 			throw new FileSystemException("File already exists: " + fileName);
 		}
 
 		int blocksNeeded = (data.length + blockSize - 1) / blockSize;
+		int extentsNeeded = Math.max(1, (blocksNeeded + MAX_BLOCKS_PER_FILE - 1) / MAX_BLOCKS_PER_FILE);
+		int totalRecords = (data.length + 127) / 128;
+
 		Set<Integer> used = usedBlocks();
 		List<Integer> allocated = new ArrayList<Integer>();
 		for (int block = DIRECTORY_BLOCKS; block < totalBlocks() && allocated.size() < blocksNeeded; block++) {
@@ -96,45 +101,100 @@ public class CpmFileSystem {
 			throw new FileSystemException("Not enough free space for " + fileName);
 		}
 
-		int freeEntry = findFreeDirectoryEntry();
-		if (freeEntry < 0) {
+		List<Integer> freeEntries = findFreeDirectoryEntries(extentsNeeded);
+		if (freeEntries.size() < extentsNeeded) {
 			throw new FileSystemException("Directory is full");
 		}
 
-		for (int i = 0; i < allocated.size(); i++) {
-			byte[] blockData = new byte[blockSize];
-			int offset = i * blockSize;
-			int length = Math.min(blockSize, data.length - offset);
-			System.arraycopy(data, offset, blockData, 0, length);
-			writeBlock(allocated.get(i), blockData);
-		}
+		for (int extent = 0; extent < extentsNeeded; extent++) {
+			int blockOffset = extent * MAX_BLOCKS_PER_FILE;
+			int blocksInExtent = Math.min(MAX_BLOCKS_PER_FILE, allocated.size() - blockOffset);
+			int dataOffset = blockOffset * blockSize;
 
-		byte[] fcb = new byte[ENTRY_SIZE];
-		fcb[0] = 0; // user 0
-		System.arraycopy(fcbName, 0, fcb, 1, 11);
-		fcb[12] = 0; // extent - always 0 in this single-extent-only version
-		fcb[15] = (byte) Math.min(128, (data.length + 127) / 128); // 128-byte records used
-		for (int i = 0; i < allocated.size(); i++) {
-			fcb[16 + i] = (byte) (allocated.get(i).intValue());
+			for (int i = 0; i < blocksInExtent; i++) {
+				byte[] blockData = new byte[blockSize];
+				int offset = dataOffset + i * blockSize;
+				int length = Math.min(blockSize, data.length - offset);
+				if (length > 0) {
+					System.arraycopy(data, offset, blockData, 0, length);
+				}
+				writeBlock(allocated.get(blockOffset + i), blockData);
+			}
+
+			byte[] fcb = new byte[ENTRY_SIZE];
+			fcb[0] = 0; // user 0
+			System.arraycopy(fcbName, 0, fcb, 1, 11);
+			fcb[12] = (byte) extent;
+			// every extent but the last is exactly full (128 records) by construction -
+			// blocksInExtent only comes up short of MAX_BLOCKS_PER_FILE on the last one
+			boolean isLastExtent = extent == extentsNeeded - 1;
+			fcb[15] = (byte) (isLastExtent ? totalRecords - extent * 128 : 128);
+			for (int i = 0; i < blocksInExtent; i++) {
+				fcb[16 + i] = (byte) (allocated.get(blockOffset + i).intValue());
+			}
+			writeDirectoryEntry(freeEntries.get(extent), fcb);
 		}
-		writeDirectoryEntry(freeEntry, fcb);
+	}
+
+	/** Marks every extent of the named file's directory entries empty ($E5). Data
+	 * blocks aren't touched - they're only ever "used" by virtue of being
+	 * referenced from a non-empty entry, so clearing the entries frees them
+	 * implicitly, the same way usedBlocks() already determines free space by
+	 * scanning entries rather than a separate bitmap. */
+	public void deleteFile(String fileName) throws DiskReadError, DiskWriteError, GeometryException, FileSystemException {
+		byte[] fcbName = encodeFileName(fileName);
+		if (findEntry(fcbName, 0) < 0) {
+			throw new FileSystemException("File not found: " + fileName);
+		}
+		byte[] emptyEntry = new byte[ENTRY_SIZE];
+		Arrays.fill(emptyEntry, (byte) STATUS_EMPTY);
+		for (int extent = 0; ; extent++) {
+			int entryIndex = findEntry(fcbName, extent);
+			if (entryIndex < 0) {
+				break;
+			}
+			byte[] raw = readDirectoryEntry(entryIndex);
+			int recordsInExtent = raw[15] & 0xff;
+			writeDirectoryEntry(entryIndex, emptyEntry);
+			if (recordsInExtent < 128) {
+				break; // wasn't full - there's no extent after this one
+			}
+		}
 	}
 
 	/** Returns the file's data, length rounded up to the nearest 128-byte record -
-	 * see the class comment on record-count-based lengths. */
+	 * see the class comment on record-count-based lengths and multi-extent files. */
 	public byte[] readFile(String fileName) throws DiskReadError, GeometryException, FileSystemException {
 		byte[] fcbName = encodeFileName(fileName);
-		int entryIndex = findEntry(fcbName);
-		if (entryIndex < 0) {
+		if (findEntry(fcbName, 0) < 0) {
 			throw new FileSystemException("File not found: " + fileName);
 		}
-		byte[] raw = readDirectoryEntry(entryIndex);
-		int recordCount = raw[15] & 0xff;
-		byte[] result = new byte[recordCount * 128];
+
+		List<Integer> blocks = new ArrayList<Integer>();
+		int totalRecords = 0;
+		for (int extent = 0; ; extent++) {
+			int entryIndex = findEntry(fcbName, extent);
+			if (entryIndex < 0) {
+				break;
+			}
+			byte[] raw = readDirectoryEntry(entryIndex);
+			int recordsInExtent = raw[15] & 0xff;
+			totalRecords += recordsInExtent;
+			for (int i = 0; i < 16; i++) {
+				int block = raw[16 + i] & 0xff;
+				if (block != 0) {
+					blocks.add(block);
+				}
+			}
+			if (recordsInExtent < 128) {
+				break; // wasn't full - there's no extent after this one
+			}
+		}
+
+		byte[] result = new byte[totalRecords * 128];
 		int copied = 0;
-		for (int i = 0; i < 16 && copied < result.length; i++) {
-			int block = raw[16 + i] & 0xff;
-			if (block == 0) {
+		for (int block : blocks) {
+			if (copied >= result.length) {
 				break;
 			}
 			byte[] blockData = readBlock(block);
@@ -145,35 +205,38 @@ public class CpmFileSystem {
 		return result;
 	}
 
+	/** Filtered to each file's first extent (EX == 0) - without this, a
+	 * multi-extent file's name would appear once per extent. */
 	public List<String> listFiles() throws DiskReadError, GeometryException {
 		List<String> names = new ArrayList<String>();
 		for (int entry = 0; entry < DIRECTORY_ENTRIES; entry++) {
 			byte[] raw = readDirectoryEntry(entry);
-			if ((raw[0] & 0xff) != STATUS_EMPTY) {
+			if ((raw[0] & 0xff) != STATUS_EMPTY && (raw[12] & 0xff) == 0) {
 				names.add(decodeFileName(raw));
 			}
 		}
 		return names;
 	}
 
-	private int findEntry(byte[] fcbName) throws DiskReadError, GeometryException {
+	private int findEntry(byte[] fcbName, int extent) throws DiskReadError, GeometryException {
 		for (int entry = 0; entry < DIRECTORY_ENTRIES; entry++) {
 			byte[] raw = readDirectoryEntry(entry);
-			if ((raw[0] & 0xff) != STATUS_EMPTY && nameMatches(raw, fcbName)) {
+			if ((raw[0] & 0xff) != STATUS_EMPTY && (raw[12] & 0xff) == extent && nameMatches(raw, fcbName)) {
 				return entry;
 			}
 		}
 		return -1;
 	}
 
-	private int findFreeDirectoryEntry() throws DiskReadError, GeometryException {
-		for (int entry = 0; entry < DIRECTORY_ENTRIES; entry++) {
+	private List<Integer> findFreeDirectoryEntries(int count) throws DiskReadError, GeometryException {
+		List<Integer> free = new ArrayList<Integer>();
+		for (int entry = 0; entry < DIRECTORY_ENTRIES && free.size() < count; entry++) {
 			byte[] raw = readDirectoryEntry(entry);
 			if ((raw[0] & 0xff) == STATUS_EMPTY) {
-				return entry;
+				free.add(entry);
 			}
 		}
-		return -1;
+		return free;
 	}
 
 	private Set<Integer> usedBlocks() throws DiskReadError, GeometryException {
