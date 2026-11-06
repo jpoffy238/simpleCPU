@@ -1,0 +1,278 @@
+Modules list:
+-------------
+ccp.o:
+    CODE              Offs=000000  Size=0004CC  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=00003F  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=000028  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=000001  Align=00001  Fill=0000
+bios_glue.o:
+    CODE              Offs=0004CC  Size=000028  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=000001  Align=00001  Fill=0000
+bdos_glue.o:
+    CODE              Offs=0004F4  Size=000015  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(addysp.o):
+    CODE              Offs=000509  Size=00000E  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(condes.o):
+    CODE              Offs=000517  Size=00000C  Align=00001  Fill=0000
+    DATA              Offs=000001  Size=000025  Align=00001  Fill=0000
+    ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(crt0.o):
+    STARTUP           Offs=000000  Size=000017  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(decaxy.o):
+    CODE              Offs=000523  Size=000009  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(decsp1.o):
+    CODE              Offs=00052C  Size=000009  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(decsp2.o):
+    CODE              Offs=000535  Size=00000D  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(icmp.o):
+    CODE              Offs=000542  Size=00002E  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(incax1.o):
+    CODE              Offs=000570  Size=000007  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(incaxy.o):
+    CODE              Offs=000577  Size=00000B  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(incsp2.o):
+    CODE              Offs=000582  Size=000016  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(incsp3.o):
+    CODE              Offs=000598  Size=000005  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(incsp4.o):
+    CODE              Offs=00059D  Size=000005  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(ldaxsp.o):
+    CODE              Offs=0005A2  Size=000009  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(leaaxsp.o):
+    CODE              Offs=0005AB  Size=00000C  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(makebool.o):
+    CODE              Offs=0005B7  Size=00002C  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(pusha.o):
+    CODE              Offs=0005E3  Size=000016  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(pushax.o):
+    CODE              Offs=0005F9  Size=00001A  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(staxsp.o):
+    CODE              Offs=000613  Size=00000B  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(subysp.o):
+    CODE              Offs=00061E  Size=00000D  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(zerobss.o):
+    CODE              Offs=00062B  Size=000023  Align=00001  Fill=0000
+/usr/share/cc65/lib/none.lib(zeropage.o):
+    ZEROPAGE          Offs=000001  Size=00001A  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+ZEROPAGE              000009  000023  00001B  00001
+STARTUP               000300  000316  000017  00001
+ONCE                  000317  000322  00000C  00001
+CODE                  000323  000970  00064E  00001
+RODATA                000971  0009AF  00003F  00001
+DATA                  0009B0  0009D5  000026  00001
+BSS                   0009D6  0009FD  000028  00001
+
+
+Exports list by name:
+---------------------
+__BSS_RUN__               0009D6 RLA    __BSS_SIZE__              000028 REA    
+__CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     000317 RLA    
+__DESTRUCTOR_COUNT__      000000 REA    __DESTRUCTOR_TABLE__      000317 RLA    
+__STACKSTART__            008000 REA    __STARTUP__               000001 REA    
+_bdos_create_file         000826 RLA    _bdos_delete_file         000823 RLA    
+_bdos_find_file           00081D RLA    _bdos_next_entry          00081A RLA    
+_bdos_read_record         000820 RLA    _bdos_rewind_dir          000817 RLA    
+_bdos_write_record        000829 RLA    _bios_getch               0007F3 RLA    
+_bios_putch               0007EF RLA    _bios_select              0007F6 RLA    
+_bios_set_buffer          0007FA RLA    _main                     00075D RLA    
+addysp                    00082D RLA    booleq                    0008E0 RLA    
+decaxy                    000846 RLA    decsp1                    00084F RLA    
+decsp2                    000858 RLA    donelib                   00083A RLA    
+incax1                    000893 RLA    incaxy                    00089C RLA    
+incsp2                    0008AD RLA    incsp3                    0008BB RLA    
+incsp4                    0008C0 RLA    initlib                   000317 RLA    
+ldax0sp                   0008C5 RLA    ldaxysp                   0008C7 RLA    
+leaa0sp                   0008CE RLA    ptr1                      000012 RLZ    
+pusha                     00090A RLA    pusha0                    00091E RLA    
+pushax                    000920 RLA    regsave                   00000E RLZ    
+sp                        00000A RLZ    sreg                      00000C RLZ    
+stax0sp                   000936 RLA    staxysp                   000938 RLA    
+subysp                    000941 RLA    tmp1                      00001A RLZ    
+tosicmp0                  000865 RLA    zerobss                   00094E RLA    
+
+
+
+Exports list by value:
+----------------------
+__CONSTRUCTOR_COUNT__     000000 REA    __DESTRUCTOR_COUNT__      000000 REA    
+__STARTUP__               000001 REA    sp                        00000A RLZ    
+sreg                      00000C RLZ    regsave                   00000E RLZ    
+ptr1                      000012 RLZ    tmp1                      00001A RLZ    
+__BSS_SIZE__              000028 REA    __CONSTRUCTOR_TABLE__     000317 RLA    
+__DESTRUCTOR_TABLE__      000317 RLA    initlib                   000317 RLA    
+_main                     00075D RLA    _bios_putch               0007EF RLA    
+_bios_getch               0007F3 RLA    _bios_select              0007F6 RLA    
+_bios_set_buffer          0007FA RLA    _bdos_rewind_dir          000817 RLA    
+_bdos_next_entry          00081A RLA    _bdos_find_file           00081D RLA    
+_bdos_read_record         000820 RLA    _bdos_delete_file         000823 RLA    
+_bdos_create_file         000826 RLA    _bdos_write_record        000829 RLA    
+addysp                    00082D RLA    donelib                   00083A RLA    
+decaxy                    000846 RLA    decsp1                    00084F RLA    
+decsp2                    000858 RLA    tosicmp0                  000865 RLA    
+incax1                    000893 RLA    incaxy                    00089C RLA    
+incsp2                    0008AD RLA    incsp3                    0008BB RLA    
+incsp4                    0008C0 RLA    ldax0sp                   0008C5 RLA    
+ldaxysp                   0008C7 RLA    leaa0sp                   0008CE RLA    
+booleq                    0008E0 RLA    pusha                     00090A RLA    
+pusha0                    00091E RLA    pushax                    000920 RLA    
+stax0sp                   000936 RLA    staxysp                   000938 RLA    
+subysp                    000941 RLA    zerobss                   00094E RLA    
+__BSS_RUN__               0009D6 RLA    __STACKSTART__            008000 REA    
+
+
+
+Imports list:
+-------------
+__BSS_RUN__ ([linker generated]):
+    zerobss.o                 common/zerobss.s(8)
+__BSS_SIZE__ ([linker generated]):
+    zerobss.o                 common/zerobss.s(8)
+__CONSTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s(18)
+__CONSTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s(18)
+__DESTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s(19)
+__DESTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s(19)
+__STACKSTART__ ([linker generated]):
+    crt0.o                    none/crt0.s(5)
+__STARTUP__ (crt0.o):
+    ccp.o                     ccp.s(13)
+_bdos_create_file (bdos_glue.o):
+    ccp.o                     ccp.s(23)
+_bdos_delete_file (bdos_glue.o):
+    ccp.o                     ccp.s(22)
+_bdos_find_file (bdos_glue.o):
+    ccp.o                     ccp.s(20)
+_bdos_next_entry (bdos_glue.o):
+    ccp.o                     ccp.s(19)
+_bdos_read_record (bdos_glue.o):
+    ccp.o                     ccp.s(21)
+_bdos_rewind_dir (bdos_glue.o):
+    ccp.o                     ccp.s(18)
+_bdos_write_record (bdos_glue.o):
+    ccp.o                     ccp.s(24)
+_bios_getch (bios_glue.o):
+    ccp.o                     ccp.s(15)
+_bios_putch (bios_glue.o):
+    ccp.o                     ccp.s(14)
+_bios_select (bios_glue.o):
+    ccp.o                     ccp.s(16)
+_bios_set_buffer (bios_glue.o):
+    ccp.o                     ccp.s(17)
+_main (ccp.o):
+    crt0.o                    none/crt0.s(3)
+addysp (addysp.o):
+    incsp4.o                  runtime/incsp4.s(8)
+    incsp3.o                  runtime/incsp3.s(8)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+booleq (makebool.o):
+    ccp.o                     ccp.s(802)
+decaxy (decaxy.o):
+    ccp.o                     ccp.s(802)
+decsp1 (decsp1.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+decsp2 (decsp2.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+donelib (condes.o):
+    crt0.o                    none/crt0.s(4)
+incax1 (incax1.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+incaxy (incaxy.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+incsp2 (incsp2.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+incsp3 (incsp3.o):
+    ccp.o                     ccp.s(802)
+incsp4 (incsp4.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+initlib (condes.o):
+    crt0.o                    none/crt0.s(4)
+ldax0sp (ldaxsp.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+ldaxysp (ldaxsp.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+leaa0sp (leaaxsp.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+ptr1 (zeropage.o):
+    zerobss.o                 common/zerobss.s(9)
+    ccp.o                     ccp.s(11)
+pusha (pusha.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+pusha0 (pushax.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+pushax (pushax.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+regsave (zeropage.o):
+    ccp.o                     ccp.s(10)
+sp (zeropage.o):
+    subysp.o                  runtime/subysp.s(9)
+    staxsp.o                  runtime/staxsp.s(8)
+    pushax.o                  runtime/pushax.s(8)
+    pusha.o                   runtime/pusha.s(8)
+    leaaxsp.o                 runtime/leaaxsp.s(8)
+    ldaxsp.o                  runtime/ldaxsp.s(8)
+    incsp2.o                  runtime/incsp2.s(8)
+    icmp.o                    runtime/icmp.s(9)
+    decsp2.o                  runtime/decsp2.s(8)
+    decsp1.o                  runtime/decsp1.s(8)
+    crt0.o                    /build/cc65-5FfAbq/cc65-2.19/asminc/zeropage.inc(11)
+    addysp.o                  runtime/addysp.s(8)
+    ccp.o                     ccp.s(10)
+sreg (zeropage.o):
+    icmp.o                    runtime/icmp.s(9)
+stax0sp (staxsp.o):
+    ccp.o                     ccp.s(802)
+staxysp (staxsp.o):
+    ccp.o                     ccp.s(802)
+subysp (subysp.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+tmp1 (zeropage.o):
+    incaxy.o                  runtime/incaxy.s(8)
+    decaxy.o                  runtime/decaxy.s(8)
+tosicmp0 (icmp.o):
+    ccp.o                     ccp.s(802)
+    ccp.o                     ccp.s(802)
+zerobss (zerobss.o):
+    crt0.o                    none/crt0.s(3)
+
