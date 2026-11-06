@@ -8,7 +8,7 @@
 ;;   H                           list commands
 ;;   E <addr>                    execute code (JSR); the routine should end in RTS
 ;;   S <drive>                   select floppy drive 0-3
-;;   F [fill]                    format every track on the selected drive (default fill $00)
+;;   F [fill]                    format every track on the selected drive (default fill $E5)
 ;;   L <track> <sector> <addr>   load one 128-byte sector into memory
 ;;   P <track> <sector> <addr>   write (put) one 128-byte sector from memory to disk
 ;;   B                           boot: find CCP.COM in the filesystem (via BDOS -
@@ -326,9 +326,12 @@ DI_SELECT JSR SKIPSP
 	JSR BIOS_SELECT
 	RTS
 ;; ---- F: format every track on the selected drive. An optional fill byte follows
-;;      the command letter; if INBUF is exhausted here, default to $00. ----
+;;      the command letter; if INBUF is exhausted here, default to $E5 - CP/M's
+;;      own "empty" byte, so a bare F actually leaves a usable CP/M directory
+;;      behind (STATUS_EMPTY in bdos.c) rather than one that reads as 64 bogus
+;;      user-0 files. ----
 DI_FORMAT JSR SKIPSP
-	LDA #0
+	LDA #$E5
 	STA BYTEVAL
 	LDY INPTR
 	LDA INBUF,Y
@@ -532,7 +535,7 @@ HELPW	ASC "W addr byte...  write one or more bytes\0"
 HELPH	ASC "H               this help\0"
 HELPE	ASC "E addr          execute (JSR); return via RTS\0"
 HELPS	ASC "S drive         select floppy drive 0-3\0"
-HELPF	ASC "F [fill]        format every track (default $00)\0"
+HELPF	ASC "F [fill]        format every track (default $E5)\0"
 HELPL	ASC "L track sec addr  load one sector into memory\0"
 HELPP	ASC "P track sec addr  write one sector from memory\0"
 HELPB	ASC "B               boot: find and run CCP.COM\0"

@@ -240,13 +240,13 @@ public class Test_BIOS {
 	}
 
 	@Test
-	public void formatWithNoArgumentDefaultsToZero() throws Exception {
+	public void formatWithNoArgumentDefaultsToE5() throws Exception {
 		console.type("S 0\r");
 		console.type("F\r");
 		runBriefly();
 
 		for (byte b : drive0.read()) {
-			assertEquals(0, b, "no fill byte given should default to $00");
+			assertEquals((byte) 0xE5, b, "no fill byte given should default to CP/M's STATUS_EMPTY ($E5)");
 		}
 	}
 
