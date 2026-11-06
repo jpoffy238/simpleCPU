@@ -190,6 +190,9 @@ public class VideoController implements Device {
 		} else if (local == REG_DATA) {
 			if (addressRegister < REGISTER_COUNT) {
 				registers[addressRegister] = data;
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("video register R%d = 0x%02X", addressRegister, data & 0xff));
+				}
 			}
 		}
 		// Keyboard Data/Status are read-only from the CPU's side - a write to
@@ -283,6 +286,9 @@ public class VideoController implements Device {
 
 	private class Screen extends JPanel {
 		private static final long serialVersionUID = 1L;
+		// java.awt.Color has no GOLD constant (that's a JavaFX/CSS name, not AWT) -
+		// this is the standard web "Gold" RGB value (255, 215, 0).
+		private static final Color GOLD = new Color(255, 215, 0);
 		private final Font font = new Font(Font.MONOSPACED, Font.PLAIN, 16);
 		private final int charWidth;
 		private final int charHeight;
@@ -295,7 +301,7 @@ public class VideoController implements Device {
 
 			setFont(font);
 			setBackground(Color.BLACK);
-			setForeground(Color.LIGHT_GRAY);
+			setForeground(GOLD);
 			setPreferredSize(new Dimension(charWidth * 80, charHeight * 24));
 			setFocusable(true);
 			addKeyListener(new KeyAdapter() {
@@ -331,7 +337,13 @@ public class VideoController implements Device {
 				int cursorRow = offset / cols;
 				int cursorCol = offset % cols;
 				if (cursorRow < rows) {
-					g.fillRect(cursorCol * charWidth, cursorRow * charHeight + 2, charWidth, 2);
+					// +1 here for the same reason the text loop above draws at
+					// (row + 1) * charHeight - drawChars/fillRect position from the
+					// top, but a row's glyphs are drawn at their baseline, (row + 1)
+					// rows down. Using plain cursorRow (no +1) here was the actual
+					// bug: it drew the cursor a full row above the text it should
+					// sit under, not a register-update problem.
+					g.fillRect(cursorCol * charWidth, (cursorRow + 1) * charHeight + 2, charWidth, 2);
 				}
 			}
 		}
