@@ -287,8 +287,11 @@ public class VideoController implements Device {
 	private class Screen extends JPanel {
 		private static final long serialVersionUID = 1L;
 		// java.awt.Color has no GOLD constant (that's a JavaFX/CSS name, not AWT) -
-		// this is the standard web "Gold" RGB value (255, 215, 0).
-		private static final Color GOLD = new Color(255, 215, 0);
+		// this is the standard web "Gold" RGB value (255, 215, 0). Not static -
+		// Screen is a non-static inner class, and static fields there are only
+		// legal for true compile-time constants (primitives/String literals);
+		// `new Color(...)` doesn't qualify.
+		private final Color GOLD = new Color(255, 215, 0);
 		private final Font font = new Font(Font.MONOSPACED, Font.PLAIN, 16);
 		private final int charWidth;
 		private final int charHeight;
