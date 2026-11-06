@@ -7,15 +7,15 @@ bios_glue.o:
     ZEROPAGE          Offs=000000  Size=000001  Align=00001  Fill=0000
 bdos_glue.o:
     CODE              Offs=000045  Size=00001B  Align=00001  Fill=0000
-/usr/share/cc65/lib/none.lib(condes.o):
+/home/jpoffen/git/cc65/lib/none.lib(condes.o):
     CODE              Offs=000060  Size=00000C  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000025  Align=00001  Fill=0000
     ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
-/usr/share/cc65/lib/none.lib(crt0.o):
+/home/jpoffen/git/cc65/lib/none.lib(crt0.o):
     STARTUP           Offs=000000  Size=000017  Align=00001  Fill=0000
-/usr/share/cc65/lib/none.lib(zerobss.o):
+/home/jpoffen/git/cc65/lib/none.lib(zerobss.o):
     CODE              Offs=00006C  Size=000023  Align=00001  Fill=0000
-/usr/share/cc65/lib/none.lib(zeropage.o):
+/home/jpoffen/git/cc65/lib/none.lib(zeropage.o):
     ZEROPAGE          Offs=000001  Size=00001A  Align=00001  Fill=0000
 
 
@@ -23,7 +23,7 @@ Segment list:
 -------------
 Name                   Start     End    Size  Align
 ----------------------------------------------------
-ZEROPAGE              000009  000023  00001B  00001
+ZEROPAGE              00000E  000028  00001B  00001
 STARTUP               000300  000316  000017  00001
 ONCE                  000317  000322  00000C  00001
 CODE                  000323  0003B1  00008F  00001
@@ -38,7 +38,7 @@ __DESTRUCTOR_COUNT__      000000 REA    __DESTRUCTOR_TABLE__      000317 RLA
 __STACKSTART__            008000 REA    __STARTUP__               000001 REA    
 _bios_putch               000340 RLA    _main                     000323 RLA    
 donelib                   000383 RLA    initlib                   000317 RLA    
-ptr1                      000012 RLZ    sp                        00000A RLZ    
+ptr1                      000017 RLZ    sp                        00000F RLZ    
 zerobss                   00038F RLA    
 
 
@@ -46,7 +46,7 @@ Exports list by value:
 ----------------------
 __BSS_SIZE__              000000 REA    __CONSTRUCTOR_COUNT__     000000 REA    
 __DESTRUCTOR_COUNT__      000000 REA    __STARTUP__               000001 REA    
-sp                        00000A RLZ    ptr1                      000012 RLZ    
+sp                        00000F RLZ    ptr1                      000017 RLZ    
 __CONSTRUCTOR_TABLE__     000317 RLA    __DESTRUCTOR_TABLE__      000317 RLA    
 initlib                   000317 RLA    _main                     000323 RLA    
 _bios_putch               000340 RLA    donelib                   000383 RLA    
@@ -57,33 +57,33 @@ __STACKSTART__            008000 REA
 Imports list:
 -------------
 __BSS_RUN__ ([linker generated]):
-    zerobss.o                 common/zerobss.s(8)
+    zerobss.o                 common/zerobss.s:8
 __BSS_SIZE__ ([linker generated]):
-    zerobss.o                 common/zerobss.s(8)
+    zerobss.o                 common/zerobss.s:8
 __CONSTRUCTOR_COUNT__ ([linker generated]):
-    condes.o                  runtime/condes.s(18)
+    condes.o                  runtime/condes.s:18
 __CONSTRUCTOR_TABLE__ ([linker generated]):
-    condes.o                  runtime/condes.s(18)
+    condes.o                  runtime/condes.s:18
 __DESTRUCTOR_COUNT__ ([linker generated]):
-    condes.o                  runtime/condes.s(19)
+    condes.o                  runtime/condes.s:19
 __DESTRUCTOR_TABLE__ ([linker generated]):
-    condes.o                  runtime/condes.s(19)
+    condes.o                  runtime/condes.s:19
 __STACKSTART__ ([linker generated]):
-    crt0.o                    none/crt0.s(5)
+    crt0.o                    none/crt0.s:5
 __STARTUP__ (crt0.o):
-    hello.o                   hello.s(13)
+    hello.o                   hello.s:13
 _bios_putch (bios_glue.o):
-    hello.o                   hello.s(14)
+    hello.o                   hello.s:14
 _main (hello.o):
-    crt0.o                    none/crt0.s(3)
+    crt0.o                    none/crt0.s:3
 donelib (condes.o):
-    crt0.o                    none/crt0.s(4)
+    crt0.o                    none/crt0.s:4
 initlib (condes.o):
-    crt0.o                    none/crt0.s(4)
+    crt0.o                    none/crt0.s:4
 ptr1 (zeropage.o):
-    zerobss.o                 common/zerobss.s(9)
+    zerobss.o                 common/zerobss.s:9
 sp (zeropage.o):
-    crt0.o                    /build/cc65-5FfAbq/cc65-2.19/asminc/zeropage.inc(11)
+    crt0.o                    /home/jpoffen/git/cc65/asminc/zeropage.inc:11
 zerobss (zerobss.o):
-    crt0.o                    none/crt0.s(3)
+    crt0.o                    none/crt0.s:3
 

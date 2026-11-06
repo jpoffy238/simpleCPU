@@ -88,7 +88,7 @@ Segment list:
 -------------
 Name                   Start     End    Size  Align
 ----------------------------------------------------
-ZEROPAGE              000009  000023  00001B  00001
+ZEROPAGE              00000E  000028  00001B  00001
 DATA                  008000  008024  000025  00001
 BSS                   008025  008117  0000F3  00001
 JUMPTABLE             00A000  00A01A  00001B  00001
@@ -123,15 +123,15 @@ incsp5                    00AE30 RLA    incsp6                    00AE35 RLA
 incsp7                    00AE3A RLA    incsp8                    00AE3F RLA    
 initlib                   00A032 RLA    ldax0sp                   00AE44 RLA    
 ldaxysp                   00AE46 RLA    popax                     00AE15 RLA    
-popptr1                   00AE79 RLA    ptr1                      000012 RLZ    
-ptr4                      000018 RLZ    push0                     00AE9D RLA    
+popptr1                   00AE79 RLA    ptr1                      000017 RLZ    
+ptr4                      00001D RLZ    push0                     00AE9D RLA    
 pusha                     00AE8B RLA    pushax                    00AEA1 RLA    
 pushw0sp                  00AEB7 RLA    pushwysp                  00AEB9 RLA    
 shlax1                    00AD7A RLA    shlax3                    00AD82 RLA    
-shlax4                    00AD90 RLA    sp                        00000A RLZ    
-sreg                      00000C RLZ    stax0sp                   00AF06 RLA    
+shlax4                    00AD90 RLA    sp                        00000F RLZ    
+sreg                      000011 RLZ    stax0sp                   00AF06 RLA    
 staxysp                   00AF08 RLA    subysp                    00AF11 RLA    
-tmp1                      00001A RLZ    tosudiva0                 00AF1E RLA    
+tmp1                      00001F RLZ    tosudiva0                 00AF1E RLA    
 tosumoda0                 00AF6D RLA    udiv16                    00AF2F RLA    
 zerobss                   00AF7E RLA    
 
@@ -139,9 +139,9 @@ zerobss                   00AF7E RLA
 Exports list by value:
 ----------------------
 __CONSTRUCTOR_COUNT__     000000 REA    __DESTRUCTOR_COUNT__      000000 REA    
-__STARTUP__               000001 REA    sp                        00000A RLZ    
-sreg                      00000C RLZ    ptr1                      000012 RLZ    
-ptr4                      000018 RLZ    tmp1                      00001A RLZ    
+__STARTUP__               000001 REA    sp                        00000F RLZ    
+sreg                      000011 RLZ    ptr1                      000017 RLZ    
+ptr4                      00001D RLZ    tmp1                      00001F RLZ    
 __BSS_SIZE__              0000F3 REA    __STACKSTART__            008000 REA    
 __BSS_RUN__               008025 RLA    __CONSTRUCTOR_TABLE__     00A032 RLA    
 __DESTRUCTOR_TABLE__      00A032 RLA    initlib                   00A032 RLA    

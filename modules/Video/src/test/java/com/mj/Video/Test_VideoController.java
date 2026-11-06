@@ -96,6 +96,18 @@ public class Test_VideoController {
 	}
 
 	@Test
+	public void getRowReturnsTheWholeVisibleRow() throws Exception {
+		setRegister(R_H_DISPLAYED, 4);
+		setRegister(R_V_DISPLAYED, 2);
+		charRam.write(0xb800, (byte) 'H');
+		charRam.write(0xb801, (byte) 'I');
+		charRam.write(0xb802, (byte) ' ');
+		charRam.write(0xb803, (byte) ' ');
+
+		assertEquals("HI  ", video.getRow(0));
+	}
+
+	@Test
 	public void displayStartAddressScrollsWithoutTouchingRam() throws Exception {
 		// Real CRTC scrolling: change two registers, not the buffer - row 1's
 		// content becomes visible at row 0 purely by moving the start address

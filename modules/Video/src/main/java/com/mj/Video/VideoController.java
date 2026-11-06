@@ -269,6 +269,18 @@ public class VideoController implements Device {
 		return (char) (charRam.read(charRamBase + offset) & 0xff);
 	}
 
+	/** The whole of row's currently visible columns, same role and signature as
+	 * ConsoleDevice.getRow() so tests driving VideoController in its place can
+	 * keep the same assertion style (.contains(), .startsWith(), etc.). */
+	public String getRow(int row) throws illegalAddressException, DeviceUnavailable {
+		int cols = horizontalDisplayed();
+		StringBuilder sb = new StringBuilder(cols);
+		for (int col = 0; col < cols; col++) {
+			sb.append(getChar(row, col));
+		}
+		return sb.toString();
+	}
+
 	private class Screen extends JPanel {
 		private static final long serialVersionUID = 1L;
 		private final Font font = new Font(Font.MONOSPACED, Font.PLAIN, 16);

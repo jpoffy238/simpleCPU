@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.mj.Devices.AddressRange;
-import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
 import com.mj.Devices.VIA6522;
@@ -25,15 +24,17 @@ import com.mj.memoryInterface.basicMemory;
 import com.mj.memoryInterface.basicROM;
 import com.mj.Video.VideoController;
 
-/** Drives the real BIOS.hex/MONITOR.hex ROMs through a CPU + console, the same way a
+/** Drives the real BIOS.hex/MONITOR.hex ROMs through a CPU + Video, the same way a
  * person typing at the keyboard would, and checks the result through getRow()/the bus
- * rather than the CPU's internal state - this is testing the firmware, not the CPU. */
+ * rather than the CPU's internal state - this is testing the firmware, not the CPU.
+ * Video is the sole console (BIOS_PUTCH/BIOS_GETCH's full cutover from ConsoleDevice -
+ * see BIOS.asm), so this fixture no longer registers one at all. */
 public class Test_BIOS {
 	@TempDir
 	Path tempDir;
 
 	private PBus bus;
-	private ConsoleDevice console;
+	private VideoController video;
 	private FloppyController fdc;
 	private IBM3740 drive0;
 	private IBM3740 drive1;
@@ -61,16 +62,14 @@ public class Test_BIOS {
 		VIA6522 via = new VIA6522(bus, new AddressRange(0x9000, 0x900f));
 		bus.registerDevice(via);
 
-		console = new ConsoleDevice(via, new AddressRange(0xec00, 0xec01));
-		bus.registerDevice(console);
-
-		// Video, same as CPUMain - RESET_INIT now calls BIOS_VIDEO_INIT unconditionally
-		// on every boot, so this fixture needs both devices registered even for tests
-		// that never look at Video's own output, or that call faults on unmapped memory
-		// before the monitor prompt ever comes up.
+		// Video, same as CPUMain - the sole console now. RESET_INIT calls
+		// BIOS_VIDEO_INIT unconditionally on every boot, so this fixture needs it
+		// registered even for tests that never look at Video's own output, or that
+		// fault on unmapped memory before the monitor prompt ever comes up.
 		basicMemory videoRam = new basicMemory(bus, new AddressRange(0xb800, 0xbfff), null, 0);
 		bus.registerDevice(videoRam);
-		bus.registerDevice(new VideoController(new AddressRange(0x9020, 0x9023), videoRam));
+		video = new VideoController(new AddressRange(0x9020, 0x9023), videoRam);
+		bus.registerDevice(video);
 
 		fdc = new FloppyController(via, new AddressRange(0x9010, 0x9014));
 		bus.registerDevice(fdc);
@@ -95,19 +94,19 @@ public class Test_BIOS {
 		c.bus.write(0x2000, (byte) 'H');
 		c.bus.write(0x2001, (byte) 'I');
 
-		console.type("D 2000\r");
+		video.type("D 2000\r");
 		runBriefly();
 
-		assertTrue(console.getRow(0).contains("D 2000"), "the typed command should be echoed");
-		assertTrue(console.getRow(1).startsWith(
+		assertTrue(video.getRow(0).contains("D 2000"), "the typed command should be echoed");
+		assertTrue(video.getRow(1).startsWith(
 				"2000  48 49 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |HI..............|"),
-				"first dump line, got: [" + console.getRow(1) + "]");
-		assertTrue(console.getRow(16).startsWith("20F0"), "16 lines of 16 bytes covers $2000-$20FF");
+				"first dump line, got: [" + video.getRow(1) + "]");
+		assertTrue(video.getRow(16).startsWith("20F0"), "16 lines of 16 bytes covers $2000-$20FF");
 	}
 
 	@Test
 	public void writeStoresBytesStartingAtTheGivenAddress() throws Exception {
-		console.type("W 2000 48 49 4a\r");
+		video.type("W 2000 48 49 4a\r");
 		runBriefly();
 
 		assertEquals(0x48, c.bus.read(0x2000) & 0xff);
@@ -119,7 +118,7 @@ public class Test_BIOS {
 	public void lineFeedAloneAlsoTerminatesTheLine() throws Exception {
 		// Swing's keyTyped for Enter isn't consistently '\r' across platforms - a real
 		// interactive run got stuck here waiting for a '\r' that never arrived.
-		console.type("W 2000 48\n");
+		video.type("W 2000 48\n");
 		runBriefly();
 
 		assertEquals(0x48, c.bus.read(0x2000) & 0xff);
@@ -127,7 +126,7 @@ public class Test_BIOS {
 
 	@Test
 	public void dollarPrefixIsAcceptedOnAddressesAndBytes() throws Exception {
-		console.type("W $2000 $48 $49\r");
+		video.type("W $2000 $48 $49\r");
 		runBriefly();
 
 		assertEquals(0x48, c.bus.read(0x2000) & 0xff, "a bare '$' shouldn't make the address default to 0");
@@ -141,16 +140,16 @@ public class Test_BIOS {
 		// $9100 has no device registered on this bus (BDOS now claims $A000-$A7FF,
 		// which this probed before BDOS existed) - dumping it should fault partway
 		// through the first line instead of taking down the whole emulated machine.
-		console.type("D 9100\r");
-		console.type("D 2000\r");
+		video.type("D 9100\r");
+		video.type("D 2000\r");
 		runBriefly();
 
-		assertTrue(console.getRow(1).contains("9100"), "the dump should start before faulting");
-		assertTrue(console.getRow(1).contains("?"), "the fault handler's error marker");
+		assertTrue(video.getRow(1).contains("9100"), "the dump should start before faulting");
+		assertTrue(video.getRow(1).contains("?"), "the fault handler's error marker");
 
 		boolean recovered = false;
 		for (int row = 0; row <= 18; row++) {
-			if (console.getRow(row).startsWith("2000")) {
+			if (video.getRow(row).startsWith("2000")) {
 				recovered = true;
 				break;
 			}
@@ -161,7 +160,7 @@ public class Test_BIOS {
 	@Test
 	public void backspaceErasesTheLastTypedCharacter() throws Exception {
 		// Type a wrong byte value, backspace both digits away, then type the right one.
-		console.type("W 2000 99\b\b48\r");
+		video.type("W 2000 99\b\b48\r");
 		runBriefly();
 
 		assertEquals(0x48, c.bus.read(0x2000) & 0xff,
@@ -170,34 +169,34 @@ public class Test_BIOS {
 
 	@Test
 	public void backspaceAtTheStartOfTheLineIsIgnored() throws Exception {
-		console.type("\b\bD 2000\r");
+		video.type("\b\bD 2000\r");
 		runBriefly();
 
-		assertTrue(console.getRow(1).startsWith("2000"),
+		assertTrue(video.getRow(1).startsWith("2000"),
 				"leading backspaces with nothing to erase shouldn't break the command");
 	}
 
 	@Test
 	public void helpListsTheAvailableCommands() throws Exception {
-		console.type("H\r");
+		video.type("H\r");
 		runBriefly();
 
-		assertTrue(console.getRow(1).contains("D addr") && console.getRow(1).contains("dump"),
-				"got: [" + console.getRow(1) + "]");
-		assertTrue(console.getRow(2).contains("W addr") && console.getRow(2).contains("write"),
-				"got: [" + console.getRow(2) + "]");
-		assertTrue(console.getRow(3).contains("H") && console.getRow(3).contains("help"),
-				"got: [" + console.getRow(3) + "]");
-		assertTrue(console.getRow(5).contains("S drive") && console.getRow(5).contains("select"),
-				"got: [" + console.getRow(5) + "]");
-		assertTrue(console.getRow(6).contains("F [fill]") && console.getRow(6).contains("format"),
-				"got: [" + console.getRow(6) + "]");
-		assertTrue(console.getRow(7).contains("L track") && console.getRow(7).contains("load"),
-				"got: [" + console.getRow(7) + "]");
-		assertTrue(console.getRow(8).contains("P track") && console.getRow(8).contains("write"),
-				"got: [" + console.getRow(8) + "]");
-		assertTrue(console.getRow(9).contains("B") && console.getRow(9).contains("boot"),
-				"got: [" + console.getRow(9) + "]");
+		assertTrue(video.getRow(1).contains("D addr") && video.getRow(1).contains("dump"),
+				"got: [" + video.getRow(1) + "]");
+		assertTrue(video.getRow(2).contains("W addr") && video.getRow(2).contains("write"),
+				"got: [" + video.getRow(2) + "]");
+		assertTrue(video.getRow(3).contains("H") && video.getRow(3).contains("help"),
+				"got: [" + video.getRow(3) + "]");
+		assertTrue(video.getRow(5).contains("S drive") && video.getRow(5).contains("select"),
+				"got: [" + video.getRow(5) + "]");
+		assertTrue(video.getRow(6).contains("F [fill]") && video.getRow(6).contains("format"),
+				"got: [" + video.getRow(6) + "]");
+		assertTrue(video.getRow(7).contains("L track") && video.getRow(7).contains("load"),
+				"got: [" + video.getRow(7) + "]");
+		assertTrue(video.getRow(8).contains("P track") && video.getRow(8).contains("write"),
+				"got: [" + video.getRow(8) + "]");
+		assertTrue(video.getRow(9).contains("B") && video.getRow(9).contains("boot"),
+				"got: [" + video.getRow(9) + "]");
 	}
 
 	@Test
@@ -211,15 +210,15 @@ public class Test_BIOS {
 		c.bus.write(addr + 4, (byte) 0x20);
 		c.bus.write(addr + 5, (byte) 0x60);
 
-		console.type("E 3000\r");
-		console.type("D 2000\r");
+		video.type("E 3000\r");
+		video.type("D 2000\r");
 		runBriefly();
 
 		assertEquals(0x99, c.bus.read(0x2000) & 0xff, "the executed routine should have run");
 
 		boolean recovered = false;
 		for (int row = 0; row <= 18; row++) {
-			if (console.getRow(row).startsWith("2000")) {
+			if (video.getRow(row).startsWith("2000")) {
 				recovered = true;
 				break;
 			}
@@ -229,8 +228,8 @@ public class Test_BIOS {
 
 	@Test
 	public void formatFillsEveryTrackOfTheSelectedDriveWithTheGivenByte() throws Exception {
-		console.type("S 0\r");
-		console.type("F AA\r");
+		video.type("S 0\r");
+		video.type("F AA\r");
 		runBriefly();
 
 		drive0.setTrack(0);
@@ -250,8 +249,8 @@ public class Test_BIOS {
 
 	@Test
 	public void formatWithNoArgumentDefaultsToE5() throws Exception {
-		console.type("S 0\r");
-		console.type("F\r");
+		video.type("S 0\r");
+		video.type("F\r");
 		runBriefly();
 
 		for (byte b : drive0.read()) {
@@ -269,8 +268,8 @@ public class Test_BIOS {
 		drive0.setSector(5);
 		drive0.write(pattern);
 
-		console.type("S 0\r");
-		console.type("L 0A 05 3000\r");
+		video.type("S 0\r");
+		video.type("L 0A 05 3000\r");
 		runBriefly();
 
 		for (int i = 0; i < pattern.length; i++) {
@@ -288,8 +287,8 @@ public class Test_BIOS {
 			c.bus.write(0x4000 + i, pattern[i]);
 		}
 
-		console.type("S 0\r");
-		console.type("P 0B 06 4000\r");
+		video.type("S 0\r");
+		video.type("P 0B 06 4000\r");
 		runBriefly();
 
 		drive0.setTrack(11);
@@ -305,8 +304,8 @@ public class Test_BIOS {
 			c.bus.write(0x5000 + i, pattern[i]);
 		}
 
-		console.type("S 1\r");
-		console.type("P 02 03 5000\r");
+		video.type("S 1\r");
+		video.type("P 02 03 5000\r");
 		runBriefly();
 
 		drive1.setTrack(2);
@@ -336,15 +335,15 @@ public class Test_BIOS {
 		new CpmFileSystem(drive0).format();
 		new CpmFileSystem(drive0).createFile("CCP.COM", program);
 
-		console.type("B\r");
-		console.type("D 2000\r");
+		video.type("B\r");
+		video.type("D 2000\r");
 		runBriefly();
 
 		assertEquals(0x99, c.bus.read(0x2000) & 0xff, "the booted routine should have run");
 
 		boolean recovered = false;
 		for (int row = 0; row <= 18; row++) {
-			if (console.getRow(row).startsWith("2000")) {
+			if (video.getRow(row).startsWith("2000")) {
 				recovered = true;
 				break;
 			}
@@ -356,15 +355,15 @@ public class Test_BIOS {
 	public void bootPrintsQuestionMarkAndRecoversWhenCcpComIsMissing() throws Exception {
 		new CpmFileSystem(drive0).format(); // formatted, but no CCP.COM written
 
-		console.type("B\r");
-		console.type("D 2000\r");
+		video.type("B\r");
+		video.type("D 2000\r");
 		runBriefly();
 
-		assertTrue(console.getRow(1).startsWith("?"), "got: [" + console.getRow(1) + "]");
+		assertTrue(video.getRow(1).startsWith("?"), "got: [" + video.getRow(1) + "]");
 
 		boolean recovered = false;
 		for (int row = 0; row <= 18; row++) {
-			if (console.getRow(row).startsWith("2000")) {
+			if (video.getRow(row).startsWith("2000")) {
 				recovered = true;
 				break;
 			}
@@ -390,10 +389,10 @@ public class Test_BIOS {
 		new CpmFileSystem(drive0).format();
 		new CpmFileSystem(drive0).createFile("CCP.COM", program);
 
-		console.type("B\r");
+		video.type("B\r");
 		runBriefly();
 
-		assertTrue(console.getRow(1).contains("Hello"), "got: [" + console.getRow(1) + "]");
+		assertTrue(video.getRow(1).contains("Hello"), "got: [" + video.getRow(1) + "]");
 	}
 
 	@Test
@@ -415,8 +414,8 @@ public class Test_BIOS {
 		new CpmFileSystem(drive0).format();
 		new CpmFileSystem(drive0).createFile("CCP.COM", program);
 
-		console.type("B\r");
-		console.type("D 2000\r");
+		video.type("B\r");
+		video.type("D 2000\r");
 		runBriefly();
 
 		assertEquals(0x99, c.bus.read(0x2000) & 0xff,

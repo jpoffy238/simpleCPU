@@ -1,7 +1,7 @@
 ;; Primitives ROM: raw hardware access only - console I/O and disk I/O - no
 ;; command parsing or filesystem concepts. That's MONITOR.asm's job; it calls
 ;; these services exclusively through the fixed jump table below, never
-;; touching CONSOLE_DATA/FD_STATUS/etc. itself. This file and MONITOR.asm are
+;; touching VIDEO_DATA/FD_STATUS/etc. itself. This file and MONITOR.asm are
 ;; assembled separately (two distinct ROM chips, see CPUMain/Test_BIOS), so the
 ;; jump table's addresses are a frozen ABI duplicated as constants over there -
 ;; keep both in sync if anything here ever moves.
@@ -21,10 +21,6 @@
 ;;                      this file's own row/column tracking (see DO_PUTCH)
 CPU 6502
 OUTPUT HEX
-
-CONSOLE_DATA = $EC00
-CONSOLE_STAT = $EC01
-DATA_AVAILABLE = $01
 
 ;; FloppyController registers (see FloppyController.java)
 FD_STATUS = $9010		;; status (read) / command (write)
@@ -47,6 +43,15 @@ VR_CURSOR_ADDR_HI = 14
 VR_CURSOR_ADDR_LO = 15
 CURSOR_ON = $00			;; anything other than CURSOR_MODE_OFF below
 CURSOR_MODE_OFF = $20			;; matches VideoController.CURSOR_MODE_OFF
+
+;; VideoController's bolted-on keyboard interface (+2/+3 of the same
+;; AddressRange as VIDEO_ADDR/VIDEO_DATA above - see its class comment for why
+;; a CRTC register pair and a keyboard data/status pair end up sharing one
+;; device). DATA_AVAILABLE is the one status bit DO_GETCH polls, same meaning
+;; (and same bit) ConsoleDevice's own status register used.
+VIDEO_KBD_DATA = $9022
+VIDEO_KBD_STAT = $9023
+DATA_AVAILABLE = $01
 
 ;; VideoController's character RAM (plain memory - BIOS pokes it directly, same
 ;; as any ordinary RAM access, no register protocol involved) and the fixed
@@ -79,14 +84,23 @@ TRACKVAL = $04
 ;; alongside purely for CR/backspace/auto-wrap decisions. SAVED_CHAR/SAVED_Y
 ;; are DO_PUTCH's own save slots for the character and Y across its whole call
 ;; (see its comment for why) - never touched by PC_SCROLL, so they survive
-;; even if a call happens to trigger a scroll. None of these overlap
-;; MONITOR.asm's $00-$04 or cc65's software stack pointer at $0A/$0B (see
-;; bdos.c's file comment).
-V_ADDR_LO  = $05
-V_ADDR_HI  = $06
-V_COL      = $07
-SAVED_CHAR = $08
-SAVED_Y    = $09
+;; even if a call happens to trigger a scroll.
+;;
+;; $09-$0D, NOT $05-$08 as an earlier pass of this file used - MONITOR.asm's
+;; own EXEC_JSR/EXEC_LO/EXEC_HI/EXEC_RTS (its self-modifying-JSR scratch for
+;; the E command) already live at $05-$08, and BIOS_PUTCH is called while
+;; those are live (echoing every character of the *next* line typed after an
+;; E command runs) - V_ADDR_LO/HI/V_COL need to survive from one BIOS_PUTCH
+;; call to the next, so colliding there silently corrupted the cursor
+;; position the moment E ran. $09-$0D are reserved for exactly this
+;; (simplecpu.cfg/bdos.cfg's ZEROPAGE segment now starts at $0E instead of
+;; $09 to make room) rather than overlapping cc65's own zero page (sp,
+;; ptr1-4, etc. from $0A) the original $05-$09 choice also happened to do.
+V_ADDR_LO  = $09
+V_ADDR_HI  = $0A
+V_COL      = $0B
+SAVED_CHAR = $0C
+SAVED_Y    = $0D
 
 * = $F000
 
@@ -102,28 +116,26 @@ SAVED_Y    = $09
 	JMP DO_RESTORE		;; $F012 BIOS_RESTORE
 	JMP DO_VIDEO_INIT	;; $F015 BIOS_VIDEO_INIT
 
-;; ---- A = char to print. Drives Console exactly as before (unchanged -
-;;      STA CONSOLE_DATA is the whole of the original routine) and, alongside
-;;      that, also pokes the same character into VideoController's character
-;;      RAM with its own row/column tracking - both outputs are driven in
-;;      parallel for now, by design, so Video's behavior can be validated
-;;      against Console's known-good output; collapsing to Video-only is a
-;;      deliberate later step, not an oversight.
+;; ---- A = char to print. Pokes VideoController's character RAM with BIOS's
+;;      own row/column tracking - Console drove this exclusively once, then
+;;      both in parallel while Video's output was being validated against
+;;      Console's known-good behavior; this is the cutover to Video being the
+;;      only output, now that it's trusted.
 ;;
-;;      The original one-instruction routine never touched X or Y and always
-;;      left A holding the printed character, so callers rely on all three
-;;      surviving a BIOS_PUTCH call: READLINE does STA INBUF,Y / JSR
-;;      BIOS_PUTCH / INY; CMD_DUMP keeps its 16-line row counter in X across
-;;      many JSR BIOS_PUTCH calls per line; and CMD_DUMP's own column-gap
-;;      spacing does LDA #' ' / JSR BIOS_PUTCH / JSR BIOS_PUTCH, printing the
-;;      same space twice by relying on A still holding it after the first
-;;      call. X is never touched anywhere in this call chain (PC_SCROLL below
-;;      uses address comparison instead of a row counter specifically to keep
-;;      it that way), so it needs no saving; Y and the character are stashed
-;;      in SAVED_Y/SAVED_CHAR via plain STY/STA (neither touches A, unlike the
-;;      TYA/TXA a PHA-based save would need) and restored at PC_DONE. ----
-DO_PUTCH STA CONSOLE_DATA
-	STA SAVED_CHAR
+;;      The very first version of this routine (before Video existed at all)
+;;      never touched X or Y and always left A holding the printed character,
+;;      so callers still rely on all three surviving a BIOS_PUTCH call:
+;;      READLINE does STA INBUF,Y / JSR BIOS_PUTCH / INY; CMD_DUMP keeps its
+;;      16-line row counter in X across many JSR BIOS_PUTCH calls per line;
+;;      and CMD_DUMP's own column-gap spacing does LDA #' ' / JSR BIOS_PUTCH /
+;;      JSR BIOS_PUTCH, printing the same space twice by relying on A still
+;;      holding it after the first call. X is never touched anywhere in this
+;;      call chain (PC_SCROLL below uses address comparison instead of a row
+;;      counter specifically to keep it that way), so it needs no saving; Y
+;;      and the character are stashed in SAVED_Y/SAVED_CHAR via plain STY/STA
+;;      (neither touches A, unlike the TYA/TXA a PHA-based save would need)
+;;      and restored at PC_DONE. ----
+DO_PUTCH STA SAVED_CHAR
 	STY SAVED_Y
 	CMP #$0D		;; CR: back to column 0, same row
 	BEQ PC_CR
@@ -355,10 +367,10 @@ VI_BYTE_LOOP LDA #' '
 	JSR PC_SET_CURSOR
 	RTS
 
-DO_GETCH LDA CONSOLE_STAT
+DO_GETCH LDA VIDEO_KBD_STAT
 	AND #DATA_AVAILABLE
 	BEQ DO_GETCH
-	LDA CONSOLE_DATA
+	LDA VIDEO_KBD_DATA
 	RTS
 
 DO_SELECT STA FD_DRIVE

@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.AddressRange;
-import com.mj.Devices.ConsoleDevice;
 import com.mj.Devices.PBus;
 import com.mj.Devices.VIA6522;
 import com.mj.Disk.FloppyController;
@@ -55,16 +54,16 @@ public class CPUMain {
 
 		VIA6522 via = new VIA6522(bus, new AddressRange(0x9000, 0x900f));
 		bus.registerDevice(via);
-		ConsoleDevice con = new ConsoleDevice(via, new AddressRange(0xec00, 0xec01));
-		bus.registerDevice(con);
 
-		// Video: a CRTC-style display controller (see VideoController's class comment),
-		// separate from and in addition to ConsoleDevice - the character RAM it scans
-		// out is plain basicMemory, registered on the bus in its own right (the CPU
-		// pokes ASCII bytes straight into it at ordinary addresses, no register call
-		// needed) but also handed directly to VideoController's constructor, since
-		// nothing else gives its renderer a way to read those bytes back for display.
-		// Sits right after BDOS's ROM in the free address space.
+		// Video: a CRTC-style display controller (see VideoController's class comment) -
+		// the sole console now (ConsoleDevice drove this exclusively once, then both in
+		// parallel while Video was being validated against it; this is the cutover,
+		// now that it's trusted). The character RAM it scans out is plain basicMemory,
+		// registered on the bus in its own right (the CPU pokes ASCII bytes straight
+		// into it at ordinary addresses, no register call needed) but also handed
+		// directly to VideoController's constructor, since nothing else gives its
+		// renderer a way to read those bytes back for display. Sits right after BDOS's
+		// ROM in the free address space.
 		basicMemory videoRam = new basicMemory(bus, new AddressRange(0xb800, 0xbfff), null, 0);
 		bus.registerDevice(videoRam);
 		VideoController video = new VideoController(new AddressRange(0x9020, 0x9023), videoRam);
@@ -88,7 +87,6 @@ public class CPUMain {
 
 		CPU c = new CPU(bus, d);
 		logger.error(String.format("Number of Opcodes = %d ", OpCodes.getMap().size()));
-		con.show();
 		video.show();
 		c.start();
 		}

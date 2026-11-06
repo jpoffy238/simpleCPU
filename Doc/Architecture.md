@@ -308,7 +308,7 @@ output mode) for the ROM.
 
 **No crt0.** Nothing ever JSRs to BDOS's reset-style entry point - only to
 the jump table's individual slots - so cc65's usual startup sequence
-(initialize the software stack pointer `sp` at zero page `$0A`/`$0B`, zero
+(initialize the software stack pointer `sp` at zero page `$0F`/`$10`, zero
 BSS, call `main()`) never actually runs here. Zeroed BSS falls out of
 Java's array default anyway, but `sp` sitting uninitialized at the *first*
 BDOS call ever (`B`'s boot sequence, before any program's own crt0 has
