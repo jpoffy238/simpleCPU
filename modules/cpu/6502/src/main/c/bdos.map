@@ -7,84 +7,84 @@ bdos.o:
 bdos_jumptable.o:
     JUMPTABLE         Offs=000000  Size=00001E  Align=00001  Fill=0000
 bios_glue.o:
-    CODE              Offs=000D4F  Size=000028  Align=00001  Fill=0000
+    CODE              Offs=000D4F  Size=00002E  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000001  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(addeqsp.o):
-    CODE              Offs=000D77  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=000D7D  Size=000011  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(addysp.o):
-    CODE              Offs=000D88  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000D8E  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(aslax1.o):
-    CODE              Offs=000D96  Size=000008  Align=00001  Fill=0000
+    CODE              Offs=000D9C  Size=000008  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(aslax3.o):
-    CODE              Offs=000D9E  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000DA4  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(aslax4.o):
-    CODE              Offs=000DAC  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=000DB2  Size=000011  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(call.o):
-    CODE              Offs=000DBD  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=000DC3  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(condes.o):
-    CODE              Offs=000DC4  Size=00000C  Align=00001  Fill=0000
+    CODE              Offs=000DCA  Size=00000C  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000025  Align=00001  Fill=0000
     ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(crt0.o):
     STARTUP           Offs=000000  Size=000017  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp1.o):
-    CODE              Offs=000DD0  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=000DD6  Size=000009  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp2.o):
-    CODE              Offs=000DD9  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000DDF  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp3.o):
-    CODE              Offs=000DE6  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000DEC  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp4.o):
-    CODE              Offs=000DF3  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000DF9  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp5.o):
-    CODE              Offs=000E00  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000E06  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp6.o):
-    CODE              Offs=000E0D  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000E13  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incax1.o):
-    CODE              Offs=000E1A  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=000E20  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incax8.o):
-    CODE              Offs=000E21  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000E27  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incaxy.o):
-    CODE              Offs=000E26  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=000E2C  Size=00000B  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp1.o):
-    CODE              Offs=000E31  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=000E37  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp2.o):
-    CODE              Offs=000E38  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000E3E  Size=000016  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp3.o):
-    CODE              Offs=000E4E  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000E54  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp4.o):
-    CODE              Offs=000E53  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000E59  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp5.o):
-    CODE              Offs=000E58  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000E5E  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp6.o):
-    CODE              Offs=000E5D  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000E63  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp7.o):
-    CODE              Offs=000E62  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000E68  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp8.o):
-    CODE              Offs=000E67  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000E6D  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(ldaxsp.o):
-    CODE              Offs=000E6C  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=000E72  Size=000009  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(makebool.o):
-    CODE              Offs=000E75  Size=00002C  Align=00001  Fill=0000
+    CODE              Offs=000E7B  Size=00002C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(popptr1.o):
-    CODE              Offs=000EA1  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000EA7  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pusha.o):
-    CODE              Offs=000EAF  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000EB5  Size=000016  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pushax.o):
-    CODE              Offs=000EC5  Size=00001A  Align=00001  Fill=0000
+    CODE              Offs=000ECB  Size=00001A  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pushwsp.o):
-    CODE              Offs=000EDF  Size=00001C  Align=00001  Fill=0000
+    CODE              Offs=000EE5  Size=00001C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(shl.o):
-    CODE              Offs=000EFB  Size=000033  Align=00001  Fill=0000
+    CODE              Offs=000F01  Size=000033  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(staxsp.o):
-    CODE              Offs=000F2E  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=000F34  Size=00000B  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(subysp.o):
-    CODE              Offs=000F39  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000F3F  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(udiv.o):
-    CODE              Offs=000F46  Size=00004F  Align=00001  Fill=0000
+    CODE              Offs=000F4C  Size=00004F  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(umod.o):
-    CODE              Offs=000F95  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=000F9B  Size=000011  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(zerobss.o):
-    CODE              Offs=000FA6  Size=000023  Align=00001  Fill=0000
+    CODE              Offs=000FAC  Size=000023  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(zeropage.o):
     ZEROPAGE          Offs=000001  Size=00001A  Align=00001  Fill=0000
 
@@ -99,8 +99,8 @@ BSS                   008025  008117  0000F3  00001
 JUMPTABLE             00A000  00A01D  00001E  00001
 STARTUP               00A01E  00A034  000017  00001
 ONCE                  00A035  00A040  00000C  00001
-CODE                  00A041  00B009  000FC9  00001
-RODATA                00B00A  00B011  000008  00001
+CODE                  00A041  00B00F  000FCF  00001
+RODATA                00B010  00B017  000008  00001
 
 
 Exports list by name:
@@ -117,31 +117,31 @@ _bdos_run_file            00A9E9 RLA    _bdos_write_record        00AC9C RLA
 _bios_getch               00AD94 RLA    _bios_read_sector         00ADA3 RLA    
 _bios_set_buffer          00AD9B RLA    _bios_set_x               00ADA0 RLA    
 _bios_write_sector        00ADA9 RLA    _main                     00AD8C RLA    
-addeq0sp                  00ADB8 RLA    addeqysp                  00ADBA RLA    
-addysp                    00ADCA RLA    aslaxy                    00AF43 RLA    
-booleq                    00AEBC RLA    callax                    00ADFE RLA    
-decsp1                    00AE11 RLA    decsp2                    00AE1A RLA    
-decsp3                    00AE27 RLA    decsp4                    00AE34 RLA    
-decsp5                    00AE41 RLA    decsp6                    00AE4E RLA    
-donelib                   00AE05 RLA    incax1                    00AE5B RLA    
-incax8                    00AE62 RLA    incaxy                    00AE69 RLA    
-incsp1                    00AE72 RLA    incsp2                    00AE81 RLA    
-incsp3                    00AE8F RLA    incsp4                    00AE94 RLA    
-incsp5                    00AE99 RLA    incsp6                    00AE9E RLA    
-incsp7                    00AEA3 RLA    incsp8                    00AEA8 RLA    
-initlib                   00A035 RLA    ldax0sp                   00AEAD RLA    
-ldaxysp                   00AEAF RLA    popax                     00AE79 RLA    
-popptr1                   00AEE2 RLA    ptr1                      000017 RLZ    
-ptr4                      00001D RLZ    push0                     00AF06 RLA    
-pusha                     00AEF4 RLA    pushax                    00AF0A RLA    
-pushw0sp                  00AF20 RLA    pushwysp                  00AF22 RLA    
-shlax1                    00ADD7 RLA    shlax3                    00ADDF RLA    
-shlax4                    00ADED RLA    sp                        00000F RLZ    
-sreg                      000011 RLZ    stax0sp                   00AF6F RLA    
-staxysp                   00AF71 RLA    subysp                    00AF7A RLA    
-tmp1                      00001F RLZ    tosudiva0                 00AF87 RLA    
-tosumoda0                 00AFD6 RLA    udiv16                    00AF98 RLA    
-zerobss                   00AFE7 RLA    
+addeq0sp                  00ADBE RLA    addeqysp                  00ADC0 RLA    
+addysp                    00ADD0 RLA    aslaxy                    00AF49 RLA    
+booleq                    00AEC2 RLA    callax                    00AE04 RLA    
+decsp1                    00AE17 RLA    decsp2                    00AE20 RLA    
+decsp3                    00AE2D RLA    decsp4                    00AE3A RLA    
+decsp5                    00AE47 RLA    decsp6                    00AE54 RLA    
+donelib                   00AE0B RLA    incax1                    00AE61 RLA    
+incax8                    00AE68 RLA    incaxy                    00AE6F RLA    
+incsp1                    00AE78 RLA    incsp2                    00AE87 RLA    
+incsp3                    00AE95 RLA    incsp4                    00AE9A RLA    
+incsp5                    00AE9F RLA    incsp6                    00AEA4 RLA    
+incsp7                    00AEA9 RLA    incsp8                    00AEAE RLA    
+initlib                   00A035 RLA    ldax0sp                   00AEB3 RLA    
+ldaxysp                   00AEB5 RLA    popax                     00AE7F RLA    
+popptr1                   00AEE8 RLA    ptr1                      000017 RLZ    
+ptr4                      00001D RLZ    push0                     00AF0C RLA    
+pusha                     00AEFA RLA    pushax                    00AF10 RLA    
+pushw0sp                  00AF26 RLA    pushwysp                  00AF28 RLA    
+shlax1                    00ADDD RLA    shlax3                    00ADE5 RLA    
+shlax4                    00ADF3 RLA    sp                        00000F RLZ    
+sreg                      000011 RLZ    stax0sp                   00AF75 RLA    
+staxysp                   00AF77 RLA    subysp                    00AF80 RLA    
+tmp1                      00001F RLZ    tosudiva0                 00AF8D RLA    
+tosumoda0                 00AFDC RLA    udiv16                    00AF9E RLA    
+zerobss                   00AFED RLA    
 
 
 Exports list by value:
@@ -161,28 +161,28 @@ _bdos_create_file         00AA09 RLA    _bdos_write_record        00AC9C RLA
 _main                     00AD8C RLA    _bios_getch               00AD94 RLA    
 _bios_set_buffer          00AD9B RLA    _bios_set_x               00ADA0 RLA    
 _bios_read_sector         00ADA3 RLA    _bios_write_sector        00ADA9 RLA    
-addeq0sp                  00ADB8 RLA    addeqysp                  00ADBA RLA    
-addysp                    00ADCA RLA    shlax1                    00ADD7 RLA    
-shlax3                    00ADDF RLA    shlax4                    00ADED RLA    
-callax                    00ADFE RLA    donelib                   00AE05 RLA    
-decsp1                    00AE11 RLA    decsp2                    00AE1A RLA    
-decsp3                    00AE27 RLA    decsp4                    00AE34 RLA    
-decsp5                    00AE41 RLA    decsp6                    00AE4E RLA    
-incax1                    00AE5B RLA    incax8                    00AE62 RLA    
-incaxy                    00AE69 RLA    incsp1                    00AE72 RLA    
-popax                     00AE79 RLA    incsp2                    00AE81 RLA    
-incsp3                    00AE8F RLA    incsp4                    00AE94 RLA    
-incsp5                    00AE99 RLA    incsp6                    00AE9E RLA    
-incsp7                    00AEA3 RLA    incsp8                    00AEA8 RLA    
-ldax0sp                   00AEAD RLA    ldaxysp                   00AEAF RLA    
-booleq                    00AEBC RLA    popptr1                   00AEE2 RLA    
-pusha                     00AEF4 RLA    push0                     00AF06 RLA    
-pushax                    00AF0A RLA    pushw0sp                  00AF20 RLA    
-pushwysp                  00AF22 RLA    aslaxy                    00AF43 RLA    
-stax0sp                   00AF6F RLA    staxysp                   00AF71 RLA    
-subysp                    00AF7A RLA    tosudiva0                 00AF87 RLA    
-udiv16                    00AF98 RLA    tosumoda0                 00AFD6 RLA    
-zerobss                   00AFE7 RLA    
+addeq0sp                  00ADBE RLA    addeqysp                  00ADC0 RLA    
+addysp                    00ADD0 RLA    shlax1                    00ADDD RLA    
+shlax3                    00ADE5 RLA    shlax4                    00ADF3 RLA    
+callax                    00AE04 RLA    donelib                   00AE0B RLA    
+decsp1                    00AE17 RLA    decsp2                    00AE20 RLA    
+decsp3                    00AE2D RLA    decsp4                    00AE3A RLA    
+decsp5                    00AE47 RLA    decsp6                    00AE54 RLA    
+incax1                    00AE61 RLA    incax8                    00AE68 RLA    
+incaxy                    00AE6F RLA    incsp1                    00AE78 RLA    
+popax                     00AE7F RLA    incsp2                    00AE87 RLA    
+incsp3                    00AE95 RLA    incsp4                    00AE9A RLA    
+incsp5                    00AE9F RLA    incsp6                    00AEA4 RLA    
+incsp7                    00AEA9 RLA    incsp8                    00AEAE RLA    
+ldax0sp                   00AEB3 RLA    ldaxysp                   00AEB5 RLA    
+booleq                    00AEC2 RLA    popptr1                   00AEE8 RLA    
+pusha                     00AEFA RLA    push0                     00AF0C RLA    
+pushax                    00AF10 RLA    pushw0sp                  00AF26 RLA    
+pushwysp                  00AF28 RLA    aslaxy                    00AF49 RLA    
+stax0sp                   00AF75 RLA    staxysp                   00AF77 RLA    
+subysp                    00AF80 RLA    tosudiva0                 00AF8D RLA    
+udiv16                    00AF9E RLA    tosumoda0                 00AFDC RLA    
+zerobss                   00AFED RLA    
 
 
 Imports list:

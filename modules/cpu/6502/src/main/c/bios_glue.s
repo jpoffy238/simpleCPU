@@ -18,6 +18,7 @@ BIOS_READ_SECTOR  = $F009
 BIOS_WRITE_SECTOR = $F00C
 BIOS_FORMAT_TRACK = $F00F
 BIOS_RESTORE      = $F012
+BIOS_GOTOXY       = $F018
 
 ; zero page: shared ABI with BIOS.asm/MONITOR.asm - the sector-buffer address
 ; parameter for BIOS_READ_SECTOR/BIOS_WRITE_SECTOR.
@@ -28,6 +29,7 @@ ADDRHI = $02
 .export _bios_set_buffer, _bios_set_x
 .export _bios_read_sector, _bios_write_sector, _bios_format_track
 .export _bios_restore
+.export _bios_gotoxy
 
 ; Glue-owned staging byte for the second hardware parameter - not part of the
 ; BIOS.asm/MONITOR.asm ABI, just this glue layer's own scratch. Lives wherever
@@ -84,3 +86,11 @@ _bios_format_track:
 ; void bios_restore(void) - no parameters
 _bios_restore:
 	jmp BIOS_RESTORE	; tail call
+
+; void __fastcall__ bios_gotoxy(unsigned char row) - row in A, col staged via
+; bios_set_x() first (same "A = track, X = sector"-style pairing as
+; bios_read_sector() above)
+_bios_gotoxy:
+	ldx staged_x
+	jsr BIOS_GOTOXY
+	rts

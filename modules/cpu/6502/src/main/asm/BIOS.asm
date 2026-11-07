@@ -19,6 +19,12 @@
 ;;   BIOS_VIDEO_INIT    no parameters - one-time setup: configures VideoController's
 ;;                      H/V Displayed and cursor, clears its character RAM, and resets
 ;;                      this file's own row/column tracking (see DO_PUTCH)
+;;   BIOS_GOTOXY        A = row (0..V_ROWS-1), X = col (0..V_COLS-1) - the only way
+;;                      to reach an arbitrary screen cell from outside this file;
+;;                      DO_PUTCH otherwise only ever advances sequentially. Repoints
+;;                      BIOS_PUTCH's next write and the hardware cursor bar at
+;;                      (row, col); no bounds checking - caller's job to stay within
+;;                      V_ROWS/V_COLS.
 CPU 6502
 OUTPUT HEX
 
@@ -115,6 +121,7 @@ SAVED_Y    = $0D
 	JMP DO_FORMAT_TRACK	;; $F00F BIOS_FORMAT_TRACK
 	JMP DO_RESTORE		;; $F012 BIOS_RESTORE
 	JMP DO_VIDEO_INIT	;; $F015 BIOS_VIDEO_INIT
+	JMP DO_GOTOXY		;; $F018 BIOS_GOTOXY
 
 ;; ---- A = char to print. Pokes VideoController's character RAM with BIOS's
 ;;      own row/column tracking - Console drove this exclusively once, then
@@ -364,6 +371,47 @@ VI_BYTE_LOOP LDA #' '
 	INX
 	CPX #V_ROWS
 	BNE VI_ROW_LOOP
+	JSR PC_SET_CURSOR
+	RTS
+
+;; ---- A = row, X = col. Repoints V_ADDR_LO/HI/V_COL (so a following
+;;      BIOS_PUTCH - and its own CR/LF/BS/scroll handling - picks up from
+;;      here exactly as if it had scrolled/wrapped into this cell normally)
+;;      and the hardware cursor bar at VIDEO_RAM + row*V_COLS + col.
+;;
+;;      row*V_COLS is a plain repeated-add loop (row is at most V_ROWS-1 = 23)
+;;      rather than a shift-based multiply - this runs once per cursor
+;;      move/redraw, never once per character, so simplicity wins over speed.
+;;      X is free to clobber as the loop counter: col is stashed into V_COL
+;;      (its own final resting place) before X gets reused this way, and nothing
+;;      in BIOS_GOTOXY's cc65-side caller convention expects X to survive a
+;;      call the way CMD_DUMP relies on BIOS_PUTCH's X survival (see DO_PUTCH's
+;;      comment) - fastcall C callers never keep values in 6502 registers
+;;      across a call at all. ----
+DO_GOTOXY STX V_COL
+	TAX
+	LDA #(VIDEO_RAM & $FF)
+	STA V_ADDR_LO
+	LDA #(VIDEO_RAM >> 8)
+	STA V_ADDR_HI
+GX_ROW_LOOP CPX #0
+	BEQ GX_ROW_DONE
+	LDA V_ADDR_LO
+	CLC
+	ADC #V_COLS
+	STA V_ADDR_LO
+	LDA V_ADDR_HI
+	ADC #0
+	STA V_ADDR_HI
+	DEX
+	JMP GX_ROW_LOOP
+GX_ROW_DONE LDA V_ADDR_LO
+	CLC
+	ADC V_COL
+	STA V_ADDR_LO
+	LDA V_ADDR_HI
+	ADC #0
+	STA V_ADDR_HI
 	JSR PC_SET_CURSOR
 	RTS
 

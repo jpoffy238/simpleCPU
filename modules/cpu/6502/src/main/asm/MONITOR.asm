@@ -28,6 +28,7 @@ BIOS_WRITE_SECTOR = $F00C	;; A = track, X = sector, ADDRLO/ADDRHI = src
 BIOS_FORMAT_TRACK = $F00F	;; A = track, X = fill byte
 BIOS_RESTORE      = $F012	;; no params - homes the selected drive to track 0
 BIOS_VIDEO_INIT   = $F015	;; no params - one-time Video setup, see BIOS.asm
+BIOS_GOTOXY       = $F018	;; A = row, X = col - see BIOS.asm
 
 ;; BDOS ROM jump table (see bdos_jumptable.s/bdos.c) - a second, separately
 ;; assembled/compiled frozen ABI, same keep-in-sync contract as BIOS above.

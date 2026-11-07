@@ -1,0 +1,459 @@
+Modules list:
+-------------
+edit.o:
+    CODE              Offs=000000  Size=000E16  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=00006C  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=001F4D  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=000007  Align=00001  Fill=0000
+bios_glue.o:
+    CODE              Offs=000E16  Size=00002E  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=000001  Align=00001  Fill=0000
+bdos_glue.o:
+    CODE              Offs=000E44  Size=00001E  Align=00001  Fill=0000
+bios_util.o:
+    CODE              Offs=000E62  Size=0000BD  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(addeqsp.o):
+    CODE              Offs=000F1F  Size=000011  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(addysp.o):
+    CODE              Offs=000F30  Size=00000E  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(condes.o):
+    CODE              Offs=000F3E  Size=00000C  Align=00001  Fill=0000
+    DATA              Offs=000007  Size=000025  Align=00001  Fill=0000
+    ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(crt0.o):
+    STARTUP           Offs=000000  Size=000017  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(decax1.o):
+    CODE              Offs=000F4A  Size=000007  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(decaxy.o):
+    CODE              Offs=000F51  Size=000009  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(decsp1.o):
+    CODE              Offs=000F5A  Size=000009  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(decsp2.o):
+    CODE              Offs=000F63  Size=00000D  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(decsp3.o):
+    CODE              Offs=000F70  Size=00000D  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(decsp5.o):
+    CODE              Offs=000F7D  Size=00000D  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(icmp.o):
+    CODE              Offs=000F8A  Size=00002E  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(incax1.o):
+    CODE              Offs=000FB8  Size=000007  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(incax3.o):
+    CODE              Offs=000FBF  Size=000005  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(incaxy.o):
+    CODE              Offs=000FC4  Size=00000B  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(incsp1.o):
+    CODE              Offs=000FCF  Size=000007  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(incsp2.o):
+    CODE              Offs=000FD6  Size=000016  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(incsp3.o):
+    CODE              Offs=000FEC  Size=000005  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(incsp5.o):
+    CODE              Offs=000FF1  Size=000005  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(incsp6.o):
+    CODE              Offs=000FF6  Size=000005  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(ldaxsp.o):
+    CODE              Offs=000FFB  Size=000009  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(leaaxsp.o):
+    CODE              Offs=001004  Size=00000C  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(makebool.o):
+    CODE              Offs=001010  Size=00002C  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(mul8.o):
+    CODE              Offs=00103C  Size=00003A  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(popptr1.o):
+    CODE              Offs=001076  Size=00000E  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(pusha.o):
+    CODE              Offs=001084  Size=000016  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(pushax.o):
+    CODE              Offs=00109A  Size=00001A  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(pushwsp.o):
+    CODE              Offs=0010B4  Size=00001C  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(staspidx.o):
+    CODE              Offs=0010D0  Size=000016  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(staxsp.o):
+    CODE              Offs=0010E6  Size=00000B  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(subysp.o):
+    CODE              Offs=0010F1  Size=00000D  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(udiv.o):
+    CODE              Offs=0010FE  Size=00004F  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(umod.o):
+    CODE              Offs=00114D  Size=000011  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(zerobss.o):
+    CODE              Offs=00115E  Size=000023  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(zeropage.o):
+    ZEROPAGE          Offs=000001  Size=00001A  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+ZEROPAGE              00000E  000028  00001B  00001
+STARTUP               000300  000316  000017  00001
+ONCE                  000317  000322  00000C  00001
+CODE                  000323  0014A3  001181  00001
+RODATA                0014A4  00150F  00006C  00001
+DATA                  001510  00153B  00002C  00001
+BSS                   00153C  003488  001F4D  00001
+
+
+Exports list by name:
+---------------------
+__BSS_RUN__               00153C RLA    __BSS_SIZE__              001F4D REA    
+__CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     000317 RLA    
+__DESTRUCTOR_COUNT__      000000 REA    __DESTRUCTOR_TABLE__      000317 RLA    
+__STACKSTART__            008000 REA    __STARTUP__               000001 REA    
+_bdos_create_file         001176 RLA    _bdos_delete_file         001173 RLA    
+_bdos_find_file           00116D RLA    _bdos_read_record         001170 RLA    
+_bdos_write_record        001179 RLA    _bios_clear_eol           0011B2 RLA    
+_bios_clrscr              001211 RLA    _bios_getch               00113D RLA    
+_bios_gotoxy              001161 RLA    _bios_putch               001139 RLA    
+_bios_putstr              001185 RLA    _bios_set_buffer          001144 RLA    
+_bios_set_x               001149 RLA    _main                     0010B9 RLA    
+addeq0sp                  001242 RLA    addysp                    001254 RLA    
+boolne                    001333 RLA    decax1                    00126D RLA    
+decaxy                    001274 RLA    decsp1                    00127D RLA    
+decsp2                    001286 RLA    decsp3                    001293 RLA    
+decsp5                    0012A0 RLA    donelib                   001261 RLA    
+incax1                    0012DB RLA    incax3                    0012E2 RLA    
+incaxy                    0012E9 RLA    incsp1                    0012F2 RLA    
+incsp2                    001301 RLA    incsp3                    00130F RLA    
+incsp5                    001314 RLA    incsp6                    001319 RLA    
+initlib                   000317 RLA    ldax0sp                   00131E RLA    
+ldaxysp                   001320 RLA    leaa0sp                   001327 RLA    
+leaaxsp                   001329 RLA    popptr1                   001399 RLA    
+ptr1                      000017 RLZ    ptr4                      00001D RLZ    
+pusha                     0013AB RLA    pusha0                    0013BF RLA    
+pushax                    0013C1 RLA    pushwysp                  0013D9 RLA    
+sp                        00000F RLZ    sreg                      000011 RLZ    
+staspidx                  0013F3 RLA    stax0sp                   001409 RLA    
+staxysp                   00140B RLA    subysp                    001414 RLA    
+tmp1                      00001F RLZ    tosicmp                   0012AF RLA    
+tosmula0                  00135F RLA    tosudiva0                 001421 RLA    
+tosumoda0                 001470 RLA    udiv16                    001432 RLA    
+zerobss                   001481 RLA    
+
+
+Exports list by value:
+----------------------
+__CONSTRUCTOR_COUNT__     000000 REA    __DESTRUCTOR_COUNT__      000000 REA    
+__STARTUP__               000001 REA    sp                        00000F RLZ    
+sreg                      000011 RLZ    ptr1                      000017 RLZ    
+ptr4                      00001D RLZ    tmp1                      00001F RLZ    
+__CONSTRUCTOR_TABLE__     000317 RLA    __DESTRUCTOR_TABLE__      000317 RLA    
+initlib                   000317 RLA    _main                     0010B9 RLA    
+_bios_putch               001139 RLA    _bios_getch               00113D RLA    
+_bios_set_buffer          001144 RLA    _bios_set_x               001149 RLA    
+_bios_gotoxy              001161 RLA    _bdos_find_file           00116D RLA    
+_bdos_read_record         001170 RLA    _bdos_delete_file         001173 RLA    
+_bdos_create_file         001176 RLA    _bdos_write_record        001179 RLA    
+_bios_putstr              001185 RLA    _bios_clear_eol           0011B2 RLA    
+_bios_clrscr              001211 RLA    addeq0sp                  001242 RLA    
+addysp                    001254 RLA    donelib                   001261 RLA    
+decax1                    00126D RLA    decaxy                    001274 RLA    
+decsp1                    00127D RLA    decsp2                    001286 RLA    
+decsp3                    001293 RLA    decsp5                    0012A0 RLA    
+tosicmp                   0012AF RLA    incax1                    0012DB RLA    
+incax3                    0012E2 RLA    incaxy                    0012E9 RLA    
+incsp1                    0012F2 RLA    incsp2                    001301 RLA    
+incsp3                    00130F RLA    incsp5                    001314 RLA    
+incsp6                    001319 RLA    ldax0sp                   00131E RLA    
+ldaxysp                   001320 RLA    leaa0sp                   001327 RLA    
+leaaxsp                   001329 RLA    boolne                    001333 RLA    
+tosmula0                  00135F RLA    popptr1                   001399 RLA    
+pusha                     0013AB RLA    pusha0                    0013BF RLA    
+pushax                    0013C1 RLA    pushwysp                  0013D9 RLA    
+staspidx                  0013F3 RLA    stax0sp                   001409 RLA    
+staxysp                   00140B RLA    subysp                    001414 RLA    
+tosudiva0                 001421 RLA    udiv16                    001432 RLA    
+tosumoda0                 001470 RLA    zerobss                   001481 RLA    
+__BSS_RUN__               00153C RLA    __BSS_SIZE__              001F4D REA    
+__STACKSTART__            008000 REA    
+
+
+Imports list:
+-------------
+__BSS_RUN__ ([linker generated]):
+    zerobss.o                 common/zerobss.s:8
+__BSS_SIZE__ ([linker generated]):
+    zerobss.o                 common/zerobss.s:8
+__CONSTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s:18
+__CONSTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s:18
+__DESTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s:19
+__DESTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s:19
+__STACKSTART__ ([linker generated]):
+    crt0.o                    none/crt0.s:5
+__STARTUP__ (crt0.o):
+    edit.o                    edit.s:13
+_bdos_create_file (bdos_glue.o):
+    edit.o                    edit.s:25
+_bdos_delete_file (bdos_glue.o):
+    edit.o                    edit.s:24
+_bdos_find_file (bdos_glue.o):
+    edit.o                    edit.s:22
+_bdos_read_record (bdos_glue.o):
+    edit.o                    edit.s:23
+_bdos_write_record (bdos_glue.o):
+    edit.o                    edit.s:26
+_bios_clear_eol (bios_util.o):
+    edit.o                    edit.s:20
+_bios_clrscr (bios_util.o):
+    edit.o                    edit.s:21
+_bios_getch (bios_glue.o):
+    edit.o                    edit.s:15
+_bios_gotoxy (bios_glue.o):
+    bios_util.o               bios_util.s:16
+    edit.o                    edit.s:19
+_bios_putch (bios_glue.o):
+    bios_util.o               bios_util.s:13
+    edit.o                    edit.s:14
+_bios_putstr (bios_util.o):
+    edit.o                    edit.s:16
+_bios_set_buffer (bios_glue.o):
+    edit.o                    edit.s:17
+_bios_set_x (bios_glue.o):
+    bios_util.o               bios_util.s:15
+    edit.o                    edit.s:18
+_main (edit.o):
+    crt0.o                    none/crt0.s:3
+addeq0sp (addeqsp.o):
+    bios_util.o               bios_util.s:145
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+addysp (addysp.o):
+    incsp6.o                  runtime/incsp6.s:8
+    incsp5.o                  runtime/incsp5.s:8
+    incsp3.o                  runtime/incsp3.s:8
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+boolne (makebool.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+decax1 (decax1.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+decaxy (decaxy.o):
+    edit.o                    edit.s:2135
+decsp1 (decsp1.o):
+    bios_util.o               bios_util.s:145
+    bios_util.o               bios_util.s:145
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+decsp2 (decsp2.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+decsp3 (decsp3.o):
+    edit.o                    edit.s:2135
+decsp5 (decsp5.o):
+    edit.o                    edit.s:2135
+donelib (condes.o):
+    crt0.o                    none/crt0.s:4
+incax1 (incax1.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+incax3 (incax3.o):
+    edit.o                    edit.s:2135
+incaxy (incaxy.o):
+    incax3.o                  runtime/incax3.s:8
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+incsp1 (incsp1.o):
+    bios_util.o               bios_util.s:145
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+incsp2 (incsp2.o):
+    staspidx.o                runtime/staspidx.s:8
+    popptr1.o                 runtime/popptr1.s:8
+    bios_util.o               bios_util.s:145
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+incsp3 (incsp3.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+incsp5 (incsp5.o):
+    bios_util.o               bios_util.s:145
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+incsp6 (incsp6.o):
+    edit.o                    edit.s:2135
+initlib (condes.o):
+    crt0.o                    none/crt0.s:4
+ldax0sp (ldaxsp.o):
+    bios_util.o               bios_util.s:145
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+ldaxysp (ldaxsp.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+leaa0sp (leaaxsp.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+leaaxsp (leaaxsp.o):
+    edit.o                    edit.s:2135
+popptr1 (popptr1.o):
+    umod.o                    runtime/umod.s:8
+    udiv.o                    runtime/udiv.s:9
+    mul8.o                    runtime/mul8.s:9
+ptr1 (zeropage.o):
+    zerobss.o                 common/zerobss.s:9
+    udiv.o                    runtime/udiv.s:10
+    staspidx.o                runtime/staspidx.s:9
+    popptr1.o                 runtime/popptr1.s:9
+    mul8.o                    runtime/mul8.s:10
+    bios_util.o               bios_util.s:11
+    edit.o                    edit.s:11
+ptr4 (zeropage.o):
+    umod.o                    runtime/umod.s:9
+    udiv.o                    runtime/udiv.s:10
+    mul8.o                    runtime/mul8.s:10
+pusha (pusha.o):
+    bios_util.o               bios_util.s:145
+    bios_util.o               bios_util.s:145
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+pusha0 (pushax.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+pushax (pushax.o):
+    bios_util.o               bios_util.s:145
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+pushwysp (pushwsp.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+sp (zeropage.o):
+    subysp.o                  runtime/subysp.s:9
+    staxsp.o                  runtime/staxsp.s:8
+    staspidx.o                runtime/staspidx.s:9
+    pushwsp.o                 runtime/pushwsp.s:8
+    pushax.o                  runtime/pushax.s:8
+    pusha.o                   runtime/pusha.s:8
+    popptr1.o                 runtime/popptr1.s:9
+    leaaxsp.o                 runtime/leaaxsp.s:8
+    ldaxsp.o                  runtime/ldaxsp.s:8
+    incsp2.o                  runtime/incsp2.s:8
+    incsp1.o                  runtime/incsp1.s:8
+    icmp.o                    runtime/icmp.s:9
+    decsp5.o                  runtime/decsp5.s:8
+    decsp3.o                  runtime/decsp3.s:8
+    decsp2.o                  runtime/decsp2.s:8
+    decsp1.o                  runtime/decsp1.s:8
+    crt0.o                    /home/jpoffen/git/cc65/asminc/zeropage.inc:11
+    addysp.o                  runtime/addysp.s:8
+    addeqsp.o                 runtime/addeqsp.s:8
+    bios_util.o               bios_util.s:10
+    edit.o                    edit.s:10
+sreg (zeropage.o):
+    umod.o                    runtime/umod.s:9
+    udiv.o                    runtime/udiv.s:10
+    icmp.o                    runtime/icmp.s:9
+    edit.o                    edit.s:10
+staspidx (staspidx.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+stax0sp (staxsp.o):
+    edit.o                    edit.s:2135
+staxysp (staxsp.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+subysp (subysp.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+tmp1 (zeropage.o):
+    staspidx.o                runtime/staspidx.s:9
+    incaxy.o                  runtime/incaxy.s:8
+    decaxy.o                  runtime/decaxy.s:8
+tosicmp (icmp.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+tosmula0 (mul8.o):
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+    edit.o                    edit.s:2135
+tosudiva0 (udiv.o):
+    edit.o                    edit.s:2135
+tosumoda0 (umod.o):
+    edit.o                    edit.s:2135
+udiv16 (udiv.o):
+    umod.o                    runtime/umod.s:8
+zerobss (zerobss.o):
+    crt0.o                    none/crt0.s:3
+

@@ -173,6 +173,20 @@ public class Test_VideoController {
 		assertEquals(0, video.read(0x9023) & 0xff);
 	}
 
+	@Test
+	public void arrowKeysQueueTheirSyntheticCodesAlongsideTypedCharacters() throws Exception {
+		// Arrow keys never reach keyTyped() (no character), so firmware reading
+		// BIOS_GETCH needs them to come through as ordinary queued bytes outside
+		// plain ASCII's 0-127 range - same queue, same dequeue order as typing.
+		video.type("A");
+		video.pressArrowKey(VideoController.KEY_UP);
+		video.type("B");
+
+		assertEquals('A', video.read(0x9022) & 0xff);
+		assertEquals(VideoController.KEY_UP, video.read(0x9022) & 0xff);
+		assertEquals('B', video.read(0x9022) & 0xff);
+	}
+
 	/** Minimal standalone Device backing a flat byte array over one AddressRange -
 	 * exactly what a real basicMemory does, without pulling in that module. */
 	private static class FakeMemory implements Device {

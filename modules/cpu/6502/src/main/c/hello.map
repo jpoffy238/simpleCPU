@@ -3,28 +3,38 @@ Modules list:
 hello.o:
     CODE              Offs=000000  Size=00001D  Align=00001  Fill=0000
 bios_glue.o:
-    CODE              Offs=00001D  Size=000028  Align=00001  Fill=0000
+    CODE              Offs=00001D  Size=00002E  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000001  Align=00001  Fill=0000
 bdos_glue.o:
-    CODE              Offs=000045  Size=00001E  Align=00001  Fill=0000
+    CODE              Offs=00004B  Size=00001E  Align=00001  Fill=0000
 bios_util.o:
-    CODE              Offs=000063  Size=00002D  Align=00001  Fill=0000
+    CODE              Offs=000069  Size=0000BD  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(addeqsp.o):
-    CODE              Offs=000090  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=000126  Size=000011  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(addysp.o):
+    CODE              Offs=000137  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(condes.o):
-    CODE              Offs=0000A1  Size=00000C  Align=00001  Fill=0000
+    CODE              Offs=000145  Size=00000C  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000025  Align=00001  Fill=0000
     ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(crt0.o):
     STARTUP           Offs=000000  Size=000017  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(decsp1.o):
+    CODE              Offs=000151  Size=000009  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(incsp1.o):
+    CODE              Offs=00015A  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp2.o):
-    CODE              Offs=0000AD  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000161  Size=000016  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(incsp5.o):
+    CODE              Offs=000177  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(ldaxsp.o):
-    CODE              Offs=0000C3  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=00017C  Size=000009  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(pusha.o):
+    CODE              Offs=000185  Size=000016  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pushax.o):
-    CODE              Offs=0000CC  Size=00001A  Align=00001  Fill=0000
+    CODE              Offs=00019B  Size=00001A  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(zerobss.o):
-    CODE              Offs=0000E6  Size=000023  Align=00001  Fill=0000
+    CODE              Offs=0001B5  Size=000023  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(zeropage.o):
     ZEROPAGE          Offs=000001  Size=00001A  Align=00001  Fill=0000
 
@@ -36,22 +46,26 @@ Name                   Start     End    Size  Align
 ZEROPAGE              00000E  000028  00001B  00001
 STARTUP               000300  000316  000017  00001
 ONCE                  000317  000322  00000C  00001
-CODE                  000323  00042B  000109  00001
-DATA                  00042C  000450  000025  00001
+CODE                  000323  0004FA  0001D8  00001
+DATA                  0004FB  00051F  000025  00001
 
 
 Exports list by name:
 ---------------------
-__BSS_RUN__               000451 RLA    __BSS_SIZE__              000000 REA    
+__BSS_RUN__               000520 RLA    __BSS_SIZE__              000000 REA    
 __CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     000317 RLA    
 __DESTRUCTOR_COUNT__      000000 REA    __DESTRUCTOR_TABLE__      000317 RLA    
 __STACKSTART__            008000 REA    __STARTUP__               000001 REA    
-_bios_putch               000340 RLA    _main                     000323 RLA    
-addeq0sp                  0003B3 RLA    donelib                   0003C4 RLA    
-incsp2                    0003D8 RLA    initlib                   000317 RLA    
-ldax0sp                   0003E6 RLA    ptr1                      000017 RLZ    
-pushax                    0003F3 RLA    sp                        00000F RLZ    
-zerobss                   000409 RLA    
+_bios_gotoxy              000368 RLA    _bios_putch               000340 RLA    
+_bios_set_x               000350 RLA    _main                     000323 RLA    
+addeq0sp                  000449 RLA    addysp                    00045B RLA    
+decsp1                    000474 RLA    donelib                   000468 RLA    
+incsp1                    00047D RLA    incsp2                    00048C RLA    
+incsp5                    00049A RLA    initlib                   000317 RLA    
+ldax0sp                   00049F RLA    ptr1                      000017 RLZ    
+pusha                     0004AC RLA    pushax                    0004C2 RLA    
+sp                        00000F RLZ    zerobss                   0004D8 RLA    
+
 
 
 Exports list by value:
@@ -61,11 +75,15 @@ __DESTRUCTOR_COUNT__      000000 REA    __STARTUP__               000001 REA
 sp                        00000F RLZ    ptr1                      000017 RLZ    
 __CONSTRUCTOR_TABLE__     000317 RLA    __DESTRUCTOR_TABLE__      000317 RLA    
 initlib                   000317 RLA    _main                     000323 RLA    
-_bios_putch               000340 RLA    addeq0sp                  0003B3 RLA    
-donelib                   0003C4 RLA    incsp2                    0003D8 RLA    
-ldax0sp                   0003E6 RLA    pushax                    0003F3 RLA    
-zerobss                   000409 RLA    __BSS_RUN__               000451 RLA    
-__STACKSTART__            008000 REA    
+_bios_putch               000340 RLA    _bios_set_x               000350 RLA    
+_bios_gotoxy              000368 RLA    addeq0sp                  000449 RLA    
+addysp                    00045B RLA    donelib                   000468 RLA    
+decsp1                    000474 RLA    incsp1                    00047D RLA    
+incsp2                    00048C RLA    incsp5                    00049A RLA    
+ldax0sp                   00049F RLA    pusha                     0004AC RLA    
+pushax                    0004C2 RLA    zerobss                   0004D8 RLA    
+__BSS_RUN__               000520 RLA    __STACKSTART__            008000 REA    
+
 
 
 Imports list:
@@ -86,32 +104,53 @@ __STACKSTART__ ([linker generated]):
     crt0.o                    none/crt0.s:5
 __STARTUP__ (crt0.o):
     hello.o                   hello.s:13
+_bios_gotoxy (bios_glue.o):
+    bios_util.o               bios_util.s:16
 _bios_putch (bios_glue.o):
     bios_util.o               bios_util.s:13
     hello.o                   hello.s:14
+_bios_set_x (bios_glue.o):
+    bios_util.o               bios_util.s:15
 _main (hello.o):
     crt0.o                    none/crt0.s:3
 addeq0sp (addeqsp.o):
-    bios_util.o               bios_util.s:48
+    bios_util.o               bios_util.s:145
+addysp (addysp.o):
+    incsp5.o                  runtime/incsp5.s:8
+decsp1 (decsp1.o):
+    bios_util.o               bios_util.s:145
+    bios_util.o               bios_util.s:145
 donelib (condes.o):
     crt0.o                    none/crt0.s:4
+incsp1 (incsp1.o):
+    bios_util.o               bios_util.s:145
 incsp2 (incsp2.o):
-    bios_util.o               bios_util.s:48
+    bios_util.o               bios_util.s:145
+incsp5 (incsp5.o):
+    bios_util.o               bios_util.s:145
 initlib (condes.o):
     crt0.o                    none/crt0.s:4
 ldax0sp (ldaxsp.o):
-    bios_util.o               bios_util.s:48
+    bios_util.o               bios_util.s:145
 ptr1 (zeropage.o):
     zerobss.o                 common/zerobss.s:9
     bios_util.o               bios_util.s:11
+pusha (pusha.o):
+    bios_util.o               bios_util.s:145
+    bios_util.o               bios_util.s:145
 pushax (pushax.o):
-    bios_util.o               bios_util.s:48
+    bios_util.o               bios_util.s:145
 sp (zeropage.o):
+    addysp.o                  runtime/addysp.s:8
     pushax.o                  runtime/pushax.s:8
+    pusha.o                   runtime/pusha.s:8
     ldaxsp.o                  runtime/ldaxsp.s:8
     incsp2.o                  runtime/incsp2.s:8
+    incsp1.o                  runtime/incsp1.s:8
+    decsp1.o                  runtime/decsp1.s:8
     crt0.o                    /home/jpoffen/git/cc65/asminc/zeropage.inc:11
     addeqsp.o                 runtime/addeqsp.s:8
+    bios_util.o               bios_util.s:10
 zerobss (zerobss.o):
     crt0.o                    none/crt0.s:3
 

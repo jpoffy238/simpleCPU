@@ -14,7 +14,18 @@
 #define BIOS_H
 
 void __fastcall__ bios_putch(char c);
+
+/* Blocks until a key is available, then returns it - an ordinary ASCII byte
+ * for anything typed normally, or one of KEY_UP/DOWN/LEFT/RIGHT below for an
+ * arrow key (VideoController.java's keyTyped() never produces a character
+ * for those, so they're queued as synthetic codes outside plain ASCII's
+ * 0-127 range instead - see VideoController.KEY_UP et al.). */
 char bios_getch(void);
+
+#define KEY_UP    0x80
+#define KEY_DOWN  0x81
+#define KEY_LEFT  0x82
+#define KEY_RIGHT 0x83
 
 /* Prints a null-terminated string one character at a time via bios_putch() -
  * no new BIOS primitive behind this, just the loop every caller was already
@@ -38,5 +49,29 @@ void __fastcall__ bios_format_track(unsigned char track);
 
 /* Homes the selected drive's head to track 0. No parameters. */
 void bios_restore(void);
+
+/* Repoints bios_putch()'s next write (and the hardware cursor bar) at an
+ * arbitrary (row, col) - the only way to reach a screen cell out of
+ * sequence; bios_putch() on its own only ever advances. col is staged via
+ * bios_set_x() first, same "stage one value, then trigger" pairing as
+ * bios_read_sector()/bios_write_sector() above; row arrives directly in A.
+ * No bounds checking - row must be < 24, col < 80 (BIOS.asm's V_ROWS/V_COLS)
+ * or the result silently wraps into adjacent rows. */
+void __fastcall__ bios_gotoxy(unsigned char row);
+
+#define BIOS_SCREEN_COLS 80
+#define BIOS_SCREEN_ROWS 24
+
+/* Clears count columns starting at (row, col) to spaces, then leaves the
+ * cursor parked back at (row, col) - conio's cclearxy(), built from
+ * bios_gotoxy()'s positioning plus bios_putch()'s ordinary sequential
+ * advance (no new BIOS primitive needed: printing count spaces after one
+ * bios_gotoxy() call already lands them left-to-right from col). */
+void bios_clear_eol(unsigned char row, unsigned char col, unsigned char count);
+
+/* Clears the whole BIOS_SCREEN_ROWS x BIOS_SCREEN_COLS screen and parks the
+ * cursor at (0, 0) - conio's clrscr(), same "just loop bios_clear_eol()"
+ * construction. */
+void bios_clrscr(void);
 
 #endif

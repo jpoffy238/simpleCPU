@@ -59,6 +59,12 @@ import com.mj.exceptions.illegalAddressException;
  *       BIOS_GETCH only ever busy-polls this one bit, same as it does for
  *       ConsoleDevice today, so there's nothing else to model yet.
  *
+ * Arrow keys queue synthetic codes 0x80-0x83 (KEY_UP/DOWN/LEFT/RIGHT below) -
+ * AWT's keyTyped never fires for them (they carry no character), so they're
+ * caught in keyPressed instead and given codes outside plain ASCII's 0-127
+ * range, same convention real extended-keyboard firmware uses to tell "a key
+ * with no character" apart from an actual received byte.
+ *
  * All 18 real registers are readable/writable (real init code written against a
  * real 6845 would write every one of them in order, so even the irrelevant ones
  * need to not fault as "unknown"), but only these actually drive the simplified
@@ -88,6 +94,11 @@ public class VideoController implements Device {
 	private static final int REG_KEYBOARD_DATA = 2;
 	private static final int REG_KEYBOARD_STATUS = 3;
 	private static final int KEYBOARD_STATUS_DATA_AVAILABLE = 0x01;
+
+	public static final int KEY_UP = 0x80;
+	public static final int KEY_DOWN = 0x81;
+	public static final int KEY_LEFT = 0x82;
+	public static final int KEY_RIGHT = 0x83;
 
 	private static final int R_H_DISPLAYED = 1;
 	private static final int R_V_DISPLAYED = 6;
@@ -218,6 +229,14 @@ public class VideoController implements Device {
 
 	private void handleKeyPress(char c) {
 		input.add((int) c);
+	}
+
+	/** Feeds a synthetic arrow-key code (KEY_UP/DOWN/LEFT/RIGHT) into the
+	 * keyboard queue, for tests to drive firmware that reads cursor keys -
+	 * same role as type(), but for keys keyTyped() never produces a
+	 * character for, so type()'s char-by-char loop can't reach them. */
+	public void pressArrowKey(int keyCode) {
+		input.add(keyCode);
 	}
 
 	@Override
@@ -365,6 +384,27 @@ public class VideoController implements Device {
 				@Override
 				public void keyTyped(KeyEvent e) {
 					handleKeyPress(e.getKeyChar());
+				}
+
+				@Override
+				public void keyPressed(KeyEvent e) {
+					switch (e.getKeyCode()) {
+					case KeyEvent.VK_UP:
+						pressArrowKey(KEY_UP);
+						break;
+					case KeyEvent.VK_DOWN:
+						pressArrowKey(KEY_DOWN);
+						break;
+					case KeyEvent.VK_LEFT:
+						pressArrowKey(KEY_LEFT);
+						break;
+					case KeyEvent.VK_RIGHT:
+						pressArrowKey(KEY_RIGHT);
+						break;
+					default:
+						// everything else keeps coming through keyTyped, same as before
+						break;
+					}
 				}
 			});
 		}
