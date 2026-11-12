@@ -16,16 +16,19 @@
 void __fastcall__ bios_putch(char c);
 
 /* Blocks until a key is available, then returns it - an ordinary ASCII byte
- * for anything typed normally, or one of KEY_UP/DOWN/LEFT/RIGHT below for an
- * arrow key (VideoController.java's keyTyped() never produces a character
- * for those, so they're queued as synthetic codes outside plain ASCII's
- * 0-127 range instead - see VideoController.KEY_UP et al.). */
+ * for anything typed normally, or one of KEY_UP/DOWN/LEFT/RIGHT/PAGE_UP/
+ * PAGE_DOWN below for a key with no character of its own
+ * (VideoController.java's keyTyped() never fires for those, so they're
+ * queued as synthetic codes outside plain ASCII's 0-127 range instead - see
+ * VideoController.KEY_UP et al.). */
 char bios_getch(void);
 
-#define KEY_UP    0x80
-#define KEY_DOWN  0x81
-#define KEY_LEFT  0x82
-#define KEY_RIGHT 0x83
+#define KEY_UP        0x80
+#define KEY_DOWN      0x81
+#define KEY_LEFT      0x82
+#define KEY_RIGHT     0x83
+#define KEY_PAGE_UP   0x84
+#define KEY_PAGE_DOWN 0x85
 
 /* Prints a null-terminated string one character at a time via bios_putch() -
  * no new BIOS primitive behind this, just the loop every caller was already

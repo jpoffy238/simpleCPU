@@ -59,11 +59,12 @@ import com.mj.exceptions.illegalAddressException;
  *       BIOS_GETCH only ever busy-polls this one bit, same as it does for
  *       ConsoleDevice today, so there's nothing else to model yet.
  *
- * Arrow keys queue synthetic codes 0x80-0x83 (KEY_UP/DOWN/LEFT/RIGHT below) -
- * AWT's keyTyped never fires for them (they carry no character), so they're
- * caught in keyPressed instead and given codes outside plain ASCII's 0-127
- * range, same convention real extended-keyboard firmware uses to tell "a key
- * with no character" apart from an actual received byte.
+ * Arrow and Page Up/Down keys queue synthetic codes 0x80-0x85 (KEY_UP/DOWN/
+ * LEFT/RIGHT/PAGE_UP/PAGE_DOWN below) - AWT's keyTyped never fires for them
+ * (they carry no character), so they're caught in keyPressed instead and
+ * given codes outside plain ASCII's 0-127 range, same convention real
+ * extended-keyboard firmware uses to tell "a key with no character" apart
+ * from an actual received byte.
  *
  * All 18 real registers are readable/writable (real init code written against a
  * real 6845 would write every one of them in order, so even the irrelevant ones
@@ -99,6 +100,8 @@ public class VideoController implements Device {
 	public static final int KEY_DOWN = 0x81;
 	public static final int KEY_LEFT = 0x82;
 	public static final int KEY_RIGHT = 0x83;
+	public static final int KEY_PAGE_UP = 0x84;
+	public static final int KEY_PAGE_DOWN = 0x85;
 
 	private static final int R_H_DISPLAYED = 1;
 	private static final int R_V_DISPLAYED = 6;
@@ -231,10 +234,11 @@ public class VideoController implements Device {
 		input.add((int) c);
 	}
 
-	/** Feeds a synthetic arrow-key code (KEY_UP/DOWN/LEFT/RIGHT) into the
-	 * keyboard queue, for tests to drive firmware that reads cursor keys -
-	 * same role as type(), but for keys keyTyped() never produces a
-	 * character for, so type()'s char-by-char loop can't reach them. */
+	/** Feeds a synthetic no-character key code (KEY_UP/DOWN/LEFT/RIGHT/
+	 * PAGE_UP/PAGE_DOWN) into the keyboard queue, for tests to drive
+	 * firmware that reads them - same role as type(), but for keys
+	 * keyTyped() never produces a character for, so type()'s char-by-char
+	 * loop can't reach them. */
 	public void pressArrowKey(int keyCode) {
 		input.add(keyCode);
 	}
@@ -400,6 +404,12 @@ public class VideoController implements Device {
 						break;
 					case KeyEvent.VK_RIGHT:
 						pressArrowKey(KEY_RIGHT);
+						break;
+					case KeyEvent.VK_PAGE_UP:
+						pressArrowKey(KEY_PAGE_UP);
+						break;
+					case KeyEvent.VK_PAGE_DOWN:
+						pressArrowKey(KEY_PAGE_DOWN);
 						break;
 					default:
 						// everything else keeps coming through keyTyped, same as before
