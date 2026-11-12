@@ -248,4 +248,58 @@ public class Test_Edit {
 		assertTrue(video.getRow(1).startsWith("HELLO"),
 				"a failed Open shouldn't have touched the existing buffer, got: [" + video.getRow(1) + "]");
 	}
+
+	/** Builds a synthetic file with `lineCount` lines ("LINE0001", "LINE0002",
+	 * ...), joined with bare Unix LF (not CR) - exercises load_file()'s
+	 * universal-newline handling at the same time as paging, same way a
+	 * real file authored on this Linux host (edit.c's own source, say,
+	 * which is exactly what prompted this feature) would arrive. */
+	private static byte[] syntheticLines(int lineCount) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 1; i <= lineCount; i++) {
+			sb.append(String.format("LINE%04d\n", i));
+		}
+		return sb.toString().getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+	}
+
+	@Test
+	public void aFileBiggerThanOnePageSwapsPagesCorrectlyAndRoundTripsThroughSave() throws Exception {
+		// 220 lines = exactly 2 pages at PAGE_LINES=200 (200 + 20) - deliberately
+		// not an exact multiple of 200, so the last page has real content of
+		// its own rather than landing exactly on a page boundary (a separate,
+		// rarer edge case not what this test is after). Bare LF line endings
+		// exercise the same universal-newline fix the single-page tests above
+		// don't need to (their HELLO\rWORLD already uses CR).
+		byte[] editProgram = Files.readAllBytes(editBin());
+		CpmFileSystem fs = new CpmFileSystem(drive0);
+		fs.format();
+		fs.createFile("CCP.COM", editProgram);
+		fs.createFile("BIG.TXT", syntheticLines(220));
+
+		video.type("B\r");
+		video.type(CTRL_O);
+		video.type("BIG.TXT\r");
+		video.pressArrowKey(VideoController.KEY_PAGE_DOWN);
+		video.pressArrowKey(VideoController.KEY_PAGE_UP);
+		// Ctrl+S alone, no filename typed after: Open already set has_name,
+		// so cmd_save() saves straight back to BIG.TXT without prompting -
+		// it only prompts when there's no name yet (see the single-page
+		// save-as-new-file test above). Typing a filename here anyway would
+		// land as literal characters inserted into the document itself,
+		// since there'd be no prompt open to consume them.
+		video.type(CTRL_S);
+		runBriefly(10000);
+
+		assertTrue(video.getRow(1).startsWith("LINE0001"),
+				"should be back on page 1 after a page-down then page-up, got: [" + video.getRow(1) + "]");
+		assertTrue(video.getRow(23).contains("Saved"), "status line, got: [" + video.getRow(23) + "]");
+
+		byte[] onDisk = new CpmFileSystem(drive0).readFile("BIG.TXT");
+		String content = new String(onDisk, "US-ASCII");
+		String[] savedLines = content.split("\r", -1);
+		for (int i = 1; i <= 220; i++) {
+			assertEquals(String.format("LINE%04d", i), savedLines[i - 1],
+					"line " + i + " of the saved round trip, got: [" + savedLines[i - 1] + "]");
+		}
+	}
 }

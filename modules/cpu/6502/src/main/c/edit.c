@@ -25,6 +25,18 @@
  * for what those looked like, if they're wanted here later). Returns
  * normally on exit, same as hello.c - BDOS's warm boot (bdos_run_file(),
  * ccp.c) reloads CCP.COM fresh at that point.
+ *
+ * A file bigger than PAGE_LINES doesn't fit in RAM whole, so it's split
+ * into fixed-size pages, only one of which (the current one) is ever in
+ * memory at a time - the rest live in their own small swap files
+ * (EDITPxx.$$$, a raw binary dump of the in-memory buffer, not text) on
+ * the current drive, paged in/out with PageUp/PageDown. BDOS has no
+ * in-place record overwrite (bdos_write_record() only ever appends - see
+ * bdos.c), so a page already on disk can only be replaced by deleting and
+ * recreating its own small file whole, never by seeking into the middle of
+ * one big swap file - see swap_page_out()/swap_page_in(). A file that fits
+ * in one page (the common case) never touches any of this machinery at
+ * all - total_pages just stays 1.
  */
 #include "bios.h"
 #include "bdos.h"
@@ -34,9 +46,18 @@
 #define VIEW_H   22
 #define STATUS_Y 23
 
-#define MAX_LINES 100
-#define MAX_COLS  79		/* one full screen row per logical line */
-#define NAME_LEN  13		/* 8.3 name + '.' + null, one byte to spare */
+#define PAGE_LINES 200		/* lines held in RAM at once - one "page" */
+#define MAX_COLS   79		/* one full screen row per logical line */
+#define NAME_LEN   13		/* 8.3 name + '.' + null, one byte to spare */
+
+/* Total capacity: MAX_PAGES * PAGE_LINES = 4000 lines. PAGE_LINES *
+ * (MAX_COLS + 1) must divide evenly by 128 (swap_page_out()/swap_page_in()
+ * move a page as whole 128-byte records, with no partial-record handling
+ * of their own - unlike the real destination file, every page's size is
+ * fixed and under this editor's own control, so there's no reason to
+ * tolerate a remainder) - 200 * 80 / 128 = 125 exactly. */
+#define MAX_PAGES     20
+#define PAGE_RECORDS  ((PAGE_LINES * (MAX_COLS + 1)) / 128)
 
 #define CTRL_O 0x0F
 #define CTRL_S 0x13
@@ -53,7 +74,7 @@
 #define DIRTY_LINE 1		/* one row's content changed - redraw just it */
 #define DIRTY_FULL 2		/* lines shifted (split/join) or a file loaded */
 
-static unsigned char lines[MAX_LINES][MAX_COLS + 1];
+static unsigned char lines[PAGE_LINES][MAX_COLS + 1];
 static unsigned char line_count = 1;
 
 static unsigned char cur_line = 0;
@@ -62,6 +83,24 @@ static unsigned char view_top = 0;
 
 static char cur_name[NAME_LEN];
 static unsigned char has_name = 0;
+
+/* Which page is currently in lines[], and how many pages the open file
+ * has in total - 1/0 whenever only one page exists (nothing has ever been
+ * swapped to disk), regardless of whether a file is even open yet. */
+static unsigned char current_page = 0;
+static unsigned char total_pages = 1;
+
+/* How many of each page's PAGE_LINES slots hold real content - every page
+ * except the last is always completely full (that's exactly what triggers
+ * flushing it to its own swap file to begin with), but the last page is
+ * whatever was left over, and that count isn't part of swap_page_out()'s
+ * raw memory dump (it's a separate scalar, not something line_len() can
+ * recover from the lines[][] content itself - plenty of real text files
+ * have legitimate blank lines, so "stop at the first empty one" isn't a
+ * safe stand-in). Indexed by page number, filled in by load_file(),
+ * consulted by page_up()/page_down()/save_file() to restore line_count
+ * correctly after a swap_page_in(). */
+static unsigned char page_line_count[MAX_PAGES];
 
 /* Set by status_msg(), cleared by the next draw_status() - lets a just-set
  * message (e.g. "Saved") survive one full redraw-then-keypress-wait cycle
@@ -96,6 +135,97 @@ static void copy_name(char *dest, const char *src) {
 		dest[i] = src[i];
 	}
 	dest[i] = '\0';
+}
+
+/* Builds "EDITPnn.$$$" for page nn (0-based, two digits - MAX_PAGES is well
+ * under 100) - a fixed name completely unrelated to whatever file is
+ * actually open, since a page's position in the swap scheme, not its
+ * content, is all that ever needs addressing. out must have room for 12
+ * bytes (11 characters + the null). */
+static void swap_page_name(unsigned char page, char *out) {
+	out[0] = 'E';
+	out[1] = 'D';
+	out[2] = 'I';
+	out[3] = 'T';
+	out[4] = 'P';
+	out[5] = '0' + (page / 10);
+	out[6] = '0' + (page % 10);
+	out[7] = '.';
+	out[8] = '$';
+	out[9] = '$';
+	out[10] = '$';
+	out[11] = '\0';
+}
+
+/* Writes the in-memory page buffer to its own swap file (EDITPxx.$$$) as
+ * PAGE_RECORDS whole 128-byte records - a raw dump of lines[][]'s own
+ * memory layout, not text, so swap_page_in() can read it straight back
+ * into the same shape with no re-parsing. Deletes any previous version of
+ * that page's file first (same delete-then-create idiom save_file() uses
+ * for the real destination file) - recreating the file whole is the only
+ * way to replace a page already on disk, since BDOS's own
+ * bdos_write_record() only ever appends (see this file's own top comment).
+ * Returns 0 if the create or any write failed (directory or disk full),
+ * 1 on success. */
+static unsigned char swap_page_out(unsigned char page) {
+	char name[12];
+	unsigned char *buf = (unsigned char *) lines;
+	unsigned int i;
+
+	swap_page_name(page, name);
+	bios_set_buffer(name);
+	bdos_delete_file();
+	bios_set_buffer(name);
+	if (!bdos_create_file()) {
+		return 0;
+	}
+	for (i = 0; i < PAGE_RECORDS; i++) {
+		bios_set_buffer(buf + (unsigned int) i * 128);
+		if (!bdos_write_record()) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+/* Reads page's own swap file straight back into the in-memory buffer,
+ * record for record - the exact reverse of swap_page_out(). Returns 0 if
+ * the page's file isn't there at all (nothing should ever call this for a
+ * page swap_page_out() hasn't already written, but failing closed rather
+ * than reading uninitialized/stale memory content is cheap insurance). */
+static unsigned char swap_page_in(unsigned char page) {
+	char name[12];
+	unsigned char *buf = (unsigned char *) lines;
+	unsigned int i;
+
+	swap_page_name(page, name);
+	bios_set_buffer(name);
+	if (!bdos_find_file()) {
+		return 0;
+	}
+	for (i = 0; i < PAGE_RECORDS; i++) {
+		bios_set_buffer(buf + (unsigned int) i * 128);
+		if (!bdos_read_record()) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+/* Deletes every possible swap-page file, whether or not it actually exists
+ * (bdos_delete_file() returning 0 for "wasn't there" is simply ignored) -
+ * called once at startup to clear out anything a previous, uncleanly-ended
+ * session left behind, since swap files otherwise only ever get deleted
+ * (then immediately recreated) by swap_page_out() itself. */
+static void cleanup_swap_files(void) {
+	unsigned char page;
+	char name[12];
+
+	for (page = 0; page < MAX_PAGES; page++) {
+		swap_page_name(page, name);
+		bios_set_buffer(name);
+		bdos_delete_file();
+	}
 }
 
 /* Appends s onto buf at len (bounded by BIOS_SCREEN_COLS), returning the
@@ -191,6 +321,12 @@ static void draw_status(void) {
 	len = append_decimal(buf, len, cur_line + 1);
 	len = append_str(buf, len, " C:");
 	len = append_decimal(buf, len, cur_col + 1);
+	if (total_pages > 1) {
+		len = append_str(buf, len, " P:");
+		len = append_decimal(buf, len, current_page + 1);
+		len = append_str(buf, len, "/");
+		len = append_decimal(buf, len, total_pages);
+	}
 	draw_text_row(STATUS_Y, buf, len);
 }
 
@@ -329,7 +465,7 @@ static void split_line(void) {
 	unsigned char len = line_len(cur_line);
 	unsigned char i;
 
-	if (line_count >= MAX_LINES) {
+	if (line_count >= PAGE_LINES) {
 		return;
 	}
 	for (i = line_count; i > cur_line + 1; i--) {
@@ -393,15 +529,36 @@ static unsigned char prompt_input(const char *prompt, char *out, unsigned char o
 
 /* Resets the buffer, then fills it record-by-record from the file already
  * found by the caller's bdos_find_file() - same BDOS primitives cmd_type()
- * (ccp.c) reads through, just split into lines on CR instead of printed
- * straight out. A record's unused tail (past the file's real end) reads
- * back as whatever padding was written there, usually '\0' - skipped here
- * same as it would need to be regardless of which reader hit it first. */
-static void load_file(void) {
+ * (ccp.c) reads through. Splits lines on CR, LF, or a CRLF/LFCR pair
+ * (treating either pairing as one line break, not two) - this editor's own
+ * save_file() always writes bare CR, matching real CP/M text files, but a
+ * file authored elsewhere (this very source file, say, written on a Unix
+ * host) may use bare LF, or CRLF. A record's unused tail (past the file's
+ * real end) reads back as whatever padding was written there, usually
+ * '\0' - skipped here same as it would need to be regardless of which
+ * reader hit it first.
+ *
+ * A logical line longer than MAX_COLS gets hard-wrapped into an extra
+ * logical line rather than having its tail silently dropped - there's no
+ * soft-wrap rendering here (see this file's own top comment), so wrapping
+ * is the only way to keep every byte without losing data. Once a page
+ * fills up (PAGE_LINES lines), it's flushed to its own swap file
+ * (swap_page_out()) and a fresh page starts collecting the rest, up to
+ * MAX_PAGES - beyond that, the rest of the file is dropped (reported back
+ * to the caller as a "truncated" result) rather than growing without
+ * bound. Always ends with page 0 back in memory, even if the file needed
+ * several pages, so editing starts at the true beginning regardless of
+ * how many pages it took to read it all in.
+ *
+ * Returns 1 on a complete read, 0 if anything had to be dropped (MAX_PAGES
+ * reached, or a mid-load swap_page_out() itself failed - disk/directory
+ * full). */
+static unsigned char load_file(void) {
 	unsigned char record[128];
-	unsigned char l, col, i, ch;
+	unsigned char l, col, i, ch, last_ch;
+	unsigned char pages_used, done, is_break;
 
-	for (l = 0; l < MAX_LINES; l++) {
+	for (l = 0; l < PAGE_LINES; l++) {
 		lines[l][0] = '\0';
 	}
 	cur_line = 0;
@@ -410,36 +567,64 @@ static void load_file(void) {
 
 	l = 0;
 	col = 0;
-	for (;;) {
+	last_ch = 0;
+	pages_used = 0;
+	done = 0;
+
+	while (!done) {
 		bios_set_buffer(record);
 		if (!bdos_read_record()) {
 			break;
 		}
-		for (i = 0; i < 128; i++) {
+		for (i = 0; i < 128 && !done; i++) {
 			ch = record[i];
-			if (ch == '\r') {
-				if (l + 1 < MAX_LINES) {
-					lines[l][col] = '\0';
-					l++;
-					col = 0;
+			is_break = (ch == '\r' || ch == '\n') &&
+					!((ch == '\n' && last_ch == '\r') ||
+					  (ch == '\r' && last_ch == '\n'));
+
+			if (is_break || (ch != '\0' && ch != '\r' && ch != '\n' && col >= MAX_COLS)) {
+				lines[l][col] = '\0';
+				l++;
+				col = 0;
+				if (l >= PAGE_LINES) {
+					if (pages_used + 1 < MAX_PAGES && swap_page_out(pages_used)) {
+						page_line_count[pages_used] = PAGE_LINES;
+						pages_used++;
+						for (l = 0; l < PAGE_LINES; l++) {
+							lines[l][0] = '\0';
+						}
+						l = 0;
+					} else {
+						done = 1;
+					}
 				}
-				continue;
 			}
-			if (ch == '\n' || ch == '\0') {
-				continue;
-			}
-			if (col < MAX_COLS) {
+			if (!is_break && !done && ch != '\0' && ch != '\r' && ch != '\n') {
 				lines[l][col++] = ch;
 				lines[l][col] = '\0';
 			}
+			last_ch = ch;
 		}
 	}
+
 	lines[l][col] = '\0';
-	line_count = l + 1;
+	page_line_count[pages_used] = l + 1;
+	total_pages = pages_used + 1;
+	current_page = pages_used;
+
+	if (pages_used > 0) {
+		swap_page_out(pages_used);
+		swap_page_in(0);
+		current_page = 0;
+	}
+	line_count = page_line_count[current_page];
+
+	return !done;
 }
 
 static void cmd_open(void) {
 	char name[NAME_LEN];
+	unsigned char ok;
 
 	if (!prompt_input("Open: ", name, NAME_LEN)) {
 		status_msg("");
@@ -450,21 +635,90 @@ static void cmd_open(void) {
 		status_msg("Not found");
 		return;
 	}
-	load_file();
+	ok = load_file();
 	copy_name(cur_name, name);
 	has_name = 1;
-	status_msg("Loaded");
+	status_msg(ok ? "Loaded" : "Truncated - file too large");
 	dirty = DIRTY_FULL;
 }
 
-/* Writes every line back out as 128-byte BDOS records, CR-terminated per
- * line (matching load_file()'s own split-on-CR convention) - deletes any
+/* Pages forward/back through the file. Flushes the current page's
+ * (possibly just-edited) content to its own swap slot before swapping the
+ * target page in, so edits survive a page turn. A no-op whenever
+ * total_pages is 1 (the common case - nothing has ever been swapped to
+ * disk at all) or the requested direction is already at the first/last
+ * page. Always lands at the top of the new page (line 0) rather than
+ * trying to preserve a meaningful cursor position across pages. */
+static void page_down(void) {
+	if (current_page + 1 >= total_pages) {
+		return;
+	}
+	swap_page_out(current_page);
+	current_page++;
+	swap_page_in(current_page);
+	line_count = page_line_count[current_page];
+	cur_line = 0;
+	cur_col = 0;
+	view_top = 0;
+	dirty = DIRTY_FULL;
+}
+
+static void page_up(void) {
+	if (current_page == 0) {
+		return;
+	}
+	swap_page_out(current_page);
+	current_page--;
+	swap_page_in(current_page);
+	line_count = page_line_count[current_page];
+	cur_line = 0;
+	cur_col = 0;
+	view_top = 0;
+	dirty = DIRTY_FULL;
+}
+
+/* Writes every line of every page back out as 128-byte BDOS records,
+ * CR-terminated per line (matching load_file()'s own split-on-line-break
+ * convention - always bare CR here, matching real CP/M text files
+ * regardless of whatever the source file originally used) - deletes any
  * existing file under the same name first (bdos_create_file() alone fails
  * if the name already exists; ignoring delete's result is fine, since 0
- * just means there was nothing to delete yet). */
+ * just means there was nothing to delete yet).
+ *
+ * For the common total_pages == 1 case, this never touches the swap-file
+ * machinery at all - same zero-extra-disk-I/O property load_file() keeps
+ * for a file that fits in one page. Otherwise: flushes the current page
+ * first (its latest edits only exist in RAM until a page turn or this
+ * flush writes them to its own swap slot), then walks every page in order
+ * via swap_page_in(), restoring whichever page the user was actually
+ * looking at back into memory before returning - Save should never
+ * silently leave the view on a different page than where it found it. */
 static void save_file(void) {
 	unsigned char record[128];
-	unsigned char l, i, col, len;
+	unsigned char l, i, col, len, p, orig_page;
+	unsigned char paging = (total_pages > 1);
+
+	orig_page = current_page;
+	/* line_count is the only authoritative count for whichever page is
+	 * actually in memory right now - page_line_count[orig_page] is either
+	 * stale (edits since the last load/page-turn changed line_count but
+	 * not this array) or, for a buffer that was typed from scratch and
+	 * never ran through load_file() at all, still its static-zero default.
+	 * Either way, the per-page loop below needs the real figure before it
+	 * reads page_line_count[orig_page] back out of this same array. */
+	page_line_count[orig_page] = line_count;
+	/* Must happen before bdos_create_file() below, never after: both it
+	 * and bdos_create_file() share one global "currently being written"
+	 * FCB (write_entry - see bdos.c), so calling bdos_create_file() again
+	 * for a swap file after cur_name's own create would silently redirect
+	 * every content write below into that swap file's entry instead of
+	 * cur_name's. Nothing from here through the end of this function
+	 * calls bdos_create_file() again - swap_page_in() (used throughout the
+	 * loop below) only ever finds/reads, a separate FCB bdos.c keeps
+	 * entirely apart from write_entry for exactly this reason. */
+	if (paging) {
+		swap_page_out(orig_page);
+	}
 
 	bios_set_buffer(cur_name);
 	bdos_delete_file();
@@ -475,27 +729,38 @@ static void save_file(void) {
 	}
 
 	col = 0;
-	for (l = 0; l < line_count; l++) {
-		len = line_len(l);
-		for (i = 0; i < len; i++) {
-			record[col++] = lines[l][i];
+	for (p = 0; p < total_pages; p++) {
+		if (paging) {
+			swap_page_in(p);
+		}
+		for (l = 0; l < page_line_count[p]; l++) {
+			len = line_len(l);
+			for (i = 0; i < len; i++) {
+				record[col++] = lines[l][i];
+				if (col == 128) {
+					bios_set_buffer(record);
+					if (!bdos_write_record()) {
+						status_msg("Disk full");
+						if (paging) {
+							swap_page_in(orig_page);
+						}
+						return;
+					}
+					col = 0;
+				}
+			}
+			record[col++] = '\r';
 			if (col == 128) {
 				bios_set_buffer(record);
 				if (!bdos_write_record()) {
 					status_msg("Disk full");
+					if (paging) {
+						swap_page_in(orig_page);
+					}
 					return;
 				}
 				col = 0;
 			}
-		}
-		record[col++] = '\r';
-		if (col == 128) {
-			bios_set_buffer(record);
-			if (!bdos_write_record()) {
-				status_msg("Disk full");
-				return;
-			}
-			col = 0;
 		}
 	}
 	if (col > 0) {
@@ -505,8 +770,15 @@ static void save_file(void) {
 		bios_set_buffer(record);
 		if (!bdos_write_record()) {
 			status_msg("Disk full");
+			if (paging) {
+				swap_page_in(orig_page);
+			}
 			return;
 		}
+	}
+	if (paging) {
+		swap_page_in(orig_page);
+		line_count = page_line_count[orig_page];
 	}
 	status_msg("Saved");
 }
@@ -554,6 +826,14 @@ static void handle_key(unsigned char k, unsigned char *quit_flag) {
 		move_right();
 		return;
 	}
+	if (k == KEY_PAGE_DOWN) {
+		page_down();
+		return;
+	}
+	if (k == KEY_PAGE_UP) {
+		page_up();
+		return;
+	}
 	if (k == '\r' || k == '\n') {
 		split_line();
 		dirty = DIRTY_FULL;
@@ -575,11 +855,12 @@ int main(void) {
 	unsigned char old_top;
 
 	lines[0][0] = '\0';
+	cleanup_swap_files();
 
 	bios_clrscr();
 	bios_set_x(0);
 	bios_gotoxy(TITLE_Y);
-	bios_putstr("^O Open  ^S Save  ^X Exit");
+	bios_putstr("^O Open  ^S Save  ^X Exit  PgUp/PgDn page");
 
 	while (!quit_flag) {
 		old_top = view_top;

@@ -187,6 +187,15 @@ public class Test_VideoController {
 		assertEquals('B', video.read(0x9022) & 0xff);
 	}
 
+	@Test
+	public void pageUpAndDownQueueTheirOwnSyntheticCodesToo() throws Exception {
+		video.pressArrowKey(VideoController.KEY_PAGE_DOWN);
+		video.pressArrowKey(VideoController.KEY_PAGE_UP);
+
+		assertEquals(VideoController.KEY_PAGE_DOWN, video.read(0x9022) & 0xff);
+		assertEquals(VideoController.KEY_PAGE_UP, video.read(0x9022) & 0xff);
+	}
+
 	/** Minimal standalone Device backing a flat byte array over one AddressRange -
 	 * exactly what a real basicMemory does, without pulling in that module. */
 	private static class FakeMemory implements Device {
