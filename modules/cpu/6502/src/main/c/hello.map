@@ -43,7 +43,7 @@ Segment list:
 -------------
 Name                   Start     End    Size  Align
 ----------------------------------------------------
-ZEROPAGE              00000E  000028  00001B  00001
+ZEROPAGE              000011  00002B  00001B  00001
 STARTUP               000300  000316  000017  00001
 ONCE                  000317  000322  00000C  00001
 CODE                  000323  0004FA  0001D8  00001
@@ -62,9 +62,9 @@ addeq0sp                  000449 RLA    addysp                    00045B RLA
 decsp1                    000474 RLA    donelib                   000468 RLA    
 incsp1                    00047D RLA    incsp2                    00048C RLA    
 incsp5                    00049A RLA    initlib                   000317 RLA    
-ldax0sp                   00049F RLA    ptr1                      000017 RLZ    
+ldax0sp                   00049F RLA    ptr1                      00001A RLZ    
 pusha                     0004AC RLA    pushax                    0004C2 RLA    
-sp                        00000F RLZ    zerobss                   0004D8 RLA    
+sp                        000012 RLZ    zerobss                   0004D8 RLA    
 
 
 
@@ -72,7 +72,7 @@ Exports list by value:
 ----------------------
 __BSS_SIZE__              000000 REA    __CONSTRUCTOR_COUNT__     000000 REA    
 __DESTRUCTOR_COUNT__      000000 REA    __STARTUP__               000001 REA    
-sp                        00000F RLZ    ptr1                      000017 RLZ    
+sp                        000012 RLZ    ptr1                      00001A RLZ    
 __CONSTRUCTOR_TABLE__     000317 RLA    __DESTRUCTOR_TABLE__      000317 RLA    
 initlib                   000317 RLA    _main                     000323 RLA    
 _bios_putch               000340 RLA    _bios_set_x               000350 RLA    

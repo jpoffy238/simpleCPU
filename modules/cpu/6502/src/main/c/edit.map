@@ -102,7 +102,7 @@ Segment list:
 -------------
 Name                   Start     End    Size  Align
 ----------------------------------------------------
-ZEROPAGE              00000E  000028  00001B  00001
+ZEROPAGE              000011  00002B  00001B  00001
 STARTUP               000300  000316  000017  00001
 ONCE                  000317  000322  00000C  00001
 CODE                  000323  0019C1  00169F  00001
@@ -139,14 +139,14 @@ incsp3                    00182D RLA    incsp5                    001832 RLA
 incsp6                    001837 RLA    initlib                   000317 RLA    
 ldax0sp                   00183C RLA    ldaxysp                   00183E RLA    
 leaa0sp                   001845 RLA    leaaxsp                   001847 RLA    
-popptr1                   0018B7 RLA    ptr1                      000017 RLZ    
-ptr4                      00001D RLZ    pusha                     0018C9 RLA    
+popptr1                   0018B7 RLA    ptr1                      00001A RLZ    
+ptr4                      000020 RLZ    pusha                     0018C9 RLA    
 pusha0                    0018DD RLA    pushax                    0018DF RLA    
 pushwysp                  0018F7 RLA    shlax7                    00174C RLA    
-sp                        00000F RLZ    sreg                      000011 RLZ    
+sp                        000012 RLZ    sreg                      000014 RLZ    
 staspidx                  001911 RLA    stax0sp                   001927 RLA    
 staxysp                   001929 RLA    subysp                    001932 RLA    
-tmp1                      00001F RLZ    tosicmp                   0017B2 RLA    
+tmp1                      000022 RLZ    tosicmp                   0017B2 RLA    
 tosmula0                  00187D RLA    tosudiva0                 00193F RLA    
 tosumoda0                 00198E RLA    udiv16                    001950 RLA    
 zerobss                   00199F RLA    
@@ -155,9 +155,9 @@ zerobss                   00199F RLA
 Exports list by value:
 ----------------------
 __CONSTRUCTOR_COUNT__     000000 REA    __DESTRUCTOR_COUNT__      000000 REA    
-__STARTUP__               000001 REA    sp                        00000F RLZ    
-sreg                      000011 RLZ    ptr1                      000017 RLZ    
-ptr4                      00001D RLZ    tmp1                      00001F RLZ    
+__STARTUP__               000001 REA    sp                        000012 RLZ    
+sreg                      000014 RLZ    ptr1                      00001A RLZ    
+ptr4                      000020 RLZ    tmp1                      000022 RLZ    
 __CONSTRUCTOR_TABLE__     000317 RLA    __DESTRUCTOR_TABLE__      000317 RLA    
 initlib                   000317 RLA    _main                     0015A1 RLA    
 _bios_putch               001624 RLA    _bios_getch               001628 RLA    

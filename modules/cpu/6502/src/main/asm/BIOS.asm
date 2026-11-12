@@ -45,6 +45,8 @@ VIDEO_DATA = $9021
 VR_H_DISPLAYED = 1
 VR_V_DISPLAYED = 6
 VR_CURSOR_START = 10
+VR_START_ADDR_HI = 12
+VR_START_ADDR_LO = 13
 VR_CURSOR_ADDR_HI = 14
 VR_CURSOR_ADDR_LO = 15
 CURSOR_ON = $00			;; anything other than CURSOR_MODE_OFF below
@@ -61,12 +63,16 @@ DATA_AVAILABLE = $01
 
 ;; VideoController's character RAM (plain memory - BIOS pokes it directly, same
 ;; as any ordinary RAM access, no register protocol involved) and the fixed
-;; 80x24 layout DO_VIDEO_INIT configures it for. V_COLS*V_ROWS (1920) is the
-;; brute-force scroll's working size - deliberately not using the full 2KB
-;; VideoController's char RAM device actually has, since Display Start Address
-;; scrolling (using the rest of that space to scroll without copying) is a later
-;; follow-up, not this pass.
+;; 80x24 layout DO_VIDEO_INIT configures it for. VIDEO_RAM_SIZE (2048) is the
+;; whole ring PC_SCROLL/DO_GOTOXY scan via Display Start Address (R12/R13) -
+;; bigger than the 1920 bytes (V_COLS*V_ROWS) actually visible at once, so
+;; there's always at least one spare row to scroll a new line into by moving
+;; the window rather than copying every row up. Deliberately a power of two:
+;; wrapping an address anywhere in this file is then just a HI-byte compare
+;; against VIDEO_RAM+VIDEO_RAM_SIZE ($C000) and a reset to VIDEO_RAM ($B800),
+;; never a real divide/modulo.
 VIDEO_RAM = $B800
+VIDEO_RAM_SIZE = $0800
 V_COLS = 80
 V_ROWS = 24
 
@@ -107,6 +113,25 @@ V_ADDR_HI  = $0A
 V_COL      = $0B
 SAVED_CHAR = $0C
 SAVED_Y    = $0D
+
+;; zero page: ring-buffer scrolling's own state, same functional-reservation
+;; reasoning as V_ADDR_LO/HI/V_COL above - needs to survive across BIOS_PUTCH
+;; calls while a cc65 program runs, so it can't overlap that program's own
+;; zero page either. V_START_LO/HI shadow Display Start Address (R12/R13) -
+;; an offset from VIDEO_RAM (0..VIDEO_RAM_SIZE-1), same convention V_ADDR_LO/
+;; HI's own Cursor Address write already uses (see PC_SET_CURSOR) - so
+;; PC_SCROLL/DO_GOTOXY never have to read a register back to know where the
+;; window currently starts. V_ROW is how many rows below V_START_LO/HI the
+;; cursor (V_ADDR_LO/HI) currently sits (0..V_ROWS-1); PC_CHECK_SCROLL
+;; increments it on every row crossing and scrolls once it would reach
+;; V_ROWS, replacing the old scheme's one-fixed-address compare (that trick
+;; only worked because Display Start Address never moved before now).
+;; $0E-$10, pushing cc65's own ZEROPAGE segment start from $0E to $11
+;; (simplecpu.cfg/bdos.cfg) - the same kind of reservation bump that moved it
+;; from $09 to $0E in the first place, for the same reason.
+V_START_LO = $0E
+V_START_HI = $0F
+V_ROW      = $10
 
 * = $F000
 
@@ -222,8 +247,10 @@ PC_SET_CURSOR LDA V_ADDR_LO
 ;; ---- advances V_ADDR_LO/HI and V_COL by one position, wrapping the column
 ;;      at V_COLS (which needs no address adjustment of its own - row N+1
 ;;      starts immediately after row N's last byte in VIDEO_RAM, so a plain
-;;      +1 already lands there) and scrolling once the screen's bottom is
-;;      passed. ----
+;;      +1 already lands there), and V_ADDR_LO/HI itself at VIDEO_RAM_SIZE
+;;      (the ring wraps back to VIDEO_RAM - this is new: the old brute-force
+;;      scroll always reset V_ADDR_LO/HI to a fixed row-23 address on every
+;;      scroll, so it never actually ran this far before). ----
 PC_ADVANCE INC V_COL
 	LDA V_COL
 	CMP #V_COLS
@@ -233,100 +260,68 @@ PC_ADVANCE INC V_COL
 PC_ADV_NOWRAP INC V_ADDR_LO
 	BNE PC_CHECK_SCROLL
 	INC V_ADDR_HI
+	LDA V_ADDR_HI
+	CMP #((VIDEO_RAM+VIDEO_RAM_SIZE) >> 8)
+	BNE PC_CHECK_SCROLL
+	LDA #(VIDEO_RAM >> 8)
+	STA V_ADDR_HI
 	;; falls through to PC_CHECK_SCROLL
 
-;; ---- scrolls once V_ADDR_LO/HI has advanced past the last visible byte
-;;      (VIDEO_RAM + V_COLS*V_ROWS = $B800+1920 = $BF80). Only ever reached
-;;      right after a row boundary (auto-wrap or explicit LF both land here
-;;      with V_COL already 0), so there's nothing left to do beyond the
-;;      scroll itself. ----
-PC_CHECK_SCROLL LDA V_ADDR_LO
-	CMP #((VIDEO_RAM+V_COLS*V_ROWS) & $FF)
+;; ---- scrolls once the cursor (V_ADDR_LO/HI) has stepped V_ROWS rows below
+;;      Display Start Address (V_START_LO/HI) - V_COL is already exactly 0
+;;      right at the moment a row boundary is crossed (both the auto-wrap
+;;      path above and PC_LF zero it before getting here), and nowhere else,
+;;      so it doubles as the "was this call actually a row crossing" signal
+;;      PC_CHECK_SCROLL needs, cheaper than the old fixed-address compare
+;;      this replaces (which only worked because Display Start Address never
+;;      moved before now). ----
+PC_CHECK_SCROLL LDA V_COL
 	BNE PC_CS_DONE
-	LDA V_ADDR_HI
-	CMP #((VIDEO_RAM+V_COLS*V_ROWS) >> 8)
+	INC V_ROW
+	LDA V_ROW
+	CMP #V_ROWS
 	BNE PC_CS_DONE
 	JSR PC_SCROLL
 PC_CS_DONE RTS
 
-;; ---- brute-force scroll: copies rows 1-23 up into rows 0-22 one row at a
-;;      time, blanks the newly-vacated last row, and repositions V_ADDR_LO/HI
-;;      there with V_COL left at 0 (already true on every caller's path into
-;;      here).
-;;
-;;      Borrows ADDRLO/ADDRHI (source pointer) and BYTEVAL/TRACKVAL
-;;      (destination pointer) rather than claiming more permanent zero page -
-;;      all four are saved on the hardware stack at entry and restored at
-;;      exit, since (unlike ADDRLO/ADDRHI's already-established "clobbered
-;;      freely across BDOS calls" convention) BYTEVAL/TRACKVAL are MONITOR's
-;;      own command-argument scratch, and this runs from an ordinary
-;;      BIOS_PUTCH call - not a dedicated primitive a command handler already
-;;      expects to lose state across.
-;;
-;;      Loop termination compares the destination pointer against the last
-;;      row's start address instead of counting rows in X: X has no "safe to
-;;      clobber" precedent here the way ADDRLO/ADDRHI do - CMD_DUMP keeps its
-;;      own row counter in X across many BIOS_PUTCH calls, so nothing in
-;;      DO_PUTCH's whole call chain touches X at all. ----
-PC_SCROLL LDA ADDRLO
-	PHA
-	LDA ADDRHI
-	PHA
-	LDA BYTEVAL
-	PHA
-	LDA TRACKVAL
-	PHA
-	LDA #((VIDEO_RAM+V_COLS) & $FF)
-	STA ADDRLO
-	LDA #((VIDEO_RAM+V_COLS) >> 8)
-	STA ADDRHI
-	LDA #(VIDEO_RAM & $FF)
-	STA BYTEVAL
-	LDA #(VIDEO_RAM >> 8)
-	STA TRACKVAL
-PS_ROW_LOOP LDY #0
-PS_BYTE_LOOP LDA (ADDRLO),Y
-	STA (BYTEVAL),Y
-	INY
-	CPY #V_COLS
-	BNE PS_BYTE_LOOP
-	LDA ADDRLO
-	CLC
+;; ---- ring-buffer scroll: moves the CRTC's own Display Start Address
+;;      (R12/R13, shadowed in V_START_LO/HI) forward by one row instead of
+;;      copying the 23 rows above it - the follow-up this file's own
+;;      VIDEO_RAM_SIZE comment already named. VIDEO_RAM_SIZE being a power of
+;;      two means wrapping V_START_LO/HI back to 0 is the same HI-byte
+;;      compare-and-reset PC_ADVANCE just did for V_ADDR_LO/HI, not a divide.
+;;      Blanks the one row V_ADDR_LO/HI now points at (the row this scroll
+;;      just revealed) - same single-row blank the old brute-force version
+;;      did at the end, just with no copying before it - then pins V_ROW
+;;      back to V_ROWS-1: both Display Start Address and the cursor moved
+;;      down by one row together, so the cursor's row position relative to
+;;      the (new) window is unchanged - still the last visible row. ----
+PC_SCROLL CLC
+	LDA V_START_LO
 	ADC #V_COLS
-	STA ADDRLO
-	LDA ADDRHI
+	STA V_START_LO
+	LDA V_START_HI
 	ADC #0
-	STA ADDRHI
-	LDA BYTEVAL
-	CLC
-	ADC #V_COLS
-	STA BYTEVAL
-	LDA TRACKVAL
-	ADC #0
-	STA TRACKVAL
-	CMP #((VIDEO_RAM+(V_ROWS-1)*V_COLS) >> 8)
-	BNE PS_ROW_LOOP
-	LDA BYTEVAL
-	CMP #((VIDEO_RAM+(V_ROWS-1)*V_COLS) & $FF)
-	BNE PS_ROW_LOOP
+	CMP #(VIDEO_RAM_SIZE >> 8)
+	BNE PS_NOWRAP
+	LDA #0
+PS_NOWRAP STA V_START_HI
+	LDA #VR_START_ADDR_LO
+	STA VIDEO_ADDR
+	LDA V_START_LO
+	STA VIDEO_DATA
+	LDA #VR_START_ADDR_HI
+	STA VIDEO_ADDR
+	LDA V_START_HI
+	STA VIDEO_DATA
 	LDY #0
 PS_BLANK_LOOP LDA #' '
-	STA (BYTEVAL),Y
+	STA (V_ADDR_LO),Y
 	INY
 	CPY #V_COLS
 	BNE PS_BLANK_LOOP
-	LDA BYTEVAL
-	STA V_ADDR_LO
-	LDA TRACKVAL
-	STA V_ADDR_HI
-	PLA
-	STA TRACKVAL
-	PLA
-	STA BYTEVAL
-	PLA
-	STA ADDRHI
-	PLA
-	STA ADDRLO
+	LDA #(V_ROWS-1)
+	STA V_ROW
 	RTS
 
 ;; ---- one-time setup, called once from MONITOR.asm's boot path (see
@@ -346,6 +341,17 @@ DO_VIDEO_INIT LDA #VR_H_DISPLAYED
 	STA VIDEO_ADDR
 	LDA #CURSOR_ON
 	STA VIDEO_DATA
+	LDA #0
+	STA V_START_LO
+	STA V_START_HI
+	LDA #VR_START_ADDR_LO
+	STA VIDEO_ADDR
+	LDA #0
+	STA VIDEO_DATA
+	LDA #VR_START_ADDR_HI
+	STA VIDEO_ADDR
+	LDA #0
+	STA VIDEO_DATA
 	LDA #(VIDEO_RAM & $FF)
 	STA V_ADDR_LO
 	STA ADDRLO
@@ -354,6 +360,7 @@ DO_VIDEO_INIT LDA #VR_H_DISPLAYED
 	STA ADDRHI
 	LDA #0
 	STA V_COL
+	STA V_ROW
 	LDX #0
 VI_ROW_LOOP LDY #0
 VI_BYTE_LOOP LDA #' '
@@ -374,10 +381,18 @@ VI_BYTE_LOOP LDA #' '
 	JSR PC_SET_CURSOR
 	RTS
 
-;; ---- A = row, X = col. Repoints V_ADDR_LO/HI/V_COL (so a following
+;; ---- A = row, X = col. Repoints V_ADDR_LO/HI/V_COL/V_ROW (so a following
 ;;      BIOS_PUTCH - and its own CR/LF/BS/scroll handling - picks up from
 ;;      here exactly as if it had scrolled/wrapped into this cell normally)
-;;      and the hardware cursor bar at VIDEO_RAM + row*V_COLS + col.
+;;      and the hardware cursor bar at Display Start Address + row*V_COLS +
+;;      col, wrapping at VIDEO_RAM_SIZE (the same HI-byte compare-and-reset
+;;      PC_ADVANCE/PC_SCROLL use) since that sum can now land anywhere in the
+;;      ring, not always within row 0's fixed VIDEO_RAM start the way it did
+;;      before Display Start Address could move. V_ROW is set directly from
+;;      row (saved off A before TAX below, since TAX leaves A unchanged) -
+;;      without this, a gotoxy to a row other than where V_ROW already
+;;      thought the cursor was would leave PC_CHECK_SCROLL's row count out
+;;      of sync with reality, scrolling at the wrong moment.
 ;;
 ;;      row*V_COLS is a plain repeated-add loop (row is at most V_ROWS-1 = 23)
 ;;      rather than a shift-based multiply - this runs once per cursor
@@ -390,8 +405,16 @@ VI_BYTE_LOOP LDA #' '
 ;;      across a call at all. ----
 DO_GOTOXY STX V_COL
 	TAX
+	STA V_ROW
 	LDA #(VIDEO_RAM & $FF)
+	CLC
+	ADC V_START_LO
 	STA V_ADDR_LO
+	LDA #(VIDEO_RAM >> 8)
+	ADC V_START_HI
+	STA V_ADDR_HI
+	CMP #((VIDEO_RAM+VIDEO_RAM_SIZE) >> 8)
+	BNE GX_ROW_LOOP
 	LDA #(VIDEO_RAM >> 8)
 	STA V_ADDR_HI
 GX_ROW_LOOP CPX #0
@@ -403,7 +426,11 @@ GX_ROW_LOOP CPX #0
 	LDA V_ADDR_HI
 	ADC #0
 	STA V_ADDR_HI
-	DEX
+	CMP #((VIDEO_RAM+VIDEO_RAM_SIZE) >> 8)
+	BNE GX_ROW_NOWRAP
+	LDA #(VIDEO_RAM >> 8)
+	STA V_ADDR_HI
+GX_ROW_NOWRAP DEX
 	JMP GX_ROW_LOOP
 GX_ROW_DONE LDA V_ADDR_LO
 	CLC
@@ -412,7 +439,11 @@ GX_ROW_DONE LDA V_ADDR_LO
 	LDA V_ADDR_HI
 	ADC #0
 	STA V_ADDR_HI
-	JSR PC_SET_CURSOR
+	CMP #((VIDEO_RAM+VIDEO_RAM_SIZE) >> 8)
+	BNE GX_COL_NOWRAP
+	LDA #(VIDEO_RAM >> 8)
+	STA V_ADDR_HI
+GX_COL_NOWRAP JSR PC_SET_CURSOR
 	RTS
 
 DO_GETCH LDA VIDEO_KBD_STAT
