@@ -386,25 +386,31 @@ DI_BOOT	LDA #0
 	JSR BIOS_SELECT
 	JSR BIOS_RESTORE
 
-	;; cc65's software stack pointer (zero page $0F/$10, per bdos.map's
-	;; exports list - $0A/$0B before simplecpu.cfg/bdos.cfg's ZEROPAGE
-	;; segment moved out to $0E to make room for BIOS.asm's own V_ADDR_LO/HI/
-	;; V_COL/SAVED_CHAR/SAVED_Y at $09-$0D) - BDOS's own crt0 never runs
-	;; (nothing JSRs to its STARTUP segment, only to its jump table), so
-	;; nothing else ever initializes this before BDOS's compiled code needs
-	;; it for parameter passing and the track/sector division -
-	;; BDOS_FIND_FILE's first-ever call would otherwise run with a garbage
-	;; stack pointer, scribbling wherever that garbage address happens to
-	;; point (caught via a "RO Memory Write attempt" flood at runtime).
+	;; cc65's software stack pointer (zero page $12/$13, per bdos.map's
+	;; exports list - $0F/$10 before simplecpu.cfg/bdos.cfg's ZEROPAGE
+	;; segment moved out to $11 to make room for BIOS.asm's own
+	;; V_START_LO/HI/V_ROW ring-buffer scroll state at $0E-$10, same reason
+	;; it moved to $0E in the first place for V_ADDR_LO/HI/V_COL/SAVED_CHAR/
+	;; SAVED_Y at $09-$0D) - BDOS's own crt0 never runs (nothing JSRs to its
+	;; STARTUP segment, only to its jump table), so nothing else ever
+	;; initializes this before BDOS's compiled code needs it for parameter
+	;; passing and the track/sector division - BDOS_FIND_FILE's first-ever
+	;; call would otherwise run with a garbage stack pointer, scribbling
+	;; wherever that garbage address happens to point (caught via a "RO
+	;; Memory Write attempt" flood at runtime - or, before this fix, by
+	;; silently corrupting whatever BIOS.asm now keeps at the OLD $0F/$10,
+	;; which happened to be V_START_HI/V_ROW this time around - a reminder
+	;; this hardcoded pair needs updating by hand every time either
+	;; ZEROPAGE's start or cc65's own internal layout shifts).
 	;; $8000 matches simplecpu.cfg's own __STACKSTART__, so CCP.COM's crt0
 	;; will set the exact same value once it's running - set only here, at
 	;; the first-ever BDOS call, not on every DI_BOOT entry or call into
 	;; BDOS, since resetting it after CCP.COM has pushed its own data would
 	;; corrupt CCP's in-progress stack frame.
 	LDA #$00
-	STA $0F
+	STA $12
 	LDA #$80
-	STA $10
+	STA $13
 
 	LDA CCPNAME_PTR
 	STA ADDRLO
