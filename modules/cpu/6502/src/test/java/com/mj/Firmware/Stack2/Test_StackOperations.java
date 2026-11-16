@@ -99,4 +99,25 @@ public class Test_StackOperations {
 		assertEquals(0x1003, c.pc);
 		assertEquals(0xff, c.sp);
 	}
+
+	@Test
+	public void jsrAndRtsWrapWithinPageOneWhenSpStartsLow() throws Exception {
+		// JSR pushes high byte then low byte (see jsrPushesReturnAddressMinusOneAndRtsAddsOne
+		// above) - two pushes from sp=0x01 land at $0101 then $0100, wrapping sp to 0xff
+		// exactly like PHA's own stackPointerWrapsWithinPageOne does for a single push.
+		c.sp = 0x01;
+		c.bus.write(0x1000, OpCodes.JSR.code());
+		c.bus.write(0x1001, (byte) 0x00);
+		c.bus.write(0x1002, (byte) 0x20);
+		c.bus.write(0x2000, OpCodes.RTS.code());
+		c.step();
+		assertEquals(0x2000, c.pc);
+		assertEquals(0xff, c.sp);
+		assertEquals(0x10, c.bus.read(0x0101) & 0xff);   // high byte of $1002
+		assertEquals(0x02, c.bus.read(0x0100) & 0xff);   // low byte of $1002 (return - 1)
+
+		c.step();
+		assertEquals(0x1003, c.pc);
+		assertEquals(0x01, c.sp, "both pulls should land sp back where JSR found it");
+	}
 }
