@@ -461,13 +461,15 @@ static unsigned char backspace_char(void) {
 	return 0;
 }
 
-static void split_line(void) {
-	unsigned char len = line_len(cur_line);
+/* Shared tail of split_line() below: shifts lines[cur_line+1..line_count-1]
+ * down by one, splits cur_line's content at cur_col into the freed slot,
+ * and advances cur_line/cur_col onto it. Callers growing past PAGE_LINES
+ * already decremented line_count first, so the shift's upper bound (and so
+ * the highest index it ever writes) is still within lines[][]'s real
+ * bounds. */
+static void insert_split_line(unsigned char len) {
 	unsigned char i;
 
-	if (line_count >= PAGE_LINES) {
-		return;
-	}
 	for (i = line_count; i > cur_line + 1; i--) {
 		copy_line(i, i - 1);
 	}
@@ -478,6 +480,95 @@ static void split_line(void) {
 	lines[cur_line][cur_col] = '\0';
 	cur_line++;
 	cur_col = 0;
+}
+
+/* Enter key. The common room-available case is the plain insert_split_line()
+ * call in the final else below - everything above it only runs once the
+ * current page is already full (PAGE_LINES lines), and only grows past
+ * that when editing the actual last page (typing/appending past the end -
+ * the common case this exists for): an earlier, already-full page - always
+ * exactly PAGE_LINES by load_file()'s own invariant - still refuses,
+ * same as before. Growing THAT case too would mean rippling the overflow
+ * forward through every subsequent full page; not implemented, since the
+ * common case this is for never hits it.
+ *
+ * Growing the last page splits into two distinct cases depending on
+ * whether cur_line is the page's own last line (PAGE_LINES - 1) or not:
+ *   - Not the last line: there's a real tail below cur_line, and a normal
+ *     insert would push the page's actual last line out past PAGE_LINES -
+ *     save that line first, then insert one line short of full so
+ *     insert_split_line()'s freed slot exactly refills. The cursor stays
+ *     on the current page; the pushed-out line becomes a new page appended
+ *     after it.
+ *   - The last line itself: there's no tail to push out, so the split's
+ *     own second half (everything from cur_col onward) IS what overflows -
+ *     it becomes the new page's first line directly, this page's last
+ *     line just truncates in place (there's no [PAGE_LINES] slot it could
+ *     insert into), and the cursor moves onto the new page, matching where
+ *     a real editor would land after splitting the very end of a buffer. */
+static void split_line(void) {
+	unsigned char len = line_len(cur_line);
+	unsigned char i;
+	unsigned char overflow[MAX_COLS + 1];
+	unsigned char growing = 0;
+	unsigned char move_to_new_page = 0;
+
+	if (line_count >= PAGE_LINES) {
+		if (current_page + 1 != total_pages || total_pages >= MAX_PAGES) {
+			return;
+		}
+		growing = 1;
+
+		if (cur_line == PAGE_LINES - 1) {
+			i = cur_col;
+			do {
+				overflow[i - cur_col] = lines[cur_line][i];
+			} while (lines[cur_line][i++] != '\0');
+			lines[cur_line][cur_col] = '\0';
+			move_to_new_page = 1;
+		} else {
+			i = 0;
+			do {
+				overflow[i] = lines[PAGE_LINES - 1][i];
+			} while (overflow[i++] != '\0');
+			line_count--;
+			insert_split_line(len);
+		}
+	} else {
+		insert_split_line(len);
+	}
+
+	if (growing) {
+		/* line_count is back at PAGE_LINES (still full) either way - flush
+		 * this page before reusing lines[][] to build the new one, which
+		 * is just the single overflow line. */
+		page_line_count[current_page] = line_count;
+		swap_page_out(current_page);
+
+		for (i = 0; i < PAGE_LINES; i++) {
+			lines[i][0] = '\0';
+		}
+		i = 0;
+		do {
+			lines[0][i] = overflow[i];
+		} while (overflow[i++] != '\0');
+		page_line_count[total_pages] = 1;
+		swap_page_out(total_pages);
+
+		if (move_to_new_page) {
+			/* lines[][] already holds this page's content (just built
+			 * above) - no reload needed, just point the view at it. */
+			current_page = total_pages;
+			line_count = 1;
+			cur_line = 0;
+			cur_col = 0;
+			view_top = 0;
+		} else {
+			swap_page_in(current_page);
+			line_count = page_line_count[current_page];
+		}
+		total_pages++;
+	}
 }
 
 /* Prompt at the status line, same shape as the original's prompt_input() -
@@ -552,7 +643,12 @@ static unsigned char prompt_input(const char *prompt, char *out, unsigned char o
  *
  * Returns 1 on a complete read, 0 if anything had to be dropped (MAX_PAGES
  * reached, or a mid-load swap_page_out() itself failed - disk/directory
- * full). */
+ * full).
+ *
+ * A file whose content ends exactly on a PAGE_LINES boundary (the common
+ * case of a standard single trailing newline landing there) doesn't get a
+ * spurious trailing page for the phantom empty line that would otherwise
+ * leave behind - see the l==0/col==0 check below. */
 static unsigned char load_file(void) {
 	unsigned char record[128];
 	unsigned char l, col, i, ch, last_ch;
@@ -607,13 +703,31 @@ static unsigned char load_file(void) {
 		}
 	}
 
-	lines[l][col] = '\0';
-	page_line_count[pages_used] = l + 1;
+	if (l == 0 && col == 0 && pages_used > 0) {
+		/* The file's very last byte was itself a line break that exactly
+		 * filled the previous page - l got reset to 0 for a "next" page
+		 * that never actually received any content (nothing left to read
+		 * after it). There's no real trailing page here: undo the flush
+		 * loop's own pages_used++ for it rather than counting a page that
+		 * only ever held a phantom empty line - page_line_count[pages_used]
+		 * (after the decrement) is already correctly PAGE_LINES, set by
+		 * that same flush. lines[][] itself, though, is still the blanked
+		 * buffer the flush reset it to - reload the real page's content
+		 * the flush already wrote out, or the buffer would read back as
+		 * all-empty despite line_count correctly saying PAGE_LINES. */
+		pages_used--;
+		swap_page_in(pages_used);
+	} else {
+		lines[l][col] = '\0';
+		page_line_count[pages_used] = l + 1;
+		if (pages_used > 0) {
+			swap_page_out(pages_used);
+		}
+	}
 	total_pages = pages_used + 1;
 	current_page = pages_used;
 
 	if (pages_used > 0) {
-		swap_page_out(pages_used);
 		swap_page_in(0);
 		current_page = 0;
 	}
