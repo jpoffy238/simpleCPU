@@ -5,7 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.mj.Devices.AddressRange;
+import com.mj.Devices.DeviceBus;
+import com.mj.Devices.PBus;
+import com.mj.Firmware.Framework.cpu001decoder;
 import com.mj.cpu001.CPU;
+import com.mj.memoryInterface.basicMemory;
 import com.mj.util.CPU_CreateUtil;
 
 /**
@@ -81,12 +86,39 @@ public class Test_AddressingEdgeCases {
 	}
 
 	@Test
+	public void jmpAbsoluteSetsPcDirectly() throws Exception {
+		// JMP $2000 - no indirection, no wrap involved; the plain absolute case
+		// JMP (ind) above doesn't exercise at all.
+		poke(0x1000, 0x4C); poke(0x1001, 0x00); poke(0x1002, 0x20);
+		c.step();
+		assertEquals(0x2000, c.pc);
+	}
+
+	@Test
 	public void backwardBranchWrapsPastZero() throws Exception {
 		// BNE -4 located at $0000: next=$0002, target=$FFFE
 		c.pc = 0x0000;
 		poke(0x0000, 0xD0); poke(0x0001, 0xFC);
 		c.step();
 		assertEquals(0xFFFE, c.pc);
+	}
+
+	@Test
+	public void forwardBranchWrapsPastFFFF() throws Exception {
+		// BNE +4 located at $FFFE: next=($FFFE+2)&$FFFF=$0000, target=$0004. Needs its
+		// own full-RAM CPU, not the shared one above - CPU_CreateUtil.getCPU() maps ROM
+		// at $F000-$FFFF (see its own class), and this opcode's bytes have to live
+		// exactly at $FFFE/$FFFF to exercise the wrap.
+		PBus bus = new DeviceBus();
+		bus.registerDevice(new basicMemory(bus, new AddressRange(0, 0xFFFF), null, 0));
+		CPU wrapCpu = new CPU(bus, new cpu001decoder());
+		wrapCpu.step();          // consume the pending power-on reset (MIH)
+		wrapCpu.pc = 0xFFFE;
+		bus.write(0xFFFE, (byte) 0xD0);
+		bus.write(0xFFFF, (byte) 0x04);
+		wrapCpu.ZFLAG.clear();
+		wrapCpu.step();
+		assertEquals(0x0004, wrapCpu.pc);
 	}
 
 	@Test
