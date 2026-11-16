@@ -396,6 +396,48 @@ public class Test_BIOS {
 	}
 
 	@Test
+	public void printingPastTheBottomScrollsRepeatedlyWithoutFaulting() throws Exception {
+		// Regression test: PC_LF's bulk add to V_ADDR_LO/HI (BIOS.asm) had no
+		// ring-wrap check of its own, unlike PC_ADVANCE's single-byte increment -
+		// it eventually walked V_ADDR_HI straight past VIDEO_RAM+VIDEO_RAM_SIZE
+		// into genuinely unmapped memory once the char RAM ring had wrapped at
+		// least once, faulting with a DeviceUnavailable. Caught interactively via
+		// CCP's TYPE command on a real bare-LF file - edit.c's own redraws always
+		// re-seed V_ADDR_LO/HI via BIOS_GOTOXY first, so edit.c's tests never
+		// exercised PC_LF's own address math far enough to hit this. LDX #60
+		// prints far more lines than one V_ROWS=24 screen holds, forcing several
+		// scrolls - enough to wrap the 2048-byte ring at least once. The trailing
+		// 'Z' only prints if the whole loop returned without faulting partway
+		// through.
+		byte[] program = {
+				(byte) 0xA2, 0x3C,				// LDX #60
+				(byte) 0xA9, 0x41,				// LDA #'A'
+				0x20, 0x00, (byte) 0xF0,		// JSR BIOS_PUTCH
+				(byte) 0xA9, 0x0A,				// LDA #$0A (LF)
+				0x20, 0x00, (byte) 0xF0,		// JSR BIOS_PUTCH
+				(byte) 0xCA,					// DEX
+				(byte) 0xD0, (byte) 0xF3,		// BNE back to LDA #'A'
+				(byte) 0xA9, 0x5A,				// LDA #'Z'
+				0x20, 0x00, (byte) 0xF0,		// JSR BIOS_PUTCH
+				0x60							// RTS
+		};
+		new CpmFileSystem(drive0).format();
+		new CpmFileSystem(drive0).createFile("CCP.COM", program);
+
+		video.type("B\r");
+		runBriefly();
+
+		boolean sawZ = false;
+		for (int row = 0; row <= 23; row++) {
+			if (video.getRow(row).contains("Z")) {
+				sawZ = true;
+				break;
+			}
+		}
+		assertTrue(sawZ, "the loop should have run to completion and printed Z without faulting on an unmapped address");
+	}
+
+	@Test
 	public void bootLoadsMultipleRecordsConsecutively() throws Exception {
 		// A 256-byte CCP.COM: the first 128 bytes are NOPs ($EA) with no RTS/JMP at
 		// all - the only way execution reaches the real routine in the second

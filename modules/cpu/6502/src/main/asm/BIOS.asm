@@ -179,6 +179,20 @@ DO_PUTCH STA SAVED_CHAR
 	STA (V_ADDR_LO),Y
 	JSR PC_ADVANCE
 	JMP PC_DONE
+;; ---- CR/BS/LF all move V_ADDR_LO/HI by an amount bounded to a single
+;;      borrow/carry on the HI byte (CR/LF's own subtract/add is a bulk
+;;      V_COL-sized jump, but it's still exactly one 8-bit SBC/ADC - the
+;;      carry/borrow out of that single op is never more than 1, no matter
+;;      how big the column distance is; BS moves by literally 1). Each needs
+;;      its own ring-wrap check same as PC_ADVANCE's, just not needed before
+;;      now - the old brute-force scroll always reset V_ADDR_LO/HI to a
+;;      fixed address on every scroll, so it never ran far enough through
+;;      the ring for any of these three to actually underflow/overflow past
+;;      VIDEO_RAM/VIDEO_RAM+VIDEO_RAM_SIZE. Caught via TYPE (ccp.c) printing
+;;      a bare-LF file (unlike edit.c, which always re-seeds V_ADDR_LO/HI
+;;      via BIOS_GOTOXY before every redraw, masking this) - PC_LF's unwrapped
+;;      bulk add walked V_ADDR_HI straight past VIDEO_RAM+VIDEO_RAM_SIZE into
+;;      genuinely unmapped memory once the ring had wrapped at least once. ----
 PC_CR	LDA V_ADDR_LO
 	SEC
 	SBC V_COL
@@ -186,7 +200,11 @@ PC_CR	LDA V_ADDR_LO
 	LDA V_ADDR_HI
 	SBC #0
 	STA V_ADDR_HI
-	LDA #0
+	CMP #(VIDEO_RAM >> 8)
+	BCS PR_NOWRAP
+	LDA #((VIDEO_RAM+VIDEO_RAM_SIZE) >> 8) - 1
+	STA V_ADDR_HI
+PR_NOWRAP LDA #0
 	STA V_COL
 	JMP PC_DONE
 PC_BS	LDA V_COL
@@ -195,6 +213,11 @@ PC_BS	LDA V_COL
 	LDA V_ADDR_LO
 	BNE PC_BS_SKIP
 	DEC V_ADDR_HI
+	LDA V_ADDR_HI
+	CMP #(VIDEO_RAM >> 8)
+	BCS PC_BS_SKIP
+	LDA #((VIDEO_RAM+VIDEO_RAM_SIZE) >> 8) - 1
+	STA V_ADDR_HI
 PC_BS_SKIP DEC V_ADDR_LO
 	JMP PC_DONE
 PC_LF	LDA #V_COLS
@@ -206,7 +229,11 @@ PC_LF	LDA #V_COLS
 	LDA V_ADDR_HI
 	ADC #0
 	STA V_ADDR_HI
-	LDA #0
+	CMP #((VIDEO_RAM+VIDEO_RAM_SIZE) >> 8)
+	BNE PL_NOWRAP
+	LDA #(VIDEO_RAM >> 8)
+	STA V_ADDR_HI
+PL_NOWRAP LDA #0
 	STA V_COL
 	JSR PC_CHECK_SCROLL
 	;; falls through to PC_DONE
@@ -314,14 +341,60 @@ PS_NOWRAP STA V_START_HI
 	STA VIDEO_ADDR
 	LDA V_START_HI
 	STA VIDEO_DATA
+
+	;; Blank the newly-revealed row at V_ADDR_LO/HI, one byte at a time via
+	;; a scratch copy (ADDRLO/ADDRHI/BYTEVAL - saved on the hardware stack
+	;; and restored below, same borrowing idiom the old brute-force
+	;; PC_SCROLL used here) rather than a single (V_ADDR_LO),Y indexed
+	;; loop: V_COLS (80) doesn't divide VIDEO_RAM_SIZE (2048) evenly, so a
+	;; row's 80 bytes can straddle the ring's wraparound point, and indexed
+	;; addressing just adds Y to the base as a flat 16-bit address - none
+	;; of PC_ADVANCE's own per-byte wrap check - walking straight past
+	;; VIDEO_RAM+VIDEO_RAM_SIZE into unmapped memory (this, not PC_LF's
+	;; bulk-add - already fixed above - turned out to be the actual "Error
+	;; Address: c020" fault once both were traced through by hand). Y
+	;; stays fixed at 0 throughout (just the "no offset" half of (zp),Y
+	;; addressing); BYTEVAL is the real 0-79 counter - X is deliberately
+	;; never touched anywhere in this routine, same as the rest of
+	;; DO_PUTCH's call chain (see its own comment) - CMD_DUMP keeps its own
+	;; row counter in X across calls that might land exactly on a scroll.
+	LDA ADDRLO
+	PHA
+	LDA ADDRHI
+	PHA
+	LDA BYTEVAL
+	PHA
+	LDA V_ADDR_LO
+	STA ADDRLO
+	LDA V_ADDR_HI
+	STA ADDRHI
+	LDA #0
+	STA BYTEVAL
 	LDY #0
 PS_BLANK_LOOP LDA #' '
-	STA (V_ADDR_LO),Y
-	INY
-	CPY #V_COLS
+	STA (ADDRLO),Y
+	INC ADDRLO
+	BNE PS_BLANK_NOWRAP
+	INC ADDRHI
+	LDA ADDRHI
+	CMP #((VIDEO_RAM+VIDEO_RAM_SIZE) >> 8)
+	BNE PS_BLANK_NOWRAP
+	LDA #(VIDEO_RAM >> 8)
+	STA ADDRHI
+PS_BLANK_NOWRAP INC BYTEVAL
+	LDA BYTEVAL
+	CMP #V_COLS
 	BNE PS_BLANK_LOOP
+
 	LDA #(V_ROWS-1)
 	STA V_ROW
+
+	PLA
+	STA BYTEVAL
+	PLA
+	STA ADDRHI
+	PLA
+	STA ADDRLO
 	RTS
 
 ;; ---- one-time setup, called once from MONITOR.asm's boot path (see
