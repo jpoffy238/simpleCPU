@@ -302,4 +302,148 @@ public class Test_Edit {
 					"line " + i + " of the saved round trip, got: [" + savedLines[i - 1] + "]");
 		}
 	}
+
+	@Test
+	public void insertingIntoAFullPageWithoutMovingToItsLastLineGrowsANewPage() throws Exception {
+		// Exactly 200 lines - PAGE_LINES - loads as one clean, completely full page
+		// now that load_file()'s own end-of-file-on-a-boundary off-by-one is fixed
+		// (it used to leave a phantom second page behind for a file shaped exactly
+		// like this one). Pressing Enter immediately, right at line 1 (not the
+		// page's own last line), exercises split_line()'s "the page's real last
+		// line is what a normal insert would push out - save it, make room, grow a
+		// new page for it" path - no navigation keystrokes needed to set up, unlike
+		// the cursor-at-the-last-line variant below.
+		byte[] editProgram = Files.readAllBytes(editBin());
+		CpmFileSystem fs = new CpmFileSystem(drive0);
+		fs.format();
+		fs.createFile("CCP.COM", editProgram);
+		fs.createFile("FULL.TXT", syntheticLines(200));
+
+		video.type("B\r");
+		video.type(CTRL_O);
+		video.type("FULL.TXT\r");
+		video.type("\r");
+		video.type(CTRL_S);
+		// Padded well past the ~10s this needed on the machine it was written on -
+		// confirmed empirically slower (I/O-bound work in particular) in at least
+		// one other environment this has run in since.
+		runBriefly(30000);
+
+		// No "P:1/2" check here: status_pending latches "Saved" on screen for
+		// exactly one extra redraw past the save, and nothing else is typed
+		// afterward, so the editor just blocks on the next keystroke (which
+		// never comes) before draw_status() ever gets a chance to show the
+		// page indicator again - the content/round-trip checks below are
+		// what actually confirm the second page is real.
+		assertEquals(" ".repeat(80), video.getRow(1), "the split's first half is now an empty line, got: [" + video.getRow(1) + "]");
+		assertTrue(video.getRow(2).startsWith("LINE0001"), "got: [" + video.getRow(2) + "]");
+		assertTrue(video.getRow(23).contains("Saved"), "status line, got: [" + video.getRow(23) + "]");
+
+		byte[] onDisk = new CpmFileSystem(drive0).readFile("FULL.TXT");
+		String content = new String(onDisk, "US-ASCII");
+		String[] savedLines = content.split("\r", -1);
+		assertEquals("", savedLines[0], "the new empty first line, got: [" + savedLines[0] + "]");
+		for (int i = 1; i <= 199; i++) {
+			assertEquals(String.format("LINE%04d", i), savedLines[i],
+					"line " + i + " of the saved round trip, got: [" + savedLines[i] + "]");
+		}
+		assertEquals("LINE0200", savedLines[200],
+				"the page's own last line, pushed out onto the new page, got: [" + savedLines[200] + "]");
+	}
+
+	@Test
+	public void typingPastTheEndOfAFullPageGrowsANewPageInsteadOfRefusing() throws Exception {
+		// Same 200-line setup as above, but this time walks the cursor all the way
+		// down to the page's own last line (PAGE_LINES - 1), and all the way right
+		// to the end of it (there's no "End" key - KEY_RIGHT one column at a time
+		// is the only way), before pressing Enter - exercising the OTHER half of
+		// split_line()'s growth logic: there's no tail left to push out, so the
+		// split's own second half becomes the new page directly, and the cursor
+		// moves onto it rather than staying put. Column has to actually reach the
+		// end of "LINE0200" (8) first, or splitting at column 0 would move that
+		// whole line's text onto the new page instead of leaving a genuinely empty
+		// line there for "NEW LINE" to land on cleanly. 199 KEY_DOWNs is slow
+		// enough (each is a full main-loop iteration, not just a register update)
+		// that this needs a much longer budget than any other test in this file -
+		// confirmed empirically, not just estimated, after an earlier attempt at
+		// 12s only got partway through them before being cut off.
+		byte[] editProgram = Files.readAllBytes(editBin());
+		CpmFileSystem fs = new CpmFileSystem(drive0);
+		fs.format();
+		fs.createFile("CCP.COM", editProgram);
+		fs.createFile("FULL.TXT", syntheticLines(200));
+
+		video.type("B\r");
+		video.type(CTRL_O);
+		video.type("FULL.TXT\r");
+		for (int i = 0; i < 199; i++) {
+			video.pressArrowKey(VideoController.KEY_DOWN);
+		}
+		for (int i = 0; i < 8; i++) {
+			video.pressArrowKey(VideoController.KEY_RIGHT);
+		}
+		video.type("\rNEW LINE");
+		video.type(CTRL_S);
+		// Padded well past the ~40s this needed on the machine it was written on,
+		// for the same reason as the test above - confirmed empirically slower
+		// (199 KEY_DOWNs only reached line 179 of 199 within 40s on one occasion)
+		// in at least one other environment this has run in since.
+		runBriefly(120000);
+
+		// No "P:2/2" check here either - see the comment on the same point in
+		// the test above; "Saved" latches the status line past any chance of
+		// draw_status() showing the page indicator again.
+		assertTrue(video.getRow(1).startsWith("NEW LINE"),
+				"cursor should have landed on the new page's own line 1, got: [" + video.getRow(1) + "]");
+		assertTrue(video.getRow(23).contains("Saved"), "status line, got: [" + video.getRow(23) + "]");
+
+		byte[] onDisk = new CpmFileSystem(drive0).readFile("FULL.TXT");
+		String content = new String(onDisk, "US-ASCII");
+		String[] savedLines = content.split("\r", -1);
+		for (int i = 1; i <= 200; i++) {
+			assertEquals(String.format("LINE%04d", i), savedLines[i - 1],
+					"line " + i + " of the saved round trip, got: [" + savedLines[i - 1] + "]");
+		}
+		assertEquals("NEW LINE", savedLines[200], "the newly typed 201st line, got: [" + savedLines[200] + "]");
+	}
+
+	@Test
+	public void insertingIntoAnEarlierFullPageRipplesTheOverflowAcrossLaterPages() throws Exception {
+		// 450 lines = exactly 2 full pages (0-199, 200-399) plus a partial third
+		// (400-449, 50 lines) - the shape that actually broke in practice (a real,
+		// editor-saved multi-page file, same as the 613-line EDIT.CPP that surfaced
+		// this): editing page 0 (not the file's last page) used to just refuse
+		// outright. Pressing Enter at line 1, column 1 (right at the very front)
+		// exercises the full cascade in one shot: page 0's own last line (LINE0200)
+		// ripples into page 1 (also full, so ITS last line - LINE0400 - ripples on
+		// again), finally landing in page 2, which has real spare room.
+		byte[] editProgram = Files.readAllBytes(editBin());
+		CpmFileSystem fs = new CpmFileSystem(drive0);
+		fs.format();
+		fs.createFile("CCP.COM", editProgram);
+		fs.createFile("BIG.TXT", syntheticLines(450));
+
+		video.type("B\r");
+		video.type(CTRL_O);
+		video.type("BIG.TXT\r");
+		video.type("\r");
+		video.type(CTRL_S);
+		runBriefly(30000);
+
+		// Still on page 0 (not moved away, since this wasn't the last-line case):
+		// the split's first half is an empty line, and the cursor landed on the
+		// second half - the file's original first line, now one row down.
+		assertEquals(" ".repeat(80), video.getRow(1), "the split's first half is now an empty line, got: [" + video.getRow(1) + "]");
+		assertTrue(video.getRow(2).startsWith("LINE0001"), "got: [" + video.getRow(2) + "]");
+		assertTrue(video.getRow(23).contains("Saved"), "status line, got: [" + video.getRow(23) + "]");
+
+		byte[] onDisk = new CpmFileSystem(drive0).readFile("BIG.TXT");
+		String content = new String(onDisk, "US-ASCII");
+		String[] savedLines = content.split("\r", -1);
+		assertEquals("", savedLines[0], "the new empty first line, got: [" + savedLines[0] + "]");
+		for (int i = 1; i <= 450; i++) {
+			assertEquals(String.format("LINE%04d", i), savedLines[i],
+					"line " + i + " of the saved round trip, got: [" + savedLines[i] + "]");
+		}
+	}
 }
