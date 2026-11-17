@@ -1,6 +1,8 @@
 package com.mj.Video;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,12 +27,16 @@ public class Test_VideoController {
 	private static final int R_START_ADDR_LO = 13;
 
 	private FakeMemory charRam;
+	private FakeMemory graphicsRam;
 	private VideoController video;
 
 	@BeforeEach
 	public void setup() {
 		charRam = new FakeMemory(new AddressRange(0xb800, 0xbfff));
-		video = new VideoController(new AddressRange(0x9020, 0x9023), charRam);
+		graphicsRam = new FakeMemory(new AddressRange(0xc000, 0xdfff));
+		// Widened from (0x9020, 0x9023) to include +4 (Mode Control) - every
+		// existing test only ever touches 0x9020-0x9023, so this is additive.
+		video = new VideoController(new AddressRange(0x9020, 0x9024), charRam, graphicsRam);
 	}
 
 	private void setRegister(int index, int value) throws Exception {
@@ -194,6 +200,56 @@ public class Test_VideoController {
 
 		assertEquals(VideoController.KEY_PAGE_DOWN, video.read(0x9022) & 0xff);
 		assertEquals(VideoController.KEY_PAGE_UP, video.read(0x9022) & 0xff);
+	}
+
+	@Test
+	public void modeDefaultsToTextAndRoundTripsThroughTheModeRegister() throws Exception {
+		assertEquals(VideoController.MODE_TEXT, video.read(0x9024) & 0xff, "text mode by default");
+		assertFalse(video.isGraphicsMode());
+
+		video.write(0x9024, (byte) VideoController.MODE_GRAPHICS);
+
+		assertEquals(VideoController.MODE_GRAPHICS, video.read(0x9024) & 0xff);
+		assertTrue(video.isGraphicsMode());
+	}
+
+	@Test
+	public void resetGoesBackToTextMode() throws Exception {
+		video.write(0x9024, (byte) VideoController.MODE_GRAPHICS);
+
+		video.reset();
+
+		assertFalse(video.isGraphicsMode());
+	}
+
+	@Test
+	public void getPixelReadsTheGraphicsRamMsbFirst() throws Exception {
+		// $80 = 10000000 - only the leftmost pixel (x=0) of the byte set.
+		graphicsRam.write(0xc000, (byte) 0x80);
+
+		assertTrue(video.getPixel(0, 0), "MSB (x=0) should be set");
+		for (int x = 1; x < 8; x++) {
+			assertFalse(video.getPixel(x, 0), "x=" + x + " should be clear");
+		}
+	}
+
+	@Test
+	public void getPixelIndexesByRowThenColumn() throws Exception {
+		// Row 1 starts at byte offset GRAPHICS_BYTES_PER_ROW (40); $01 sets just
+		// the rightmost pixel (x=7) of that row's first byte.
+		graphicsRam.write(0xc000 + VideoController.GRAPHICS_BYTES_PER_ROW, (byte) 0x01);
+
+		assertTrue(video.getPixel(7, 1));
+		assertFalse(video.getPixel(7, 0), "row 0 shouldn't be affected by row 1's byte");
+	}
+
+	@Test
+	public void getPixelIsAlwaysFalseWithNoGraphicsRamWired() throws Exception {
+		VideoController textOnly = new VideoController(new AddressRange(0x9020, 0x9024), charRam);
+		textOnly.write(0x9024, (byte) VideoController.MODE_GRAPHICS);
+
+		assertTrue(textOnly.isGraphicsMode(), "mode switch itself still works with no backing device");
+		assertFalse(textOnly.getPixel(0, 0), "no graphicsRam to read from - degrades to all-off, not a fault");
 	}
 
 	/** Minimal standalone Device backing a flat byte array over one AddressRange -

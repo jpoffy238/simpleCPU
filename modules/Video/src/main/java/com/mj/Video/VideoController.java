@@ -42,14 +42,19 @@ import com.mj.exceptions.illegalAddressException;
  * the visible window starts (R12/R13, so scrolling is "change two registers," not
  * "copy 1920 bytes") and where the cursor is (R14/R15, a RAM offset, not a row/col).
  *
- * Four bytes of address space - the first two are exactly the real 6845's
- * addressing scheme; the last two are a keyboard interface bolted on alongside,
+ * Five bytes of address space - the first two are exactly the real 6845's
+ * addressing scheme; +2/+3 are a keyboard interface bolted on alongside,
  * since Device only supports one AddressRange per device and a genuinely
  * separate keyboard-chip class would have no way to reach this controller's own
  * Screen panel to attach a KeyListener. Real CRTC-based machines (Kaypro,
  * Osborne) also had keyboard input as a physically separate chip from the CRTC -
  * bolting it on here is a pragmatic compromise around the interface constraint,
- * not a claim that one real chip did both:
+ * not a claim that one real chip did both. +4 (Mode Control) is a second such
+ * bolt-on, for a different real reason: on real CGA-class hardware, the 6845
+ * itself never knew about text-vs-graphics at all - a genuinely separate mode
+ * latch outside the CRTC decided how to interpret the character generator ROM's
+ * output. Modeling that as a distinct, non-6845 byte here (rather than
+ * repurposing one of R0-R17) keeps the real register semantics honest:
  *   +0  Address Register (write-only) - selects which of R0-R17 the next access
  *       to +1 refers to.
  *   +1  Data Register (read/write) - gets/sets the selected register's value.
@@ -58,6 +63,14 @@ import com.mj.exceptions.illegalAddressException;
  *       bits (blocking/interrupt mode) like ConsoleDevice's status register -
  *       BIOS_GETCH only ever busy-polls this one bit, same as it does for
  *       ConsoleDevice today, so there's nothing else to model yet.
+ *   +4  Mode Control (read/write) - 0 (MODE_TEXT, the default) renders R1xR6
+ *       characters from charRam exactly as before; MODE_GRAPHICS renders a
+ *       fixed 320x200 1-bit-per-pixel bitmap from graphicsRam instead (fixed,
+ *       not register-configurable, same as real CGA's own fixed-resolution
+ *       modes - see getPixel()). graphicsRam may be null (e.g. test fixtures
+ *       that only ever exercise text mode) - switching to MODE_GRAPHICS still
+ *       works, it just renders as all-off, same "degrade gracefully instead of
+ *       faulting" spirit as a real missing light pen.
  *
  * Arrow and Page Up/Down keys queue synthetic codes 0x80-0x85 (KEY_UP/DOWN/
  * LEFT/RIGHT/PAGE_UP/PAGE_DOWN below) - AWT's keyTyped never fires for them
@@ -94,6 +107,7 @@ public class VideoController implements Device {
 	private static final int REG_DATA = 1;
 	private static final int REG_KEYBOARD_DATA = 2;
 	private static final int REG_KEYBOARD_STATUS = 3;
+	private static final int REG_MODE = 4;
 	private static final int KEYBOARD_STATUS_DATA_AVAILABLE = 0x01;
 
 	public static final int KEY_UP = 0x80;
@@ -102,6 +116,16 @@ public class VideoController implements Device {
 	public static final int KEY_RIGHT = 0x83;
 	public static final int KEY_PAGE_UP = 0x84;
 	public static final int KEY_PAGE_DOWN = 0x85;
+
+	public static final int MODE_TEXT = 0;
+	public static final int MODE_GRAPHICS = 1;
+
+	/** Fixed resolution for MODE_GRAPHICS - not register-configurable, same as
+	 * real CGA's own fixed-resolution modes (there's no equivalent of R1/R6
+	 * for graphics here). */
+	public static final int GRAPHICS_COLS = 320;
+	public static final int GRAPHICS_ROWS = 200;
+	public static final int GRAPHICS_BYTES_PER_ROW = GRAPHICS_COLS / 8;
 
 	private static final int R_H_DISPLAYED = 1;
 	private static final int R_V_DISPLAYED = 6;
@@ -125,9 +149,12 @@ public class VideoController implements Device {
 	private final Device charRam;
 	private final int charRamBase;
 	private final int charRamSize;
+	private final Device graphicsRam;
+	private final int graphicsRamBase;
 
 	private final byte[] registers = new byte[REGISTER_COUNT];
 	private int addressRegister = 0;
+	private int mode = MODE_TEXT;
 	private final Queue<Integer> input = new ConcurrentLinkedQueue<Integer>();
 
 	private final Properties properties;
@@ -137,10 +164,19 @@ public class VideoController implements Device {
 	private Timer refreshTimer;
 
 	public VideoController(AddressRange range, Device charRam) {
+		this(range, charRam, null);
+	}
+
+	/** graphicsRam may be null - callers that only ever drive text mode (most
+	 * existing fixtures) don't need to wire one up at all; see the class
+	 * comment's own note on degrading gracefully rather than faulting. */
+	public VideoController(AddressRange range, Device charRam, Device graphicsRam) {
 		this.range = range;
 		this.charRam = charRam;
 		this.charRamBase = charRam.getAddressRange().baseAddress();
 		this.charRamSize = charRam.getAddressRange().size();
+		this.graphicsRam = graphicsRam;
+		this.graphicsRamBase = graphicsRam == null ? 0 : graphicsRam.getAddressRange().baseAddress();
 		this.properties = loadProperties();
 		reset();
 
@@ -270,6 +306,8 @@ public class VideoController implements Device {
 					logger.debug(String.format("video register R%d = 0x%02X", addressRegister, data & 0xff));
 				}
 			}
+		} else if (local == REG_MODE) {
+			mode = data & 0xff;
 		}
 		// Keyboard Data/Status are read-only from the CPU's side - a write to
 		// either is simply ignored, same as writing CONSOLE_DATA's read path would
@@ -289,6 +327,9 @@ public class VideoController implements Device {
 		if (local == REG_KEYBOARD_STATUS) {
 			return input.isEmpty() ? 0 : (byte) KEYBOARD_STATUS_DATA_AVAILABLE;
 		}
+		if (local == REG_MODE) {
+			return (byte) mode;
+		}
 		if (addressRegister < REGISTER_COUNT) {
 			return registers[addressRegister];
 		}
@@ -303,6 +344,7 @@ public class VideoController implements Device {
 	@Override
 	public void reset() {
 		addressRegister = 0;
+		mode = MODE_TEXT;
 		for (int i = 0; i < REGISTER_COUNT; i++) {
 			registers[i] = 0;
 		}
@@ -336,6 +378,25 @@ public class VideoController implements Device {
 
 	private boolean cursorEnabled() {
 		return unsigned(R_CURSOR_START) != CURSOR_MODE_OFF;
+	}
+
+	public boolean isGraphicsMode() {
+		return mode != MODE_TEXT;
+	}
+
+	/** True if pixel (x, y) is set, in the fixed 320x200 monochrome
+	 * GRAPHICS_MODE bitmap - always false if there's no graphicsRam device at
+	 * all (see the class comment). x/y aren't bounds-checked beyond what
+	 * graphicsRam itself enforces - same convention getChar()'s own row/col
+	 * has for charRam. */
+	public boolean getPixel(int x, int y) throws illegalAddressException, DeviceUnavailable {
+		if (graphicsRam == null) {
+			return false;
+		}
+		int byteOffset = y * GRAPHICS_BYTES_PER_ROW + (x / 8);
+		int bitMask = 1 << (7 - (x % 8));
+		int value = graphicsRam.read(graphicsRamBase + byteOffset) & 0xff;
+		return (value & bitMask) != 0;
 	}
 
 	/** The character at (row, col) of the currently visible window - lets tests
@@ -422,6 +483,14 @@ public class VideoController implements Device {
 		@Override
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
+			if (isGraphicsMode()) {
+				paintGraphics(g);
+			} else {
+				paintText(g);
+			}
+		}
+
+		private void paintText(Graphics g) {
 			int cols = horizontalDisplayed();
 			int rows = verticalDisplayed();
 			if (cols == 0 || rows == 0) {
@@ -453,6 +522,29 @@ public class VideoController implements Device {
 					g.fillRect(border + cursorCol * charWidth, border + (cursorRow + 1) * charHeight + 2, charWidth, 2);
 				}
 			}
+		}
+
+		/** Builds one BufferedImage pixel-by-pixel then blits it in a single
+		 * drawImage() call - 320x200 individual fillRect() calls per repaint
+		 * (one per pixel) would work but cost noticeably more given Swing's
+		 * own ~30fps repaint timer driving this continuously, not just once. */
+		private void paintGraphics(Graphics g) {
+			setPreferredSize(new Dimension(2 * border + GRAPHICS_COLS, 2 * border + GRAPHICS_ROWS));
+			BufferedImage image = new BufferedImage(GRAPHICS_COLS, GRAPHICS_ROWS, BufferedImage.TYPE_INT_RGB);
+			int onColor = getForeground().getRGB();
+			int offColor = getBackground().getRGB();
+			for (int y = 0; y < GRAPHICS_ROWS; y++) {
+				for (int x = 0; x < GRAPHICS_COLS; x++) {
+					boolean on;
+					try {
+						on = getPixel(x, y);
+					} catch (illegalAddressException | DeviceUnavailable e) {
+						on = false;
+					}
+					image.setRGB(x, y, on ? onColor : offColor);
+				}
+			}
+			g.drawImage(image, border, border, null);
 		}
 	}
 }

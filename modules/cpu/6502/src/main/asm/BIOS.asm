@@ -25,6 +25,13 @@
 ;;                      BIOS_PUTCH's next write and the hardware cursor bar at
 ;;                      (row, col); no bounds checking - caller's job to stay within
 ;;                      V_ROWS/V_COLS.
+;;   BIOS_GRAPHICS_MODE A = MODE_TEXT or MODE_GRAPHICS - switches VideoController's
+;;                      Mode Control register; VideoController.getPixel() only ever
+;;                      reads GRAPHICS_RAM while in MODE_GRAPHICS
+;;   BIOS_SET_PIXEL     A = row (0..199), X = on/off (0 = off), zero-page
+;;                      ADDRLO/ADDRHI = column (0..319), staged beforehand (see
+;;                      bios_set_pixel_x in bios.h/bios_glue.s) - no bounds
+;;                      checking, same as BIOS_GOTOXY
 CPU 6502
 OUTPUT HEX
 
@@ -60,6 +67,17 @@ CURSOR_MODE_OFF = $20			;; matches VideoController.CURSOR_MODE_OFF
 VIDEO_KBD_DATA = $9022
 VIDEO_KBD_STAT = $9023
 DATA_AVAILABLE = $01
+
+;; VideoController's Mode Control register (+4 of the same AddressRange) -
+;; deliberately not one of the 18 real 6845 registers, the same way real
+;; CGA-class hardware kept text/graphics switching in a separate latch
+;; outside the CRTC itself. GRAPHICS_RAM is the 320x200 1bpp bitmap BIOS_SET_PIXEL
+;; addresses into; GRAPHICS_BYTES_PER_ROW (320/8) is its row stride.
+VIDEO_MODE = $9024
+MODE_TEXT = $00
+MODE_GRAPHICS = $01
+GRAPHICS_RAM = $C000
+GRAPHICS_BYTES_PER_ROW = 40
 
 ;; VideoController's character RAM (plain memory - BIOS pokes it directly, same
 ;; as any ordinary RAM access, no register protocol involved) and the fixed
@@ -147,6 +165,8 @@ V_ROW      = $10
 	JMP DO_RESTORE		;; $F012 BIOS_RESTORE
 	JMP DO_VIDEO_INIT	;; $F015 BIOS_VIDEO_INIT
 	JMP DO_GOTOXY		;; $F018 BIOS_GOTOXY
+	JMP DO_GRAPHICS_MODE	;; $F01B BIOS_GRAPHICS_MODE
+	JMP DO_SET_PIXEL	;; $F01E BIOS_SET_PIXEL
 
 ;; ---- A = char to print. Pokes VideoController's character RAM with BIOS's
 ;;      own row/column tracking - Console drove this exclusively once, then
@@ -578,3 +598,94 @@ DO_FORMAT_TRACK STA FD_TRACK
 DO_RESTORE LDA #$00
 	STA FD_STATUS
 	RTS
+
+;; ---- A = MODE_TEXT or MODE_GRAPHICS. Just a register poke - VideoController
+;;      itself decides how to paint based on it (see its class comment). ----
+DO_GRAPHICS_MODE STA VIDEO_MODE
+	RTS
+
+;; ---- A = row (0-199), X = on/off (0 = off, anything else = on), zero-page
+;;      ADDRLO/ADDRHI = column (0-319), staged by the caller beforehand (same
+;;      "stage one value, then trigger" convention BIOS_READ_SECTOR's own
+;;      ADDRLO/ADDRHI use). GRAPHICS_RAM is addressed row-major: byteOffset =
+;;      row*GRAPHICS_BYTES_PER_ROW + col/8, bit (7 - col mod 8) within that
+;;      byte - MSB-first, matching VideoController.getPixel().
+;;
+;;      col mod 8 is pulled out of ADDRLO before anything else touches it
+;;      (ADDRLO mod 8 always equals the full 16-bit column mod 8, since 8
+;;      divides 256 evenly - no need to look at ADDRHI for this part) and
+;;      used to index PIXEL_BIT_MASKS; that mask is stashed on the hardware
+;;      stack across the multiply below, which needs A/X itself.
+;;
+;;      ADDRLO/ADDRHI (column) is then shifted right 3 bits as a 16-bit pair
+;;      to become col/8 - row*GRAPHICS_BYTES_PER_ROW is added on top of that
+;;      via a plain repeated-addition loop (X counts rows down to zero; no
+;;      multiply instruction on this CPU), and finally GRAPHICS_RAM's own
+;;      base address, leaving ADDRLO/ADDRHI pointing at the one byte to
+;;      read-modify-write. BYTEVAL/TRACKVAL are borrowed the same way
+;;      PC_SCROLL borrows them (no save/restore - this file always runs with
+;;      interrupts off, see its header). ----
+DO_SET_PIXEL STA BYTEVAL		;; row, until the multiply loop below
+	STX TRACKVAL			;; on/off, until X is needed as that loop's counter
+	LDA ADDRLO
+	AND #$07
+	TAY
+	LDA PIXEL_BIT_MASKS,Y
+	PHA				;; mask, until Y is needed as 0 for (ADDRLO),Y
+
+	LDA ADDRHI			;; ADDRLO/ADDRHI >>= 3 (16-bit), giving col/8
+	LSR A
+	STA ADDRHI
+	LDA ADDRLO
+	ROR A
+	STA ADDRLO
+	LDA ADDRHI
+	LSR A
+	STA ADDRHI
+	LDA ADDRLO
+	ROR A
+	STA ADDRLO
+	LDA ADDRHI
+	LSR A
+	STA ADDRHI
+	LDA ADDRLO
+	ROR A
+	STA ADDRLO
+
+	LDX BYTEVAL			;; += row*GRAPHICS_BYTES_PER_ROW, one row at a time
+DSP_MUL_LOOP CPX #$00
+	BEQ DSP_MUL_DONE
+	CLC
+	LDA ADDRLO
+	ADC #GRAPHICS_BYTES_PER_ROW
+	STA ADDRLO
+	LDA ADDRHI
+	ADC #$00
+	STA ADDRHI
+	DEX
+	JMP DSP_MUL_LOOP
+DSP_MUL_DONE CLC			;; += GRAPHICS_RAM's own base address
+	LDA ADDRLO
+	ADC #(GRAPHICS_RAM & $FF)
+	STA ADDRLO
+	LDA ADDRHI
+	ADC #(GRAPHICS_RAM >> 8)
+	STA ADDRHI
+
+	PLA				;; mask, pushed above
+	STA BYTEVAL			;; row no longer needed - reuse its slot
+	LDY #$00
+	LDA (ADDRLO),Y
+	LDX TRACKVAL
+	BEQ DSP_CLEAR
+	ORA BYTEVAL
+	JMP DSP_STORE
+DSP_CLEAR LDA BYTEVAL
+	EOR #$FF
+	STA TRACKVAL			;; on/off no longer needed - reuse its slot
+	LDA (ADDRLO),Y
+	AND TRACKVAL
+DSP_STORE STA (ADDRLO),Y
+	RTS
+
+PIXEL_BIT_MASKS DB $80,$40,$20,$10,$08,$04,$02,$01

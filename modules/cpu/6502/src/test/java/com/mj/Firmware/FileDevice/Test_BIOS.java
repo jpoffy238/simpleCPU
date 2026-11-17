@@ -2,6 +2,7 @@ package com.mj.Firmware.FileDevice;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -68,7 +69,9 @@ public class Test_BIOS {
 		// fault on unmapped memory before the monitor prompt ever comes up.
 		basicMemory videoRam = new basicMemory(bus, new AddressRange(0xb800, 0xbfff), null, 0);
 		bus.registerDevice(videoRam);
-		video = new VideoController(new AddressRange(0x9020, 0x9023), videoRam);
+		basicMemory graphicsRam = new basicMemory(bus, new AddressRange(0xc000, 0xdfff), null, 0);
+		bus.registerDevice(graphicsRam);
+		video = new VideoController(new AddressRange(0x9020, 0x9024), videoRam, graphicsRam);
 		bus.registerDevice(video);
 
 		fdc = new FloppyController(via, new AddressRange(0x9010, 0x9014));
@@ -478,5 +481,66 @@ public class Test_BIOS {
 
 		assertEquals(0, c.bus.read(0x9014) & 0xff, "reset should re-select drive 0");
 		assertEquals(0, c.bus.read(0x9011) & 0xff, "reset should restore to track 0");
+	}
+
+	@Test
+	public void bootedProgramCanDrawAndClearPixelsThroughTheGraphicsPrimitives() throws Exception {
+		// LDA #1 / JSR BIOS_GRAPHICS_MODE ($F01B), then a handful of
+		// "stage column into $01/$02, stage on/off into X, row in A, JSR
+		// BIOS_SET_PIXEL ($F01E)" sequences - see BIOS.asm's DO_SET_PIXEL for the
+		// calling convention. Exercises: (0,0) and (7,0), the two ends of the
+		// same byte's bit range (mod-8 boundary); (319,199), the bottom-right
+		// corner of the 320x200 bitmap (column needs both staging bytes, since
+		// 319 > 255); and (3,2) set then cleared, to prove the AND-mask path
+		// actually clears a bit rather than just never setting it.
+		byte[] program = {
+				(byte) 0xA9, 0x01, 0x20, 0x1B, (byte) 0xF0,			// LDA #1 / JSR BIOS_GRAPHICS_MODE
+
+				(byte) 0xA9, 0x00, (byte) 0x85, 0x01,				// LDA #0 / STA $01 (col lo)
+				(byte) 0xA9, 0x00, (byte) 0x85, 0x02,				// LDA #0 / STA $02 (col hi)
+				(byte) 0xA2, 0x01,						// LDX #1 (on)
+				(byte) 0xA9, 0x00,						// LDA #0 (row)
+				0x20, 0x1E, (byte) 0xF0,					// JSR BIOS_SET_PIXEL -> (0,0) on
+
+				(byte) 0xA9, 0x07, (byte) 0x85, 0x01,				// col lo = 7
+				(byte) 0xA9, 0x00, (byte) 0x85, 0x02,				// col hi = 0
+				(byte) 0xA2, 0x01,
+				(byte) 0xA9, 0x00,
+				0x20, 0x1E, (byte) 0xF0,					// -> (7,0) on
+
+				(byte) 0xA9, 0x3F, (byte) 0x85, 0x01,				// col lo = 0x3F
+				(byte) 0xA9, 0x01, (byte) 0x85, 0x02,				// col hi = 1  (319)
+				(byte) 0xA2, 0x01,
+				(byte) 0xA9, (byte) 0xC7,					// row = 199
+				0x20, 0x1E, (byte) 0xF0,					// -> (319,199) on
+
+				(byte) 0xA9, 0x03, (byte) 0x85, 0x01,				// col lo = 3
+				(byte) 0xA9, 0x00, (byte) 0x85, 0x02,				// col hi = 0
+				(byte) 0xA2, 0x01,
+				(byte) 0xA9, 0x02,						// row = 2
+				0x20, 0x1E, (byte) 0xF0,					// -> (3,2) on
+
+				(byte) 0xA9, 0x03, (byte) 0x85, 0x01,				// same (3,2) again,
+				(byte) 0xA9, 0x00, (byte) 0x85, 0x02,
+				(byte) 0xA2, 0x00,						// but X = 0 (off) this time
+				(byte) 0xA9, 0x02,
+				0x20, 0x1E, (byte) 0xF0,					// -> (3,2) off
+
+				0x60								// RTS
+		};
+		new CpmFileSystem(drive0).format();
+		new CpmFileSystem(drive0).createFile("CCP.COM", program);
+
+		video.type("B\r");
+		runBriefly();
+
+		assertTrue(video.isGraphicsMode(), "BIOS_GRAPHICS_MODE should have switched VideoController into graphics mode");
+		assertTrue(video.getPixel(0, 0), "(0,0) should be on");
+		assertTrue(video.getPixel(7, 0), "(7,0), the other end of the same byte, should be on");
+		for (int x = 1; x < 7; x++) {
+			assertFalse(video.getPixel(x, 0), "x=" + x + " of row 0's first byte should be untouched");
+		}
+		assertTrue(video.getPixel(319, 199), "(319,199), the bottom-right corner, should be on");
+		assertFalse(video.getPixel(3, 2), "(3,2) was set and then cleared - should be off again");
 	}
 }

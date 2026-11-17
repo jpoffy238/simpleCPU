@@ -82,7 +82,9 @@ public class Test_Edit {
 
 		basicMemory videoRam = new basicMemory(bus, new AddressRange(0xb800, 0xbfff), null, 0);
 		bus.registerDevice(videoRam);
-		video = new VideoController(new AddressRange(0x9020, 0x9023), videoRam);
+		basicMemory graphicsRam = new basicMemory(bus, new AddressRange(0xc000, 0xdfff), null, 0);
+		bus.registerDevice(graphicsRam);
+		video = new VideoController(new AddressRange(0x9020, 0x9024), videoRam, graphicsRam);
 		bus.registerDevice(video);
 
 		FloppyController fdc = new FloppyController(via, new AddressRange(0x9010, 0x9014));
