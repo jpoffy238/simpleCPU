@@ -406,4 +406,44 @@ public class Test_Edit {
 		}
 		assertEquals("NEW LINE", savedLines[200], "the newly typed 201st line, got: [" + savedLines[200] + "]");
 	}
+
+	@Test
+	public void insertingIntoAnEarlierFullPageRipplesTheOverflowAcrossLaterPages() throws Exception {
+		// 450 lines = exactly 2 full pages (0-199, 200-399) plus a partial third
+		// (400-449, 50 lines) - the shape that actually broke in practice (a real,
+		// editor-saved multi-page file, same as the 613-line EDIT.CPP that surfaced
+		// this): editing page 0 (not the file's last page) used to just refuse
+		// outright. Pressing Enter at line 1, column 1 (right at the very front)
+		// exercises the full cascade in one shot: page 0's own last line (LINE0200)
+		// ripples into page 1 (also full, so ITS last line - LINE0400 - ripples on
+		// again), finally landing in page 2, which has real spare room.
+		byte[] editProgram = Files.readAllBytes(editBin());
+		CpmFileSystem fs = new CpmFileSystem(drive0);
+		fs.format();
+		fs.createFile("CCP.COM", editProgram);
+		fs.createFile("BIG.TXT", syntheticLines(450));
+
+		video.type("B\r");
+		video.type(CTRL_O);
+		video.type("BIG.TXT\r");
+		video.type("\r");
+		video.type(CTRL_S);
+		runBriefly(30000);
+
+		// Still on page 0 (not moved away, since this wasn't the last-line case):
+		// the split's first half is an empty line, and the cursor landed on the
+		// second half - the file's original first line, now one row down.
+		assertEquals(" ".repeat(80), video.getRow(1), "the split's first half is now an empty line, got: [" + video.getRow(1) + "]");
+		assertTrue(video.getRow(2).startsWith("LINE0001"), "got: [" + video.getRow(2) + "]");
+		assertTrue(video.getRow(23).contains("Saved"), "status line, got: [" + video.getRow(23) + "]");
+
+		byte[] onDisk = new CpmFileSystem(drive0).readFile("BIG.TXT");
+		String content = new String(onDisk, "US-ASCII");
+		String[] savedLines = content.split("\r", -1);
+		assertEquals("", savedLines[0], "the new empty first line, got: [" + savedLines[0] + "]");
+		for (int i = 1; i <= 450; i++) {
+			assertEquals(String.format("LINE%04d", i), savedLines[i],
+					"line " + i + " of the saved round trip, got: [" + savedLines[i] + "]");
+		}
+	}
 }

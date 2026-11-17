@@ -484,37 +484,48 @@ static void insert_split_line(unsigned char len) {
 
 /* Enter key. The common room-available case is the plain insert_split_line()
  * call in the final else below - everything above it only runs once the
- * current page is already full (PAGE_LINES lines), and only grows past
- * that when editing the actual last page (typing/appending past the end -
- * the common case this exists for): an earlier, already-full page - always
- * exactly PAGE_LINES by load_file()'s own invariant - still refuses,
- * same as before. Growing THAT case too would mean rippling the overflow
- * forward through every subsequent full page; not implemented, since the
- * common case this is for never hits it.
+ * current page is already full (PAGE_LINES lines). Refuses only when truly
+ * out of room everywhere: at the page ceiling (MAX_PAGES) AND the file's
+ * actual last page is also completely full - every other full page has
+ * somewhere to send its own overflow, even if that somewhere is several
+ * pages further on.
  *
- * Growing the last page splits into two distinct cases depending on
- * whether cur_line is the page's own last line (PAGE_LINES - 1) or not:
+ * Splits into two distinct cases depending on whether cur_line is the
+ * current page's own last line (PAGE_LINES - 1) or not:
  *   - Not the last line: there's a real tail below cur_line, and a normal
  *     insert would push the page's actual last line out past PAGE_LINES -
  *     save that line first, then insert one line short of full so
  *     insert_split_line()'s freed slot exactly refills. The cursor stays
- *     on the current page; the pushed-out line becomes a new page appended
- *     after it.
+ *     on the current page.
  *   - The last line itself: there's no tail to push out, so the split's
  *     own second half (everything from cur_col onward) IS what overflows -
- *     it becomes the new page's first line directly, this page's last
- *     line just truncates in place (there's no [PAGE_LINES] slot it could
- *     insert into), and the cursor moves onto the new page, matching where
- *     a real editor would land after splitting the very end of a buffer. */
+ *     this page's last line just truncates in place (there's no
+ *     [PAGE_LINES] slot it could insert into), and the cursor moves onto
+ *     the very next page, matching where a real editor would land after
+ *     splitting the very end of a buffer.
+ *
+ * Either way, whatever overflows becomes the carry this function ripples
+ * forward: it always becomes the very next page's own new first line,
+ * shifting that page's existing content down by one - and if THAT page is
+ * also completely full (true of every page but the last, by load_file()'s
+ * own invariant), its own last line becomes the new carry for the page
+ * after it, and so on, until some page actually has room, or the chain
+ * runs off the end and gets a brand new page of its own. Only the FIRST
+ * page the carry touches (current_page + 1) is where the user's own new
+ * content actually lands - every page beyond that just reshuffles other,
+ * pre-existing lines, which is why the cursor only ever needs to consider
+ * current_page + 1, never how far the cascade went past it. */
 static void split_line(void) {
 	unsigned char len = line_len(cur_line);
 	unsigned char i;
-	unsigned char overflow[MAX_COLS + 1];
+	unsigned char carry[MAX_COLS + 1];
+	unsigned char next_carry[MAX_COLS + 1];
 	unsigned char growing = 0;
-	unsigned char move_to_new_page = 0;
+	unsigned char move_to_next_page = 0;
+	unsigned char target;
 
 	if (line_count >= PAGE_LINES) {
-		if (current_page + 1 != total_pages || total_pages >= MAX_PAGES) {
+		if (total_pages >= MAX_PAGES && page_line_count[total_pages - 1] >= PAGE_LINES) {
 			return;
 		}
 		growing = 1;
@@ -522,15 +533,15 @@ static void split_line(void) {
 		if (cur_line == PAGE_LINES - 1) {
 			i = cur_col;
 			do {
-				overflow[i - cur_col] = lines[cur_line][i];
+				carry[i - cur_col] = lines[cur_line][i];
 			} while (lines[cur_line][i++] != '\0');
 			lines[cur_line][cur_col] = '\0';
-			move_to_new_page = 1;
+			move_to_next_page = 1;
 		} else {
 			i = 0;
 			do {
-				overflow[i] = lines[PAGE_LINES - 1][i];
-			} while (overflow[i++] != '\0');
+				carry[i] = lines[PAGE_LINES - 1][i];
+			} while (carry[i++] != '\0');
 			line_count--;
 			insert_split_line(len);
 		}
@@ -538,36 +549,79 @@ static void split_line(void) {
 		insert_split_line(len);
 	}
 
-	if (growing) {
-		/* line_count is back at PAGE_LINES (still full) either way - flush
-		 * this page before reusing lines[][] to build the new one, which
-		 * is just the single overflow line. */
-		page_line_count[current_page] = line_count;
-		swap_page_out(current_page);
+	if (!growing) {
+		return;
+	}
 
-		for (i = 0; i < PAGE_LINES; i++) {
-			lines[i][0] = '\0';
+	/* line_count is back at PAGE_LINES (still full) either way - flush this
+	 * page, then ripple carry forward through every subsequent full page
+	 * until it lands somewhere with room. */
+	page_line_count[current_page] = line_count;
+	swap_page_out(current_page);
+
+	target = current_page;
+	for (;;) {
+		target++;
+		if (target >= total_pages) {
+			/* Ran off the end - carry becomes a brand new page. */
+			for (i = 0; i < PAGE_LINES; i++) {
+				lines[i][0] = '\0';
+			}
+			i = 0;
+			do {
+				lines[0][i] = carry[i];
+			} while (carry[i++] != '\0');
+			page_line_count[target] = 1;
+			swap_page_out(target);
+			total_pages++;
+			break;
+		}
+
+		swap_page_in(target);
+		if (page_line_count[target] < PAGE_LINES) {
+			/* Room here - carry becomes this page's new first line. */
+			for (i = page_line_count[target]; i > 0; i--) {
+				copy_line(i, i - 1);
+			}
+			i = 0;
+			do {
+				lines[0][i] = carry[i];
+			} while (carry[i++] != '\0');
+			page_line_count[target]++;
+			swap_page_out(target);
+			break;
+		}
+
+		/* Full too - its own last line becomes the next carry, and the
+		 * current carry takes its place at the front. */
+		i = 0;
+		do {
+			next_carry[i] = lines[PAGE_LINES - 1][i];
+		} while (next_carry[i++] != '\0');
+		for (i = PAGE_LINES - 1; i > 0; i--) {
+			copy_line(i, i - 1);
 		}
 		i = 0;
 		do {
-			lines[0][i] = overflow[i];
-		} while (overflow[i++] != '\0');
-		page_line_count[total_pages] = 1;
-		swap_page_out(total_pages);
+			lines[0][i] = carry[i];
+		} while (carry[i++] != '\0');
+		swap_page_out(target);
+		i = 0;
+		do {
+			carry[i] = next_carry[i];
+		} while (next_carry[i++] != '\0');
+	}
 
-		if (move_to_new_page) {
-			/* lines[][] already holds this page's content (just built
-			 * above) - no reload needed, just point the view at it. */
-			current_page = total_pages;
-			line_count = 1;
-			cur_line = 0;
-			cur_col = 0;
-			view_top = 0;
-		} else {
-			swap_page_in(current_page);
-			line_count = page_line_count[current_page];
-		}
-		total_pages++;
+	if (move_to_next_page) {
+		current_page++;
+		swap_page_in(current_page);
+		line_count = page_line_count[current_page];
+		cur_line = 0;
+		cur_col = 0;
+		view_top = 0;
+	} else {
+		swap_page_in(current_page);
+		line_count = page_line_count[current_page];
 	}
 }
 
