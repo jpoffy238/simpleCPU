@@ -34,3 +34,10 @@ hs_err_pid*
 *.lst
 /.apt_generated/
 modules/cpu/6502/testdata/
+
+# Local JVM/Maven installs (copied in so Claude Code can run mvn directly
+# with a full path, rather than relying on the user's own shell) - not
+# portable (their Debian-style /etc symlinks get fixed up to real file
+# copies locally after copying), so these stay out of version control.
+/jvm/
+/maven/
