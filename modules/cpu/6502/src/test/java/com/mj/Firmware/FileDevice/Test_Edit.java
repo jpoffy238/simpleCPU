@@ -324,7 +324,10 @@ public class Test_Edit {
 		video.type("FULL.TXT\r");
 		video.type("\r");
 		video.type(CTRL_S);
-		runBriefly(10000);
+		// Padded well past the ~10s this needed on the machine it was written on -
+		// confirmed empirically slower (I/O-bound work in particular) in at least
+		// one other environment this has run in since.
+		runBriefly(30000);
 
 		// No "P:1/2" check here: status_pending latches "Saved" on screen for
 		// exactly one extra redraw past the save, and nothing else is typed
@@ -381,7 +384,11 @@ public class Test_Edit {
 		}
 		video.type("\rNEW LINE");
 		video.type(CTRL_S);
-		runBriefly(40000);
+		// Padded well past the ~40s this needed on the machine it was written on,
+		// for the same reason as the test above - confirmed empirically slower
+		// (199 KEY_DOWNs only reached line 179 of 199 within 40s on one occasion)
+		// in at least one other environment this has run in since.
+		runBriefly(120000);
 
 		// No "P:2/2" check here either - see the comment on the same point in
 		// the test above; "Saved" latches the status line past any chance of

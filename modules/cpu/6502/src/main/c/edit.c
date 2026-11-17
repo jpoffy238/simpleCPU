@@ -993,6 +993,14 @@ int main(void) {
 		dirty = DIRTY_NONE;
 
 		draw_status();
+		// draw_status() (and, on the status_pending path, the status_msg()
+		// call that set status_pending in the first place) writes through
+		// bios_putch(), which always leaves the hardware cursor wherever
+		// that write last landed - the status line itself, not the user's
+		// actual edit position. Reposition it before waiting for the next
+		// key, or the blinking cursor sits at the bottom of the screen
+		// instead of where typing would actually go.
+		position_cursor();
 		k = bios_getch();
 		handle_key(k, &quit_flag);
 	}
