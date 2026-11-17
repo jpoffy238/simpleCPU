@@ -19,6 +19,8 @@ BIOS_WRITE_SECTOR = $F00C
 BIOS_FORMAT_TRACK = $F00F
 BIOS_RESTORE      = $F012
 BIOS_GOTOXY       = $F018
+BIOS_GRAPHICS_MODE = $F01B
+BIOS_SET_PIXEL     = $F01E
 
 ; zero page: shared ABI with BIOS.asm/MONITOR.asm - the sector-buffer address
 ; parameter for BIOS_READ_SECTOR/BIOS_WRITE_SECTOR.
@@ -30,6 +32,8 @@ ADDRHI = $02
 .export _bios_read_sector, _bios_write_sector, _bios_format_track
 .export _bios_restore
 .export _bios_gotoxy
+.export _bios_graphics_mode
+.export _bios_set_pixel_x, _bios_set_pixel
 
 ; Glue-owned staging byte for the second hardware parameter - not part of the
 ; BIOS.asm/MONITOR.asm ABI, just this glue layer's own scratch. Lives wherever
@@ -93,4 +97,22 @@ _bios_restore:
 _bios_gotoxy:
 	ldx staged_x
 	jsr BIOS_GOTOXY
+	rts
+
+; void __fastcall__ bios_graphics_mode(unsigned char on) - on in A
+_bios_graphics_mode:
+	jmp BIOS_GRAPHICS_MODE	; tail call
+
+; void __fastcall__ bios_set_pixel_x(unsigned int x) - x in A (low) / X (high),
+; same mechanics as bios_set_buffer() above
+_bios_set_pixel_x:
+	sta ADDRLO
+	stx ADDRHI
+	rts
+
+; void __fastcall__ bios_set_pixel(unsigned char y) - y in A, x staged via
+; bios_set_pixel_x(), on/off staged via bios_set_x()
+_bios_set_pixel:
+	ldx staged_x
+	jsr BIOS_SET_PIXEL
 	rts

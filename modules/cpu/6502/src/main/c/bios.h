@@ -77,4 +77,32 @@ void bios_clear_eol(unsigned char row, unsigned char col, unsigned char count);
  * construction. */
 void bios_clrscr(void);
 
+/* Switches VideoController's Mode Control register - BIOS_MODE_TEXT (the
+ * power-on default) or BIOS_MODE_GRAPHICS. VideoController.getPixel() (and
+ * its on-screen painting) only ever consults BIOS_GRAPHICS_RAM while in
+ * graphics mode; bios_putch()/bios_gotoxy() keep working on the character
+ * RAM underneath regardless, same as real CGA-class hardware kept its text
+ * framebuffer intact while a graphics mode was selected. */
+void __fastcall__ bios_graphics_mode(unsigned char on);
+
+#define BIOS_MODE_TEXT     0
+#define BIOS_MODE_GRAPHICS 1
+
+#define BIOS_GRAPHICS_COLS 320
+#define BIOS_GRAPHICS_ROWS 200
+
+/* Stages the pixel's column (0-319) ahead of bios_set_pixel() - its own
+ * function rather than reusing bios_set_buffer(), even though the staging
+ * mechanics (ADDRLO/ADDRHI) are identical, since "pointer" and "pixel
+ * column" are different things to a caller reading this header. */
+void __fastcall__ bios_set_pixel_x(unsigned int x);
+
+/* Sets or clears one pixel at (x, y) - x staged via bios_set_pixel_x() and
+ * on/off staged via the existing bios_set_x() above, y arrives directly in
+ * A on this trigger call (same "stage one value, then trigger" pairing as
+ * bios_read_sector()/bios_gotoxy()). No bounds checking - x must be <
+ * BIOS_GRAPHICS_COLS, y < BIOS_GRAPHICS_ROWS or the result silently wraps
+ * into an adjacent row. */
+void __fastcall__ bios_set_pixel(unsigned char y);
+
 #endif

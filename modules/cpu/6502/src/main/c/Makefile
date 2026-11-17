@@ -26,7 +26,7 @@
 CC65 = cl65
 CFLAGS = -O -t none
 
-APPS = hello ccp edit
+APPS = hello ccp edit graphics
 
 .PHONY: all install clean
 

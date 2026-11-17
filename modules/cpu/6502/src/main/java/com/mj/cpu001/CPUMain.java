@@ -66,7 +66,13 @@ public class CPUMain {
 		// ROM in the free address space.
 		basicMemory videoRam = new basicMemory(bus, new AddressRange(0xb800, 0xbfff), null, 0);
 		bus.registerDevice(videoRam);
-		VideoController video = new VideoController(new AddressRange(0x9020, 0x9023), videoRam);
+		// Graphics VRAM for MODE_GRAPHICS (see VideoController's class comment) -
+		// 320x200 1bpp needs 8000 bytes; $C000-$DFFF (8192) sat completely unused in
+		// the memory map until now, between text video RAM ($B800-$BFFF) below and
+		// BIOS/MONITOR ROM ($F000+) above - no existing region needed to move.
+		basicMemory graphicsRam = new basicMemory(bus, new AddressRange(0xc000, 0xdfff), null, 0);
+		bus.registerDevice(graphicsRam);
+		VideoController video = new VideoController(new AddressRange(0x9020, 0x9024), videoRam, graphicsRam);
 		bus.registerDevice(video);
 
 		FloppyController fdc = new FloppyController(via, new AddressRange(0x9010, 0x9014));
