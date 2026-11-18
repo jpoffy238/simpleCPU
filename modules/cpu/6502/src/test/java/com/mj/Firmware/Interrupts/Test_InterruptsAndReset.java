@@ -25,7 +25,7 @@ public class Test_InterruptsAndReset {
 		bus = new DeviceBus();
 		bus.registerDevice(new basicMemory(bus, new AddressRange(0, 32 * 1024), null, 0));
 		basicROM rom = new basicROM(bus, new AddressRange(0xf000, 0xffff), null, 0);
-		rom.setVectors(nmi, reset, irq);
+		CPU.setVectors(rom, nmi, reset, irq);
 		bus.registerDevice(rom);
 		return new CPU(bus, new cpu001decoder());
 	}

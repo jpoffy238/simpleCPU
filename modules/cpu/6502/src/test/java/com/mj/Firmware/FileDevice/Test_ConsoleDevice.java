@@ -33,7 +33,7 @@ public class Test_ConsoleDevice {
 		bus = new DeviceBus();
 		bus.registerDevice(new basicMemory(bus, new AddressRange(0, 32 * 1024), null, 0));
 		basicROM rom = new basicROM(bus, new AddressRange(0xf000, 0xffff), null, 0);
-		rom.setVectors(0x1000, 0x1000, 0x1000);
+		CPU.setVectors(rom, 0x1000, 0x1000, 0x1000);
 		bus.registerDevice(rom);
 
 		VIA6522 via = new VIA6522(bus, new AddressRange(0x9000, 0x900f));
