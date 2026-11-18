@@ -1,90 +1,90 @@
 Modules list:
 -------------
 bdos.o:
-    CODE              Offs=000000  Size=000D4F  Align=00001  Fill=0000
+    CODE              Offs=000000  Size=000E4C  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=000008  Align=00001  Fill=0000
     BSS               Offs=000000  Size=0000F3  Align=00001  Fill=0000
 bdos_jumptable.o:
-    JUMPTABLE         Offs=000000  Size=00001E  Align=00001  Fill=0000
+    JUMPTABLE         Offs=000000  Size=000021  Align=00001  Fill=0000
 bios_glue.o:
-    CODE              Offs=000D4F  Size=00003C  Align=00001  Fill=0000
+    CODE              Offs=000E4C  Size=00003C  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000001  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(addeqsp.o):
-    CODE              Offs=000D8B  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=000E88  Size=000011  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(addysp.o):
-    CODE              Offs=000D9C  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000E99  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(aslax1.o):
-    CODE              Offs=000DAA  Size=000008  Align=00001  Fill=0000
+    CODE              Offs=000EA7  Size=000008  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(aslax3.o):
-    CODE              Offs=000DB2  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000EAF  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(aslax4.o):
-    CODE              Offs=000DC0  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=000EBD  Size=000011  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(call.o):
-    CODE              Offs=000DD1  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=000ECE  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(condes.o):
-    CODE              Offs=000DD8  Size=00000C  Align=00001  Fill=0000
+    CODE              Offs=000ED5  Size=00000C  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000025  Align=00001  Fill=0000
     ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(crt0.o):
     STARTUP           Offs=000000  Size=000017  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp1.o):
-    CODE              Offs=000DE4  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=000EE1  Size=000009  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp2.o):
-    CODE              Offs=000DED  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000EEA  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp3.o):
-    CODE              Offs=000DFA  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000EF7  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp4.o):
-    CODE              Offs=000E07  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000F04  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp5.o):
-    CODE              Offs=000E14  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000F11  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp6.o):
-    CODE              Offs=000E21  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000F1E  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incax1.o):
-    CODE              Offs=000E2E  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=000F2B  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incax8.o):
-    CODE              Offs=000E35  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000F32  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incaxy.o):
-    CODE              Offs=000E3A  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=000F37  Size=00000B  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp1.o):
-    CODE              Offs=000E45  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=000F42  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp2.o):
-    CODE              Offs=000E4C  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000F49  Size=000016  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp3.o):
-    CODE              Offs=000E62  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000F5F  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp4.o):
-    CODE              Offs=000E67  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000F64  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp5.o):
-    CODE              Offs=000E6C  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000F69  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp6.o):
-    CODE              Offs=000E71  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000F6E  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp7.o):
-    CODE              Offs=000E76  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000F73  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp8.o):
-    CODE              Offs=000E7B  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000F78  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(ldaxsp.o):
-    CODE              Offs=000E80  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=000F7D  Size=000009  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(makebool.o):
-    CODE              Offs=000E89  Size=00002C  Align=00001  Fill=0000
+    CODE              Offs=000F86  Size=00002C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(popptr1.o):
-    CODE              Offs=000EB5  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000FB2  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pusha.o):
-    CODE              Offs=000EC3  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000FC0  Size=000016  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pushax.o):
-    CODE              Offs=000ED9  Size=00001A  Align=00001  Fill=0000
+    CODE              Offs=000FD6  Size=00001A  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pushwsp.o):
-    CODE              Offs=000EF3  Size=00001C  Align=00001  Fill=0000
+    CODE              Offs=000FF0  Size=00001C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(shl.o):
-    CODE              Offs=000F0F  Size=000033  Align=00001  Fill=0000
+    CODE              Offs=00100C  Size=000033  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(staxsp.o):
-    CODE              Offs=000F42  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=00103F  Size=00000B  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(subysp.o):
-    CODE              Offs=000F4D  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=00104A  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(udiv.o):
-    CODE              Offs=000F5A  Size=00004F  Align=00001  Fill=0000
+    CODE              Offs=001057  Size=00004F  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(umod.o):
-    CODE              Offs=000FA9  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=0010A6  Size=000011  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(zerobss.o):
-    CODE              Offs=000FBA  Size=000023  Align=00001  Fill=0000
+    CODE              Offs=0010B7  Size=000023  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(zeropage.o):
     ZEROPAGE          Offs=000001  Size=00001A  Align=00001  Fill=0000
 
@@ -96,52 +96,53 @@ Name                   Start     End    Size  Align
 ZEROPAGE              000011  00002B  00001B  00001
 DATA                  008000  008024  000025  00001
 BSS                   008025  008117  0000F3  00001
-JUMPTABLE             00A000  00A01D  00001E  00001
-STARTUP               00A01E  00A034  000017  00001
-ONCE                  00A035  00A040  00000C  00001
-CODE                  00A041  00B01D  000FDD  00001
-RODATA                00B01E  00B025  000008  00001
+JUMPTABLE             00A000  00A020  000021  00001
+STARTUP               00A021  00A037  000017  00001
+ONCE                  00A038  00A043  00000C  00001
+CODE                  00A044  00B11D  0010DA  00001
+RODATA                00B11E  00B125  000008  00001
 
 
 Exports list by name:
 ---------------------
 __BSS_RUN__               008025 RLA    __BSS_SIZE__              0000F3 REA    
-__CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     00A035 RLA    
-__DESTRUCTOR_COUNT__      000000 REA    __DESTRUCTOR_TABLE__      00A035 RLA    
+__CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     00A038 RLA    
+__DESTRUCTOR_COUNT__      000000 REA    __DESTRUCTOR_TABLE__      00A038 RLA    
 __STACKSTART__            008000 REA    __STARTUP__               000001 REA    
-_bdos_create_file         00AA09 RLA    _bdos_delete_file         00A721 RLA    
-_bdos_entry_size          00A514 RLA    _bdos_find_file           00A4F8 RLA    
-_bdos_next_entry          00A313 RLA    _bdos_read_record         00A58A RLA    
-_bdos_rename_file         00A883 RLA    _bdos_rewind_dir          00A30A RLA    
-_bdos_run_file            00A9E9 RLA    _bdos_write_record        00AC9C RLA    
-_bios_getch               00AD94 RLA    _bios_read_sector         00ADA3 RLA    
-_bios_set_buffer          00AD9B RLA    _bios_set_x               00ADA0 RLA    
-_bios_write_sector        00ADA9 RLA    _main                     00AD8C RLA    
-addeq0sp                  00ADCC RLA    addeqysp                  00ADCE RLA    
-addysp                    00ADDE RLA    aslaxy                    00AF57 RLA    
-booleq                    00AED0 RLA    callax                    00AE12 RLA    
-decsp1                    00AE25 RLA    decsp2                    00AE2E RLA    
-decsp3                    00AE3B RLA    decsp4                    00AE48 RLA    
-decsp5                    00AE55 RLA    decsp6                    00AE62 RLA    
-donelib                   00AE19 RLA    incax1                    00AE6F RLA    
-incax8                    00AE76 RLA    incaxy                    00AE7D RLA    
-incsp1                    00AE86 RLA    incsp2                    00AE95 RLA    
-incsp3                    00AEA3 RLA    incsp4                    00AEA8 RLA    
-incsp5                    00AEAD RLA    incsp6                    00AEB2 RLA    
-incsp7                    00AEB7 RLA    incsp8                    00AEBC RLA    
-initlib                   00A035 RLA    ldax0sp                   00AEC1 RLA    
-ldaxysp                   00AEC3 RLA    popax                     00AE8D RLA    
-popptr1                   00AEF6 RLA    ptr1                      00001A RLZ    
-ptr4                      000020 RLZ    push0                     00AF1A RLA    
-pusha                     00AF08 RLA    pushax                    00AF1E RLA    
-pushw0sp                  00AF34 RLA    pushwysp                  00AF36 RLA    
-shlax1                    00ADEB RLA    shlax3                    00ADF3 RLA    
-shlax4                    00AE01 RLA    sp                        000012 RLZ    
-sreg                      000014 RLZ    stax0sp                   00AF83 RLA    
-staxysp                   00AF85 RLA    subysp                    00AF8E RLA    
-tmp1                      000022 RLZ    tosudiva0                 00AF9B RLA    
-tosumoda0                 00AFEA RLA    udiv16                    00AFAC RLA    
-zerobss                   00AFFB RLA    
+_bdos_create_file         00AAD7 RLA    _bdos_delete_file         00A7EF RLA    
+_bdos_entry_size          00A5E2 RLA    _bdos_find_file           00A5C6 RLA    
+_bdos_free_blocks         00AE5A RLA    _bdos_next_entry          00A3E1 RLA    
+_bdos_read_record         00A658 RLA    _bdos_rename_file         00A951 RLA    
+_bdos_rewind_dir          00A3D8 RLA    _bdos_run_file            00AAB7 RLA    
+_bdos_write_record        00AD6A RLA    _bios_getch               00AE94 RLA    
+_bios_read_sector         00AEA3 RLA    _bios_set_buffer          00AE9B RLA    
+_bios_set_x               00AEA0 RLA    _bios_write_sector        00AEA9 RLA    
+_main                     00AE8C RLA    addeq0sp                  00AECC RLA    
+addeqysp                  00AECE RLA    addysp                    00AEDE RLA    
+aslaxy                    00B057 RLA    booleq                    00AFD0 RLA    
+callax                    00AF12 RLA    decsp1                    00AF25 RLA    
+decsp2                    00AF2E RLA    decsp3                    00AF3B RLA    
+decsp4                    00AF48 RLA    decsp5                    00AF55 RLA    
+decsp6                    00AF62 RLA    donelib                   00AF19 RLA    
+incax1                    00AF6F RLA    incax8                    00AF76 RLA    
+incaxy                    00AF7D RLA    incsp1                    00AF86 RLA    
+incsp2                    00AF95 RLA    incsp3                    00AFA3 RLA    
+incsp4                    00AFA8 RLA    incsp5                    00AFAD RLA    
+incsp6                    00AFB2 RLA    incsp7                    00AFB7 RLA    
+incsp8                    00AFBC RLA    initlib                   00A038 RLA    
+ldax0sp                   00AFC1 RLA    ldaxysp                   00AFC3 RLA    
+popax                     00AF8D RLA    popptr1                   00AFF6 RLA    
+ptr1                      00001A RLZ    ptr4                      000020 RLZ    
+push0                     00B01A RLA    pusha                     00B008 RLA    
+pushax                    00B01E RLA    pushw0sp                  00B034 RLA    
+pushwysp                  00B036 RLA    shlax1                    00AEEB RLA    
+shlax3                    00AEF3 RLA    shlax4                    00AF01 RLA    
+sp                        000012 RLZ    sreg                      000014 RLZ    
+stax0sp                   00B083 RLA    staxysp                   00B085 RLA    
+subysp                    00B08E RLA    tmp1                      000022 RLZ    
+tosudiva0                 00B09B RLA    tosumoda0                 00B0EA RLA    
+udiv16                    00B0AC RLA    zerobss                   00B0FB RLA    
+
 
 
 Exports list by value:
@@ -151,38 +152,39 @@ __STARTUP__               000001 REA    sp                        000012 RLZ
 sreg                      000014 RLZ    ptr1                      00001A RLZ    
 ptr4                      000020 RLZ    tmp1                      000022 RLZ    
 __BSS_SIZE__              0000F3 REA    __STACKSTART__            008000 REA    
-__BSS_RUN__               008025 RLA    __CONSTRUCTOR_TABLE__     00A035 RLA    
-__DESTRUCTOR_TABLE__      00A035 RLA    initlib                   00A035 RLA    
-_bdos_rewind_dir          00A30A RLA    _bdos_next_entry          00A313 RLA    
-_bdos_find_file           00A4F8 RLA    _bdos_entry_size          00A514 RLA    
-_bdos_read_record         00A58A RLA    _bdos_delete_file         00A721 RLA    
-_bdos_rename_file         00A883 RLA    _bdos_run_file            00A9E9 RLA    
-_bdos_create_file         00AA09 RLA    _bdos_write_record        00AC9C RLA    
-_main                     00AD8C RLA    _bios_getch               00AD94 RLA    
-_bios_set_buffer          00AD9B RLA    _bios_set_x               00ADA0 RLA    
-_bios_read_sector         00ADA3 RLA    _bios_write_sector        00ADA9 RLA    
-addeq0sp                  00ADCC RLA    addeqysp                  00ADCE RLA    
-addysp                    00ADDE RLA    shlax1                    00ADEB RLA    
-shlax3                    00ADF3 RLA    shlax4                    00AE01 RLA    
-callax                    00AE12 RLA    donelib                   00AE19 RLA    
-decsp1                    00AE25 RLA    decsp2                    00AE2E RLA    
-decsp3                    00AE3B RLA    decsp4                    00AE48 RLA    
-decsp5                    00AE55 RLA    decsp6                    00AE62 RLA    
-incax1                    00AE6F RLA    incax8                    00AE76 RLA    
-incaxy                    00AE7D RLA    incsp1                    00AE86 RLA    
-popax                     00AE8D RLA    incsp2                    00AE95 RLA    
-incsp3                    00AEA3 RLA    incsp4                    00AEA8 RLA    
-incsp5                    00AEAD RLA    incsp6                    00AEB2 RLA    
-incsp7                    00AEB7 RLA    incsp8                    00AEBC RLA    
-ldax0sp                   00AEC1 RLA    ldaxysp                   00AEC3 RLA    
-booleq                    00AED0 RLA    popptr1                   00AEF6 RLA    
-pusha                     00AF08 RLA    push0                     00AF1A RLA    
-pushax                    00AF1E RLA    pushw0sp                  00AF34 RLA    
-pushwysp                  00AF36 RLA    aslaxy                    00AF57 RLA    
-stax0sp                   00AF83 RLA    staxysp                   00AF85 RLA    
-subysp                    00AF8E RLA    tosudiva0                 00AF9B RLA    
-udiv16                    00AFAC RLA    tosumoda0                 00AFEA RLA    
-zerobss                   00AFFB RLA    
+__BSS_RUN__               008025 RLA    __CONSTRUCTOR_TABLE__     00A038 RLA    
+__DESTRUCTOR_TABLE__      00A038 RLA    initlib                   00A038 RLA    
+_bdos_rewind_dir          00A3D8 RLA    _bdos_next_entry          00A3E1 RLA    
+_bdos_find_file           00A5C6 RLA    _bdos_entry_size          00A5E2 RLA    
+_bdos_read_record         00A658 RLA    _bdos_delete_file         00A7EF RLA    
+_bdos_rename_file         00A951 RLA    _bdos_run_file            00AAB7 RLA    
+_bdos_create_file         00AAD7 RLA    _bdos_write_record        00AD6A RLA    
+_bdos_free_blocks         00AE5A RLA    _main                     00AE8C RLA    
+_bios_getch               00AE94 RLA    _bios_set_buffer          00AE9B RLA    
+_bios_set_x               00AEA0 RLA    _bios_read_sector         00AEA3 RLA    
+_bios_write_sector        00AEA9 RLA    addeq0sp                  00AECC RLA    
+addeqysp                  00AECE RLA    addysp                    00AEDE RLA    
+shlax1                    00AEEB RLA    shlax3                    00AEF3 RLA    
+shlax4                    00AF01 RLA    callax                    00AF12 RLA    
+donelib                   00AF19 RLA    decsp1                    00AF25 RLA    
+decsp2                    00AF2E RLA    decsp3                    00AF3B RLA    
+decsp4                    00AF48 RLA    decsp5                    00AF55 RLA    
+decsp6                    00AF62 RLA    incax1                    00AF6F RLA    
+incax8                    00AF76 RLA    incaxy                    00AF7D RLA    
+incsp1                    00AF86 RLA    popax                     00AF8D RLA    
+incsp2                    00AF95 RLA    incsp3                    00AFA3 RLA    
+incsp4                    00AFA8 RLA    incsp5                    00AFAD RLA    
+incsp6                    00AFB2 RLA    incsp7                    00AFB7 RLA    
+incsp8                    00AFBC RLA    ldax0sp                   00AFC1 RLA    
+ldaxysp                   00AFC3 RLA    booleq                    00AFD0 RLA    
+popptr1                   00AFF6 RLA    pusha                     00B008 RLA    
+push0                     00B01A RLA    pushax                    00B01E RLA    
+pushw0sp                  00B034 RLA    pushwysp                  00B036 RLA    
+aslaxy                    00B057 RLA    stax0sp                   00B083 RLA    
+staxysp                   00B085 RLA    subysp                    00B08E RLA    
+tosudiva0                 00B09B RLA    udiv16                    00B0AC RLA    
+tosumoda0                 00B0EA RLA    zerobss                   00B0FB RLA    
+
 
 
 Imports list:
@@ -211,6 +213,8 @@ _bdos_entry_size (bdos.o):
     bdos_jumptable.o          bdos_jumptable.s:19
 _bdos_find_file (bdos.o):
     bdos_jumptable.o          bdos_jumptable.s:14
+_bdos_free_blocks (bdos.o):
+    bdos_jumptable.o          bdos_jumptable.s:22
 _bdos_next_entry (bdos.o):
     bdos_jumptable.o          bdos_jumptable.s:13
 _bdos_read_record (bdos.o):
@@ -236,12 +240,13 @@ _bios_write_sector (bios_glue.o):
 _main (bdos.o):
     crt0.o                    none/crt0.s:3
 addeq0sp (addeqsp.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 addeqysp (addeqsp.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 addysp (addysp.o):
     incsp8.o                  runtime/incsp8.s:8
     incsp7.o                  runtime/incsp7.s:8
@@ -249,100 +254,106 @@ addysp (addysp.o):
     incsp5.o                  runtime/incsp5.s:8
     incsp4.o                  runtime/incsp4.s:8
     incsp3.o                  runtime/incsp3.s:8
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 aslaxy (shl.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 booleq (makebool.o):
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
 callax (call.o):
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
 decsp1 (decsp1.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 decsp2 (decsp2.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 decsp3 (decsp3.o):
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 decsp4 (decsp4.o):
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
 decsp5 (decsp5.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 decsp6 (decsp6.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 donelib (condes.o):
     crt0.o                    none/crt0.s:4
 incax1 (incax1.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 incax8 (incax8.o):
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
 incaxy (incaxy.o):
     incax8.o                  runtime/incax8.s:8
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 incsp1 (incsp1.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 incsp2 (incsp2.o):
     popptr1.o                 runtime/popptr1.s:8
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 incsp3 (incsp3.o):
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 incsp4 (incsp4.o):
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
 incsp5 (incsp5.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 incsp6 (incsp6.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 incsp7 (incsp7.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 incsp8 (incsp8.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 initlib (condes.o):
     crt0.o                    none/crt0.s:4
 ldax0sp (ldaxsp.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 ldaxysp (ldaxsp.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 popax (incsp2.o):
     shl.o                     runtime/shl.s:15
 popptr1 (popptr1.o):
@@ -358,62 +369,64 @@ ptr4 (zeropage.o):
     umod.o                    runtime/umod.s:9
     udiv.o                    runtime/udiv.s:10
 push0 (pushax.o):
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
 pusha (pusha.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 pushax (pushax.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 pushw0sp (pushwsp.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 pushwysp (pushwsp.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 shlax1 (aslax1.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 shlax3 (aslax3.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 shlax4 (aslax4.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 sp (zeropage.o):
     popptr1.o                 runtime/popptr1.s:9
     subysp.o                  runtime/subysp.s:9
@@ -439,19 +452,21 @@ sreg (zeropage.o):
     udiv.o                    runtime/udiv.s:10
     bdos.o                    bdos.s:10
 stax0sp (staxsp.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 staxysp (staxsp.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 subysp (subysp.o):
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
 tmp1 (zeropage.o):
     shl.o                     runtime/shl.s:16
     incaxy.o                  runtime/incaxy.s:8
@@ -459,11 +474,11 @@ tmp1 (zeropage.o):
     aslax3.o                  runtime/aslax3.s:8
     aslax1.o                  runtime/aslax1.s:8
 tosudiva0 (udiv.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 tosumoda0 (umod.o):
-    bdos.o                    bdos.s:1993
-    bdos.o                    bdos.s:1993
+    bdos.o                    bdos.s:2145
+    bdos.o                    bdos.s:2145
 udiv16 (udiv.o):
     umod.o                    runtime/umod.s:8
 zerobss (zerobss.o):

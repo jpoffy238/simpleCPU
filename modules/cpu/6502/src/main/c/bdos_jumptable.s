@@ -19,6 +19,7 @@
 .import _bdos_entry_size
 .import _bdos_rename_file
 .import _bdos_run_file
+.import _bdos_free_blocks
 
 .segment "JUMPTABLE"
 	jmp _bdos_rewind_dir	; $A000 BDOS_REWIND_DIR
@@ -31,3 +32,4 @@
 	jmp _bdos_entry_size	; $A015 BDOS_ENTRY_SIZE
 	jmp _bdos_rename_file	; $A018 BDOS_RENAME_FILE
 	jmp _bdos_run_file	; $A01B BDOS_RUN_FILE
+	jmp _bdos_free_blocks	; $A01E BDOS_FREE_BLOCKS

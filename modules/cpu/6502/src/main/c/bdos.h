@@ -57,8 +57,13 @@
  * Every primitive above returns unsigned char (1 = succeeded/found, 0 =
  * not found/no more/failed) via cc65's standard single-byte return in A -
  * no different from bios_getch()'s existing return-a-value-in-A precedent -
- * except bdos_entry_size(), which returns unsigned int (a record count can
- * exceed 255) via the standard 16-bit A(low)/X(high) return. */
+ * except bdos_entry_size()/bdos_free_blocks(), which return unsigned int (a
+ * count that can exceed 255) via the standard 16-bit A(low)/X(high) return.
+ *
+ *   bdos_free_blocks() no parameters - rescans the directory itself (unlike
+ *                      every primitive above, which operates on whatever
+ *                      file bdos_find_file()/bdos_create_file() last named)
+ *                      and returns how many of BDOS_TOTAL_BLOCKS are free. */
 #ifndef BDOS_H
 #define BDOS_H
 
@@ -72,5 +77,14 @@ unsigned char bdos_write_record(void);
 unsigned int bdos_entry_size(void);
 unsigned char bdos_rename_file(void);
 unsigned char bdos_run_file(void);
+unsigned int bdos_free_blocks(void);
+
+/* The disk's total allocation block count - a compile-time constant for the
+ * one disk geometry this project supports (IBM3740), so it costs nothing to
+ * expose directly rather than through a jump-table call. Must stay in sync
+ * with bdos.c's own (internal) TOTAL_BLOCKS and CpmFileSystem.totalBlockCount()
+ * - same "duplicated constant across toolchains" precedent as the jump
+ * table addresses themselves. */
+#define BDOS_TOTAL_BLOCKS 243
 
 #endif

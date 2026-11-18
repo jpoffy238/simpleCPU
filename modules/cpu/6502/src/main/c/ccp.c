@@ -213,6 +213,22 @@ static void cmd_dir(void) {
 	bios_putch('\n');
 }
 
+/* Real CP/M's STAT reports disk space in K; this geometry's own block size
+ * (SECTORS_PER_BLOCK 128-byte sectors) is exactly 1K, so the block counts
+ * bdos_free_blocks()/BDOS_TOTAL_BLOCKS already return need no further
+ * conversion, unlike cmd_dir()'s records-to-K division above. */
+static void cmd_stat(void) {
+	unsigned int total = BDOS_TOTAL_BLOCKS;
+	unsigned int free = bdos_free_blocks();
+
+	print_decimal(total - free);
+	bios_putstr("k used, ");
+	print_decimal(free);
+	bios_putstr("k free, ");
+	print_decimal(total);
+	bios_putstr("k total\n");
+}
+
 /* Prints a file's contents, one BDOS-supplied 128-byte record at a time.
  * Lengths are only tracked to the nearest 128-byte record, same real
  * limitation as CpmFileSystem/real CP/M - a file whose length isn't a
@@ -471,6 +487,8 @@ int main(void) {
 		}
 		if (matches("DIR")) {
 			cmd_dir();
+		} else if (matches("STAT")) {
+			cmd_stat();
 		} else if ((arg_start = starts_with("TYPE")) != 0) {
 			cmd_type(&line[arg_start]);
 		} else if ((arg_start = starts_with("ERA")) != 0) {
