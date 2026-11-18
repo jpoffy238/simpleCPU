@@ -218,6 +218,27 @@ public class CpmFileSystem {
 		return names;
 	}
 
+	/** Total allocation blocks this disk geometry provides, used or not - a
+	 * STAT-style report's "disk capacity" figure. */
+	public int totalBlockCount() {
+		return totalBlocks();
+	}
+
+	/** How many blocks a live directory scan finds referenced (including the
+	 * two directory blocks themselves, same as usedBlocks() always counting
+	 * them). */
+	public int usedBlockCount() throws DiskReadError, GeometryException {
+		return usedBlocks().size();
+	}
+
+	/** totalBlockCount() - usedBlockCount() - a STAT-style report's "space
+	 * left" figure. Each block is exactly 1KB for this geometry
+	 * (SECTORS_PER_BLOCK * 128-byte sectors), so this figure is already in K,
+	 * same unit real CP/M's own STAT reports in. */
+	public int freeBlockCount() throws DiskReadError, GeometryException {
+		return totalBlocks() - usedBlocks().size();
+	}
+
 	private int findEntry(byte[] fcbName, int extent) throws DiskReadError, GeometryException {
 		for (int entry = 0; entry < DIRECTORY_ENTRIES; entry++) {
 			byte[] raw = readDirectoryEntry(entry);

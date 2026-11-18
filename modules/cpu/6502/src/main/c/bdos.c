@@ -140,6 +140,40 @@ static unsigned char block_is_used(unsigned char block) {
 	return block_bitmap[block >> 3] & (1 << (block & 7));
 }
 
+/* Rebuilds block_bitmap from a full directory scan - every block any
+ * non-empty entry (of any extent) points to, plus the two directory blocks
+ * themselves. Used by bdos_free_blocks() below. Deliberately NOT shared
+ * with bdos_create_file(), even though its own scan builds the exact same
+ * bitmap as a side effect - that scan also checks for an existing name and
+ * finds a free directory entry in the same single pass, and calling this
+ * separately from there would mean scanning the directory twice per file
+ * creation instead of once. */
+static void scan_used_blocks(void) {
+	unsigned char sector_index, entry_index, i;
+	unsigned char *entry;
+
+	for (i = 0; i < 32; i++) {
+		block_bitmap[i] = 0;
+	}
+	mark_block_used(0);
+	mark_block_used(1);
+
+	for (sector_index = 0; sector_index < DIR_SECTORS; sector_index++) {
+		read_data_sector(sector_index);
+		for (entry_index = 0; entry_index < ENTRIES_PER_SECTOR; entry_index++) {
+			entry = sector_buf + entry_index * ENTRY_SIZE;
+			if (entry[0] == STATUS_EMPTY) {
+				continue;
+			}
+			for (i = 0; i < 16; i++) {
+				if (entry[16 + i] != 0) {
+					mark_block_used(entry[16 + i]);
+				}
+			}
+		}
+	}
+}
+
 /* First block at or past DIRECTORY_BLOCKS not yet marked used, or 0 (never
  * a valid data block - see TOTAL_BLOCKS's comment) if the disk is full. */
 static unsigned char next_free_block(void) {
@@ -761,6 +795,42 @@ unsigned char bdos_write_record(void) {
 	write_entry[15]++;
 	write_directory_entry(write_dir_sector, write_dir_offset);
 	return 1;
+}
+
+/* How many of TOTAL_BLOCKS are NOT currently referenced by any directory
+ * entry - a STAT-style report's "space left" figure. Each block is exactly
+ * 1KB for this geometry (SECTORS_PER_BLOCK 128-byte sectors), so this
+ * figure is already in K, same unit real CP/M's own STAT reports in - see
+ * CpmFileSystem.freeBlockCount(), the validated host-side reference this
+ * mirrors. No parameters; unsigned int (not unsigned char) to match
+ * bdos_entry_size()'s existing precedent for a count that - on some future,
+ * bigger disk geometry - could exceed 255, even though it never will on
+ * TOTAL_BLOCKS's current value of 243. */
+unsigned int bdos_free_blocks(void) {
+	unsigned char block;
+	unsigned int free_count;
+
+	/* free_count is deliberately assigned AFTER scan_used_blocks() returns,
+	 * not initialized in its declaration above (`= 0`) the way every other
+	 * local in this file is - cc65 1.10 (-O) was found, empirically, to
+	 * silently lose a local's initial value (cl65 V2.19) if it's assigned before a call
+	 * to another user function and then read/updated after that call
+	 * returns (confirmed by bisection: swapping just these two lines turned
+	 * a wrong, always-zero result into the correct one; isolating
+	 * scan_used_blocks() to a no-op, or hardcoding this function's return
+	 * value, both worked fine on their own - only the combination broke).
+	 * No bug report filed upstream yet; if cc65 is ever upgraded, this
+	 * comment (and the empirical test it protects, see
+	 * Test_CCP#bdosFreeBlocksPrimitiveReturnsTheRightCountDirectly) can be
+	 * revisited. */
+	scan_used_blocks();
+	free_count = 0;
+	for (block = DIRECTORY_BLOCKS; block < TOTAL_BLOCKS; block++) {
+		if (!block_is_used(block)) {
+			free_count++;
+		}
+	}
+	return free_count;
 }
 
 int main(void) {

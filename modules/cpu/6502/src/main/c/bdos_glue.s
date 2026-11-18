@@ -20,10 +20,12 @@ BDOS_WRITE_RECORD = $A012
 BDOS_ENTRY_SIZE   = $A015
 BDOS_RENAME_FILE  = $A018
 BDOS_RUN_FILE     = $A01B
+BDOS_FREE_BLOCKS  = $A01E
 
 .export _bdos_rewind_dir, _bdos_next_entry, _bdos_find_file, _bdos_read_record
 .export _bdos_delete_file, _bdos_create_file, _bdos_write_record
 .export _bdos_entry_size, _bdos_rename_file, _bdos_run_file
+.export _bdos_free_blocks
 
 .segment "CODE"
 
@@ -67,3 +69,7 @@ _bdos_rename_file:
 ; ever returns at all if the named file wasn't found - see bdos.c's comment.
 _bdos_run_file:
 	jmp BDOS_RUN_FILE
+
+; unsigned int bdos_free_blocks(void) - return value comes back in A (low)/X (high)
+_bdos_free_blocks:
+	jmp BDOS_FREE_BLOCKS

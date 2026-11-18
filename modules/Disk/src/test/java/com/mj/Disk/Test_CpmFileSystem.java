@@ -240,4 +240,32 @@ public class Test_CpmFileSystem {
 		assertThrows(FileSystemException.class, () -> fs.createFile("WAYTOOLONG.TXT", "x".getBytes()));
 		assertThrows(FileSystemException.class, () -> fs.createFile("OK.TOOLONG", "x".getBytes()));
 	}
+
+	@Test
+	public void totalBlockCountIsTheWholeDataAreaIncludingTheDirectoryItself() throws Exception {
+		// (76 - BOOT_TRACKS) tracks * 26 sectors/track / 8 sectors/block - pinned
+		// here the same way bdos.c's own TOTAL_BLOCKS constant is (see its
+		// comment), so a change to either silently drifting out of sync with
+		// the other gets caught by one of the two test suites.
+		assertEquals(243, fs.totalBlockCount());
+	}
+
+	@Test
+	public void freshlyFormattedDiskHasOnlyTheDirectoryBlocksUsed() throws Exception {
+		assertEquals(2, fs.usedBlockCount(), "just the 2 directory blocks (DIRECTORY_BLOCKS)");
+		assertEquals(fs.totalBlockCount() - 2, fs.freeBlockCount());
+	}
+
+	@Test
+	public void usedAndFreeBlockCountsMoveTogetherAsFilesComeAndGo() throws Exception {
+		int freeBefore = fs.freeBlockCount();
+		byte[] data = new byte[3000]; // spans 3 blocks, same as the track-boundary test
+
+		fs.createFile("BIG.BIN", data);
+		assertEquals(freeBefore - 3, fs.freeBlockCount());
+		assertEquals(fs.totalBlockCount(), fs.usedBlockCount() + fs.freeBlockCount());
+
+		fs.deleteFile("BIG.BIN");
+		assertEquals(freeBefore, fs.freeBlockCount());
+	}
 }
