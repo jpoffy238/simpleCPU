@@ -64,4 +64,89 @@ final class ArithmeticOperations {
 		}
 		return result;
 	}
+
+	/** NEG (ED $44) - A = 0 - A (two's-complement negation). Same flag
+	 * shape as a subtraction, just with 0 as the implicit left operand
+	 * rather than A itself - not expressible through addSub() as-is,
+	 * which always reads A as the left operand, so this duplicates its
+	 * formulas by hand with 0 substituted in, rather than reshaping
+	 * addSub() for one caller. */
+	static int negate(Z80CPU cpu) {
+		int a = cpu.af.hi();
+		int raw = -a;
+		int result = raw & 0xff;
+		boolean halfCarry = -(a & 0xf) < 0;
+		boolean carry = raw < 0;
+		boolean overflow = (a & 0x80) != 0 && (result & 0x80) != 0;
+
+		int flags = 0;
+		if ((result & 0x80) != 0) {
+			flags |= Flags.S;
+		}
+		if (result == 0) {
+			flags |= Flags.Z;
+		}
+		if (halfCarry) {
+			flags |= Flags.H;
+		}
+		if (overflow) {
+			flags |= Flags.PV;
+		}
+		flags |= Flags.N;
+		if (carry) {
+			flags |= Flags.C;
+		}
+		cpu.af.setLo(flags);
+		cpu.af.setHi(result);
+		return result;
+	}
+
+	/** ADC HL,rr / SBC HL,rr (ED-prefixed) - the 16-bit counterpart of
+	 * addSub() above, always including the carry flag (there's no
+	 * carry-less ED-prefixed form the way plain ADD/SUB have one at
+	 * 8 bits - that's the separate, simpler, flags-light ADD HL,rr,
+	 * unprefixed and not part of this family) and always writing the
+	 * result back into HL (there's no 16-bit CP to need a writeBack
+	 * flag for). Same formulas as addSub(), scaled from 8 to 16 bits
+	 * (nibble-boundary half-carry becomes byte-boundary, bit 7's sign
+	 * becomes bit 15's). */
+	static int addSubHL(Z80CPU cpu, int operand, boolean subtract) {
+		int hl = cpu.hl.get16();
+		int carryIn = (cpu.af.lo() & Flags.C) != 0 ? 1 : 0;
+		int raw = subtract ? hl - operand - carryIn : hl + operand + carryIn;
+		int result = raw & 0xffff;
+
+		int halfRaw = subtract
+				? (hl & 0xfff) - (operand & 0xfff) - carryIn
+				: (hl & 0xfff) + (operand & 0xfff) + carryIn;
+		boolean halfCarry = subtract ? halfRaw < 0 : halfRaw > 0xfff;
+		boolean carry = subtract ? raw < 0 : raw > 0xffff;
+		boolean overflow = subtract
+				? ((hl ^ operand) & 0x8000) != 0 && ((hl ^ result) & 0x8000) != 0
+				: ((hl ^ operand) & 0x8000) == 0 && ((hl ^ result) & 0x8000) != 0;
+
+		int flags = 0;
+		if ((result & 0x8000) != 0) {
+			flags |= Flags.S;
+		}
+		if (result == 0) {
+			flags |= Flags.Z;
+		}
+		if (halfCarry) {
+			flags |= Flags.H;
+		}
+		if (overflow) {
+			flags |= Flags.PV;
+		}
+		if (subtract) {
+			flags |= Flags.N;
+		}
+		if (carry) {
+			flags |= Flags.C;
+		}
+		cpu.af.setLo(flags);
+
+		cpu.hl.set16(result);
+		return result;
+	}
 }
