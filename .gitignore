@@ -26,6 +26,7 @@ logs/
 *.img
 *.o
 *.bin
+*.z80
 target/
 *.lst
 *.hex.lst
