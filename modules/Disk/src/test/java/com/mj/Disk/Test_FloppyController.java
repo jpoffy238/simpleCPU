@@ -57,7 +57,7 @@ public class Test_FloppyController {
 		bus.registerDevice(via);
 		bus.write(VIA_BASE + VIA6522.REG_IER, (byte) (0x80 | VIA6522.FLAG_CB1));
 
-		controller = new FloppyController(via, new AddressRange(BASE, BASE + 4));
+		controller = new FloppyController(() -> via.requestInterrupt(VIA6522.FLAG_CB1), new AddressRange(BASE, BASE + 4));
 		bus.registerDevice(controller);
 	}
 
