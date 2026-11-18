@@ -15,6 +15,7 @@ import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
 import com.mj.exceptions.illegalOpCodeException;
+import com.mj.memoryInterface.basicROM;
 
 public class CPU extends Thread {
 	/** Hardware vectors (little-endian addresses stored at the top of memory). */
@@ -26,6 +27,30 @@ public class CPU extends Thread {
 	 * of halting the emulated machine outright, the same way a real interrupt would,
 	 * so firmware gets a chance to recover instead of the whole session dying. */
 	public static final int VECTOR_FAULT = 0xfff8;
+
+	/** Burns the three hardware vectors ($FFFA NMI, $FFFC RESET, $FFFE IRQ)
+	 * into a ROM that wasn't loaded from a hex file (one loaded from a hex
+	 * file normally carries its own vectors already). Lives here rather than
+	 * on basicROM itself (modules/Devices) - the vector table's fixed
+	 * addresses are a 6502-specific concept, not something a CPU-agnostic ROM
+	 * class should know about; basicROM's own poke() is the generic
+	 * "write into a read-only region" primitive this is built from. Must be
+	 * called before the CPU starts. */
+	public static void setVectors(basicROM rom, int nmi, int reset, int irq) throws illegalAddressException {
+		pokeVector(rom, VECTOR_NMI, nmi);
+		pokeVector(rom, VECTOR_RESET, reset);
+		pokeVector(rom, VECTOR_IRQ, irq);
+	}
+
+	/** Burns the project-specific bus-fault vector ($FFF8) - see VECTOR_FAULT. */
+	public static void setFaultVector(basicROM rom, int handler) throws illegalAddressException {
+		pokeVector(rom, VECTOR_FAULT, handler);
+	}
+
+	private static void pokeVector(basicROM rom, int vectorAddress, int target) throws illegalAddressException {
+		rom.poke(vectorAddress, (byte) (target & 0xff));
+		rom.poke(vectorAddress + 1, (byte) ((target >> 8) & 0xff));
+	}
 
 	public CPU(PBus bus, Decoder dcd) {
 		this.bus =bus;
