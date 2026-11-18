@@ -37,6 +37,18 @@ public class Z80CPU {
 	public final RegisterPair ix = new RegisterPair();
 	public final RegisterPair iy = new RegisterPair();
 
+	/** Interrupt vector / memory refresh - plain 8-bit registers, never
+	 * paired into a RegisterPair (there's no real `IR` combined addressing
+	 * mode). Declared now since LD I,A/LD R,A need somewhere to write, even
+	 * though nothing reads I for its real hardware purpose yet (interrupt
+	 * mode 2's vector table lookup) or R for its own (DRAM refresh timing -
+	 * meaningless to an emulator anyway). LD A,I/LD A,R are deliberately
+	 * not implemented yet - unlike every other LD, they set real flags
+	 * (P/V from IFF2, the interrupt-enable flip-flop), which doesn't exist
+	 * until EI/DI/interrupt handling does. */
+	public int i;
+	public int r;
+
 	public int pc;
 	public int sp;
 
