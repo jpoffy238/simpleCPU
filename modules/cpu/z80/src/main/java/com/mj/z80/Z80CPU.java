@@ -9,11 +9,12 @@ import com.mj.exceptions.illegalOpCodeException;
 /** The Z80's register file plus the two independent buses a real Z80 system
  * has (see Z80Machine) - memoryBus for every ordinary instruction, portBus
  * for IN/OUT alone. Deliberately not extending Thread or offering a run()
- * loop yet (unlike the 6502 side's CPU) - that's tied to real interrupt
- * handling (NMI, IM 0/1/2), which is out of scope until the instructions
- * that configure it (EI/DI/IM) exist. step() executes exactly one
- * instruction; a caller (today, a test; eventually something like
- * CPUMain's own run loop) calls it in a loop. */
+ * loop yet (unlike the 6502 side's CPU) - that's tied to a real bootable
+ * Z80 machine with real interrupt-raising devices, which doesn't exist
+ * yet. step() executes exactly one instruction; a caller (today, a test;
+ * eventually something like CPUMain's own run loop) calls it in a loop,
+ * calling serviceInterrupts() first each time so a pending NMI/INT is
+ * handled before the next instruction decodes. */
 public class Z80CPU {
 	public final PBus memoryBus;
 	public final PBus portBus;
@@ -52,6 +53,37 @@ public class Z80CPU {
 	public int pc;
 	public int sp;
 
+	/** The two interrupt enable flip-flops. IFF1 is the one that actually
+	 * gates whether a maskable interrupt is accepted; IFF2 is just a backup
+	 * copy, restored into IFF1 by RETN after an NMI (which only ever clears
+	 * IFF1, never IFF2) and separately readable as LD A,I/LD A,R's P/V bit.
+	 * Both start false - real hardware powers up with interrupts disabled. */
+	public boolean iff1;
+	public boolean iff2;
+
+	/** Set by IM 0/1/2 (SetInterruptMode), read by serviceInterrupts() when
+	 * a maskable interrupt actually needs handling. Starts at 0, the real
+	 * power-on default - see serviceInterrupts()'s own comment for why
+	 * leaving it there and then raising a maskable interrupt throws rather
+	 * than silently doing something wrong. */
+	public int interruptMode;
+
+	/** Set by EI; consumed by the very next call to serviceInterrupts(),
+	 * which simply skips that one check - guaranteeing the instruction
+	 * immediately after EI always runs before any interrupt can land, even
+	 * though IFF1/IFF2 are already true by then. This is what makes the
+	 * common EI;RET ISR-exit idiom safe on real hardware, and the only
+	 * reason EI doesn't just set IFF1/IFF2 and leave it at that. */
+	public boolean suppressInterruptCheckOnce;
+
+	/** The 8-bit vector a real IM2 device places on the data bus during the
+	 * interrupt-acknowledge cycle, used as the low byte of the vector-table
+	 * pointer (I is the high byte). No real device supplies this yet - no
+	 * Z80 machine with real daisy-chained peripherals exists - so a caller
+	 * (today, a test; eventually a real device) sets this directly before
+	 * raising portBus's interrupt line. */
+	public int pendingInterruptVector;
+
 	/** DD-CB/FD-CB's displacement byte - the one piece of per-call state that
 	 * can't be baked into a table slot the way "which index register, IX or
 	 * IY" can (see Z80InstructionDecoder's class comment): the decoder has
@@ -87,5 +119,67 @@ public class Z80CPU {
 	public void step() throws illegalOpCodeException, illegalAddressException, DeviceUnavailable, ROException {
 		Z80Instruction instruction = decoder.decode(this);
 		instruction.execute(this);
+	}
+
+	/** Services a pending NMI or (if IFF1 allows it) maskable interrupt,
+	 * pushing the current PC and jumping to the handler. Meant to be called
+	 * before each step(), so EI's one-instruction grace period
+	 * (suppressInterruptCheckOnce) can suppress exactly one check first.
+	 * Returns true if an interrupt was serviced, which a driving loop
+	 * should treat as having used this turn rather than also calling
+	 * step() right after.
+	 *
+	 * Only portBus's interrupt lines are checked - interrupt-capable
+	 * peripherals live in I/O space in this design, the same convention as
+	 * the 6502 side routing every device interrupt through its VIA.
+	 *
+	 * NMI always wins over a maskable interrupt, is serviced regardless of
+	 * IFF1, and clears only IFF1 (not IFF2) - see ReturnFromNmi.
+	 *
+	 * IM 0 (the interrupting device injecting an arbitrary instruction
+	 * byte, not a vector) is not implemented - every real IM0 use is just
+	 * RST n anyway, and IM 1 already reproduces the single most common
+	 * case (RST 38H). Leaving interruptMode at its power-on default of 0
+	 * and then raising a maskable interrupt anyway throws, rather than
+	 * silently doing something wrong - call IM 1 or IM 2 first. */
+	public boolean serviceInterrupts() throws illegalAddressException, DeviceUnavailable, ROException {
+		if (suppressInterruptCheckOnce) {
+			suppressInterruptCheckOnce = false;
+			return false;
+		}
+		if (portBus.IsNMInterruptRaised()) {
+			pushPC();
+			iff1 = false;
+			pc = 0x0066;
+			portBus.clearNMInterupt();
+			return true;
+		}
+		if (iff1 && portBus.IsInterruptRaised()) {
+			if (interruptMode == 0) {
+				throw new UnsupportedOperationException(
+						"IM 0 interrupt servicing is not implemented - call IM 1 or IM 2 before raising a maskable interrupt");
+			}
+			iff1 = false;
+			iff2 = false;
+			pushPC();
+			if (interruptMode == 1) {
+				pc = 0x0038;
+			} else {
+				int vectorAddress = ((i & 0xff) << 8) | (pendingInterruptVector & 0xff);
+				int low = memoryBus.read(vectorAddress) & 0xff;
+				int high = memoryBus.read((vectorAddress + 1) & 0xffff) & 0xff;
+				pc = (high << 8) | low;
+			}
+			portBus.clearInterupt();
+			return true;
+		}
+		return false;
+	}
+
+	private void pushPC() throws illegalAddressException, DeviceUnavailable, ROException {
+		sp = (sp - 1) & 0xffff;
+		memoryBus.write(sp, (byte) ((pc >> 8) & 0xff));
+		sp = (sp - 1) & 0xffff;
+		memoryBus.write(sp, (byte) (pc & 0xff));
 	}
 }
