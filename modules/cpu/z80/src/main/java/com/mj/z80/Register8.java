@@ -9,13 +9,18 @@ package com.mj.z80;
  * this one. get()/set() reach into whichever RegisterPair the register is
  * actually the high or low half of. */
 public enum Register8 {
-	B(cpu -> cpu.bc.hi(), (cpu, v) -> cpu.bc.setHi(v)),
-	C(cpu -> cpu.bc.lo(), (cpu, v) -> cpu.bc.setLo(v)),
-	D(cpu -> cpu.de.hi(), (cpu, v) -> cpu.de.setHi(v)),
-	E(cpu -> cpu.de.lo(), (cpu, v) -> cpu.de.setLo(v)),
-	H(cpu -> cpu.hl.hi(), (cpu, v) -> cpu.hl.setHi(v)),
-	L(cpu -> cpu.hl.lo(), (cpu, v) -> cpu.hl.setLo(v)),
-	A(cpu -> cpu.af.hi(), (cpu, v) -> cpu.af.setHi(v));
+	// The 3-bit register code every opcode that encodes "which register"
+	// uses (LD r,r's own ddd/sss fields, and later the CB-prefixed shift/
+	// rotate/bit/set/res opcodes, which encode a register the same way) -
+	// 0,1,2,3,4,5,7, skipping 6 (that code means (HL), never a Register8
+	// value - see this enum's own class comment).
+	B(0, cpu -> cpu.bc.hi(), (cpu, v) -> cpu.bc.setHi(v)),
+	C(1, cpu -> cpu.bc.lo(), (cpu, v) -> cpu.bc.setLo(v)),
+	D(2, cpu -> cpu.de.hi(), (cpu, v) -> cpu.de.setHi(v)),
+	E(3, cpu -> cpu.de.lo(), (cpu, v) -> cpu.de.setLo(v)),
+	H(4, cpu -> cpu.hl.hi(), (cpu, v) -> cpu.hl.setHi(v)),
+	L(5, cpu -> cpu.hl.lo(), (cpu, v) -> cpu.hl.setLo(v)),
+	A(7, cpu -> cpu.af.hi(), (cpu, v) -> cpu.af.setHi(v));
 
 	@FunctionalInterface
 	private interface Getter {
@@ -27,12 +32,18 @@ public enum Register8 {
 		void set(Z80CPU cpu, int value);
 	}
 
+	private final int code;
 	private final Getter getter;
 	private final Setter setter;
 
-	Register8(Getter getter, Setter setter) {
+	Register8(int code, Getter getter, Setter setter) {
+		this.code = code;
 		this.getter = getter;
 		this.setter = setter;
+	}
+
+	public int code() {
+		return code;
 	}
 
 	public int get(Z80CPU cpu) {

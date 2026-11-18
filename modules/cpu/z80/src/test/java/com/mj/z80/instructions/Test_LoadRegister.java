@@ -10,12 +10,17 @@ import com.mj.z80.Z80CPU;
 import com.mj.z80.Z80InstructionDecoder;
 import com.mj.z80.Z80Machine;
 
-/** LD A,r - the destination-A slice of the Z80's LD r,r' family (see
- * LoadRegisterTable). Each test loads a single opcode byte, runs it, and
- * checks three things real Z80 hardware guarantees: A takes on the source
+/** LD r,r' - the whole register-to-register family (see LoadRegisterTable).
+ * Each test loads a single opcode byte, runs it, and checks three things
+ * real Z80 hardware guarantees: the destination takes on the source
  * register's value, the source register itself is left alone (this isn't
  * a swap), and no flag is touched - true of every 8-bit LD, not just
- * these. */
+ * these. A handful of real, independently-known opcodes are pinned
+ * explicitly (one per destination register) as a cross-check against
+ * LoadRegisterTable's own formula - the sweep test below only proves that
+ * formula is internally consistent with itself, not that it matches real
+ * Z80 hardware, so pinning a few values against the actual Zilog-documented
+ * opcodes is what actually catches a transposed ddd/sss bit-shift. */
 public class Test_LoadRegister {
 	private Z80Machine machine;
 	private Z80CPU cpu;
@@ -28,8 +33,8 @@ public class Test_LoadRegister {
 		cpu = new Z80CPU(machine.memoryBus(), machine.portBus(), decoder);
 	}
 
-	private void assertLoadsAFromRegister(int opcode, Register8 source) throws Exception {
-		cpu.af.setHi(0x00); // A starts different from the value the source is about to get
+	private void assertLoadMoves(int opcode, Register8 destination, Register8 source) throws Exception {
+		destination.set(cpu, 0x00); // destination starts different from the value the source is about to get
 		source.set(cpu, 0x42);
 		cpu.af.setLo(0x55); // flags sentinel - LD must never touch it
 		machine.memoryBus().write(0x1000, (byte) opcode);
@@ -37,7 +42,7 @@ public class Test_LoadRegister {
 
 		cpu.step();
 
-		assertEquals(0x42, cpu.af.hi(), "A should now hold the source register's value");
+		assertEquals(0x42, destination.get(cpu), "destination should now hold the source register's value");
 		assertEquals(0x42, source.get(cpu), "the source register itself must be left untouched - this isn't a swap");
 		assertEquals(0x55, cpu.af.lo(), "LD r,r' must never affect flags");
 		assertEquals(0x1001, cpu.pc);
@@ -45,36 +50,90 @@ public class Test_LoadRegister {
 
 	@Test
 	public void ldAB() throws Exception {
-		assertLoadsAFromRegister(0x78, Register8.B);
+		assertLoadMoves(0x78, Register8.A, Register8.B);
 	}
 
 	@Test
 	public void ldAC() throws Exception {
-		assertLoadsAFromRegister(0x79, Register8.C);
+		assertLoadMoves(0x79, Register8.A, Register8.C);
 	}
 
 	@Test
 	public void ldAD() throws Exception {
-		assertLoadsAFromRegister(0x7A, Register8.D);
+		assertLoadMoves(0x7A, Register8.A, Register8.D);
 	}
 
 	@Test
 	public void ldAE() throws Exception {
-		assertLoadsAFromRegister(0x7B, Register8.E);
+		assertLoadMoves(0x7B, Register8.A, Register8.E);
 	}
 
 	@Test
 	public void ldAH() throws Exception {
-		assertLoadsAFromRegister(0x7C, Register8.H);
+		assertLoadMoves(0x7C, Register8.A, Register8.H);
 	}
 
 	@Test
 	public void ldAL() throws Exception {
-		assertLoadsAFromRegister(0x7D, Register8.L);
+		assertLoadMoves(0x7D, Register8.A, Register8.L);
 	}
 
 	@Test
 	public void ldAAIsARealOpcodeNotJustASkippedSlot() throws Exception {
-		assertLoadsAFromRegister(0x7F, Register8.A);
+		assertLoadMoves(0x7F, Register8.A, Register8.A);
+	}
+
+	// One pinned, independently-known real opcode per remaining destination
+	// register - see this class's own comment on why the sweep test below
+	// isn't enough on its own.
+
+	@Test
+	public void ldBB() throws Exception {
+		assertLoadMoves(0x40, Register8.B, Register8.B);
+	}
+
+	@Test
+	public void ldBA() throws Exception {
+		assertLoadMoves(0x47, Register8.B, Register8.A);
+	}
+
+	@Test
+	public void ldCA() throws Exception {
+		assertLoadMoves(0x4F, Register8.C, Register8.A);
+	}
+
+	@Test
+	public void ldDB() throws Exception {
+		assertLoadMoves(0x50, Register8.D, Register8.B);
+	}
+
+	@Test
+	public void ldEA() throws Exception {
+		assertLoadMoves(0x5F, Register8.E, Register8.A);
+	}
+
+	@Test
+	public void ldHB() throws Exception {
+		assertLoadMoves(0x60, Register8.H, Register8.B);
+	}
+
+	@Test
+	public void ldLA() throws Exception {
+		assertLoadMoves(0x6F, Register8.L, Register8.A);
+	}
+
+	/** Every one of the 49 valid register-to-register combinations, computed
+	 * via the exact same `01 ddd sss` formula LoadRegisterTable itself uses
+	 * - a regression net for the whole family's wiring (right opcode, right
+	 * value transfer, source untouched, flags untouched, PC advance), on
+	 * top of (not instead of) the pinned spot checks above. */
+	@Test
+	public void everyRegisterToRegisterCombinationDispatchesCorrectly() throws Exception {
+		for (Register8 destination : Register8.values()) {
+			for (Register8 source : Register8.values()) {
+				int opcode = 0x40 | (destination.code() << 3) | source.code();
+				assertLoadMoves(opcode, destination, source);
+			}
+		}
 	}
 }
