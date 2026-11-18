@@ -3,23 +3,25 @@ package com.mj.z80.instructions;
 import com.mj.z80.Register8;
 import com.mj.z80.Z80InstructionDecoder;
 
-/** Populates the base table's LD r,r' opcodes (`01 ddd sss`, $40-$7F minus
- * the $x6/$xE columns - those are (HL), a different instruction shape).
- * Only LD A,r is populated so far ($78-$7D, $7F - $7E is LD A,(HL), out of
- * scope here) - one destination register at a time, same incremental
- * approach as every other instruction family in this project; more rows
- * join this same method as the rest of the family gets built. */
+/** Populates the base table's whole LD r,r' family: every register-to-
+ * register combination of the `01 ddd sss` opcode shape, ddd/sss each one
+ * of Register8's seven values. $76 (ddd=sss=110, i.e. "LD (HL),(HL)") can
+ * never come out of this loop at all - that code means (HL), which isn't
+ * a Register8 value - which is exactly right: that slot is real hardware's
+ * HALT opcode, not a register load, and belongs to a different
+ * instruction family entirely. (HL)/(IX+d)/(IY+d) as either operand are
+ * likewise out of scope here - a memory access, not a register, gets its
+ * own instruction shape once that family is built. */
 public final class LoadRegisterTable {
 	private LoadRegisterTable() {
 	}
 
 	public static void populate(Z80InstructionDecoder decoder) {
-		decoder.setBase(0x78, new LoadRegister(Register8.A, Register8.B));
-		decoder.setBase(0x79, new LoadRegister(Register8.A, Register8.C));
-		decoder.setBase(0x7A, new LoadRegister(Register8.A, Register8.D));
-		decoder.setBase(0x7B, new LoadRegister(Register8.A, Register8.E));
-		decoder.setBase(0x7C, new LoadRegister(Register8.A, Register8.H));
-		decoder.setBase(0x7D, new LoadRegister(Register8.A, Register8.L));
-		decoder.setBase(0x7F, new LoadRegister(Register8.A, Register8.A));
+		for (Register8 destination : Register8.values()) {
+			for (Register8 source : Register8.values()) {
+				int opcode = 0x40 | (destination.code() << 3) | source.code();
+				decoder.setBase(opcode, new LoadRegister(destination, source));
+			}
+		}
 	}
 }
