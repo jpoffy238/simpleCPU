@@ -7,9 +7,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.mj.Devices.AddressRange;
 import com.mj.Devices.Device;
+import com.mj.Devices.InterruptLine;
 import com.mj.Devices.PBus.BussId;
 import com.mj.Devices.PBus.DEVTYPE;
-import com.mj.Devices.VIA6522;
 import com.mj.Disk.exceptions.DiskReadError;
 import com.mj.Disk.exceptions.DiskWriteError;
 import com.mj.Disk.exceptions.GeometryException;
@@ -26,7 +26,9 @@ import com.mj.exceptions.illegalAddressException;
  *   +1  Track
  *   +2  Sector
  *   +3  Data
- *   +4  Drive Select (0-3)
+ *   +4  Drive Select (0-7 - a real 3-line drive-select field, same as a
+ *       real WD179x-era system; only as many drives as attachDrive()
+ *       actually wires up report ready)
  */
 public class FloppyController implements Device {
 	public static final int REG_STATUS_COMMAND = 0;
@@ -40,7 +42,7 @@ public class FloppyController implements Device {
 	private static final int STATUS_RECORD_NOT_FOUND = 0x04;
 	private static final int STATUS_NOT_READY = 0x80;
 
-	private static final int MAX_DRIVES = 4;
+	private static final int MAX_DRIVES = 8;
 
 	private enum Transfer {
 		NONE, READ, WRITE
@@ -48,7 +50,7 @@ public class FloppyController implements Device {
 
 	private static final Logger logger = LogManager.getLogger(FloppyController.class);
 
-	private final VIA6522 via;
+	private final InterruptLine interruptLine;
 	private final AddressRange range;
 	private final FloppyDevice[] drives = new FloppyDevice[MAX_DRIVES];
 
@@ -62,8 +64,8 @@ public class FloppyController implements Device {
 	private byte[] buffer;
 	private int bufferIndex;
 
-	public FloppyController(VIA6522 via, AddressRange range) {
-		this.via = via;
+	public FloppyController(InterruptLine interruptLine, AddressRange range) {
+		this.interruptLine = interruptLine;
 		this.range = range;
 	}
 
@@ -162,7 +164,7 @@ public class FloppyController implements Device {
 		default:
 			logger.debug(String.format("Unsupported floppy command %02x", command));
 			status = STATUS_RECORD_NOT_FOUND;
-			via.requestInterrupt(VIA6522.FLAG_CB1);
+			interruptLine.raiseInterrupt();
 			break;
 		}
 	}
@@ -175,7 +177,7 @@ public class FloppyController implements Device {
 		} catch (GeometryException e) {
 			status = STATUS_RECORD_NOT_FOUND;
 		}
-		via.requestInterrupt(VIA6522.FLAG_CB1);
+		interruptLine.raiseInterrupt();
 	}
 
 	private void formatTrack(FloppyDevice drive) {
@@ -192,7 +194,7 @@ public class FloppyController implements Device {
 		} catch (GeometryException | DiskWriteError e) {
 			status = STATUS_RECORD_NOT_FOUND;
 		}
-		via.requestInterrupt(VIA6522.FLAG_CB1); // single completion interrupt, Type-I style
+		interruptLine.raiseInterrupt(); // single completion interrupt, Type-I style
 	}
 
 	private void beginRead(FloppyDevice drive) {
@@ -203,10 +205,10 @@ public class FloppyController implements Device {
 			bufferIndex = 0;
 			transfer = Transfer.READ;
 			status = STATUS_BUSY | STATUS_DRQ;
-			via.requestInterrupt(VIA6522.FLAG_CB1); // first byte is ready
+			interruptLine.raiseInterrupt(); // first byte is ready
 		} catch (GeometryException | DiskReadError e) {
 			status = STATUS_RECORD_NOT_FOUND;
-			via.requestInterrupt(VIA6522.FLAG_CB1);
+			interruptLine.raiseInterrupt();
 		}
 	}
 
@@ -227,7 +229,7 @@ public class FloppyController implements Device {
 			status &= ~(STATUS_BUSY | STATUS_DRQ);
 			transfer = Transfer.NONE;
 		} else {
-			via.requestInterrupt(VIA6522.FLAG_CB1); // next byte is ready
+			interruptLine.raiseInterrupt(); // next byte is ready
 		}
 		return value;
 	}
@@ -249,12 +251,12 @@ public class FloppyController implements Device {
 			}
 			transfer = Transfer.NONE;
 		} else {
-			via.requestInterrupt(VIA6522.FLAG_CB1); // ready for next byte
+			interruptLine.raiseInterrupt(); // ready for next byte
 		}
 	}
 
 	public void raiseInterrupt() {
-		via.requestInterrupt(VIA6522.FLAG_CB1);
+		interruptLine.raiseInterrupt();
 	}
 
 	public void reset() {

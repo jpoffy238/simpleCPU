@@ -70,7 +70,7 @@ public class Test_CCP {
 		video = new VideoController(new AddressRange(0x9020, 0x9024), videoRam, graphicsRam);
 		bus.registerDevice(video);
 
-		FloppyController fdc = new FloppyController(via, new AddressRange(0x9010, 0x9014));
+		FloppyController fdc = new FloppyController(() -> via.requestInterrupt(VIA6522.FLAG_CB1), new AddressRange(0x9010, 0x9014));
 		bus.registerDevice(fdc);
 		IBM3740 drive0 = new IBM3740();
 		drive0.setVirtualDiskFile(tempDir.resolve("drive0.img").toString());

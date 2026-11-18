@@ -74,7 +74,7 @@ public class Test_BIOS {
 		video = new VideoController(new AddressRange(0x9020, 0x9024), videoRam, graphicsRam);
 		bus.registerDevice(video);
 
-		fdc = new FloppyController(via, new AddressRange(0x9010, 0x9014));
+		fdc = new FloppyController(() -> via.requestInterrupt(VIA6522.FLAG_CB1), new AddressRange(0x9010, 0x9014));
 		bus.registerDevice(fdc);
 		drive0 = new IBM3740();
 		drive0.setVirtualDiskFile(tempDir.resolve("drive0.img").toString());
