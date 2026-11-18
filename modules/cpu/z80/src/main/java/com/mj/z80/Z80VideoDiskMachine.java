@@ -1,5 +1,7 @@
 package com.mj.z80;
 
+import java.io.IOException;
+
 import com.mj.Devices.AddressRange;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
@@ -7,6 +9,9 @@ import com.mj.Disk.EightInch.IBM3740;
 import com.mj.Disk.FloppyController;
 import com.mj.Disk.exceptions.DiskReadError;
 import com.mj.Disk.exceptions.DiskWriteError;
+import com.mj.exceptions.DeviceUnavailable;
+import com.mj.exceptions.ROException;
+import com.mj.exceptions.illegalAddressException;
 import com.mj.memoryInterface.basicMemory;
 import com.mj.Video.VideoController;
 
@@ -98,5 +103,13 @@ public class Z80VideoDiskMachine {
 		IBM3740 disk = new IBM3740();
 		disk.setVirtualDiskFile(imageFileName);
 		floppyController.attachDrive(driveNumber, disk);
+	}
+
+	/** Loads a z80-asm-assembled .z80 file (see Z80BinaryFile) onto the
+	 * memory bus at its own embedded start address - same convenience
+	 * Z80Machine's own loadIntoMemory() provides. */
+	public void loadIntoMemory(String fileName)
+			throws IOException, illegalAddressException, ROException, DeviceUnavailable {
+		Z80BinaryFile.load(memoryBus, fileName);
 	}
 }
