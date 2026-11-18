@@ -149,4 +149,31 @@ final class ArithmeticOperations {
 		cpu.hl.set16(result);
 		return result;
 	}
+
+	/** ADD HL,rr (unprefixed, $09/$19/$29/$39) - a third, distinct 16-bit
+	 * flag shape alongside the two above: unlike 16-bit INC/DEC (no flags
+	 * at all) and unlike addSubHL() above (every flag computed), this one
+	 * sets H/N/C but leaves S/Z/P-V exactly as they were - a real,
+	 * documented quirk of this specific instruction. No carry-in (that's
+	 * what the ED-prefixed ADC HL,rr is for) and always written back into
+	 * HL. */
+	static int addHL(Z80CPU cpu, int operand) {
+		int hl = cpu.hl.get16();
+		int raw = hl + operand;
+		int result = raw & 0xffff;
+		boolean halfCarry = ((hl & 0xfff) + (operand & 0xfff)) > 0xfff;
+		boolean carry = raw > 0xffff;
+
+		int flags = cpu.af.lo() & (Flags.S | Flags.Z | Flags.PV);
+		if (halfCarry) {
+			flags |= Flags.H;
+		}
+		if (carry) {
+			flags |= Flags.C;
+		}
+		cpu.af.setLo(flags);
+
+		cpu.hl.set16(result);
+		return result;
+	}
 }
