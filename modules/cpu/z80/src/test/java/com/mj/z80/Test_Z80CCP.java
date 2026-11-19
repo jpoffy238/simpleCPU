@@ -68,9 +68,14 @@ public class Test_Z80CCP {
 		Z80InstructionDecoder decoder = new Z80InstructionDecoder();
 		FullInstructionSet.populate(decoder);
 		cpu = new Z80CPU(machine.memoryBus(), machine.portBus(), decoder);
-		// ccp.ihx's own crt0 entry - NOT --code-loc's address, see
-		// Test_Z80HelloWorld's own comment on why.
-		cpu.pc = 0x0000;
+		// ccp.ihx is now built with cpm_crt0.asm (--no-std-crt0), not
+		// SDCC's own default crt0 - see the Makefile's own comment for
+		// why (it needs to be genuinely loadable via BDOS_RUN_FILE, which
+		// means no reset-vector-at-0 indirection at all) - so its real
+		// entry point is --code-loc itself, matching BOOTADDR (bdos.c,
+		// #ifdef __SDCC) exactly, unlike hello.ihx's own pc=0 convention
+		// (see Test_Z80HelloWorld's own comment).
+		cpu.pc = 0x1000;
 	}
 
 	private void runSteps(int steps) throws Exception {
