@@ -1,8 +1,8 @@
 ; Primitives ROM (really RAM for now - no write protection exists on the
-; Z80 side yet): raw hardware access - console I/O and now disk I/O too -
-; no command parsing or filesystem concepts, same split as the 6502 side's
-; own BIOS.asm/MONITOR.asm (which this file is deliberately modeled on).
-; Graphics primitives remain a follow-up.
+; Z80 side yet): raw hardware access - console, disk, and now graphics
+; I/O - no command parsing or filesystem concepts, same split as the 6502
+; side's own BIOS.asm/MONITOR.asm (which this file is deliberately modeled
+; on).
 ;
 ; Calling convention:
 ;   BIOS_PUTCH         A = char to print; comes back holding the same
@@ -26,6 +26,11 @@
 ;                        over every track itself)
 ;   BIOS_RESTORE         no parameters - homes the selected drive's head
 ;                        back to track 0
+;   BIOS_GRAPHICS_MODE   A = MODE_TEXT or MODE_GRAPHICS - just a register
+;                        poke, VideoController itself decides how to paint
+;                        based on it
+;   BIOS_SET_PIXEL       A = row (0-199), E = on/off (0 = off), HL = column
+;                        (0-319)
 ;
 ; Deliberately simpler than the 6502 version in one way: no hardware
 ; scrolling via Display Start Address - once output reaches the last row
@@ -66,6 +71,18 @@ FD_SECTOR equ $12
 FD_DATA   equ $13
 FD_DRIVE  equ $14
 
+; VideoController's Mode Control register, same port range ($00-$04) as the
+; other video registers above - $04 was always part of that range, just
+; unused until now.
+VIDEO_MODE equ $04
+
+; 320x200 1bpp bitmap - same address and geometry as the 6502 side's own
+; GRAPHICS_RAM, for easy cross-CPU comparison. See DO_SET_PIXEL below for
+; the byte/bit addressing (row-major, MSB-first, matching
+; VideoController.getPixel()).
+GRAPHICS_RAM equ $C000
+GRAPHICS_BYTES_PER_ROW equ 40
+
 VR_H_DISPLAYED equ 1
 VR_V_DISPLAYED equ 6
 VR_CURSOR_START equ 10
@@ -92,6 +109,8 @@ V_ROWS equ 24
 	jp DO_WRITE_SECTOR	; $F012 BIOS_WRITE_SECTOR
 	jp DO_FORMAT_TRACK	; $F015 BIOS_FORMAT_TRACK
 	jp DO_RESTORE		; $F018 BIOS_RESTORE
+	jp DO_GRAPHICS_MODE	; $F01B BIOS_GRAPHICS_MODE
+	jp DO_SET_PIXEL		; $F01E BIOS_SET_PIXEL
 
 ; ---- A = char to print. CR moves to column 0 on the same row; LF moves
 ;      to column 0 on the next row (wrapping row at V_ROWS back to 0); any
@@ -352,6 +371,90 @@ DO_RESTORE push bc
 	out (c),a
 	pop bc
 	ret
+
+; ---- A = MODE_TEXT or MODE_GRAPHICS. Just a register poke -
+;      VideoController itself decides how to paint based on it. ----
+DO_GRAPHICS_MODE push bc
+	ld bc,VIDEO_MODE
+	out (c),a
+	pop bc
+	ret
+
+; ---- A = row (0-199), E = on/off (0 = off, anything else = on), HL =
+;      column (0-319). GRAPHICS_RAM is addressed row-major: byteOffset =
+;      row*GRAPHICS_BYTES_PER_ROW + col/8, bit (7 - col mod 8) within that
+;      byte - MSB-first, matching VideoController.getPixel() and the
+;      6502 side's own DO_SET_PIXEL.
+;
+;      col mod 8 only ever needs L (col's low byte), same reasoning the
+;      6502 version uses for ADDRLO - 8 divides 256 evenly, so the high
+;      byte can't affect it. col/8 is a plain 16-bit logical shift right
+;      by 3 (SRL H / RR L, three times - RR L picks up the bit SRL H just
+;      shifted out, so this is one real 16-bit shift, not two independent
+;      8-bit ones), and row*GRAPHICS_BYTES_PER_ROW is added on top via a
+;      repeated-add loop, same style as COMPUTE_OFFSET's own row*V_COLS.
+;      PIXEL_ROW/PIXEL_ONOFF/PIXEL_MASK are scratch bytes, same idea as
+;      V_ROW/V_COL above, used here only because the real parameters
+;      (A, E) would otherwise get clobbered by HL's own table-lookup/
+;      shift/add work before they're needed again. ----
+DO_SET_PIXEL push bc
+	push de
+	push hl
+	ld (PIXEL_ROW),a
+	ld a,e
+	ld (PIXEL_ONOFF),a
+
+	ld a,l
+	and $07
+	ld c,a
+	ld b,0
+	ld hl,PIXEL_BIT_MASKS
+	add hl,bc
+	ld a,(hl)
+	ld (PIXEL_MASK),a
+
+	pop hl			; hl = column again
+	srl h
+	rr l
+	srl h
+	rr l
+	srl h
+	rr l			; hl = column / 8
+
+	ld a,(PIXEL_ROW)
+	ld b,a
+DSP_MUL_LOOP ld a,b
+	or 0
+	jp z,DSP_MUL_DONE
+	ld de,GRAPHICS_BYTES_PER_ROW
+	add hl,de
+	dec b
+	jp DSP_MUL_LOOP
+DSP_MUL_DONE ld de,GRAPHICS_RAM
+	add hl,de		; hl -> the one byte to read-modify-write
+
+	ld a,(PIXEL_ONOFF)
+	or 0
+	jp z,DSP_CLEAR
+	ld a,(hl)
+	ld b,a
+	ld a,(PIXEL_MASK)
+	or b
+	jp DSP_STORE
+DSP_CLEAR ld a,(PIXEL_MASK)
+	cpl
+	ld b,a
+	ld a,(hl)
+	and b
+DSP_STORE ld (hl),a
+	pop de
+	pop bc
+	ret
+
+PIXEL_BIT_MASKS defb $80,$40,$20,$10,$08,$04,$02,$01
+PIXEL_ROW defb 0
+PIXEL_ONOFF defb 0
+PIXEL_MASK defb 0
 
 ; ---- BIOS's own row/column tracking for DO_PUTCH's output -
 ;      VideoController's hardware has no concept of "where the next

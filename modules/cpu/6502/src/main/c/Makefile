@@ -23,10 +23,13 @@
 #   mvn -pl modules/Disk exec:java -Dexec.mainClass=com.mj.Disk.CpmDiskTool \
 #       -Dexec.args="put disk0.img ccp.bin CCP.COM"
 #
-# bios.h (and, so far, just hello.c) now live in ../../../c-shared - shared
-# unchanged with the Z80/SDCC side, see that header's own comment - so
-# CFLAGS needs an explicit -I to find it, and hello.bin gets its own rule
-# (the generic %.bin pattern below only matches a same-directory %.c).
+# bios.h/bdos.h and hello.c/bdos.c/ccp.c/bios_util.c all now live in
+# ../../../c-shared - shared unchanged with the Z80/SDCC side, see those
+# headers' own comments - so CFLAGS needs an explicit -I to find them, and
+# every one of those four .c files needs its own explicit rule referencing
+# $(CSHARED) (the generic %.bin pattern below only matches a
+# same-directory %.c - still true for edit.c, the one app that hasn't
+# moved).
 
 CC65 = cl65
 CSHARED = ../../../../c-shared
@@ -38,14 +41,20 @@ APPS = hello ccp edit graphics
 
 all: bdos.bin $(patsubst %,%.bin,$(APPS))
 
-bdos.bin: bdos.c bdos_jumptable.s bios_glue.s bdos.cfg $(CSHARED)/bios.h
-	$(CC65) $(CFLAGS) -C bdos.cfg -m bdos.map -o bdos.bin bdos.c bdos_jumptable.s bios_glue.s
+bdos.bin: $(CSHARED)/bdos.c bdos_jumptable.s bios_glue.s bdos.cfg $(CSHARED)/bios.h
+	$(CC65) $(CFLAGS) -C bdos.cfg -m bdos.map -o bdos.bin $(CSHARED)/bdos.c bdos_jumptable.s bios_glue.s
 
-hello.bin: $(CSHARED)/hello.c bios_glue.s bdos_glue.s bios_util.c simplecpu.cfg $(CSHARED)/bios.h bdos.h
-	$(CC65) $(CFLAGS) -C simplecpu.cfg -m hello.map -o hello.bin $(CSHARED)/hello.c bios_glue.s bdos_glue.s bios_util.c
+hello.bin: $(CSHARED)/hello.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c simplecpu.cfg $(CSHARED)/bios.h $(CSHARED)/bdos.h
+	$(CC65) $(CFLAGS) -C simplecpu.cfg -m hello.map -o hello.bin $(CSHARED)/hello.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c
 
-%.bin: %.c bios_glue.s bdos_glue.s bios_util.c simplecpu.cfg $(CSHARED)/bios.h bdos.h
-	$(CC65) $(CFLAGS) -C simplecpu.cfg -m $*.map -o $@ $< bios_glue.s bdos_glue.s bios_util.c
+ccp.bin: $(CSHARED)/ccp.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c simplecpu.cfg $(CSHARED)/bios.h $(CSHARED)/bdos.h
+	$(CC65) $(CFLAGS) -C simplecpu.cfg -m ccp.map -o ccp.bin $(CSHARED)/ccp.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c
+
+graphics.bin: $(CSHARED)/graphics.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c simplecpu.cfg $(CSHARED)/bios.h $(CSHARED)/bdos.h
+	$(CC65) $(CFLAGS) -C simplecpu.cfg -m graphics.map -o graphics.bin $(CSHARED)/graphics.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c
+
+%.bin: %.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c simplecpu.cfg $(CSHARED)/bios.h $(CSHARED)/bdos.h
+	$(CC65) $(CFLAGS) -C simplecpu.cfg -m $*.map -o $@ $< bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c
 
 install: bdos.bin
 	cp bdos.bin ../../main/resources

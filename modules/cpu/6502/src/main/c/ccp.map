@@ -202,153 +202,153 @@ __DESTRUCTOR_TABLE__ ([linker generated]):
 __STACKSTART__ ([linker generated]):
     crt0.o                    none/crt0.s:5
 __STARTUP__ (crt0.o):
-    ccp.o                     ccp.s:13
+    ccp.o                     ../../../../c-shared/ccp.s:13
 _bdos_create_file (bdos_glue.o):
-    ccp.o                     ccp.s:24
+    ccp.o                     ../../../../c-shared/ccp.s:24
 _bdos_delete_file (bdos_glue.o):
-    ccp.o                     ccp.s:23
+    ccp.o                     ../../../../c-shared/ccp.s:23
 _bdos_entry_size (bdos_glue.o):
-    ccp.o                     ccp.s:26
+    ccp.o                     ../../../../c-shared/ccp.s:26
 _bdos_find_file (bdos_glue.o):
-    ccp.o                     ccp.s:21
+    ccp.o                     ../../../../c-shared/ccp.s:21
 _bdos_free_blocks (bdos_glue.o):
-    ccp.o                     ccp.s:29
+    ccp.o                     ../../../../c-shared/ccp.s:29
 _bdos_next_entry (bdos_glue.o):
-    ccp.o                     ccp.s:20
+    ccp.o                     ../../../../c-shared/ccp.s:20
 _bdos_read_record (bdos_glue.o):
-    ccp.o                     ccp.s:22
+    ccp.o                     ../../../../c-shared/ccp.s:22
 _bdos_rename_file (bdos_glue.o):
-    ccp.o                     ccp.s:27
+    ccp.o                     ../../../../c-shared/ccp.s:27
 _bdos_rewind_dir (bdos_glue.o):
-    ccp.o                     ccp.s:19
+    ccp.o                     ../../../../c-shared/ccp.s:19
 _bdos_run_file (bdos_glue.o):
-    ccp.o                     ccp.s:28
+    ccp.o                     ../../../../c-shared/ccp.s:28
 _bdos_write_record (bdos_glue.o):
-    ccp.o                     ccp.s:25
+    ccp.o                     ../../../../c-shared/ccp.s:25
 _bios_getch (bios_glue.o):
-    ccp.o                     ccp.s:15
+    ccp.o                     ../../../../c-shared/ccp.s:15
 _bios_gotoxy (bios_glue.o):
-    bios_util.o               bios_util.s:16
+    bios_util.o               ../../../../c-shared/bios_util.s:16
 _bios_putch (bios_glue.o):
-    bios_util.o               bios_util.s:13
-    ccp.o                     ccp.s:14
+    bios_util.o               ../../../../c-shared/bios_util.s:13
+    ccp.o                     ../../../../c-shared/ccp.s:14
 _bios_putstr (bios_util.o):
-    ccp.o                     ccp.s:16
+    ccp.o                     ../../../../c-shared/ccp.s:16
 _bios_select (bios_glue.o):
-    ccp.o                     ccp.s:17
+    ccp.o                     ../../../../c-shared/ccp.s:17
 _bios_set_buffer (bios_glue.o):
-    ccp.o                     ccp.s:18
+    ccp.o                     ../../../../c-shared/ccp.s:18
 _bios_set_x (bios_glue.o):
-    bios_util.o               bios_util.s:15
+    bios_util.o               ../../../../c-shared/bios_util.s:15
 _main (ccp.o):
     crt0.o                    none/crt0.s:3
 addeq0sp (addeqsp.o):
-    bios_util.o               bios_util.s:145
-    ccp.o                     ccp.s:1417
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 addeqysp (addeqsp.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 addysp (addysp.o):
     incsp8.o                  runtime/incsp8.s:8
     incsp6.o                  runtime/incsp6.s:8
     incsp5.o                  runtime/incsp5.s:8
     incsp4.o                  runtime/incsp4.s:8
     incsp3.o                  runtime/incsp3.s:8
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 booleq (makebool.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 decaxy (decaxy.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 decsp1 (decsp1.o):
-    bios_util.o               bios_util.s:145
-    bios_util.o               bios_util.s:145
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 decsp2 (decsp2.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 decsp5 (decsp5.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 donelib (condes.o):
     crt0.o                    none/crt0.s:4
 incax1 (incax1.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 incax2 (incax2.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 incax7 (incax7.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 incaxy (incaxy.o):
     incax7.o                  runtime/incax7.s:8
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 incsp1 (incsp1.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 incsp2 (incsp2.o):
     popptr1.o                 runtime/popptr1.s:8
     staspidx.o                runtime/staspidx.s:8
-    bios_util.o               bios_util.s:145
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 incsp3 (incsp3.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 incsp4 (incsp4.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 incsp5 (incsp5.o):
-    bios_util.o               bios_util.s:145
-    ccp.o                     ccp.s:1417
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 incsp6 (incsp6.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 incsp8 (incsp8.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 initlib (condes.o):
     crt0.o                    none/crt0.s:4
 ldax0sp (ldaxsp.o):
-    bios_util.o               bios_util.s:145
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 ldaxysp (ldaxsp.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 leaa0sp (leaaxsp.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 leaaxsp (leaaxsp.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 mulax10 (mulax10.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 popptr1 (popptr1.o):
     umod.o                    runtime/umod.s:8
     udiv.o                    runtime/udiv.s:9
@@ -358,47 +358,47 @@ ptr1 (zeropage.o):
     udiv.o                    runtime/udiv.s:10
     staspidx.o                runtime/staspidx.s:9
     mulax10.o                 runtime/mulax10.s:9
-    bios_util.o               bios_util.s:11
-    ccp.o                     ccp.s:11
+    bios_util.o               ../../../../c-shared/bios_util.s:11
+    ccp.o                     ../../../../c-shared/ccp.s:11
 ptr4 (zeropage.o):
     umod.o                    runtime/umod.s:9
     udiv.o                    runtime/udiv.s:10
 push0 (pushax.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 pusha (pusha.o):
-    bios_util.o               bios_util.s:145
-    bios_util.o               bios_util.s:145
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 pusha0 (pushax.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 pushax (pushax.o):
-    bios_util.o               bios_util.s:145
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 pushwysp (pushwsp.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 shlax1 (aslax1.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 shrax3 (shrax3.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 sp (zeropage.o):
     popptr1.o                 runtime/popptr1.s:9
     subysp.o                  runtime/subysp.s:9
@@ -417,27 +417,27 @@ sp (zeropage.o):
     crt0.o                    /home/jpoffen/git/cc65/asminc/zeropage.inc:11
     addysp.o                  runtime/addysp.s:8
     addeqsp.o                 runtime/addeqsp.s:8
-    bios_util.o               bios_util.s:10
-    ccp.o                     ccp.s:10
+    bios_util.o               ../../../../c-shared/bios_util.s:10
+    ccp.o                     ../../../../c-shared/ccp.s:10
 sreg (zeropage.o):
     umod.o                    runtime/umod.s:9
     udiv.o                    runtime/udiv.s:10
-    ccp.o                     ccp.s:10
+    ccp.o                     ../../../../c-shared/ccp.s:10
 staspidx (staspidx.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 stax0sp (staxsp.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 staxysp (staxsp.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 subysp (subysp.o):
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 tmp1 (zeropage.o):
     staspidx.o                runtime/staspidx.s:9
     shrax3.o                  runtime/shrax3.s:8
@@ -445,9 +445,9 @@ tmp1 (zeropage.o):
     decaxy.o                  runtime/decaxy.s:8
     aslax1.o                  runtime/aslax1.s:8
 tosudiva0 (udiv.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 tosumoda0 (umod.o):
-    ccp.o                     ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1417
 udiv16 (udiv.o):
     umod.o                    runtime/umod.s:8
 zerobss (zerobss.o):

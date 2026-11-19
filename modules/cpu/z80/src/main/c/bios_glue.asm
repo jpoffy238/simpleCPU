@@ -47,6 +47,8 @@ BIOS_READ_SECTOR  = 0xF00F
 BIOS_WRITE_SECTOR = 0xF012
 BIOS_FORMAT_TRACK = 0xF015
 BIOS_RESTORE      = 0xF018
+BIOS_GRAPHICS_MODE = 0xF01B
+BIOS_SET_PIXEL     = 0xF01E
 
 ADDRLO   = 0x0040
 ADDRHI   = 0x0041
@@ -65,6 +67,9 @@ STAGED_X = 0x0042
 .globl _bios_write_sector
 .globl _bios_format_track
 .globl _bios_restore
+.globl _bios_graphics_mode
+.globl _bios_set_pixel_x
+.globl _bios_set_pixel
 
 ; void bios_putch(char c) - c arrives in A
 _bios_putch::
@@ -126,3 +131,23 @@ _bios_format_track::
 ; void bios_restore(void) - no parameters
 _bios_restore::
 	jp	BIOS_RESTORE
+
+; void bios_graphics_mode(unsigned char on) - on arrives in A
+_bios_graphics_mode::
+	jp	BIOS_GRAPHICS_MODE
+
+; void bios_set_pixel_x(unsigned int x) - x arrives in HL. Own function
+; rather than reusing bios_set_buffer(), even though the staging mechanics
+; (ADDRLO) are identical - see bios.h's own comment on why, same reasoning
+; the 6502 side already uses.
+_bios_set_pixel_x::
+	ld	(ADDRLO), hl
+	ret
+
+; void bios_set_pixel(unsigned char y) - y arrives in A (left untouched
+; below); on/off staged via bios_set_x(), x staged via bios_set_pixel_x()
+_bios_set_pixel::
+	ld	hl, #STAGED_X
+	ld	e, (hl)
+	ld	hl, (ADDRLO)
+	jp	BIOS_SET_PIXEL
