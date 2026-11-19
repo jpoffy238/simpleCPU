@@ -575,7 +575,17 @@ unsigned char bdos_rename_file(void) {
 	return found_any;
 }
 
+/* BOOTADDR is where a loaded program's bytes get written and then jumped
+ * into - a fixed, agreed address both toolchains' own "app" build process
+ * links every loadable program against (simplecpu.cfg's ORIGIN on the
+ * 6502 side; --code-loc on the Z80 side, see cpm_crt0.asm's own comment
+ * for why Z80 needs a dedicated minimal crt0 of its own to make this
+ * work at all, unlike SDCC's normal power-on-oriented default one). */
+#ifdef __SDCC
+#define BOOTADDR ((unsigned char *) 0x1000)
+#else
 #define BOOTADDR ((unsigned char *) 0x0300)
+#endif
 #define CCP_NAME "CCP.COM"
 
 /* Loads name's content to BOOTADDR record by record and jumps into it.

@@ -47,6 +47,22 @@
 # cc65's own emulated software stack pointer, so (unlike the 6502 port)
 # there is no extra "whoever calls BDOS first must init SP" gotcha to
 # worry about here at all.
+#
+# ccp.ihx is different again, for a third reason: it's the one "app" that
+# needs to be genuinely loadable by BDOS_RUN_FILE (bdos.c's
+# load_and_run(), called from CCP itself or BDOS's own cold-boot path),
+# not just directly boot-able at pc=0 for a test's own convenience the
+# way hello.ihx is. A loaded program is entered by a plain CALL from
+# BDOS's own already-running C code, not a Z80 power-on reset - see
+# cpm_crt0.asm's own comment for why that needs its own minimal crt0
+# (just "call _main / ret", no SP reset, no BSS zeroing) rather than
+# SDCC's own default one, and why --no-std-crt0 is required here too
+# (same reset-vector-collision reasoning as BDOS's own build - BDOS.ihx
+# and ccp.ihx get loaded into the same 64K space at once). This also
+# moves ccp.ihx's real entry point from pc=0 (hello.ihx's own convention)
+# to --code-loc itself, $1000 - matching BOOTADDR (bdos.c, #ifdef
+# __SDCC) exactly, since that's the one fixed address both BDOS_RUN_FILE
+# and any test booting ccp.ihx directly need to agree on.
 
 SDCC_BIN = /home/jpoffen/git/sdcc/sdcc-4.6.0/bin
 SDCC = $(SDCC_BIN)/sdcc
@@ -70,6 +86,9 @@ bdos_glue.rel: bdos_glue.asm
 bdos_jumptable.rel: bdos_jumptable.asm
 	$(SDASZ80) -o bdos_jumptable.rel bdos_jumptable.asm
 
+cpm_crt0.rel: cpm_crt0.asm
+	$(SDASZ80) -o cpm_crt0.rel cpm_crt0.asm
+
 bios_util.rel: $(CSHARED)/bios_util.c $(CSHARED)/bios.h
 	$(SDCC) -mz80 -c -I$(CSHARED) -o bios_util.rel $(CSHARED)/bios_util.c
 
@@ -88,8 +107,8 @@ hello.ihx: hello.rel bios_glue.rel
 ccp.rel: $(CSHARED)/ccp.c $(CSHARED)/bios.h $(CSHARED)/bdos.h
 	$(SDCC) -mz80 -c -I$(CSHARED) -o ccp.rel $(CSHARED)/ccp.c
 
-ccp.ihx: ccp.rel bios_glue.rel bdos_glue.rel bios_util.rel
-	$(SDCC) -mz80 --code-loc $(CODE_LOC) -o ccp.ihx ccp.rel bios_glue.rel bdos_glue.rel bios_util.rel
+ccp.ihx: cpm_crt0.rel ccp.rel bios_glue.rel bdos_glue.rel bios_util.rel
+	$(SDCC) -mz80 --no-std-crt0 --code-loc $(CODE_LOC) -o ccp.ihx cpm_crt0.rel ccp.rel bios_glue.rel bdos_glue.rel bios_util.rel
 
 install:
 	@echo "Nothing installed yet - every .ihx here is a manual toolchain smoke test, not loaded by Java automatically (see this Makefile's own comment)."
