@@ -228,22 +228,22 @@ _bios_clrscr (bios_util.o):
 _bios_getch (bios_glue.o):
     edit.o                    edit.s:15
 _bios_gotoxy (bios_glue.o):
-    bios_util.o               bios_util.s:16
+    bios_util.o               ../../../../c-shared/bios_util.s:16
     edit.o                    edit.s:19
 _bios_putch (bios_glue.o):
-    bios_util.o               bios_util.s:13
+    bios_util.o               ../../../../c-shared/bios_util.s:13
     edit.o                    edit.s:14
 _bios_putstr (bios_util.o):
     edit.o                    edit.s:16
 _bios_set_buffer (bios_glue.o):
     edit.o                    edit.s:17
 _bios_set_x (bios_glue.o):
-    bios_util.o               bios_util.s:15
+    bios_util.o               ../../../../c-shared/bios_util.s:15
     edit.o                    edit.s:18
 _main (edit.o):
     crt0.o                    none/crt0.s:3
 addeq0sp (addeqsp.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
@@ -276,8 +276,8 @@ decax1 (decax1.o):
 decaxy (decaxy.o):
     edit.o                    edit.s:3282
 decsp1 (decsp1.o):
-    bios_util.o               bios_util.s:145
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
@@ -333,14 +333,14 @@ incaxy (incaxy.o):
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
 incsp1 (incsp1.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
 incsp2 (incsp2.o):
     staspidx.o                runtime/staspidx.s:8
     popptr1.o                 runtime/popptr1.s:8
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
 incsp3 (incsp3.o):
@@ -352,7 +352,7 @@ incsp3 (incsp3.o):
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
 incsp5 (incsp5.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
 incsp6 (incsp6.o):
@@ -360,7 +360,7 @@ incsp6 (incsp6.o):
 initlib (condes.o):
     crt0.o                    none/crt0.s:4
 ldax0sp (ldaxsp.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
@@ -398,15 +398,15 @@ ptr1 (zeropage.o):
     staspidx.o                runtime/staspidx.s:9
     popptr1.o                 runtime/popptr1.s:9
     mul8.o                    runtime/mul8.s:10
-    bios_util.o               bios_util.s:11
+    bios_util.o               ../../../../c-shared/bios_util.s:11
     edit.o                    edit.s:11
 ptr4 (zeropage.o):
     umod.o                    runtime/umod.s:9
     udiv.o                    runtime/udiv.s:10
     mul8.o                    runtime/mul8.s:10
 pusha (pusha.o):
-    bios_util.o               bios_util.s:145
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
@@ -441,7 +441,7 @@ pusha0 (pushax.o):
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
 pushax (pushax.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
     edit.o                    edit.s:3282
@@ -486,7 +486,7 @@ sp (zeropage.o):
     crt0.o                    /home/jpoffen/git/cc65/asminc/zeropage.inc:11
     addysp.o                  runtime/addysp.s:8
     addeqsp.o                 runtime/addeqsp.s:8
-    bios_util.o               bios_util.s:10
+    bios_util.o               ../../../../c-shared/bios_util.s:10
     edit.o                    edit.s:10
 sreg (zeropage.o):
     umod.o                    runtime/umod.s:9

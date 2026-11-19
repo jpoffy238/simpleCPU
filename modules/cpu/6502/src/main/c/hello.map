@@ -105,41 +105,41 @@ __STACKSTART__ ([linker generated]):
 __STARTUP__ (crt0.o):
     hello.o                   ../../../../c-shared/hello.s:13
 _bios_gotoxy (bios_glue.o):
-    bios_util.o               bios_util.s:16
+    bios_util.o               ../../../../c-shared/bios_util.s:16
 _bios_putch (bios_glue.o):
-    bios_util.o               bios_util.s:13
+    bios_util.o               ../../../../c-shared/bios_util.s:13
     hello.o                   ../../../../c-shared/hello.s:14
 _bios_set_x (bios_glue.o):
-    bios_util.o               bios_util.s:15
+    bios_util.o               ../../../../c-shared/bios_util.s:15
 _main (hello.o):
     crt0.o                    none/crt0.s:3
 addeq0sp (addeqsp.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 addysp (addysp.o):
     incsp5.o                  runtime/incsp5.s:8
 decsp1 (decsp1.o):
-    bios_util.o               bios_util.s:145
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 donelib (condes.o):
     crt0.o                    none/crt0.s:4
 incsp1 (incsp1.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 incsp2 (incsp2.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 incsp5 (incsp5.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 initlib (condes.o):
     crt0.o                    none/crt0.s:4
 ldax0sp (ldaxsp.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 ptr1 (zeropage.o):
     zerobss.o                 common/zerobss.s:9
-    bios_util.o               bios_util.s:11
+    bios_util.o               ../../../../c-shared/bios_util.s:11
 pusha (pusha.o):
-    bios_util.o               bios_util.s:145
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 pushax (pushax.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 sp (zeropage.o):
     addysp.o                  runtime/addysp.s:8
     pushax.o                  runtime/pushax.s:8
@@ -150,7 +150,7 @@ sp (zeropage.o):
     decsp1.o                  runtime/decsp1.s:8
     crt0.o                    /home/jpoffen/git/cc65/asminc/zeropage.inc:11
     addeqsp.o                 runtime/addeqsp.s:8
-    bios_util.o               bios_util.s:10
+    bios_util.o               ../../../../c-shared/bios_util.s:10
 zerobss (zerobss.o):
     crt0.o                    none/crt0.s:3
 

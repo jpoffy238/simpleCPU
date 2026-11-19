@@ -137,60 +137,60 @@ __DESTRUCTOR_TABLE__ ([linker generated]):
 __STACKSTART__ ([linker generated]):
     crt0.o                    none/crt0.s:5
 __STARTUP__ (crt0.o):
-    graphics.o                graphics.s:13
+    graphics.o                ../../../../c-shared/graphics.s:13
 _bios_gotoxy (bios_glue.o):
-    bios_util.o               bios_util.s:16
+    bios_util.o               ../../../../c-shared/bios_util.s:16
 _bios_graphics_mode (bios_glue.o):
-    graphics.o                graphics.s:16
+    graphics.o                ../../../../c-shared/graphics.s:16
 _bios_putch (bios_glue.o):
-    bios_util.o               bios_util.s:13
+    bios_util.o               ../../../../c-shared/bios_util.s:13
 _bios_putstr (bios_util.o):
-    graphics.o                graphics.s:14
+    graphics.o                ../../../../c-shared/graphics.s:14
 _bios_set_pixel (bios_glue.o):
-    graphics.o                graphics.s:18
+    graphics.o                ../../../../c-shared/graphics.s:18
 _bios_set_pixel_x (bios_glue.o):
-    graphics.o                graphics.s:17
+    graphics.o                ../../../../c-shared/graphics.s:17
 _bios_set_x (bios_glue.o):
-    bios_util.o               bios_util.s:15
-    graphics.o                graphics.s:15
+    bios_util.o               ../../../../c-shared/bios_util.s:15
+    graphics.o                ../../../../c-shared/graphics.s:15
 _main (graphics.o):
     crt0.o                    none/crt0.s:3
 addeq0sp (addeqsp.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 addeqysp (addeqsp.o):
-    graphics.o                graphics.s:102
+    graphics.o                ../../../../c-shared/graphics.s:102
 addysp (addysp.o):
     incsp5.o                  runtime/incsp5.s:8
 addysp1 (addysp.o):
     ludiv.o                   runtime/ludiv.s:9
     lmul.o                    runtime/lmul.s:9
 axulong (axlong.o):
-    graphics.o                graphics.s:102
+    graphics.o                ../../../../c-shared/graphics.s:102
 decsp1 (decsp1.o):
-    bios_util.o               bios_util.s:145
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 decsp4 (decsp4.o):
     lpush.o                   runtime/lpush.s:12
-    graphics.o                graphics.s:102
+    graphics.o                ../../../../c-shared/graphics.s:102
 donelib (condes.o):
     crt0.o                    none/crt0.s:4
 incsp1 (incsp1.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 incsp2 (incsp2.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 incsp5 (incsp5.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 initlib (condes.o):
     crt0.o                    none/crt0.s:4
 ldax0sp (ldaxsp.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 ldaxysp (ldaxsp.o):
-    graphics.o                graphics.s:102
+    graphics.o                ../../../../c-shared/graphics.s:102
 ptr1 (zeropage.o):
     zerobss.o                 common/zerobss.s:9
     ludiv.o                   runtime/ludiv.s:10
     lmul.o                    runtime/lmul.s:10
-    bios_util.o               bios_util.s:11
+    bios_util.o               ../../../../c-shared/bios_util.s:11
 ptr2 (zeropage.o):
     ludiv.o                   runtime/ludiv.s:10
 ptr3 (zeropage.o):
@@ -200,12 +200,12 @@ ptr4 (zeropage.o):
     ludiv.o                   runtime/ludiv.s:10
     lmul.o                    runtime/lmul.s:10
 pusha (pusha.o):
-    bios_util.o               bios_util.s:145
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 pushax (pushax.o):
-    bios_util.o               bios_util.s:145
+    bios_util.o               ../../../../c-shared/bios_util.s:145
 pusheax (lpush.o):
-    graphics.o                graphics.s:102
+    graphics.o                ../../../../c-shared/graphics.s:102
 sp (zeropage.o):
     addysp.o                  runtime/addysp.s:8
     staxsp.o                  runtime/staxsp.s:8
@@ -221,17 +221,17 @@ sp (zeropage.o):
     decsp1.o                  runtime/decsp1.s:8
     crt0.o                    /home/jpoffen/git/cc65/asminc/zeropage.inc:11
     addeqsp.o                 runtime/addeqsp.s:8
-    bios_util.o               bios_util.s:10
-    graphics.o                graphics.s:10
+    bios_util.o               ../../../../c-shared/bios_util.s:10
+    graphics.o                ../../../../c-shared/graphics.s:10
 sreg (zeropage.o):
     ludiv.o                   runtime/ludiv.s:10
     lpush.o                   runtime/lpush.s:13
     lmul.o                    runtime/lmul.s:10
     axlong.o                  runtime/axlong.s:9
 stax0sp (staxsp.o):
-    graphics.o                graphics.s:102
+    graphics.o                ../../../../c-shared/graphics.s:102
 staxysp (staxsp.o):
-    graphics.o                graphics.s:102
+    graphics.o                ../../../../c-shared/graphics.s:102
 tmp2 (zeropage.o):
     lmul.o                    runtime/lmul.s:10
 tmp3 (zeropage.o):
@@ -241,9 +241,9 @@ tmp4 (zeropage.o):
     ludiv.o                   runtime/ludiv.s:10
     lmul.o                    runtime/lmul.s:10
 tosudiv0ax (ludiv.o):
-    graphics.o                graphics.s:102
+    graphics.o                ../../../../c-shared/graphics.s:102
 tosumul0ax (lmul.o):
-    graphics.o                graphics.s:102
+    graphics.o                ../../../../c-shared/graphics.s:102
 zerobss (zerobss.o):
     crt0.o                    none/crt0.s:3
 
