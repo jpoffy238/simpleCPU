@@ -17,7 +17,9 @@
 ;                       exercises it yet.)
 ;   BIOS_GETCH          blocks until a key is available; returns A = char
 ;   BIOS_VIDEO_INIT      no parameters - one-time setup
-;   BIOS_GOTOXY          A = row (0-23), E = col (0-79)
+;   BIOS_GOTOXY          A = row (0-23, relative to the current scrolled
+;                        window, same convention PC_SCROLL itself uses),
+;                        E = col (0-79)
 ;   BIOS_SELECT          A = drive (0-7)
 ;   BIOS_READ_SECTOR     A = track, E = sector, HL = destination buffer
 ;   BIOS_WRITE_SECTOR    A = track, E = sector, HL = source buffer
@@ -32,12 +34,17 @@
 ;   BIOS_SET_PIXEL       A = row (0-199), E = on/off (0 = off), HL = column
 ;                        (0-319)
 ;
-; Deliberately simpler than the 6502 version in one way: no hardware
-; scrolling via Display Start Address - once output reaches the last row
-; it just wraps back to row 0 rather than scrolling the window up. Good
-; enough to prove the pipeline (CPU -> port bus -> VideoController ->
-; screen) actually works; real scrolling is a reasonable follow-up once
-; it is.
+; Real hardware scrolling via Display Start Address (R12/R13), mirroring
+; the 6502 side's own BIOS.asm - see DO_PUTCH/PC_SCROLL below. Simpler
+; than the 6502 version in one way Z80 itself affords: V_ADDR/V_START are
+; kept as plain 16-bit ring-buffer OFFSETS (0..VIDEO_RAM_SIZE-1, not
+; absolute addresses), and VIDEO_RAM_SIZE being a power of two (2048)
+; means wrapping after ANY add or subtract - overflow past the top AND
+; underflow below zero alike - is just "mask the high byte to 3 bits"
+; (see WRAP_RING), one shared step every path below runs through, rather
+; than the 6502 version's own separate per-path overflow/underflow
+; branches (a 6502 ADC/SBC only ever carries/borrows one bit at a time on
+; an 8-bit register, so it has no equivalent single-step shortcut).
 ;
 ; Also simpler in a second way real Z80 hardware itself affords: HL is a
 ; genuine 16-bit pointer register, so BIOS_READ_SECTOR/BIOS_WRITE_SECTOR
@@ -86,11 +93,19 @@ GRAPHICS_BYTES_PER_ROW equ 40
 VR_H_DISPLAYED equ 1
 VR_V_DISPLAYED equ 6
 VR_CURSOR_START equ 10
+VR_START_ADDR_HI equ 12
+VR_START_ADDR_LO equ 13
 VR_CURSOR_ADDR_HI equ 14
 VR_CURSOR_ADDR_LO equ 15
 CURSOR_ON equ $00
 
+; VIDEO_RAM_SIZE is the whole ring PC_SCROLL/DO_GOTOXY scan via Display
+; Start Address (R12/R13) - bigger than the 1920 bytes (V_COLS*V_ROWS)
+; actually visible at once, so there's always at least one spare row to
+; scroll a new line into by moving the window rather than copying every
+; row up. Deliberately a power of two - see WRAP_RING.
 VIDEO_RAM equ $B800
+VIDEO_RAM_SIZE equ $0800
 V_COLS equ 80
 V_ROWS equ 24
 
@@ -113,10 +128,13 @@ V_ROWS equ 24
 	jp DO_SET_PIXEL		; $F01E BIOS_SET_PIXEL
 
 ; ---- A = char to print. CR moves to column 0 on the same row; LF moves
-;      to column 0 on the next row (wrapping row at V_ROWS back to 0); any
-;      other byte is poked at the current (row, col) and the cursor
-;      advances, wrapping column at V_COLS into a row advance exactly like
-;      LF's own row-wrap. ----
+;      to column 0 on the next row, scrolling once the cursor has stepped
+;      V_ROWS rows below Display Start Address; BS moves one column left,
+;      no wrap (matches cc65/ccp.c's own expectation - see read_line()'s
+;      "\b, space, \b" visual-erase sequence, shared unchanged with the
+;      6502 side); any other byte is poked at the current position and
+;      the cursor advances, wrapping column at V_COLS into the same
+;      row-crossing/scroll check LF's own row move runs through. ----
 DO_PUTCH push bc
 	push de
 	push hl
@@ -124,8 +142,10 @@ DO_PUTCH push bc
 	jp z,PC_CR_ENTRY
 	cp $0A
 	jp z,PC_LF_ENTRY
+	cp $08
+	jp z,PC_BS_ENTRY
 	push af
-	call COMPUTE_OFFSET	; hl = row*V_COLS + col
+	ld hl,(V_ADDR)
 	ld de,VIDEO_RAM
 	add hl,de
 	pop af
@@ -139,70 +159,173 @@ PC_CR_ENTRY push af
 PC_LF_ENTRY push af
 	call PC_LF
 	pop af
+	jp PC_DONE
+PC_BS_ENTRY push af
+	call PC_BS
+	pop af
 	;; falls through to PC_DONE
-PC_DONE	pop hl
+; ---- shared tail for every path above: stage the Cursor Address
+; register from the (possibly just-updated) V_ADDR, then restore the
+; original character into A before returning - PC_SET_CURSOR clobbers A
+; internally (it's how it talks to the port registers), so this needs
+; its own save/restore around that call, on top of each entry path's own
+; save/restore around its own helper call above. ----
+PC_DONE	push af
+	call PC_SET_CURSOR
+	pop af
+	pop hl
 	pop de
 	pop bc
 	ret
 
-; ---- hl = V_ROW*V_COLS + V_COL - the offset from VIDEO_RAM's own base
-;      both the character-poke address and the Cursor Address register
-;      use. A plain repeated-add loop (V_ROW is at most V_ROWS-1 = 23) -
-;      this runs once per character, never once per pixel, so simplicity
-;      wins over speed, same reasoning the 6502 side's own DO_GOTOXY used
-;      for its row*V_COLS. ----
-COMPUTE_OFFSET ld hl,0
-	ld a,(V_ROW)
-	ld b,a
-CO_LOOP	ld a,b
-	or 0
-	jp z,CO_DONE
-	ld de,V_COLS
-	add hl,de
-	dec b
-	jp CO_LOOP
-CO_DONE	ld a,(V_COL)
-	ld e,a
-	ld d,0
-	add hl,de
+; ---- masks a 16-bit ring-buffer offset in HL down to 0..VIDEO_RAM_SIZE-1
+;      - VIDEO_RAM_SIZE (2048 = $0800) being a power of two means this
+;      correctly wraps both an overflow past the top AND an underflow
+;      below zero (a negative offset's two's-complement bit pattern,
+;      masked to the same low bits, lands exactly on the right positive
+;      wrapped value) - one shared step every path below runs an add or
+;      subtract through, rather than a separate overflow/underflow branch
+;      per path. ----
+WRAP_RING ld a,h
+	and $07
+	ld h,a
 	ret
 
-; ---- advances the cursor by one column, wrapping into PC_NEXT_ROW at
-;      V_COLS - CP's carry flag is unsigned "less than", so "jp c" after
-;      "cp V_COLS" means "the incremented column is still in range, no
-;      wrap needed." ----
+; ---- V_ADDR -= V_COL (back to the start of the current row); V_COL=0. ----
+PC_CR	ld hl,(V_ADDR)
+	ld a,(V_COL)
+	ld e,a
+	ld d,0
+	or a
+	sbc hl,de
+	call WRAP_RING
+	ld (V_ADDR),hl
+	xor a
+	ld (V_COL),a
+	ret
+
+; ---- V_ADDR += (V_COLS - V_COL) (distance to the start of the next
+;      row); V_COL=0; then PC_CHECK_SCROLL, since this always crosses a
+;      row boundary. ----
+PC_LF	ld a,(V_COL)
+	ld e,a
+	ld d,0
+	ld hl,V_COLS
+	or a
+	sbc hl,de
+	ld de,(V_ADDR)
+	add hl,de
+	call WRAP_RING
+	ld (V_ADDR),hl
+	xor a
+	ld (V_COL),a
+	jp PC_CHECK_SCROLL
+
+; ---- one column left, no wrap at V_COLS/row 0 - already at column 0
+;      means there's nothing to do (matches ConsoleDevice's own BS, and
+;      real dumb-terminal behavior generally). ----
+PC_BS	ld a,(V_COL)
+	or 0
+	ret z
+	dec a
+	ld (V_COL),a
+	ld hl,(V_ADDR)
+	dec hl
+	call WRAP_RING
+	ld (V_ADDR),hl
+	ret
+
+; ---- advances V_COL by one, wrapping at V_COLS back to 0, and V_ADDR by
+;      one, ring-wrapping via WRAP_RING - then PC_CHECK_SCROLL, since a
+;      column wrap here means a row boundary was just crossed exactly
+;      like PC_LF's own row move. ----
 PC_ADVANCE ld a,(V_COL)
 	inc a
 	cp V_COLS
 	jp c,PA_STORE
-	call PC_NEXT_ROW
-	ld a,0
+	xor a
 PA_STORE ld (V_COL),a
-	jp PC_SET_CURSOR
+	ld hl,(V_ADDR)
+	inc hl
+	call WRAP_RING
+	ld (V_ADDR),hl
+	jp PC_CHECK_SCROLL
 
-; ---- advances V_ROW by one, wrapping back to row 0 at V_ROWS - no
-;      scrolling, see this file's own header comment. ----
-PC_NEXT_ROW ld a,(V_ROW)
+; ---- scrolls once the cursor has stepped V_ROWS rows below Display
+;      Start Address - V_COL is already exactly 0 right at the moment a
+;      row boundary is crossed (both PC_ADVANCE's own wrap and PC_LF zero
+;      it before getting here), and nowhere else, so it doubles as the
+;      "was this call actually a row crossing" signal, same convention
+;      the 6502 side's own PC_CHECK_SCROLL uses. ----
+PC_CHECK_SCROLL ld a,(V_COL)
+	or 0
+	ret nz
+	ld a,(V_ROW)
 	inc a
+	ld (V_ROW),a
 	cp V_ROWS
-	jp c,PNR_STORE
-	ld a,0
-PNR_STORE ld (V_ROW),a
+	ret nz
+	call PC_SCROLL
 	ret
 
-PC_CR	xor a
-	ld (V_COL),a
-	jp PC_SET_CURSOR
+; ---- ring-buffer scroll: moves Display Start Address (R12/R13, shadowed
+;      in V_START) forward by one row instead of copying every row above
+;      it up. Blanks the one row V_ADDR now points at (the row this
+;      scroll just revealed) a byte at a time - V_COLS (80) doesn't
+;      divide VIDEO_RAM_SIZE (2048) evenly, so a row's 80 bytes can
+;      straddle the ring's wraparound point, and each byte's own absolute
+;      address has to be recomputed from the (already-wrapped) running
+;      offset rather than just incremented past it - then pins V_ROW back
+;      to V_ROWS-1: both Display Start Address and the cursor moved down
+;      by one row together, so the cursor's row position relative to the
+;      (new) window is unchanged - still the last visible row. ----
+PC_SCROLL push bc
+	push de
+	push hl
+	ld hl,(V_START)
+	ld de,V_COLS
+	add hl,de
+	call WRAP_RING
+	ld (V_START),hl
+	ld a,VR_START_ADDR_LO
+	ld bc,VIDEO_ADDR
+	out (c),a
+	ld a,l
+	ld bc,VIDEO_DATA
+	out (c),a
+	ld a,VR_START_ADDR_HI
+	ld bc,VIDEO_ADDR
+	out (c),a
+	ld a,h
+	ld bc,VIDEO_DATA
+	out (c),a
 
-PC_LF	call PC_NEXT_ROW
-	xor a
-	ld (V_COL),a
-	jp PC_SET_CURSOR
+	ld hl,(V_ADDR)
+	ld b,V_COLS
+PS_BLANK_LOOP push hl
+	ld de,VIDEO_RAM
+	add hl,de
+	ld (hl),' '
+	pop hl
+	inc hl
+	call WRAP_RING
+	dec b
+	jp nz,PS_BLANK_LOOP
 
-; ---- stages the Cursor Address register (R14/R15) from COMPUTE_OFFSET's
-;      own result - the offset from VIDEO_RAM, same convention
-;      VideoController's own Cursor Address doc already uses. ----
-PC_SET_CURSOR call COMPUTE_OFFSET
+	ld a,V_ROWS-1
+	ld (V_ROW),a
+
+	pop hl
+	pop de
+	pop bc
+	ret
+
+; ---- stages the Cursor Address register (R14/R15) from V_ADDR directly -
+;      V_ADDR is already the absolute ring offset (not relative to
+;      Display Start Address), same convention VideoController's own
+;      Cursor Address doc uses, so no COMPUTE_OFFSET-style recomputation
+;      is needed here at all. ----
+PC_SET_CURSOR ld hl,(V_ADDR)
 	ld a,VR_CURSOR_ADDR_LO
 	ld bc,VIDEO_ADDR
 	out (c),a
@@ -219,8 +342,13 @@ PC_SET_CURSOR call COMPUTE_OFFSET
 
 ; ---- one-time setup: configures the registers DO_PUTCH's own output
 ;      relies on, clears the visible screen (otherwise it would show
-;      whatever garbage already happens to be in VIDEO_RAM), and resets
-;      this file's own row/column tracking to match. ----
+;      whatever garbage already happens to be in VIDEO_RAM), resets
+;      Display Start Address to 0, and resets this file's own
+;      row/column/ring-offset tracking to match. Only the visible
+;      V_ROWS*V_COLS cells are cleared, not the whole VIDEO_RAM_SIZE ring
+;      - the "extra" scrollback area starts out as garbage, same as the
+;      6502 side, but PC_SCROLL always blanks a row before it becomes
+;      visible, so that garbage is never actually seen. ----
 DO_VIDEO_INIT push bc
 	push de
 	push hl
@@ -242,6 +370,21 @@ DO_VIDEO_INIT push bc
 	ld a,CURSOR_ON
 	ld bc,VIDEO_DATA
 	out (c),a
+	ld a,VR_START_ADDR_LO
+	ld bc,VIDEO_ADDR
+	out (c),a
+	xor a
+	ld bc,VIDEO_DATA
+	out (c),a
+	ld a,VR_START_ADDR_HI
+	ld bc,VIDEO_ADDR
+	out (c),a
+	xor a
+	ld bc,VIDEO_DATA
+	out (c),a
+	ld hl,0
+	ld (V_ADDR),hl
+	ld (V_START),hl
 	xor a
 	ld (V_ROW),a
 	ld (V_COL),a
@@ -259,15 +402,41 @@ VI_CLEAR_LOOP ld (hl),' '
 	pop bc
 	ret
 
-; ---- A = row, E = col. Repoints V_ROW/V_COL (so a following BIOS_PUTCH -
-;      and its own CR/LF/wrap handling - picks up from here exactly as if
-;      it had advanced into this cell normally) and the hardware cursor. ----
+; ---- A = row (relative to the current scrolled window - the same
+;      convention PC_SCROLL/V_ROW use), E = col. Repoints V_ADDR (so a
+;      following BIOS_PUTCH - and its own CR/LF/BS/scroll handling -
+;      picks up from here exactly as if it had advanced into this cell
+;      normally), V_ROW directly (without this, a gotoxy to a row other
+;      than where V_ROW already thought the cursor was would leave
+;      PC_CHECK_SCROLL's row count out of sync with reality, scrolling at
+;      the wrong moment), V_COL, and the hardware cursor bar. row*V_COLS
+;      is a plain repeated-add loop (row is at most V_ROWS-1 = 23) rather
+;      than a shift-based multiply - this runs once per cursor move/
+;      redraw, never once per character, so simplicity wins over speed,
+;      same reasoning the 6502 side's own DO_GOTOXY uses. ----
 DO_GOTOXY push bc
 	push de
 	push hl
 	ld (V_ROW),a
+	ld b,a
 	ld a,e
 	ld (V_COL),a
+	ld hl,0
+GX_ROW_LOOP ld a,b
+	or 0
+	jp z,GX_ROW_DONE
+	ld de,V_COLS
+	add hl,de
+	dec b
+	jp GX_ROW_LOOP
+GX_ROW_DONE ld a,(V_COL)
+	ld e,a
+	ld d,0
+	add hl,de
+	ld de,(V_START)
+	add hl,de
+	call WRAP_RING
+	ld (V_ADDR),hl
 	call PC_SET_CURSOR
 	pop hl
 	pop de
@@ -456,9 +625,19 @@ PIXEL_ROW defb 0
 PIXEL_ONOFF defb 0
 PIXEL_MASK defb 0
 
-; ---- BIOS's own row/column tracking for DO_PUTCH's output -
+; ---- BIOS's own row/column/ring-offset tracking for DO_PUTCH's output -
 ;      VideoController's hardware has no concept of "where the next
 ;      character goes" (that is always firmware's job, even on real
-;      CRTC-based machines), so this file owns it. ----
+;      CRTC-based machines), so this file owns it. V_ADDR/V_START are
+;      16-bit offsets from VIDEO_RAM (0..VIDEO_RAM_SIZE-1, see
+;      WRAP_RING) - V_ADDR is the cursor's own ring position, V_START
+;      shadows Display Start Address (R12/R13) so PC_SCROLL/DO_GOTOXY
+;      never have to read a register back to know where the visible
+;      window currently starts. V_ROW is how many rows below V_START the
+;      cursor currently is (0..V_ROWS-1), not an absolute row - it's what
+;      PC_CHECK_SCROLL actually compares against V_ROWS to decide when to
+;      scroll. ----
+V_ADDR	defw 0
+V_START	defw 0
 V_ROW	defb 0
 V_COL	defb 0
