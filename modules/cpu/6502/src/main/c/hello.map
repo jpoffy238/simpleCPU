@@ -103,12 +103,12 @@ __DESTRUCTOR_TABLE__ ([linker generated]):
 __STACKSTART__ ([linker generated]):
     crt0.o                    none/crt0.s:5
 __STARTUP__ (crt0.o):
-    hello.o                   hello.s:13
+    hello.o                   ../../../../c-shared/hello.s:13
 _bios_gotoxy (bios_glue.o):
     bios_util.o               bios_util.s:16
 _bios_putch (bios_glue.o):
     bios_util.o               bios_util.s:13
-    hello.o                   hello.s:14
+    hello.o                   ../../../../c-shared/hello.s:14
 _bios_set_x (bios_glue.o):
     bios_util.o               bios_util.s:15
 _main (hello.o):

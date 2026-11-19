@@ -1,4 +1,11 @@
-/* C-facing declarations for BIOS.asm's primitives, bridged via bios_glue.s.
+/* C-facing declarations for the BIOS's console/disk/graphics primitives -
+ * bridged via bios_glue.s (cc65/6502) or bios_glue.asm (SDCC/Z80), one of
+ * each living under that CPU's own src/main/c since the two toolchains use
+ * incompatible assembler syntax for an identical idea (JP/JMP straight to a
+ * fixed jump-table address). This header, and the .c files that only call
+ * through it, are shared between both CPUs unchanged - see
+ * modules/cpu/c-shared's own place in the build for how each Makefile reaches
+ * it.
  *
  * Multi-parameter primitives (read/write sector, format track) are split into
  * a "stage one value, then trigger" sequence rather than one function taking
@@ -7,13 +14,32 @@
  * for format), then the track-taking call itself. cc65's calling convention
  * for more than one stack-passed C parameter needs correctly popping its own
  * software stack in the glue code - not worth the risk of getting wrong
- * without being able to compile/test it here. __fastcall__ for a single
- * parameter (received directly in A, no software stack involved) is simple
- * and well-documented, so every function below takes at most one. */
+ * without being able to compile/test it here. cc65's own __fastcall__ for a
+ * single parameter (received directly in A, no software stack involved) is
+ * simple and well-documented, so every function below takes at most one -
+ * and SDCC's own default z80 calling convention (sdcccall(1)) already passes
+ * a single byte/word argument in a register with no extra qualifier needed,
+ * so BIOS_FASTCALL below is cc65-only, empty under SDCC. */
 #ifndef BIOS_H
 #define BIOS_H
 
-void __fastcall__ bios_putch(char c);
+#ifdef __CC65__
+#define BIOS_FASTCALL __fastcall__
+#else
+#define BIOS_FASTCALL
+#endif
+
+void BIOS_FASTCALL bios_putch(char c);
+
+/* Z80-only: one-time video setup (registers, screen clear, row/col reset) -
+ * on the 6502 side this already happened in MONITOR.asm before any program
+ * got booted, so cc65 code never needed to call it itself; the Z80 side has
+ * no monitor yet (BIOS.z80 boots straight into a program), so any Z80 C
+ * program that uses bios_putch() must call this itself first, same as
+ * Demo.asm (see src/main/asm) does by hand. */
+#ifdef __SDCC
+void bios_video_init(void);
+#endif
 
 /* Blocks until a key is available, then returns it - an ordinary ASCII byte
  * for anything typed normally, or one of KEY_UP/DOWN/LEFT/RIGHT/PAGE_UP/
@@ -37,18 +63,18 @@ char bios_getch(void);
  * primitive repeatedly, not a new hardware operation needing its own
  * jump-table slot. */
 void bios_putstr(const char *s);
-void __fastcall__ bios_select(unsigned char drive);
+void BIOS_FASTCALL bios_select(unsigned char drive);
 
 /* Stages the sector-buffer pointer into ADDRLO/ADDRHI ahead of a read/write. */
-void __fastcall__ bios_set_buffer(void *ptr);
+void BIOS_FASTCALL bios_set_buffer(void *ptr);
 
 /* Stages the second hardware register: sector number for bios_read_sector()/
  * bios_write_sector(), fill byte for bios_format_track(). */
-void __fastcall__ bios_set_x(unsigned char value);
+void BIOS_FASTCALL bios_set_x(unsigned char value);
 
-void __fastcall__ bios_read_sector(unsigned char track);
-void __fastcall__ bios_write_sector(unsigned char track);
-void __fastcall__ bios_format_track(unsigned char track);
+void BIOS_FASTCALL bios_read_sector(unsigned char track);
+void BIOS_FASTCALL bios_write_sector(unsigned char track);
+void BIOS_FASTCALL bios_format_track(unsigned char track);
 
 /* Homes the selected drive's head to track 0. No parameters. */
 void bios_restore(void);
@@ -60,7 +86,7 @@ void bios_restore(void);
  * bios_read_sector()/bios_write_sector() above; row arrives directly in A.
  * No bounds checking - row must be < 24, col < 80 (BIOS.asm's V_ROWS/V_COLS)
  * or the result silently wraps into adjacent rows. */
-void __fastcall__ bios_gotoxy(unsigned char row);
+void BIOS_FASTCALL bios_gotoxy(unsigned char row);
 
 #define BIOS_SCREEN_COLS 80
 #define BIOS_SCREEN_ROWS 24
@@ -83,7 +109,7 @@ void bios_clrscr(void);
  * graphics mode; bios_putch()/bios_gotoxy() keep working on the character
  * RAM underneath regardless, same as real CGA-class hardware kept its text
  * framebuffer intact while a graphics mode was selected. */
-void __fastcall__ bios_graphics_mode(unsigned char on);
+void BIOS_FASTCALL bios_graphics_mode(unsigned char on);
 
 #define BIOS_MODE_TEXT     0
 #define BIOS_MODE_GRAPHICS 1
@@ -95,7 +121,7 @@ void __fastcall__ bios_graphics_mode(unsigned char on);
  * function rather than reusing bios_set_buffer(), even though the staging
  * mechanics (ADDRLO/ADDRHI) are identical, since "pointer" and "pixel
  * column" are different things to a caller reading this header. */
-void __fastcall__ bios_set_pixel_x(unsigned int x);
+void BIOS_FASTCALL bios_set_pixel_x(unsigned int x);
 
 /* Sets or clears one pixel at (x, y) - x staged via bios_set_pixel_x() and
  * on/off staged via the existing bios_set_x() above, y arrives directly in
@@ -103,6 +129,6 @@ void __fastcall__ bios_set_pixel_x(unsigned int x);
  * bios_read_sector()/bios_gotoxy()). No bounds checking - x must be <
  * BIOS_GRAPHICS_COLS, y < BIOS_GRAPHICS_ROWS or the result silently wraps
  * into an adjacent row. */
-void __fastcall__ bios_set_pixel(unsigned char y);
+void BIOS_FASTCALL bios_set_pixel(unsigned char y);
 
 #endif
