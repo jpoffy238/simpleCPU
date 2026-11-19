@@ -22,9 +22,15 @@
 # CpmDiskTool's "put" subcommand onto a disk image:
 #   mvn -pl modules/Disk exec:java -Dexec.mainClass=com.mj.Disk.CpmDiskTool \
 #       -Dexec.args="put disk0.img ccp.bin CCP.COM"
+#
+# bios.h (and, so far, just hello.c) now live in ../../../c-shared - shared
+# unchanged with the Z80/SDCC side, see that header's own comment - so
+# CFLAGS needs an explicit -I to find it, and hello.bin gets its own rule
+# (the generic %.bin pattern below only matches a same-directory %.c).
 
 CC65 = cl65
-CFLAGS = -O -t none
+CSHARED = ../../../../c-shared
+CFLAGS = -O -t none -I$(CSHARED)
 
 APPS = hello ccp edit graphics
 
@@ -32,10 +38,13 @@ APPS = hello ccp edit graphics
 
 all: bdos.bin $(patsubst %,%.bin,$(APPS))
 
-bdos.bin: bdos.c bdos_jumptable.s bios_glue.s bdos.cfg bios.h
+bdos.bin: bdos.c bdos_jumptable.s bios_glue.s bdos.cfg $(CSHARED)/bios.h
 	$(CC65) $(CFLAGS) -C bdos.cfg -m bdos.map -o bdos.bin bdos.c bdos_jumptable.s bios_glue.s
 
-%.bin: %.c bios_glue.s bdos_glue.s bios_util.c simplecpu.cfg bios.h bdos.h
+hello.bin: $(CSHARED)/hello.c bios_glue.s bdos_glue.s bios_util.c simplecpu.cfg $(CSHARED)/bios.h bdos.h
+	$(CC65) $(CFLAGS) -C simplecpu.cfg -m hello.map -o hello.bin $(CSHARED)/hello.c bios_glue.s bdos_glue.s bios_util.c
+
+%.bin: %.c bios_glue.s bdos_glue.s bios_util.c simplecpu.cfg $(CSHARED)/bios.h bdos.h
 	$(CC65) $(CFLAGS) -C simplecpu.cfg -m $*.map -o $@ $< bios_glue.s bdos_glue.s bios_util.c
 
 install: bdos.bin

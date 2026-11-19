@@ -42,3 +42,18 @@ modules/cpu/6502/testdata/
 # copies locally after copying), so these stay out of version control.
 /jvm/
 /maven/
+
+# SDCC's build output for modules/cpu/z80/src/main/c - scoped to that one
+# directory (not a blanket *.asm/*.rel) because bios_glue.asm there is
+# hand-written source, not generated, and *.rel would also hit crasm's own
+# object files if it ever produced any. hello.asm is SDCC's own
+# intermediate (compiling hello.c also leaves this behind, same as its
+# .lst/.sym/.noi) - any later app added to that Makefile's APPS needs the
+# same per-file treatment here, not a wildcard.
+modules/cpu/z80/src/main/c/*.rel
+modules/cpu/z80/src/main/c/*.ihx
+modules/cpu/z80/src/main/c/*.lk
+modules/cpu/z80/src/main/c/*.map
+modules/cpu/z80/src/main/c/*.noi
+modules/cpu/z80/src/main/c/*.sym
+modules/cpu/z80/src/main/c/hello.asm

@@ -9,6 +9,7 @@ import com.mj.Disk.EightInch.IBM3740;
 import com.mj.Disk.FloppyController;
 import com.mj.Disk.exceptions.DiskReadError;
 import com.mj.Disk.exceptions.DiskWriteError;
+import com.mj.IntelHex.IntelHexLoader;
 import com.mj.exceptions.DeviceUnavailable;
 import com.mj.exceptions.ROException;
 import com.mj.exceptions.illegalAddressException;
@@ -111,5 +112,20 @@ public class Z80VideoDiskMachine {
 	public void loadIntoMemory(String fileName)
 			throws IOException, illegalAddressException, ROException, DeviceUnavailable {
 		Z80BinaryFile.load(memoryBus, fileName);
+	}
+
+	/** Loads a plain Intel HEX file (SDCC's own .ihx output, same format
+	 * cc65/crasm's .hex already use on the 6502 side) onto the memory bus -
+	 * shares IntelHexLoader (modules/Devices) rather than duplicating the
+	 * record-walking loop, since both toolchains just emit standard Intel
+	 * HEX. startAddress is the caller's own entry point, matching whatever
+	 * --code-loc the C program was linked with (Demo.asm's own convention,
+	 * $1000, for the only one that exists so far - see
+	 * src/main/c/Makefile) - Intel HEX records carry their own absolute
+	 * addresses, so this is a plain relocation offset, not a lookup;
+	 * CPU_CreateUtil.load()'s every real 6502 caller passes 0 here too. */
+	public void loadIntelHexIntoMemory(String fileName, int startAddress)
+			throws illegalAddressException, ROException, IOException, DeviceUnavailable {
+		IntelHexLoader.load(memoryBus, fileName, startAddress);
 	}
 }
