@@ -137,8 +137,9 @@ edit.rel: $(CSHARED)/edit.c $(CSHARED)/bios.h $(CSHARED)/bdos.h
 edit.ihx: cpm_crt0.rel edit.rel bios_glue.rel bdos_glue.rel bios_util.rel
 	$(SDCC) -mz80 --no-std-crt0 --code-loc $(CODE_LOC) --data-loc $(DATA_LOC) -o edit.ihx cpm_crt0.rel edit.rel bios_glue.rel bdos_glue.rel bios_util.rel
 
-install:
-	@echo "Nothing installed yet - every .ihx here is a manual toolchain smoke test, not loaded by Java automatically (see this Makefile's own comment)."
+install: bdos.ihx
+	cp bdos.ihx ../../main/resources
+	cp bdos.ihx ../../test/resources
 
 clean:
 	rm -f *.rel *.ihx *.lk *.lst *.map *.noi *.sym

@@ -1,5 +1,6 @@
 package com.mj.cpu001;
 
+import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +21,9 @@ import com.mj.Video.VideoController;
 public class CPUMain {
 	private static final Logger logger = LogManager.getLogger(CPUMain.class);
 	public static void main(String[] args) {
+		// Optional first arg: a folder holding disk0.img/disk1.img/.../disk3.img.
+		// Defaults to the current working directory, same as before this was configurable.
+		String diskDir = args.length > 0 ? args[0] : ".";
 
 		PBus bus = new DeviceBus();
 		bus.registerDevice(new basicMemory(bus,
@@ -78,7 +82,7 @@ public class CPUMain {
 		FloppyController fdc = new FloppyController(() -> via.requestInterrupt(VIA6522.FLAG_CB1), new AddressRange(0x9010, 0x9014));
 		bus.registerDevice(fdc);
 		for (int drive = 0; drive < 4; drive++) {
-			String imageName = "disk" + drive + ".img";
+			String imageName = Paths.get(diskDir, "disk" + drive + ".img").toString();
 			try {
 				// Created fresh (with a valid header) on first run if it doesn't exist yet.
 				IBM3740 disk = new IBM3740();
