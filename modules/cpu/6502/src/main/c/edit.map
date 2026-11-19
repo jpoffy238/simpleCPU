@@ -210,184 +210,184 @@ __DESTRUCTOR_TABLE__ ([linker generated]):
 __STACKSTART__ ([linker generated]):
     crt0.o                    none/crt0.s:5
 __STARTUP__ (crt0.o):
-    edit.o                    edit.s:13
+    edit.o                    ../../../../c-shared/edit.s:13
 _bdos_create_file (bdos_glue.o):
-    edit.o                    edit.s:25
+    edit.o                    ../../../../c-shared/edit.s:25
 _bdos_delete_file (bdos_glue.o):
-    edit.o                    edit.s:24
+    edit.o                    ../../../../c-shared/edit.s:24
 _bdos_find_file (bdos_glue.o):
-    edit.o                    edit.s:22
+    edit.o                    ../../../../c-shared/edit.s:22
 _bdos_read_record (bdos_glue.o):
-    edit.o                    edit.s:23
+    edit.o                    ../../../../c-shared/edit.s:23
 _bdos_write_record (bdos_glue.o):
-    edit.o                    edit.s:26
+    edit.o                    ../../../../c-shared/edit.s:26
 _bios_clear_eol (bios_util.o):
-    edit.o                    edit.s:20
+    edit.o                    ../../../../c-shared/edit.s:20
 _bios_clrscr (bios_util.o):
-    edit.o                    edit.s:21
+    edit.o                    ../../../../c-shared/edit.s:21
 _bios_getch (bios_glue.o):
-    edit.o                    edit.s:15
+    edit.o                    ../../../../c-shared/edit.s:15
 _bios_gotoxy (bios_glue.o):
     bios_util.o               ../../../../c-shared/bios_util.s:16
-    edit.o                    edit.s:19
+    edit.o                    ../../../../c-shared/edit.s:19
 _bios_putch (bios_glue.o):
     bios_util.o               ../../../../c-shared/bios_util.s:13
-    edit.o                    edit.s:14
+    edit.o                    ../../../../c-shared/edit.s:14
 _bios_putstr (bios_util.o):
-    edit.o                    edit.s:16
+    edit.o                    ../../../../c-shared/edit.s:16
 _bios_set_buffer (bios_glue.o):
-    edit.o                    edit.s:17
+    edit.o                    ../../../../c-shared/edit.s:17
 _bios_set_x (bios_glue.o):
     bios_util.o               ../../../../c-shared/bios_util.s:15
-    edit.o                    edit.s:18
+    edit.o                    ../../../../c-shared/edit.s:18
 _main (edit.o):
     crt0.o                    none/crt0.s:3
 addeq0sp (addeqsp.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 addysp (addysp.o):
     incsp6.o                  runtime/incsp6.s:8
     incsp5.o                  runtime/incsp5.s:8
     incsp3.o                  runtime/incsp3.s:8
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 bnega (bneg.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 boolne (makebool.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 decax1 (decax1.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 decaxy (decaxy.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 decsp1 (decsp1.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 decsp2 (decsp2.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 decsp3 (decsp3.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 decsp5 (decsp5.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 donelib (condes.o):
     crt0.o                    none/crt0.s:4
 incax1 (incax1.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incax2 (incax2.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incax3 (incax3.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incax4 (incaxy.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incax5 (incax5.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incax6 (incax6.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incax7 (incax7.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incax8 (incax8.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incaxy (incaxy.o):
     incax8.o                  runtime/incax8.s:8
     incax7.o                  runtime/incax7.s:8
     incax6.o                  runtime/incax6.s:8
     incax5.o                  runtime/incax5.s:8
     incax3.o                  runtime/incax3.s:8
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incsp1 (incsp1.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incsp2 (incsp2.o):
     staspidx.o                runtime/staspidx.s:8
     popptr1.o                 runtime/popptr1.s:8
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incsp3 (incsp3.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incsp5 (incsp5.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 incsp6 (incsp6.o):
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 initlib (condes.o):
     crt0.o                    none/crt0.s:4
 ldax0sp (ldaxsp.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 ldaxysp (ldaxsp.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 leaa0sp (leaaxsp.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 leaaxsp (leaaxsp.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 popptr1 (popptr1.o):
     umod.o                    runtime/umod.s:8
     udiv.o                    runtime/udiv.s:9
@@ -399,7 +399,7 @@ ptr1 (zeropage.o):
     popptr1.o                 runtime/popptr1.s:9
     mul8.o                    runtime/mul8.s:10
     bios_util.o               ../../../../c-shared/bios_util.s:11
-    edit.o                    edit.s:11
+    edit.o                    ../../../../c-shared/edit.s:11
 ptr4 (zeropage.o):
     umod.o                    runtime/umod.s:9
     udiv.o                    runtime/udiv.s:10
@@ -407,65 +407,65 @@ ptr4 (zeropage.o):
 pusha (pusha.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 pusha0 (pushax.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 pushax (pushax.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 pushwysp (pushwsp.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 shlax7 (aslax7.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 sp (zeropage.o):
     subysp.o                  runtime/subysp.s:9
     staxsp.o                  runtime/staxsp.s:8
@@ -487,61 +487,61 @@ sp (zeropage.o):
     addysp.o                  runtime/addysp.s:8
     addeqsp.o                 runtime/addeqsp.s:8
     bios_util.o               ../../../../c-shared/bios_util.s:10
-    edit.o                    edit.s:10
+    edit.o                    ../../../../c-shared/edit.s:10
 sreg (zeropage.o):
     umod.o                    runtime/umod.s:9
     udiv.o                    runtime/udiv.s:10
     icmp.o                    runtime/icmp.s:9
-    edit.o                    edit.s:10
+    edit.o                    ../../../../c-shared/edit.s:10
 staspidx (staspidx.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 stax0sp (staxsp.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 staxysp (staxsp.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 subysp (subysp.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 tmp1 (zeropage.o):
     staspidx.o                runtime/staspidx.s:9
     incaxy.o                  runtime/incaxy.s:8
     decaxy.o                  runtime/decaxy.s:8
 tosicmp (icmp.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 tosmula0 (mul8.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 tosudiva0 (udiv.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 tosumoda0 (umod.o):
-    edit.o                    edit.s:3282
-    edit.o                    edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
+    edit.o                    ../../../../c-shared/edit.s:3282
 udiv16 (udiv.o):
     umod.o                    runtime/umod.s:8
 zerobss (zerobss.o):

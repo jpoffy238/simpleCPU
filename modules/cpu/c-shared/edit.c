@@ -1022,6 +1022,12 @@ int main(void) {
 	unsigned char k;
 	unsigned char old_top;
 
+#ifdef __SDCC
+	/* Z80-only: no monitor exists yet to have already done this before
+	 * booting EDIT (unlike the 6502 side) - see bios.h's own comment on
+	 * bios_video_init(). */
+	bios_video_init();
+#endif
 	lines[0][0] = '\0';
 	cleanup_swap_files();
 
