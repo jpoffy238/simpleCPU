@@ -23,13 +23,13 @@
 #   mvn -pl modules/Disk exec:java -Dexec.mainClass=com.mj.Disk.CpmDiskTool \
 #       -Dexec.args="put disk0.img ccp.bin CCP.COM"
 #
-# bios.h/bdos.h and hello.c/bdos.c/ccp.c/bios_util.c all now live in
-# ../../../c-shared - shared unchanged with the Z80/SDCC side, see those
-# headers' own comments - so CFLAGS needs an explicit -I to find them, and
-# every one of those four .c files needs its own explicit rule referencing
-# $(CSHARED) (the generic %.bin pattern below only matches a
-# same-directory %.c - still true for edit.c, the one app that hasn't
-# moved).
+# bios.h/bdos.h and hello.c/bdos.c/ccp.c/bios_util.c/graphics.c/edit.c all
+# now live in ../../../c-shared - shared unchanged with the Z80/SDCC side,
+# see those headers' own comments - so CFLAGS needs an explicit -I to find
+# them, and every one of those .c files needs its own explicit rule
+# referencing $(CSHARED) (the generic %.bin pattern below no longer
+# matches anything, since every app has moved - kept as a fallback for a
+# future app that stays 6502-only).
 
 CC65 = cl65
 CSHARED = ../../../../c-shared
@@ -52,6 +52,9 @@ ccp.bin: $(CSHARED)/ccp.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c simplec
 
 graphics.bin: $(CSHARED)/graphics.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c simplecpu.cfg $(CSHARED)/bios.h $(CSHARED)/bdos.h
 	$(CC65) $(CFLAGS) -C simplecpu.cfg -m graphics.map -o graphics.bin $(CSHARED)/graphics.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c
+
+edit.bin: $(CSHARED)/edit.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c simplecpu.cfg $(CSHARED)/bios.h $(CSHARED)/bdos.h
+	$(CC65) $(CFLAGS) -C simplecpu.cfg -m edit.map -o edit.bin $(CSHARED)/edit.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c
 
 %.bin: %.c bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c simplecpu.cfg $(CSHARED)/bios.h $(CSHARED)/bdos.h
 	$(CC65) $(CFLAGS) -C simplecpu.cfg -m $*.map -o $@ $< bios_glue.s bdos_glue.s $(CSHARED)/bios_util.c

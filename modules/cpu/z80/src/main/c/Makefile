@@ -48,30 +48,51 @@
 # there is no extra "whoever calls BDOS first must init SP" gotcha to
 # worry about here at all.
 #
-# ccp.ihx is different again, for a third reason: it's the one "app" that
-# needs to be genuinely loadable by BDOS_RUN_FILE (bdos.c's
-# load_and_run(), called from CCP itself or BDOS's own cold-boot path),
-# not just directly boot-able at pc=0 for a test's own convenience the
-# way hello.ihx is. A loaded program is entered by a plain CALL from
-# BDOS's own already-running C code, not a Z80 power-on reset - see
-# cpm_crt0.asm's own comment for why that needs its own minimal crt0
-# (just "call _main / ret", no SP reset, no BSS zeroing) rather than
-# SDCC's own default one, and why --no-std-crt0 is required here too
-# (same reset-vector-collision reasoning as BDOS's own build - BDOS.ihx
-# and ccp.ihx get loaded into the same 64K space at once). This also
-# moves ccp.ihx's real entry point from pc=0 (hello.ihx's own convention)
-# to --code-loc itself, $1000 - matching BOOTADDR (bdos.c, #ifdef
-# __SDCC) exactly, since that's the one fixed address both BDOS_RUN_FILE
-# and any test booting ccp.ihx directly need to agree on.
+# ccp.ihx (and now edit.ihx) are different again, for a third reason:
+# they're the "apps" that need to be genuinely loadable by BDOS_RUN_FILE
+# (bdos.c's load_and_run(), called from CCP itself or BDOS's own
+# cold-boot path) - EDIT is launched exactly this way, by typing its name
+# at a real CCP prompt, same as real CP/M - not just directly boot-able
+# at pc=0 for a test's own convenience the way hello.ihx is. A loaded
+# program is entered by a plain CALL from BDOS's own already-running C
+# code, not a Z80 power-on reset - see cpm_crt0.asm's own comment for why
+# that needs its own minimal crt0 (just "call _main / ret", no SP reset,
+# no BSS zeroing) rather than SDCC's own default one, and why
+# --no-std-crt0 is required here too (same reset-vector-collision
+# reasoning as BDOS's own build - BDOS.ihx and whichever app needs it get
+# loaded into the same 64K space at once). This also moves these two
+# apps' real entry point from pc=0 (hello.ihx's own convention) to
+# --code-loc itself, $1000 - matching BOOTADDR (bdos.c, #ifdef __SDCC)
+# exactly, since that's the one fixed address both BDOS_RUN_FILE and any
+# test booting one of them directly need to agree on.
+#
+# --data-loc, explicitly pinned for every app build below - a real bug
+# found 2026-11-19 porting edit.c: left unspecified, SDCC's own default
+# places _DATA/_BSS at $8000 with no size check against anything else in
+# the address space. hello.c/ccp.c's own static data is tiny (under 200
+# bytes) and happened to stay comfortably below $B800 (video RAM) by
+# sheer luck; edit.c's `lines[200][80]` buffer alone is 16000 bytes,
+# pushing _DATA's own end past $BEA0 - deep into video RAM, silently
+# corrupting it (and, likely, _DATA getting corrupted right back by
+# VideoController's own writes). Found by comparing edit.map's own
+# `_DATA` line (`00008000 00003EA1`, ending at $BEA0) against
+# Z80VideoDiskMachine's video RAM range ($B800-$BFFF) after a real
+# symptom (edit.c's main loop stuck forever in BIOS.asm's own
+# DO_GETCH_POLL, even though keystrokes were queued) pointed at memory
+# corruption somewhere. $3000 leaves generous headroom above every app's
+# own small `_CODE` (comfortably under 8K so far) and well below BDOS
+# ($A000) even for a future app with a much larger static footprint than
+# edit.c's own.
 
 SDCC_BIN = /home/jpoffen/git/sdcc/sdcc-4.6.0/bin
 SDCC = $(SDCC_BIN)/sdcc
 SDASZ80 = $(SDCC_BIN)/sdasz80
 CSHARED = ../../../../c-shared
 CODE_LOC = 0x1000
+DATA_LOC = 0x3000
 BDOS_LOC = 0xA000
 
-APPS = hello ccp
+APPS = hello ccp edit
 
 .PHONY: all install clean
 
@@ -102,13 +123,19 @@ hello.rel: $(CSHARED)/hello.c $(CSHARED)/bios.h
 	$(SDCC) -mz80 -c -I$(CSHARED) -o hello.rel $(CSHARED)/hello.c
 
 hello.ihx: hello.rel bios_glue.rel
-	$(SDCC) -mz80 --code-loc $(CODE_LOC) -o hello.ihx hello.rel bios_glue.rel
+	$(SDCC) -mz80 --code-loc $(CODE_LOC) --data-loc $(DATA_LOC) -o hello.ihx hello.rel bios_glue.rel
 
 ccp.rel: $(CSHARED)/ccp.c $(CSHARED)/bios.h $(CSHARED)/bdos.h
 	$(SDCC) -mz80 -c -I$(CSHARED) -o ccp.rel $(CSHARED)/ccp.c
 
 ccp.ihx: cpm_crt0.rel ccp.rel bios_glue.rel bdos_glue.rel bios_util.rel
-	$(SDCC) -mz80 --no-std-crt0 --code-loc $(CODE_LOC) -o ccp.ihx cpm_crt0.rel ccp.rel bios_glue.rel bdos_glue.rel bios_util.rel
+	$(SDCC) -mz80 --no-std-crt0 --code-loc $(CODE_LOC) --data-loc $(DATA_LOC) -o ccp.ihx cpm_crt0.rel ccp.rel bios_glue.rel bdos_glue.rel bios_util.rel
+
+edit.rel: $(CSHARED)/edit.c $(CSHARED)/bios.h $(CSHARED)/bdos.h
+	$(SDCC) -mz80 -c -I$(CSHARED) -o edit.rel $(CSHARED)/edit.c
+
+edit.ihx: cpm_crt0.rel edit.rel bios_glue.rel bdos_glue.rel bios_util.rel
+	$(SDCC) -mz80 --no-std-crt0 --code-loc $(CODE_LOC) --data-loc $(DATA_LOC) -o edit.ihx cpm_crt0.rel edit.rel bios_glue.rel bdos_glue.rel bios_util.rel
 
 install:
 	@echo "Nothing installed yet - every .ihx here is a manual toolchain smoke test, not loaded by Java automatically (see this Makefile's own comment)."
