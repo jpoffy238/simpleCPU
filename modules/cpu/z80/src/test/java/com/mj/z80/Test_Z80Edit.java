@@ -12,14 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.mj.Devices.AddressRange;
-import com.mj.Devices.DeviceBus;
-import com.mj.Devices.PBus;
 import com.mj.Disk.CpmFileSystem;
 import com.mj.Disk.EightInch.IBM3740;
 import com.mj.IntelHex.IntelHexLoader;
 import com.mj.Video.VideoController;
-import com.mj.memoryInterface.basicMemory;
 import com.mj.z80.instructions.FullInstructionSet;
 
 /** Drives the real, SDCC-compiled edit.ihx (shared edit.c with the 6502
@@ -66,38 +62,6 @@ public class Test_Z80Edit {
 
 	private static Path ccpIhx() {
 		return Paths.get("src/main/c/ccp.ihx");
-	}
-
-	/** Loads an .ihx onto a scratch bus (reusing the already-proven
-	 * IntelHexLoader) and flattens it into a plain byte[] from 0x1000
-	 * through the highest address any DATA record touched - a real CP/M
-	 * file is exactly this kind of flat image, unlike the multi-region
-	 * .ihx format itself. Same helper Test_Z80BdosRunFile already uses
-	 * for ccp.ihx, generalized to any such program. */
-	private static byte[] programBytes(Path ihx) throws Exception {
-		int loadAddress = 0x1000;
-		PBus scratch = new DeviceBus();
-		scratch.registerDevice(new basicMemory(scratch, new AddressRange(loadAddress, 0xffff), null, 0));
-		IntelHexLoader.load(scratch, ihx.toString(), 0);
-
-		int highest = loadAddress;
-		for (String line : Files.readAllLines(ihx)) {
-			if (!line.startsWith(":")) {
-				continue;
-			}
-			int byteCount = Integer.parseInt(line.substring(1, 3), 16);
-			int address = Integer.parseInt(line.substring(3, 7), 16);
-			int type = Integer.parseInt(line.substring(7, 9), 16);
-			if (type == 0) {
-				highest = Math.max(highest, address + byteCount);
-			}
-		}
-
-		byte[] program = new byte[highest - loadAddress];
-		for (int i = 0; i < program.length; i++) {
-			program[i] = (byte) scratch.read(loadAddress + i);
-		}
-		return program;
 	}
 
 	@BeforeEach
@@ -149,8 +113,8 @@ public class Test_Z80Edit {
 	private void bootRealCcpThenLaunchEdit() throws Exception {
 		Assumptions.assumeTrue(Files.exists(ccpIhx()),
 				"ccp.ihx not built - run `make` in modules/cpu/z80/src/main/c first");
-		fs.createFile("CCP.COM", programBytes(ccpIhx()));
-		fs.createFile("EDIT.COM", programBytes(editIhx()));
+		fs.createFile("CCP.COM", IntelHexLoader.flatten(ccpIhx().toString()));
+		fs.createFile("EDIT.COM", IntelHexLoader.flatten(editIhx().toString()));
 		machine.loadIntelHexIntoMemory(ccpIhx().toString(), 0);
 
 		Z80InstructionDecoder decoder = new Z80InstructionDecoder();

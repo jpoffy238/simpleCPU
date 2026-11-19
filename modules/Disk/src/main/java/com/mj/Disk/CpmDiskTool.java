@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import com.mj.Disk.EightInch.IBM3740;
+import com.mj.IntelHex.IntelHexLoader;
 
 /** A small host-side command-line tool for preparing disk images - format a
  * blank image, copy CP/M files in and out, erase one, list what's there, or
@@ -80,9 +81,27 @@ public class CpmDiskTool {
 
 	private static void put(String imagePath, String hostFile, String cpmName) throws Exception {
 		IBM3740 drive = openExisting(imagePath);
-		byte[] data = Files.readAllBytes(Paths.get(hostFile));
+		byte[] data = readProgramBytes(hostFile);
 		new CpmFileSystem(drive).createFile(cpmName, data);
 		System.out.println("Wrote " + data.length + " bytes to " + cpmName);
+	}
+
+	/** Reads hostFile's own program bytes - a flat binary (cc65's own .bin
+	 * output) as-is, or a .ihx (SDCC's own multi-region Intel HEX output -
+	 * see modules/cpu/z80/src/main/c/Makefile) flattened into one first,
+	 * via IntelHexLoader.flatten() - a real CP/M file is a flat image, not
+	 * a multi-region hex file. Detected by content (every real Intel HEX
+	 * line starts with ':'), not file extension, so put() keeps working
+	 * unchanged for either CPU's own toolchain output with no new flag or
+	 * script to remember - the same disk-put.sh/disk-redeploy.sh already
+	 * work for a Z80 .ihx file exactly as they already do for a 6502
+	 * .bin. */
+	private static byte[] readProgramBytes(String hostFile) throws Exception {
+		byte[] raw = Files.readAllBytes(Paths.get(hostFile));
+		if (raw.length > 0 && raw[0] == ':') {
+			return IntelHexLoader.flatten(hostFile);
+		}
+		return raw;
 	}
 
 	private static void get(String imagePath, String cpmName, String hostFile) throws Exception {
