@@ -1,6 +1,6 @@
 .SUFFIXES: .z80 .asm
 
-install: BIOS.z80 Demo.z80 DiskTest.z80 GraphicsTest.z80 ScrollTest.z80 RunFileTest.z80
+install: BIOS.z80 Demo.z80 DiskTest.z80 GraphicsTest.z80 ScrollTest.z80 RunFileTest.z80 Boot.z80
 	mkdir -p ../../test/resources ../../main/resources
 	cp *.z80 ../../test/resources
 	cp *.z80 ../../main/resources
@@ -25,3 +25,6 @@ ScrollTest.z80: ScrollTest.asm
 
 RunFileTest.z80: RunFileTest.asm
 	z80-asm RunFileTest.asm 0x1000::RunFileTest.z80
+
+Boot.z80: Boot.asm
+	z80-asm Boot.asm 0x1000::Boot.z80
