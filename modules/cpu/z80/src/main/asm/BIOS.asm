@@ -1,10 +1,8 @@
 ; Primitives ROM (really RAM for now - no write protection exists on the
-; Z80 side yet): raw hardware access only - console I/O - no command
-; parsing or filesystem concepts, same split as the 6502 side's own
-; BIOS.asm/MONITOR.asm (which this file is deliberately modeled on). Only
-; the console subset exists so far (BIOS_PUTCH/BIOS_GETCH/BIOS_VIDEO_INIT/
-; BIOS_GOTOXY) - disk and graphics primitives are a follow-up, once this
-; much is proven to actually boot and run.
+; Z80 side yet): raw hardware access - console I/O and now disk I/O too -
+; no command parsing or filesystem concepts, same split as the 6502 side's
+; own BIOS.asm/MONITOR.asm (which this file is deliberately modeled on).
+; Graphics primitives remain a follow-up.
 ;
 ; Calling convention:
 ;   BIOS_PUTCH         A = char to print; comes back holding the same
@@ -20,6 +18,14 @@
 ;   BIOS_GETCH          blocks until a key is available; returns A = char
 ;   BIOS_VIDEO_INIT      no parameters - one-time setup
 ;   BIOS_GOTOXY          A = row (0-23), E = col (0-79)
+;   BIOS_SELECT          A = drive (0-7)
+;   BIOS_READ_SECTOR     A = track, E = sector, HL = destination buffer
+;   BIOS_WRITE_SECTOR    A = track, E = sector, HL = source buffer
+;   BIOS_FORMAT_TRACK    A = track, E = fill byte (one track only - a
+;                        caller wanting the whole disk formatted loops
+;                        over every track itself)
+;   BIOS_RESTORE         no parameters - homes the selected drive's head
+;                        back to track 0
 ;
 ; Deliberately simpler than the 6502 version in one way: no hardware
 ; scrolling via Display Start Address - once output reaches the last row
@@ -29,8 +35,14 @@
 ; it is.
 ;
 ; Also simpler in a second way real Z80 hardware itself affords: HL is a
-; genuine 16-bit pointer register, so there's no need for the 6502
-; version's zero-page ADDRLO/ADDRHI staging trick anywhere here.
+; genuine 16-bit pointer register, so BIOS_READ_SECTOR/BIOS_WRITE_SECTOR
+; take their buffer pointer directly in HL - no need for the 6502
+; version's zero-page ADDRLO/ADDRHI staging trick at this level. The
+; shared C side (bios.h/bios_glue.asm, see modules/cpu/c-shared) still
+; presents the same "stage one value, then trigger" single-parameter
+; calls bios.h's cc65 heritage requires - that staging is bios_glue.asm's
+; own private scratch, not a BIOS.asm-level concept, exactly because this
+; primitive doesn't need one of its own.
 ;
 ; Every port access here goes through the ED-prefixed "IN A,(C)"/
 ; "OUT (C),A" forms (BC = port number, loaded fresh immediately before
@@ -45,6 +57,14 @@ VIDEO_DATA equ $01
 VIDEO_KBD_DATA equ $02
 VIDEO_KBD_STAT equ $03
 DATA_AVAILABLE equ $01
+
+; FloppyController's own register layout (modules/Disk/.../FloppyController.java)
+; registered on the Z80 machine's port bus at $10-$14 (see Z80VideoDiskMachine).
+FD_STATUS equ $10
+FD_TRACK  equ $11
+FD_SECTOR equ $12
+FD_DATA   equ $13
+FD_DRIVE  equ $14
 
 VR_H_DISPLAYED equ 1
 VR_V_DISPLAYED equ 6
@@ -67,6 +87,11 @@ V_ROWS equ 24
 	jp DO_GETCH		; $F003 BIOS_GETCH
 	jp DO_VIDEO_INIT	; $F006 BIOS_VIDEO_INIT
 	jp DO_GOTOXY		; $F009 BIOS_GOTOXY
+	jp DO_SELECT		; $F00C BIOS_SELECT
+	jp DO_READ_SECTOR	; $F00F BIOS_READ_SECTOR
+	jp DO_WRITE_SECTOR	; $F012 BIOS_WRITE_SECTOR
+	jp DO_FORMAT_TRACK	; $F015 BIOS_FORMAT_TRACK
+	jp DO_RESTORE		; $F018 BIOS_RESTORE
 
 ; ---- A = char to print. CR moves to column 0 on the same row; LF moves
 ;      to column 0 on the next row (wrapping row at V_ROWS back to 0); any
@@ -237,6 +262,94 @@ DO_GETCH_POLL ld bc,VIDEO_KBD_STAT
 	jp z,DO_GETCH_POLL
 	ld bc,VIDEO_KBD_DATA
 	in a,(c)
+	pop bc
+	ret
+
+; ---- A = drive (0-7). ----
+DO_SELECT push bc
+	ld bc,FD_DRIVE
+	out (c),a
+	pop bc
+	ret
+
+; ---- A = track, E = sector, HL = destination buffer. The Read Sector
+;      command loads its whole 128-byte buffer synchronously (this
+;      emulator's own FloppyController has no real per-byte transfer
+;      delay), so this can just drain FD_DATA in a tight loop - no
+;      DRQ/interrupt handling needed for a simple polling reader. ----
+DO_READ_SECTOR push bc
+	push de
+	push hl
+	ld bc,FD_TRACK
+	out (c),a
+	ld bc,FD_SECTOR
+	ld a,e
+	out (c),a
+	ld bc,FD_STATUS
+	ld a,$80
+	out (c),a
+	ld d,128
+DRS_LOOP ld bc,FD_DATA
+	in a,(c)
+	ld (hl),a
+	inc hl
+	dec d
+	jp nz,DRS_LOOP
+	pop hl
+	pop de
+	pop bc
+	ret
+
+; ---- A = track, E = sector, HL = source buffer. Mirrors DO_READ_SECTOR
+;      in reverse - feeding FD_DATA drives the controller's Write Sector
+;      transfer, which flushes to the backing file on the 128th byte. ----
+DO_WRITE_SECTOR push bc
+	push de
+	push hl
+	ld bc,FD_TRACK
+	out (c),a
+	ld bc,FD_SECTOR
+	ld a,e
+	out (c),a
+	ld bc,FD_STATUS
+	ld a,$a0
+	out (c),a
+	ld d,128
+DWS_LOOP ld a,(hl)
+	ld bc,FD_DATA
+	out (c),a
+	inc hl
+	dec d
+	jp nz,DWS_LOOP
+	pop hl
+	pop de
+	pop bc
+	ret
+
+; ---- A = track, E = fill byte. One track only, like a real WD179x Write
+;      Track - a caller wanting the whole disk formatted loops over every
+;      track itself. Runs to completion synchronously, like Seek/Restore,
+;      so there's no real BUSY period to poll. ----
+DO_FORMAT_TRACK push bc
+	push de
+	ld bc,FD_TRACK
+	out (c),a
+	ld bc,FD_DATA
+	ld a,e
+	out (c),a
+	ld bc,FD_STATUS
+	ld a,$f0
+	out (c),a
+	pop de
+	pop bc
+	ret
+
+; ---- home the selected drive's head to track 0. No parameters - restore
+;      doesn't need a target track like seek does. ----
+DO_RESTORE push bc
+	ld bc,FD_STATUS
+	ld a,$00
+	out (c),a
 	pop bc
 	ret
 
