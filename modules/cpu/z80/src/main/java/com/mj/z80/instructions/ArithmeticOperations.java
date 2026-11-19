@@ -1,6 +1,7 @@
 package com.mj.z80.instructions;
 
 import com.mj.z80.Flags;
+import com.mj.z80.RegisterPair;
 import com.mj.z80.Z80CPU;
 
 /** Shared 8-bit add/subtract-with-carry math for ADD, ADC, SUB, SBC, and
@@ -158,10 +159,18 @@ final class ArithmeticOperations {
 	 * what the ED-prefixed ADC HL,rr is for) and always written back into
 	 * HL. */
 	static int addHL(Z80CPU cpu, int operand) {
-		int hl = cpu.hl.get16();
-		int raw = hl + operand;
+		return addToPair(cpu, cpu.hl, operand);
+	}
+
+	/** Same flag shape as addHL() above, generalized to any destination
+	 * RegisterPair - DD/FD-prefixed ADD IX,rr/ADD IY,rr (also $09/$19/$29/
+	 * $39, just under a prefix) is the identical operation/flag behavior
+	 * targeting IX/IY instead of HL, not a fourth distinct shape. */
+	static int addToPair(Z80CPU cpu, RegisterPair dest, int operand) {
+		int value = dest.get16();
+		int raw = value + operand;
 		int result = raw & 0xffff;
-		boolean halfCarry = ((hl & 0xfff) + (operand & 0xfff)) > 0xfff;
+		boolean halfCarry = ((value & 0xfff) + (operand & 0xfff)) > 0xfff;
 		boolean carry = raw > 0xffff;
 
 		int flags = cpu.af.lo() & (Flags.S | Flags.Z | Flags.PV);
@@ -173,7 +182,7 @@ final class ArithmeticOperations {
 		}
 		cpu.af.setLo(flags);
 
-		cpu.hl.set16(result);
+		dest.set16(result);
 		return result;
 	}
 }

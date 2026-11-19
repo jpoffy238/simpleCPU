@@ -11,23 +11,27 @@
  * (CCP.COM today, whatever else later) calls it through a fixed jump table
  * (see bdos_jumptable.s) instead of duplicating it.
  *
- * Called two ways, both external to this compiled binary - BDOS.bin is never
- * linked together with a caller, since they're separate cl65 builds:
- *   - MONITOR.asm (hand assembly) JSRs straight to the fixed jump-table
- *     addresses.
- *   - Any cc65-compiled program (ccp.c, say) calls through bdos_glue.s's
- *     thin JSR stubs, declared in bdos.h - from that program's own C code,
- *     it looks like an ordinary function call.
+ * Called two ways, both external to this compiled binary - BDOS.bin/BDOS.ihx
+ * is never linked together with a caller, since they're separate cl65/SDCC
+ * builds:
+ *   - MONITOR.asm (hand assembly, 6502 side only so far) JSRs straight to
+ *     the fixed jump-table addresses.
+ *   - Any cc65- or SDCC-compiled program (ccp.c, say) calls through
+ *     bdos_glue.s/bdos_glue.asm's thin stubs, declared in bdos.h - from
+ *     that program's own C code, it looks like an ordinary function call.
  *
- * ADDRLO/ADDRHI (zero page $01/$02) is the same pointer-staging pair
- * bios_set_buffer() already uses for BIOS_READ_SECTOR/WRITE_SECTOR - reused
- * here for a different purpose depending on the call (input filename for
- * bdos_find_file(), output destination for bdos_next_entry()/
- * bdos_read_record()) rather than adding a second pointer ABI. TRANSFER
- * reads it back as an actual pointer value: on this little-endian platform,
- * the low byte at $01 and high byte at $02 is exactly how cc65 represents a
- * pointer itself, so treating address $01 as an "unsigned char **" and
- * dereferencing it reconstructs whatever bios_set_buffer() staged there.
+ * ADDRLO/ADDRHI is the same pointer-staging pair bios_set_buffer() already
+ * uses for BIOS_READ_SECTOR/WRITE_SECTOR - reused here for a different
+ * purpose depending on the call (input filename for bdos_find_file(),
+ * output destination for bdos_next_entry()/bdos_read_record()) rather than
+ * adding a second pointer ABI. TRANSFER reads it back as an actual pointer
+ * value: on either CPU (both little-endian), the low byte at ADDRLO and
+ * high byte at ADDRLO+1 is exactly how a pointer is represented in memory,
+ * so treating that address as an "unsigned char **" and dereferencing it
+ * reconstructs whatever bios_set_buffer() staged there. The address itself
+ * differs per CPU (6502's own zero page $01 vs a safe Z80 RAM scratch byte
+ * well clear of SDCC's own reset-vector/RST-trampoline/crt0 regions -
+ * $0000-$003F and $0100-$010F, see bios_glue.asm) - #ifdef'd below.
  *
  * Stateful, matching how real CP/M's BDOS worked: bdos_rewind_dir()/
  * bdos_next_entry() track a directory scan position across calls, and
@@ -37,11 +41,13 @@
  * time (BDOS is called like a subroutine, not run concurrently with
  * anything).
  *
- * main() is never actually entered - nothing JSRs to this ROM's reset-style
- * entry point, only to the jump table's individual slots - but cc65's crt0
- * startup unconditionally expects a _main symbol to link against, so an
- * unused stub satisfies the linker rather than fighting the toolchain's
- * standard build assumptions. */
+ * main() is never actually entered - nothing JSRs/CALLs to this ROM's
+ * reset-style entry point, only to the jump table's individual slots - but
+ * cc65's crt0 startup unconditionally expects a _main symbol to link
+ * against, so an unused stub satisfies the linker rather than fighting the
+ * toolchain's standard build assumptions. SDCC's own --no-std-crt0 (used
+ * for the Z80 build, see bdos_jumptable.asm) has no such requirement, but
+ * the same harmless stub costs nothing either way. */
 #include "bios.h"
 
 #define BOOT_TRACKS 1
@@ -60,7 +66,11 @@
  * sentinel - consistent with that convention. */
 #define TOTAL_BLOCKS 243
 
+#ifdef __SDCC
+#define TRANSFER (*(unsigned char **) 0x0040)
+#else
 #define TRANSFER (*(unsigned char **) 0x0001)
+#endif
 
 static unsigned char sector_buf[128];
 

@@ -476,6 +476,12 @@ int main(void) {
 	unsigned char len;
 	unsigned char arg_start;
 
+#ifdef __SDCC
+	/* Z80-only: no monitor exists yet to have already done this before
+	 * booting CCP (unlike the 6502 side) - see bios.h's own comment on
+	 * bios_video_init(). */
+	bios_video_init();
+#endif
 	bios_select(current_drive); /* explicit - don't rely on whatever B's
 	                              * caller left the drive selection as */
 
