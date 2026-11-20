@@ -14,14 +14,26 @@ import com.mj.exceptions.illegalAddressException;
 public class RTC extends Thread implements Device {
 	private Lock readLock = new ReentrantLock();
 	static Logger logger = LogManager.getLogger(RTC.class);
-	private AddressRange mr = new AddressRange(0xa000, 0xa003);
+	private AddressRange mr;
 	// Big-endian u_time: seconds since the Unix epoch (UTC), updated once a second.
 	// Calendar/display conversion is firmware's job, not this device's.
-	private byte[] time = new byte[mr.size()];
-	VIA6522 via;
+	private byte[] time;
+	private InterruptLine interruptLine;
 
-	public RTC(VIA6522 via) {
-		this.via = via;
+	/** interruptLine is whatever this machine's own interrupt mechanism is
+	 * (a VIA6522's requestInterrupt(FLAG_T1) lambda on the 6502 side,
+	 * matching the real hardware's own VIA-routed convention; a
+	 * VectoredInterruptController's requestInterrupt() on the Z80 side) -
+	 * only exercised if something actually calls start() on this Thread
+	 * (see run()/read()'s own comments for why that's optional, not
+	 * required, for a caller that just wants to poll a live value). range
+	 * is this device's own 4-byte register block's address, which varies
+	 * by machine (CPU_CreateUtil's scratch bus vs. the real CPUMain/
+	 * Z80VideoDiskMachine wiring) - no longer hardcoded here. */
+	public RTC(InterruptLine interruptLine, AddressRange range) {
+		this.interruptLine = interruptLine;
+		this.mr = range;
+		this.time = new byte[mr.size()];
 		now();
 	}
 
@@ -50,6 +62,17 @@ public class RTC extends Thread implements Device {
 	@Override
 	public byte read(int address) throws illegalAddressException, DeviceUnavailable {
 		int localAddress = address - mr.startAddressRange;
+		if (localAddress == 0 && !isAlive()) {
+			// Nobody ever started this device's own ticking thread (a plain
+			// polling caller, like BIOS_GET_TIME, has no need to) - refresh
+			// here instead, right as the first byte of a 4-byte read
+			// begins, so all 4 bytes still come from one consistent
+			// instant. Skipped once the thread IS running (see run()): it
+			// already keeps `time` fresh on its own one-second schedule,
+			// and refreshing here too would risk a torn read mid-copy for
+			// whatever ISR is mid-way through draining these 4 bytes.
+			now();
+		}
 		readLock.lock();
 		byte value = time[localAddress];
 		readLock.unlock();
@@ -71,7 +94,7 @@ public class RTC extends Thread implements Device {
 		
 		while (!isInterrupted()) {
 			now();
-			via.requestInterrupt(VIA6522.FLAG_T1);
+			interruptLine.raiseInterrupt();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {

@@ -30,7 +30,7 @@ public class CPU_CreateUtil {
 		VIA6522 via = new VIA6522(bus, new AddressRange(0x9000, 0x900f));
 		bus.registerDevice(via);
 
-		rtc = new RTC(via);
+		rtc = new RTC(() -> via.requestInterrupt(VIA6522.FLAG_T1), new AddressRange(0xa000, 0xa003));
 		bus.registerDevice(new basicMemory(bus, new AddressRange(0, 32 * 1024), null, 0));
 		basicROM rom = new basicROM(bus, new AddressRange(0xf000, 0xffff), "RTCInt.hex", 0);
 

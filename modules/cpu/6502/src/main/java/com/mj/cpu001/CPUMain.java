@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.AddressRange;
 import com.mj.Devices.PBus;
+import com.mj.Devices.RTC;
 import com.mj.Devices.VIA6522;
 import com.mj.Disk.FloppyController;
 import com.mj.Disk.EightInch.IBM3740;
@@ -78,6 +79,17 @@ public class CPUMain {
 		bus.registerDevice(graphicsRam);
 		VideoController video = new VideoController(new AddressRange(0x9020, 0x9024), videoRam, graphicsRam);
 		bus.registerDevice(video);
+
+		// Real-time clock (RTC.java) - a plain 4-byte read-only Unix-epoch-seconds
+		// register block, right after Video's own range in the free $90xx MMIO
+		// space (not $A000, RTC's own test-scratch-bus address - that range is
+		// BDOS ROM here). Its ticking Thread is never started: nothing on this
+		// bus has ever called bus.startDevices() (VIA/Floppy/Video don't need a
+		// Thread either), and RTC.read() self-refreshes on its own whenever
+		// nobody started it - see RTC.java's own comment - so BIOS_GET_TIME
+		// still gets a genuinely live value through plain polling.
+		RTC rtc = new RTC(() -> via.requestInterrupt(VIA6522.FLAG_T1), new AddressRange(0x9025, 0x9028));
+		bus.registerDevice(rtc);
 
 		FloppyController fdc = new FloppyController(() -> via.requestInterrupt(VIA6522.FLAG_CB1), new AddressRange(0x9010, 0x9014));
 		bus.registerDevice(fdc);

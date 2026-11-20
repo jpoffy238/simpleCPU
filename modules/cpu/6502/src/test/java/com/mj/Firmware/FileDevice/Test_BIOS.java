@@ -15,6 +15,7 @@ import org.junit.jupiter.api.io.TempDir;
 import com.mj.Devices.AddressRange;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
+import com.mj.Devices.RTC;
 import com.mj.Devices.VIA6522;
 import com.mj.Disk.CpmFileSystem;
 import com.mj.Disk.FloppyController;
@@ -73,6 +74,11 @@ public class Test_BIOS {
 		bus.registerDevice(graphicsRam);
 		video = new VideoController(new AddressRange(0x9020, 0x9024), videoRam, graphicsRam);
 		bus.registerDevice(video);
+
+		// RTC, same as CPUMain - right after Video's own range in the free $90xx
+		// MMIO space. Its ticking Thread is never started (see CPUMain's own
+		// comment); RTC.read() self-refreshes on its own instead.
+		bus.registerDevice(new RTC(() -> via.requestInterrupt(VIA6522.FLAG_T1), new AddressRange(0x9025, 0x9028)));
 
 		fdc = new FloppyController(() -> via.requestInterrupt(VIA6522.FLAG_CB1), new AddressRange(0x9010, 0x9014));
 		bus.registerDevice(fdc);
@@ -542,5 +548,35 @@ public class Test_BIOS {
 		}
 		assertTrue(video.getPixel(319, 199), "(319,199), the bottom-right corner, should be on");
 		assertFalse(video.getPixel(3, 2), "(3,2) was set and then cleared - should be off again");
+	}
+
+	@Test
+	public void bootedProgramCanReadTheRealTimeThroughTheBiosGetTimePrimitive() throws Exception {
+		// LDA #(TIME & $FF) / STA ADDRLO ($01), LDA #(TIME >> 8) / STA ADDRHI
+		// ($02), JSR BIOS_GET_TIME ($F021), RTS - stages the destination buffer
+		// the same way BIOS_READ_SECTOR's own callers do (see DO_GET_TIME's own
+		// comment), then this test reads it back as a little-endian unsigned
+		// long and checks it against a wall-clock bracket, same style as the
+		// original Test_RTC.
+		byte[] program = {
+				(byte) 0xA9, 0x00, (byte) 0x85, 0x01,	// LDA #$00 / STA $01 (TIME low)
+				(byte) 0xA9, 0x20, (byte) 0x85, 0x02,	// LDA #$20 / STA $02 (TIME high)
+				0x20, 0x21, (byte) 0xF0,		// JSR BIOS_GET_TIME
+				0x60					// RTS
+		};
+		new CpmFileSystem(drive0).format();
+		new CpmFileSystem(drive0).createFile("CCP.COM", program);
+
+		long before = System.currentTimeMillis() / 1000L;
+		video.type("B\r");
+		runBriefly();
+		long after = System.currentTimeMillis() / 1000L;
+
+		long epoch = 0;
+		for (int i = 3; i >= 0; i--) {
+			epoch = (epoch << 8) | (c.bus.read(0x2000 + i) & 0xffL);
+		}
+		assertTrue(epoch >= before && epoch <= after,
+				"BIOS_GET_TIME result " + epoch + " should be between " + before + " and " + after);
 	}
 }
