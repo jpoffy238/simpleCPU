@@ -104,6 +104,23 @@ static unsigned char write_dir_offset;
 static unsigned char write_block_count;
 static unsigned char write_active;
 static unsigned char write_extent;
+/* The name this write/delete/rename-old-name operation is looking for in
+ * the directory - kept separate from fcb_name (below) for the same reason
+ * write_entry etc. are kept separate from open_blocks etc.: a caller can
+ * have a read in progress (bdos_find_file()/bdos_read_record(), using
+ * fcb_name) and, without closing it, create/delete/rename a DIFFERENT file
+ * partway through (edit.c's swap_page_out()/swap_page_in() does exactly
+ * this, flushing its own swap file mid-load). Before this existed,
+ * bdos_create_file()/bdos_delete_file()/bdos_rename_file() all reused
+ * fcb_name directly, so that nested call silently overwrote the name the
+ * in-progress read's own find_extent() was still using - harmless until the
+ * read next needed to cross an extent boundary, at which point it searched
+ * for the wrong file, found nothing, and the read quietly (and wrongly)
+ * looked like end-of-file. Found 2026-11-20: editing c-shared/edit.c itself
+ * (big enough to need 3 extents and enough page-swaps to clobber fcb_name
+ * at least once before hitting the first boundary) truncated at exactly the
+ * first extent/extent boundary, every time. */
+static unsigned char write_fcb_name[11];
 
 /* 1 bit per block, covering blocks 0-255 (TOTAL_BLOCKS is 243) - built
  * fresh by bdos_create_file() from a full directory scan, then kept in
@@ -117,13 +134,21 @@ static unsigned char block_bitmap[32];
  * that stack. Keeping every local here a plain scalar (handled via
  * registers/zero-page temporaries, not the software stack) avoids the
  * question entirely rather than relying on an uninitialized sp happening to
- * be harmless. */
+ * be harmless.
+ *
+ * Read-path only: find_extent(), and so bdos_find_file()/bdos_read_record()/
+ * bdos_entry_size(), are the only things that touch this now - see
+ * write_fcb_name's own comment above for why create/delete/rename no longer
+ * do. */
 static unsigned char fcb_name[11];
 /* bdos_rename_file()'s destination name - a second static for the same
  * uninitialized-sp-at-boot reason as fcb_name, even though rename is
  * never actually called at boot time; keeping both as statics (rather
  * than fcb_name plus a local for the other) is simpler than reasoning
- * about which of the two names is "the boot-sensitive one." */
+ * about which of the two names is "the boot-sensitive one." The source
+ * (old) name rename_extent() compares against is write_fcb_name, not
+ * fcb_name - rename mutates the directory same as create/delete, so it
+ * gets the same treatment. */
 static unsigned char new_fcb_name[11];
 
 /* Port of CpmFileSystem.readDataSector() - divides/mods by
@@ -423,10 +448,11 @@ unsigned char bdos_read_record(void) {
 	return 1;
 }
 
-/* Scans the whole directory for fcb_name (already encoded) at exactly the
- * given extent number; on a match, marks it empty and writes that sector
- * back. Returns the entry's record count (0-128) if found, or 0xFF (never
- * a valid record count) if that file/extent combination doesn't exist. */
+/* Scans the whole directory for write_fcb_name (already encoded) at exactly
+ * the given extent number; on a match, marks it empty and writes that
+ * sector back. Returns the entry's record count (0-128) if found, or 0xFF
+ * (never a valid record count) if that file/extent combination doesn't
+ * exist. */
 static unsigned char delete_extent(unsigned char extent) {
 	unsigned char sector_index, entry_index, i;
 	unsigned char *entry;
@@ -439,7 +465,7 @@ static unsigned char delete_extent(unsigned char extent) {
 			if (entry[0] == STATUS_EMPTY || entry[12] != extent) {
 				continue;
 			}
-			for (i = 0; i < 11 && entry[1 + i] == fcb_name[i]; i++) {
+			for (i = 0; i < 11 && entry[1 + i] == write_fcb_name[i]; i++) {
 				/* comparing */
 			}
 			if (i == 11) {
@@ -466,7 +492,7 @@ unsigned char bdos_delete_file(void) {
 	unsigned char records;
 	unsigned char found_any = 0;
 
-	if (!encode_name(filename, fcb_name)) {
+	if (!encode_name(filename, write_fcb_name)) {
 		return 0;
 	}
 
@@ -483,8 +509,8 @@ unsigned char bdos_delete_file(void) {
 	return found_any;
 }
 
-/* Scans the whole directory for fcb_name (already encoded) at exactly the
- * given extent number; on a match, overwrites its name bytes with
+/* Scans the whole directory for write_fcb_name (already encoded) at exactly
+ * the given extent number; on a match, overwrites its name bytes with
  * new_fcb_name and writes that sector back. Returns the entry's record
  * count (0-128), or 0xFF if that file/extent combination doesn't exist -
  * same convention as delete_extent(). */
@@ -500,7 +526,7 @@ static unsigned char rename_extent(unsigned char extent) {
 			if (entry[0] == STATUS_EMPTY || entry[12] != extent) {
 				continue;
 			}
-			for (i = 0; i < 11 && entry[1 + i] == fcb_name[i]; i++) {
+			for (i = 0; i < 11 && entry[1 + i] == write_fcb_name[i]; i++) {
 				/* comparing */
 			}
 			if (i == 11) {
@@ -542,7 +568,7 @@ unsigned char bdos_rename_file(void) {
 		old_filename++;
 	}
 	old_filename++;
-	if (!encode_name(old_filename, fcb_name)) {
+	if (!encode_name(old_filename, write_fcb_name)) {
 		return 0;
 	}
 
@@ -666,7 +692,7 @@ unsigned char bdos_create_file(void) {
 	unsigned char free_sector = 0;
 	unsigned char free_offset = 0;
 
-	if (!encode_name(filename, fcb_name)) {
+	if (!encode_name(filename, write_fcb_name)) {
 		return 0;
 	}
 
@@ -688,7 +714,7 @@ unsigned char bdos_create_file(void) {
 				}
 				continue;
 			}
-			for (i = 0; i < 11 && entry[1 + i] == fcb_name[i]; i++) {
+			for (i = 0; i < 11 && entry[1 + i] == write_fcb_name[i]; i++) {
 				/* comparing */
 			}
 			if (i == 11) {
@@ -710,7 +736,7 @@ unsigned char bdos_create_file(void) {
 		write_entry[i] = 0;
 	}
 	for (i = 0; i < 11; i++) {
-		write_entry[1 + i] = fcb_name[i];
+		write_entry[1 + i] = write_fcb_name[i];
 	}
 	write_dir_sector = free_sector;
 	write_dir_offset = free_offset;

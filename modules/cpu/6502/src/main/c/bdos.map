@@ -3,7 +3,7 @@ Modules list:
 bdos.o:
     CODE              Offs=000000  Size=000E4C  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=000008  Align=00001  Fill=0000
-    BSS               Offs=000000  Size=0000F3  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=0000FE  Align=00001  Fill=0000
 bdos_jumptable.o:
     JUMPTABLE         Offs=000000  Size=000021  Align=00001  Fill=0000
 bios_glue.o:
@@ -95,7 +95,7 @@ Name                   Start     End    Size  Align
 ----------------------------------------------------
 ZEROPAGE              000011  00002B  00001B  00001
 DATA                  008000  008024  000025  00001
-BSS                   008025  008117  0000F3  00001
+BSS                   008025  008122  0000FE  00001
 JUMPTABLE             00A000  00A020  000021  00001
 STARTUP               00A021  00A037  000017  00001
 ONCE                  00A038  00A043  00000C  00001
@@ -105,7 +105,7 @@ RODATA                00B11E  00B125  000008  00001
 
 Exports list by name:
 ---------------------
-__BSS_RUN__               008025 RLA    __BSS_SIZE__              0000F3 REA    
+__BSS_RUN__               008025 RLA    __BSS_SIZE__              0000FE REA    
 __CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     00A038 RLA    
 __DESTRUCTOR_COUNT__      000000 REA    __DESTRUCTOR_TABLE__      00A038 RLA    
 __STACKSTART__            008000 REA    __STARTUP__               000001 REA    
@@ -151,7 +151,7 @@ __CONSTRUCTOR_COUNT__     000000 REA    __DESTRUCTOR_COUNT__      000000 REA
 __STARTUP__               000001 REA    sp                        000012 RLZ    
 sreg                      000014 RLZ    ptr1                      00001A RLZ    
 ptr4                      000020 RLZ    tmp1                      000022 RLZ    
-__BSS_SIZE__              0000F3 REA    __STACKSTART__            008000 REA    
+__BSS_SIZE__              0000FE REA    __STACKSTART__            008000 REA    
 __BSS_RUN__               008025 RLA    __CONSTRUCTOR_TABLE__     00A038 RLA    
 __DESTRUCTOR_TABLE__      00A038 RLA    initlib                   00A038 RLA    
 _bdos_rewind_dir          00A3D8 RLA    _bdos_next_entry          00A3E1 RLA    
@@ -240,13 +240,13 @@ _bios_write_sector (bios_glue.o):
 _main (bdos.o):
     crt0.o                    none/crt0.s:3
 addeq0sp (addeqsp.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 addeqysp (addeqsp.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 addysp (addysp.o):
     incsp8.o                  runtime/incsp8.s:8
     incsp7.o                  runtime/incsp7.s:8
@@ -254,106 +254,106 @@ addysp (addysp.o):
     incsp5.o                  runtime/incsp5.s:8
     incsp4.o                  runtime/incsp4.s:8
     incsp3.o                  runtime/incsp3.s:8
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 aslaxy (shl.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 booleq (makebool.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 callax (call.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 decsp1 (decsp1.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 decsp2 (decsp2.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 decsp3 (decsp3.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 decsp4 (decsp4.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 decsp5 (decsp5.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 decsp6 (decsp6.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 donelib (condes.o):
     crt0.o                    none/crt0.s:4
 incax1 (incax1.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 incax8 (incax8.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 incaxy (incaxy.o):
     incax8.o                  runtime/incax8.s:8
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 incsp1 (incsp1.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 incsp2 (incsp2.o):
     popptr1.o                 runtime/popptr1.s:8
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 incsp3 (incsp3.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 incsp4 (incsp4.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 incsp5 (incsp5.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 incsp6 (incsp6.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 incsp7 (incsp7.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 incsp8 (incsp8.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 initlib (condes.o):
     crt0.o                    none/crt0.s:4
 ldax0sp (ldaxsp.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 ldaxysp (ldaxsp.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 popax (incsp2.o):
     shl.o                     runtime/shl.s:15
 popptr1 (popptr1.o):
@@ -369,64 +369,64 @@ ptr4 (zeropage.o):
     umod.o                    runtime/umod.s:9
     udiv.o                    runtime/udiv.s:10
 push0 (pushax.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 pusha (pusha.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 pushax (pushax.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 pushw0sp (pushwsp.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 pushwysp (pushwsp.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 shlax1 (aslax1.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 shlax3 (aslax3.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 shlax4 (aslax4.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 sp (zeropage.o):
     popptr1.o                 runtime/popptr1.s:9
     subysp.o                  runtime/subysp.s:9
@@ -452,21 +452,21 @@ sreg (zeropage.o):
     udiv.o                    runtime/udiv.s:10
     bdos.o                    ../../../../c-shared/bdos.s:10
 stax0sp (staxsp.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 staxysp (staxsp.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 subysp (subysp.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 tmp1 (zeropage.o):
     shl.o                     runtime/shl.s:16
     incaxy.o                  runtime/incaxy.s:8
@@ -474,11 +474,11 @@ tmp1 (zeropage.o):
     aslax3.o                  runtime/aslax3.s:8
     aslax1.o                  runtime/aslax1.s:8
 tosudiva0 (udiv.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 tosumoda0 (umod.o):
-    bdos.o                    ../../../../c-shared/bdos.s:2145
-    bdos.o                    ../../../../c-shared/bdos.s:2145
+    bdos.o                    ../../../../c-shared/bdos.s:2147
+    bdos.o                    ../../../../c-shared/bdos.s:2147
 udiv16 (udiv.o):
     umod.o                    runtime/umod.s:8
 zerobss (zerobss.o):
