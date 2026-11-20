@@ -49,6 +49,7 @@ BIOS_FORMAT_TRACK = 0xF015
 BIOS_RESTORE      = 0xF018
 BIOS_GRAPHICS_MODE = 0xF01B
 BIOS_SET_PIXEL     = 0xF01E
+BIOS_GET_TIME      = 0xF021
 
 ADDRLO   = 0x0040
 ADDRHI   = 0x0041
@@ -70,6 +71,7 @@ STAGED_X = 0x0042
 .globl _bios_graphics_mode
 .globl _bios_set_pixel_x
 .globl _bios_set_pixel
+.globl _bios_get_time
 
 ; void bios_putch(char c) - c arrives in A
 _bios_putch::
@@ -151,3 +153,8 @@ _bios_set_pixel::
 	ld	e, (hl)
 	ld	hl, (ADDRLO)
 	jp	BIOS_SET_PIXEL
+
+; void bios_get_time(unsigned long *out) - ptr arrives directly in HL
+; (BIOS_GET_TIME's own convention - one parameter, no staging needed)
+_bios_get_time::
+	jp	BIOS_GET_TIME

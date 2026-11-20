@@ -33,6 +33,11 @@
 ;                        based on it
 ;   BIOS_SET_PIXEL       A = row (0-199), E = on/off (0 = off), HL = column
 ;                        (0-319)
+;   BIOS_GET_TIME        no parameters; HL = destination 4-byte buffer -
+;                        copies RTC's Unix-epoch-seconds counter (RTC.java)
+;                        there as a little-endian unsigned long (this
+;                        project's own time_t; no calendar/display
+;                        conversion - see RTC.java's own comment)
 ;
 ; Real hardware scrolling via Display Start Address (R12/R13), mirroring
 ; the 6502 side's own BIOS.asm - see DO_PUTCH/PC_SCROLL below. Simpler
@@ -69,6 +74,12 @@ VIDEO_DATA equ $01
 VIDEO_KBD_DATA equ $02
 VIDEO_KBD_STAT equ $03
 DATA_AVAILABLE equ $01
+
+; RTC's own big-endian Unix-epoch-seconds register block (see RTC.java) -
+; read-only, 4 bytes, registered on the port bus at $06-$09 (see
+; Z80VideoDiskMachine) - free space between VectoredInterruptController's
+; vector register ($05) and FloppyController's own registers ($10-$14).
+RTC_TIME equ $06
 
 ; FloppyController's own register layout (modules/Disk/.../FloppyController.java)
 ; registered on the Z80 machine's port bus at $10-$14 (see Z80VideoDiskMachine).
@@ -126,6 +137,7 @@ V_ROWS equ 24
 	jp DO_RESTORE		; $F018 BIOS_RESTORE
 	jp DO_GRAPHICS_MODE	; $F01B BIOS_GRAPHICS_MODE
 	jp DO_SET_PIXEL		; $F01E BIOS_SET_PIXEL
+	jp DO_GET_TIME		; $F021 BIOS_GET_TIME
 
 ; ---- A = char to print. CR moves to column 0 on the same row; LF moves
 ;      to column 0 on the next row, scrolling once the cursor has stepped
@@ -641,3 +653,37 @@ V_ADDR	defw 0
 V_START	defw 0
 V_ROW	defb 0
 V_COL	defb 0
+
+; ---- no parameters; HL = destination 4-byte buffer. Copies RTC's raw
+;      Unix-epoch-seconds counter (RTC.java) from the port bus, reversing
+;      its big-endian register layout into little-endian byte order - the
+;      native order this CPU (and C's own unsigned long) expects - rather
+;      than a flat copy. Reading RTC_TIME itself first (not RTC_TIME+3)
+;      deliberately triggers RTC's own read-time refresh (see RTC.read())
+;      before the other three bytes are read, so all four come from one
+;      consistent instant despite being four separate port reads. Same
+;      "preserve BC/HL for the caller" convention as every other primitive
+;      in this file, even though HL is also this call's own parameter. ----
+DO_GET_TIME push bc
+	push hl
+	ld bc,RTC_TIME
+	in a,(c)		; byte 0 (MSB) - triggers RTC's own refresh
+	inc hl
+	inc hl
+	inc hl			; hl -> out+3 (LSB slot)
+	ld (hl),a
+	dec hl
+	inc bc
+	in a,(c)		; byte 1
+	ld (hl),a
+	dec hl
+	inc bc
+	in a,(c)		; byte 2
+	ld (hl),a
+	dec hl
+	inc bc
+	in a,(c)		; byte 3 (LSB)
+	ld (hl),a
+	pop hl
+	pop bc
+	ret

@@ -21,6 +21,7 @@ BIOS_RESTORE      = $F012
 BIOS_GOTOXY       = $F018
 BIOS_GRAPHICS_MODE = $F01B
 BIOS_SET_PIXEL     = $F01E
+BIOS_GET_TIME      = $F021
 
 ; zero page: shared ABI with BIOS.asm/MONITOR.asm - the sector-buffer address
 ; parameter for BIOS_READ_SECTOR/BIOS_WRITE_SECTOR.
@@ -34,6 +35,7 @@ ADDRHI = $02
 .export _bios_gotoxy
 .export _bios_graphics_mode
 .export _bios_set_pixel_x, _bios_set_pixel
+.export _bios_get_time
 
 ; Glue-owned staging byte for the second hardware parameter - not part of the
 ; BIOS.asm/MONITOR.asm ABI, just this glue layer's own scratch. Lives wherever
@@ -115,4 +117,15 @@ _bios_set_pixel_x:
 _bios_set_pixel:
 	ldx staged_x
 	jsr BIOS_SET_PIXEL
+	rts
+
+; void __fastcall__ bios_get_time(unsigned long *out) - pointer in A (low) /
+; X (high), same staging mechanics as bios_set_buffer() but triggering the
+; copy immediately rather than just staging it for a later call - only one
+; parameter here (the pointer), so no separate "stage then trigger" split
+; is needed the way multi-parameter primitives require.
+_bios_get_time:
+	sta ADDRLO
+	stx ADDRHI
+	jsr BIOS_GET_TIME
 	rts

@@ -32,6 +32,12 @@
 ;;                      ADDRLO/ADDRHI = column (0..319), staged beforehand (see
 ;;                      bios_set_pixel_x in bios.h/bios_glue.s) - no bounds
 ;;                      checking, same as BIOS_GOTOXY
+;;   BIOS_GET_TIME      no parameters; zero-page ADDRLO/ADDRHI = destination
+;;                      4-byte buffer, staged the same way BIOS_READ_SECTOR's
+;;                      own callers do - copies RTC's Unix-epoch-seconds
+;;                      counter (RTC.java) there as a little-endian unsigned
+;;                      long (this project's own time_t; no calendar/display
+;;                      conversion - see RTC.java's own comment)
 CPU 6502
 OUTPUT HEX
 
@@ -78,6 +84,12 @@ MODE_TEXT = $00
 MODE_GRAPHICS = $01
 GRAPHICS_RAM = $C000
 GRAPHICS_BYTES_PER_ROW = 40
+
+;; RTC's own big-endian Unix-epoch-seconds register block (see RTC.java) -
+;; read-only, 4 bytes, right after VideoController's own range ($9020-$9024)
+;; in the free MMIO space (not $A000, RTC's own test-scratch-bus address -
+;; that range is BDOS ROM here, see CPUMain).
+RTC_TIME = $9025
 
 ;; VideoController's character RAM (plain memory - BIOS pokes it directly, same
 ;; as any ordinary RAM access, no register protocol involved) and the fixed
@@ -167,6 +179,7 @@ V_ROW      = $10
 	JMP DO_GOTOXY		;; $F018 BIOS_GOTOXY
 	JMP DO_GRAPHICS_MODE	;; $F01B BIOS_GRAPHICS_MODE
 	JMP DO_SET_PIXEL	;; $F01E BIOS_SET_PIXEL
+	JMP DO_GET_TIME		;; $F021 BIOS_GET_TIME
 
 ;; ---- A = char to print. Pokes VideoController's character RAM with BIOS's
 ;;      own row/column tracking - Console drove this exclusively once, then
@@ -689,3 +702,27 @@ DSP_STORE STA (ADDRLO),Y
 	RTS
 
 PIXEL_BIT_MASKS DB $80,$40,$20,$10,$08,$04,$02,$01
+
+;; ---- no parameters; zero-page ADDRLO/ADDRHI = destination 4-byte buffer,
+;;      staged by the caller the same way BIOS_READ_SECTOR's own callers
+;;      do. Copies RTC's raw Unix-epoch-seconds counter (RTC.java) into the
+;;      caller's buffer, reversing its big-endian hardware register layout
+;;      into little-endian byte order - the order this CPU (and C's own
+;;      unsigned long) expects - rather than a flat copy. Reading RTC_TIME
+;;      itself first (not RTC_TIME+3) deliberately triggers RTC's own
+;;      read-time refresh (see RTC.read()) before the other three bytes are
+;;      read, so all four come from one consistent instant despite being
+;;      four separate hardware reads. ----
+DO_GET_TIME LDA RTC_TIME
+	LDY #3
+	STA (ADDRLO),Y
+	LDA RTC_TIME+1
+	LDY #2
+	STA (ADDRLO),Y
+	LDA RTC_TIME+2
+	LDY #1
+	STA (ADDRLO),Y
+	LDA RTC_TIME+3
+	LDY #0
+	STA (ADDRLO),Y
+	RTS

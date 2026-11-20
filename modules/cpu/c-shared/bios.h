@@ -131,4 +131,14 @@ void BIOS_FASTCALL bios_set_pixel_x(unsigned int x);
  * into an adjacent row. */
 void BIOS_FASTCALL bios_set_pixel(unsigned char y);
 
+/* Copies RTC's raw Unix-epoch-seconds counter (see RTC.java) into *out,
+ * converting it from the hardware's big-endian register layout into this
+ * CPU's native little-endian unsigned long - *out is then an ordinary
+ * seconds-since-the-epoch count, this project's own time_t (no calendar/
+ * display conversion exists here, same deliberate omission as RTC.java's
+ * own comment, and no <time.h> dependency on either toolchain). Takes the
+ * pointer directly (one parameter - no "stage then trigger" split needed,
+ * unlike bios_read_sector() etc.), same style as bios_set_buffer(). */
+void BIOS_FASTCALL bios_get_time(unsigned long *out);
+
 #endif

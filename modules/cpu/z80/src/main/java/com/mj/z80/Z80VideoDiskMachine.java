@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.mj.Devices.AddressRange;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
+import com.mj.Devices.RTC;
 import com.mj.Devices.VectoredInterruptController;
 import com.mj.Disk.EightInch.IBM3740;
 import com.mj.Disk.FloppyController;
@@ -35,9 +36,15 @@ import com.mj.Video.VideoController;
  *
  * Port bus: VideoController's small register set (CRTC Address/Data,
  * keyboard data/status, Mode Control) at $00-$04; VectoredInterruptController
- * (one register, the IM2 vector) at $05; FloppyController wholesale (it has
- * no bulk-RAM piece the way Video does - sector data already moves one byte
- * at a time through its own Data register) at $10-$14. FloppyController's
+ * (one register, the IM2 vector) at $05; RTC (RTC.java - a plain 4-byte
+ * read-only Unix-epoch-seconds register block) at $06-$09; FloppyController
+ * wholesale (it has no bulk-RAM piece the way Video does - sector data
+ * already moves one byte at a time through its own Data register) at
+ * $10-$14. RTC's own ticking Thread is never started here - nothing on this
+ * machine calls bus.startDevices() for any device, and RTC.read() already
+ * self-refreshes on its own whenever nobody started it (see RTC.java's own
+ * comment), so BIOS_GET_TIME still gets a genuinely live value through
+ * plain polling, with no interrupt wiring needed at all. FloppyController's
  * own interrupt line is wired through VectoredInterruptController rather
  * than straight onto the port bus's shared line directly - real hardware's
  * own WD179x-style FDC never held a Z80 vector register itself; a real
@@ -65,6 +72,7 @@ public class Z80VideoDiskMachine {
 	private final VideoController video;
 	private final FloppyController floppyController;
 	private final VectoredInterruptController interruptController;
+	private final RTC rtc;
 
 	public Z80VideoDiskMachine() {
 		memoryBus = new DeviceBus();
@@ -83,6 +91,9 @@ public class Z80VideoDiskMachine {
 
 		interruptController = new VectoredInterruptController(portBus, new AddressRange(0x05, 0x05));
 		portBus.registerDevice(interruptController);
+
+		rtc = new RTC(interruptController::requestInterrupt, new AddressRange(0x06, 0x09));
+		portBus.registerDevice(rtc);
 
 		floppyController = new FloppyController(interruptController::requestInterrupt, new AddressRange(0x10, 0x14));
 		portBus.registerDevice(floppyController);
@@ -106,6 +117,10 @@ public class Z80VideoDiskMachine {
 
 	public VectoredInterruptController interruptController() {
 		return interruptController;
+	}
+
+	public RTC rtc() {
+		return rtc;
 	}
 
 	/** Attaches a disk image file to one of FloppyController's drive
