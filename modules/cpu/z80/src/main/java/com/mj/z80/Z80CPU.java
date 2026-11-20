@@ -76,12 +76,16 @@ public class Z80CPU {
 	 * reason EI doesn't just set IFF1/IFF2 and leave it at that. */
 	public boolean suppressInterruptCheckOnce;
 
-	/** The 8-bit vector a real IM2 device places on the data bus during the
-	 * interrupt-acknowledge cycle, used as the low byte of the vector-table
-	 * pointer (I is the high byte). No real device supplies this yet - no
-	 * Z80 machine with real daisy-chained peripherals exists - so a caller
-	 * (today, a test; eventually a real device) sets this directly before
-	 * raising portBus's interrupt line. */
+	/** A manual override for the IM2 vector, used as the low byte of the
+	 * vector-table pointer (I is the high byte) only when portBus has no real
+	 * InterruptVectorSource registered to ask instead - see
+	 * serviceInterrupts()'s own comment. Lets a raw CPU-level test raise an
+	 * IM2 interrupt (portBus.raiseInterupt()) without needing a whole real
+	 * device graph. Real wiring (Z80VideoDiskMachine's
+	 * VectoredInterruptController) never touches this field at all - it goes
+	 * through portBus.acknowledgePendingVector() instead, the same way a real
+	 * IM2 device presents its vector during the hardware's own interrupt-
+	 * acknowledge cycle. */
 	public int pendingInterruptVector;
 
 	/** DD-CB/FD-CB's displacement byte - the one piece of per-call state that
@@ -165,7 +169,15 @@ public class Z80CPU {
 			if (interruptMode == 1) {
 				pc = 0x0038;
 			} else {
-				int vectorAddress = ((i & 0xff) << 8) | (pendingInterruptVector & 0xff);
+				// A real registered device (VectoredInterruptController, say)
+				// takes priority; pendingInterruptVector is only a fallback
+				// for a raw CPU-level test with no such device wired up -
+				// see that field's own comment.
+				int vector = portBus.acknowledgePendingVector();
+				if (vector < 0) {
+					vector = pendingInterruptVector;
+				}
+				int vectorAddress = ((i & 0xff) << 8) | (vector & 0xff);
 				int low = memoryBus.read(vectorAddress) & 0xff;
 				int high = memoryBus.read((vectorAddress + 1) & 0xffff) & 0xff;
 				pc = (high << 8) | low;

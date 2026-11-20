@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.mj.Devices.AddressRange;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
+import com.mj.Devices.VectoredInterruptController;
 import com.mj.Disk.EightInch.IBM3740;
 import com.mj.Disk.FloppyController;
 import com.mj.Disk.exceptions.DiskReadError;
@@ -33,14 +34,18 @@ import com.mj.Video.VideoController;
  * RAM here for now.
  *
  * Port bus: VideoController's small register set (CRTC Address/Data,
- * keyboard data/status, Mode Control) at $00-$04; FloppyController
- * wholesale (it has no bulk-RAM piece the way Video does - sector data
- * already moves one byte at a time through its own Data register) at
- * $10-$14. FloppyController no longer needs a VIA to interrupt through
- * (see InterruptLine) - it pulls the port bus's own single interrupt
- * line directly, which is period-correct for a Z80 system (a VIA is
- * 6502-era hardware) and simpler than the 6502 side's VIA-routed
- * version.
+ * keyboard data/status, Mode Control) at $00-$04; VectoredInterruptController
+ * (one register, the IM2 vector) at $05; FloppyController wholesale (it has
+ * no bulk-RAM piece the way Video does - sector data already moves one byte
+ * at a time through its own Data register) at $10-$14. FloppyController's
+ * own interrupt line is wired through VectoredInterruptController rather
+ * than straight onto the port bus's shared line directly - real hardware's
+ * own WD179x-style FDC never held a Z80 vector register itself; a real
+ * system routed its INTRQ line into a separate PIO/CTC chip that did, and
+ * that's the role VectoredInterruptController plays here (see its own class
+ * comment). It still raises the bus's shared line too (requestInterrupt()
+ * does both), so the plain interrupt-pending check every CPU already does is
+ * unchanged - only IM2's actual vector lookup goes through the new device.
  *
  * Deliberately does not attach any disk images itself - attachDrive()
  * below is for that, so a real boot entry point (once one exists) can
@@ -59,6 +64,7 @@ public class Z80VideoDiskMachine {
 	private final PBus portBus;
 	private final VideoController video;
 	private final FloppyController floppyController;
+	private final VectoredInterruptController interruptController;
 
 	public Z80VideoDiskMachine() {
 		memoryBus = new DeviceBus();
@@ -75,7 +81,10 @@ public class Z80VideoDiskMachine {
 		video = new VideoController(new AddressRange(0x00, 0x04), videoRam, graphicsRam);
 		portBus.registerDevice(video);
 
-		floppyController = new FloppyController(portBus::raiseInterupt, new AddressRange(0x10, 0x14));
+		interruptController = new VectoredInterruptController(portBus, new AddressRange(0x05, 0x05));
+		portBus.registerDevice(interruptController);
+
+		floppyController = new FloppyController(interruptController::requestInterrupt, new AddressRange(0x10, 0x14));
 		portBus.registerDevice(floppyController);
 	}
 
@@ -93,6 +102,10 @@ public class Z80VideoDiskMachine {
 
 	public FloppyController floppyController() {
 		return floppyController;
+	}
+
+	public VectoredInterruptController interruptController() {
+		return interruptController;
 	}
 
 	/** Attaches a disk image file to one of FloppyController's drive

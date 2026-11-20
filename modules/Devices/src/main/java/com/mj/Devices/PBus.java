@@ -47,8 +47,22 @@ public interface PBus extends CPUBus {
 	public void registerDevice(Device deviceHandler);
 
 	public void unregisterDevice(Device deviceHandler);
-	
+
 	public List <Device> getDevices();
-	
+
+	/** Registers a real Z80 IM2 vector supplier (see InterruptVectorSource's
+	 * own comment) - in priority order, first registered highest, the same
+	 * "closest to the CPU wins" convention a real daisy chain uses. Separate
+	 * from registerDevice(): a vector source is also usually a Device (for
+	 * its own port I/O, like VectoredInterruptController's vector register),
+	 * but the two registrations are independent - this one is only ever
+	 * consulted by acknowledgePendingVector(), never by read()/write(). */
+	public void registerInterruptVectorSource(InterruptVectorSource source);
+
+	/** Scans registered sources in priority order and returns the first one
+	 * with hasPendingInterrupt() true, acknowledging it (see
+	 * InterruptVectorSource.acknowledge()) as a side effect - or -1 if none
+	 * currently have anything pending. */
+	public int acknowledgePendingVector();
 
 }

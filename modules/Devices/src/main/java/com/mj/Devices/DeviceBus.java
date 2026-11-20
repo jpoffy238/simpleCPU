@@ -1,5 +1,6 @@
 package com.mj.Devices;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ public class DeviceBus implements PBus {
 	String formater = "DeviceType : %s10 : BusId : %s10 : Object : %s20";
 	private static final Logger logger = LogManager.getLogger(DeviceBus.class);
 	private Map<AddressRange, Device> devices = new HashMap<AddressRange, Device>();
+	private List<InterruptVectorSource> interruptVectorSources = new ArrayList<InterruptVectorSource>();
 	protected boolean interuptRaised = false;
 	protected boolean raiseNMInterupt = false;
 	protected boolean powerOnReset = false;
@@ -198,9 +200,22 @@ public class DeviceBus implements PBus {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
 
-	
-	
+	@Override
+	public void registerInterruptVectorSource(InterruptVectorSource source) {
+		interruptVectorSources.add(source);
+	}
+
+	@Override
+	public int acknowledgePendingVector() {
+		for (InterruptVectorSource source : interruptVectorSources) {
+			if (source.hasPendingInterrupt()) {
+				int vector = source.vector();
+				source.acknowledge();
+				return vector;
+			}
+		}
+		return -1;
+	}
 
 }

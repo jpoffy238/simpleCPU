@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.mj.Devices.AddressRange;
+import com.mj.Devices.VectoredInterruptController;
 import com.mj.z80.Flags;
 import com.mj.z80.Z80CPU;
 import com.mj.z80.Z80InstructionDecoder;
@@ -217,6 +219,29 @@ public class Test_Interrupt {
 		assertEquals(0x1FFE, cpu.sp);
 		assertEquals(0x34, machine.memoryBus().read(0x1FFE) & 0xff);
 		assertEquals(0x12, machine.memoryBus().read(0x1FFF) & 0xff);
+	}
+
+	@Test
+	public void serviceInterruptsPrefersARegisteredVectorSourceOverTheManualOverrideField() throws Exception {
+		cpu.pc = 0x1234;
+		cpu.sp = 0x2000;
+		cpu.iff1 = true;
+		cpu.interruptMode = 2;
+		cpu.i = 0x40;
+		cpu.pendingInterruptVector = 0x99; // must be ignored once a real source is registered
+		VectoredInterruptController controller = new VectoredInterruptController(machine.portBus(),
+				new AddressRange(0x05, 0x05));
+		machine.portBus().registerDevice(controller);
+		machine.portBus().write(0x05, (byte) 0x10); // software loads the vector, the real IM2 setup step
+		machine.memoryBus().write(0x4010, (byte) 0x00);
+		machine.memoryBus().write(0x4011, (byte) 0x80);
+
+		controller.requestInterrupt();
+
+		assertTrue(cpu.serviceInterrupts());
+		assertEquals(0x8000, cpu.pc, "should use the controller's own vector ($10), not pendingInterruptVector");
+		assertFalse(controller.hasPendingInterrupt(), "presenting the vector is itself the acknowledgment");
+		assertFalse(machine.portBus().IsInterruptRaised());
 	}
 
 	@Test
