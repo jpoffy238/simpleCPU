@@ -1,81 +1,118 @@
 # simpleCPU Architecture
 
-A Java emulator for the NMOS 6502, built bottom-up: a validated CPU core,
-a CPU-agnostic device/bus layer, a two-ROM BIOS/monitor split, and a
-WD179x-style floppy disk subsystem. This document describes how those
-pieces fit together as of the `modules/cpu/6502` + `modules/Devices` +
-`modules/Disk` split (post BIOS/monitor ROM separation).
+Two Java-emulated CP/M-era CPUs - a validated NMOS 6502 core and a Z80 core
+built up the same way after it - sharing a CPU-agnostic device/bus layer, a
+disk subsystem, a CRTC-style video device, and (since both run the same
+CP/M-flavored DOS) a shared C codebase for BDOS/CCP/BIOS-primitive glue.
+This document describes how all of that fits together as of 2026-11-20.
 
 ## Module layout
 
 ```
 modules/
   Devices/        CPU-agnostic bus: Device/PBus/DeviceBus/AddressRange,
-                   VIA6522, ConsoleDevice, RTC, device exceptions.
+                   InterruptLine, VIA6522 (6502-only hardware), RTC,
+                   InterruptVectorSource (Z80 IM2 support), device exceptions.
+  Disk/            FloppyController (WD179x-style, shared by both CPUs) and
+                   file-backed virtual disks (VirtualDisk/FileVirtualDisk/
+                   IBM3740); CpmFileSystem/CpmDiskTool (host-side CP/M
+                   filesystem reference); Imd/ (reads real period .IMD CP/M
+                   disk images).
+  Video/           VideoController - a CRTC-style display controller, the
+                   sole console on both CPUs (text + 320x200 1bpp graphics).
   cpu/6502/        The 6502 core (com.mj.cpu001.CPU), the interactive
-                   CPUMain entry point, and the firmware (src/main/asm).
-  Disk/            FloppyController (WD179x-style) and file-backed
-                   virtual disks (VirtualDisk/FileVirtualDisk/IBM3740).
-  Video/           Reserved for a future graphics device - not yet
-                   implemented, not registered in the root build.
+                   CPUMain entry point, and the 6502-specific firmware
+                   (src/main/asm: BIOS.asm/MONITOR.asm, hand-assembled via
+                   crasm).
+  cpu/z80/         The Z80 core (com.mj.z80.Z80CPU), the interactive Z80Main
+                   entry point, and the Z80-specific firmware (src/main/asm:
+                   BIOS.z80, hand-assembled via the z80-asm toolchain).
+  cpu/c-shared/    Plain C source (not a Maven module) shared unchanged
+                   between both CPUs: bios.h/bdos.h, bios_util.c, bdos.c,
+                   ccp.c, edit.c, graphics.c, hello.c. Compiled by cc65 for
+                   the 6502 side, SDCC for the Z80 side.
 ```
 
-`Devices` exists as its own module so that a future non-6502 CPU core could
-reuse the same bus/VIA/console without duplicating them - `cpu/6502` and
-`Disk` both depend on it, but it depends on neither.
+`Devices`/`Disk`/`Video` exist as their own modules specifically so a second
+CPU core could reuse them without duplicating anything - and that's exactly
+what happened: `cpu/z80` depends on all three unchanged, the same way
+`cpu/6502` does. Neither CPU module depends on the other.
 
 ## The bus
 
-Every device (`Device` interface) sits behind a shared `PBus`
-(`DeviceBus` is the concrete implementation). A device registers an
-`AddressRange`; `DeviceBus.read()/write()` linearly scans registered ranges
-to find the device that `contains()` a given address and delegates to it.
-There's no bank switching or address decoding beyond this - a read/write to
-an address with no device behind it throws `DeviceUnavailable`, which the
-CPU treats as a recoverable bus fault (see below), not a crash.
+Every device (`Device` interface) sits behind a shared `PBus` (`DeviceBus`
+is the concrete implementation). A device registers an `AddressRange`;
+`DeviceBus.read()/write()` linearly scans registered ranges to find the
+device that `contains()` a given address and delegates to it. There's no
+bank switching or address decoding beyond this - a read/write to an address
+with no device behind it throws `DeviceUnavailable`, which the 6502's
+`CPU.run()` treats as a recoverable bus fault (see below), not a crash.
 
-## CPU core
+**Two independent buses on the Z80 side.** The 6502 has one unified address
+space; the Z80 has a real `/IORQ` vs `/MREQ` pin distinction, modeled as two
+separate `DeviceBus` instances - `memoryBus` for every ordinary instruction,
+`portBus` for `IN`/`OUT` alone. `Z80CPU` holds both. A port-space device
+(`FloppyController`, `VideoController`'s register set, `RTC`,
+`VectoredInterruptController`) uses the exact same `Device`/`AddressRange`
+machinery as a memory-mapped one - just registered on the port bus with a
+narrow range instead of the full 64K memory one. No changes were needed in
+`modules/Devices` itself to support this.
+
+**`InterruptLine`** (`modules/Devices`, one method: `raiseInterrupt()`) is
+what lets a CPU-agnostic device like `FloppyController` depend on "something
+it can interrupt" without depending on *which* interrupt controller a given
+machine uses - the 6502 side passes a lambda wrapping a `VIA6522` call (real
+period hardware for that CPU); the Z80 side passes one wrapping
+`portBus.raiseInterupt()` directly, or (for RTC) a
+`VectoredInterruptController`'s `requestInterrupt()` - more period-correct
+for a Z80 machine, which has no business needing a 6502-only VIA just to
+share this class.
+
+## 6502 CPU core
 
 `com.mj.cpu001.CPU` is the 6502 itself: registers, flags, the fetch/decode/
-execute loop (`run()`), and the stack (hardwired to `$0100-$01FF`, as on
-real hardware). Most instructions are table-driven (`Firmware.Table`);
+execute loop (`run()`), and the stack (hardwired to `$0100-$01FF`, as on real
+hardware). Most instructions are table-driven (`Firmware.Table`);
 execution-flow instructions (`JMP`/`JSR`/`RTS`/`RTI`/`BRK`/branches) and the
 project-specific `MIH` ("maskable interrupt handler" injection) and `HLT`
 instructions are hand-written in `Firmware.ExecutionFlow`. `HLT` is a
 project-specific instruction (not real 6502) used by unit tests to signal
 "this program is done" - it halts the whole emulated CPU and is never meant
-to be used by real firmware.
+to be used by real firmware. `CPU` itself `extends Thread`, running on its
+own thread so Swing's event dispatch thread (video) stays responsive.
 
 ### Interrupts and the bus-fault vector
 
 `fetchInstruction()` checks for a pending interrupt before every opcode
 fetch, injecting a synthetic `MIH` instruction that reads the right vector
-and transfers control, same as real 6502 hardware timing. Three vector
-pairs exist: NMI (`$FFFA`), RESET (`$FFFC`), IRQ (`$FFFE`) - standard 6502 -
-plus one project-specific extension:
+and transfers control, same as real 6502 hardware timing. Three vector pairs
+exist: NMI (`$FFFA`), RESET (`$FFFC`), IRQ (`$FFFE`) - standard 6502 - plus
+one project-specific extension:
 
 - **`VECTOR_FAULT` ($FFF8)**: reading or writing an address with no device
   behind it throws `DeviceUnavailable`. Rather than halting the emulated
-  machine outright, `CPU.run()` pushes PC+status (like a real interrupt)
-  and jumps through this vector, giving firmware a chance to recover. The
-  monitor ROM's fault handler discards the pushed state and returns
-  straight to the prompt rather than attempting `RTI`, since resuming the
-  faulting instruction would just fault again.
+  machine outright, `CPU.run()` pushes PC+status (like a real interrupt) and
+  jumps through this vector, giving firmware a chance to recover. The
+  monitor ROM's fault handler discards the pushed state and returns straight
+  to the prompt rather than attempting `RTI`, since resuming the faulting
+  instruction would just fault again.
 
 ### Interrupt aggregation (VIA6522)
 
-Every device that wants to interrupt the CPU goes through a `VIA6522`
-(real MOS 6522 register semantics for IFR/IER) rather than touching the
-bus's shared IRQ line directly - the VIA is the single point that
-aggregates per-device interrupt sources onto that one line, same as real
-hardware. Only the interrupt subsystem (IFR/IER) is functional; ports,
+Every 6502-side device that wants to interrupt the CPU goes through a
+`VIA6522` (real MOS 6522 register semantics for IFR/IER) rather than
+touching the bus's shared IRQ line directly - the VIA is the single point
+that aggregates per-device interrupt sources onto that one line, same as
+real hardware. Only the interrupt subsystem (IFR/IER) is functional; ports,
 timers, and the shift register are addressed but inert. Current sources:
-`RTC` via `FLAG_T1`, `FloppyController` via `FLAG_CB1`, `ConsoleDevice` via
-`FLAG_CA1` (gated by its own control-register interrupt-mode bit).
+`RTC` via `FLAG_T1`, `FloppyController` via `FLAG_CB1`.
 
-## Memory map
+## 6502 memory map
 
-The address space as `CPUMain`/`Test_BIOS` wire it up:
+The address space as `CPUMain` wires it up (every test fixture that boots
+real firmware - `Test_BIOS`, `Test_CCP`, `Test_Edit` - duplicates this same
+layout by hand, since there's no shared "6502 machine" constructor the way
+`Z80VideoDiskMachine` is on the Z80 side):
 
 ```
 $0000-$00FF   Zero page (monitor-private vars + the BIOS-call ABI's
@@ -83,43 +120,44 @@ $0000-$00FF   Zero page (monitor-private vars + the BIOS-call ABI's
 $0100-$01FF   Stack (fixed by 6502 hardware)
 $0200-$02FF   INBUF (the monitor's command-line buffer)
 $0300-$7FFF   BOOTADDR onward - where B loads CCP.COM's content; any file
-              beyond a page or so runs well past the $0300-$03FF page
-              into the free RAM beyond it, which is expected, not a
-              collision
+              beyond a page or so runs well past the $0300-$03FF page into
+              the free RAM beyond it
 $8000-$81FF   BDOS's own working RAM (directory-scan position, "currently
               open"/"currently being written" file state, block-allocation
-              bitmap, sector buffer) - plain `basicMemory`, not part of the
+              bitmap, sector buffer) - plain basicMemory, not part of the
               ROM chip below, since BDOS's C code writes to it at runtime
-              (see BDOS below)
-$8200-$8FFF   Unmapped (a bus access here faults, recoverably)
+$8200-$9024   Unmapped except the MMIO cluster below
 $9000-$900F   VIA6522
 $9010-$9014   FloppyController (status/command, track, sector, data,
               drive-select)
-$9015-$9FFF   Unmapped ($9100 is `Test_BIOS`'s fault-recovery probe address)
-$A000-$B7FF   ROM chip 3: BDOS (see Firmware below) - sized generously
-              (6KB) relative to what BDOS actually uses, since this whole
-              range was otherwise free address space anyway
-$EC00-$EC01   ConsoleDevice (data, status/control)
-$F000-$F7FF   ROM chip 1: BIOS primitives (see Firmware below)
+$9020-$9024   VideoController's register set (CRTC Address/Data, keyboard
+              data/status, Mode Control)
+$9025-$9028   RTC (big-endian Unix-epoch-seconds, read-only, 4 bytes)
+$9029-$9FFF   Unmapped ($9100 is Test_BIOS's fault-recovery probe address)
+$A000-$B7FF   ROM chip 3: BDOS
+$B800-$BFFF   VideoController's character RAM (text mode)
+$C000-$DFFF   VideoController's graphics RAM (320x200 1bpp, MODE_GRAPHICS)
+$F000-$F7FF   ROM chip 1: BIOS primitives
 $F800-$FFFF   ROM chip 2: Monitor, including the hardware + fault vectors
 ```
 
-Zero page, stack, and RAM up to `$7FFF` are plain `basicMemory`. The gap
-between `$B800` and `$EBFF`, and between `$ED00` and `$EFFF`, is
-deliberately left unmapped rather than packed tight, matching how real
-systems leave room between device address windows.
+Zero page, stack, and RAM up to `$7FFF` are plain `basicMemory`. `RTC`'s own
+address here deliberately differs from the `$A000` it uses in the
+`CPU_CreateUtil` test-scratch bus (see RTC below) - that address would
+collide with BDOS ROM in the real machine.
 
 ## Firmware: a three-ROM BIOS/monitor/BDOS split
 
 The firmware is split into three ROM chips (three `basicROM` instances),
 mirroring real systems that had distinct BIOS, monitor/BASIC, and (in
 spirit) BDOS ROM sockets - though unlike the first two, BDOS is cc65-
-compiled C, not hand assembly:
+compiled C, not hand assembly.
 
 ### BIOS.asm - primitives ROM ($F000-$F7FF)
 
-Raw hardware access only - console I/O and disk I/O - no command parsing
-or filesystem concepts. Exposes a fixed, frozen jump table at `$F000`:
+Raw hardware access only - console, disk, graphics, and RTC I/O - no
+command parsing or filesystem concepts. Exposes a fixed, frozen jump table
+at `$F000`:
 
 | Address | Routine             | Calling convention |
 |---------|----------------------|---------------------|
@@ -130,36 +168,27 @@ or filesystem concepts. Exposes a fixed, frozen jump table at `$F000`:
 | `$F00C` | `BIOS_WRITE_SECTOR`  | A = track, X = sector, ADDRLO/ADDRHI = src |
 | `$F00F` | `BIOS_FORMAT_TRACK`  | A = track, X = fill byte (one track only) |
 | `$F012` | `BIOS_RESTORE`       | no parameters - homes the selected drive to track 0 |
+| `$F015` | `BIOS_VIDEO_INIT`    | no parameters - one-time CRTC setup, clears the screen |
+| `$F018` | `BIOS_GOTOXY`        | A = row (0-23), X = col (0-79) |
+| `$F01B` | `BIOS_GRAPHICS_MODE` | A = MODE_TEXT or MODE_GRAPHICS |
+| `$F01E` | `BIOS_SET_PIXEL`     | A = row (0-199), X = on/off, zero-page ADDRLO/ADDRHI = column (0-319), staged beforehand |
+| `$F021` | `BIOS_GET_TIME`      | no parameters; zero-page ADDRLO/ADDRHI = destination 4-byte buffer - copies RTC's counter there as a little-endian `unsigned long` |
 
 Each slot is a `JMP` to the real implementation below it - moving an
 implementation is always safe as long as its slot still jumps to the right
-place. `MONITOR.asm` is assembled completely separately (no shared symbol
-table between the two files), so it hardcodes these same six addresses as
-constants - a frozen ABI, documented in both files, that must be kept in
-sync by hand if anything here ever moves.
+place. `MONITOR.asm` and `bios_glue.s` are assembled completely separately
+from `BIOS.asm` (no shared symbol table), so both hardcode these same
+addresses as constants - a frozen ABI that must be kept in sync by hand if
+anything here ever moves.
 
 ### MONITOR.asm - monitor ROM ($F800-$FFFF)
 
 The `COMMAND ARGUMENTS`-style command interpreter, and the thing the reset
-vector actually lands in. Never touches `CONSOLE_DATA`/`FD_STATUS`/etc.
-directly - only the jump table above. Also owns the hardware vector table
-(`$FFFA-$FFFF`) and the fault vector (`$FFF8`), embedded directly via `DW`
-directives, since reset should land in the monitor and fault recovery
-("print `?`, return to the prompt") is monitor policy, not a hardware
-primitive.
-
-NMI and RESET both vector through `RESET_INIT`, not straight to `LOOP`:
-it selects drive 0 and issues `BIOS_RESTORE` before falling into the normal
-prompt loop, so a reset always finds the hardware in a known state
-regardless of what a previous program (a future DOS, say) left the
-drive/track selection as. This is a belt-and-suspenders robustness measure,
-not a correctness requirement - the monitor's own ROM code never needs
-"restoring" after something else runs, since ROM is write-protected and the
-reset vector is unconditional (a reset always lands back here no matter
-what was executing), so the monitor was never actually torn down, just not
-the thing currently running. IRQ isn't meaningfully used by this system
-yet, and conceptually shouldn't re-init hardware mid-operation even if it
-were, so it goes straight to `LOOP`.
+vector actually lands in. Never touches hardware registers directly - only
+the jump table above. Also owns the hardware vector table (`$FFFA-$FFFF`)
+and the fault vector (`$FFF8`), embedded directly via `DW` directives, since
+reset should land in the monitor and fault recovery ("print `?`, return to
+the prompt") is monitor policy, not a hardware primitive.
 
 Commands:
 
@@ -175,58 +204,33 @@ Commands:
 | `P` | `P <track> <sector> <addr>` | write one sector from memory to disk |
 | `B` | `B` | boot: find `CCP.COM` via BDOS, load it to `BOOTADDR`, and JSR there |
 
-`B` no longer reads track 0 at all. It asks BDOS to find a file named
-`CCP.COM` (`BDOS_FIND_FILE`), then repeatedly asks for its next 128-byte
-record (`BDOS_READ_RECORD`), appending each one at `BOOTADDR` onward,
-exactly the way real CP/M's cold loader found and loaded its own CCP - a
-file in the directory, not a fixed, hand-maintained boot area. If `CCP.COM`
-isn't found, `B` prints `?` and returns to the prompt, same as an unknown
-command. This replaced an earlier convention where track 0 sector 1 was a
-1-byte header (how many 128-byte code sectors followed, capped at 25 so
-loading could never spill into track 1+) and sectors 2 onward were the raw
-code - abandoned because the cap (3200 bytes) was already tight against a
-cc65-compiled shell (CCP.COM, with `DIR`/`TYPE`/`ERA`/`COPY`, is in the low
-thousands of bytes), where a CP/M file's size - now that BDOS supports
-multi-extent files (see CP/M filesystem below) - isn't capped at all short
-of running out of disk. Track 0 is still reserved/unused by the filesystem
-- just not read by `B` anymore.
-
-All three ROMs load via `basicROM`'s privileged constructor-time path (the
-file is read and written directly into the backing array, bypassing the
-normal write-protection check) rather than the plain-bus-write loader
-(`CPU_CreateUtil.load()`) used for test programs that are genuinely meant
-to live in RAM - these ROMs are truly write-protected at runtime. BDOS's is
-a raw binary (`loadBinary()`), not Intel HEX (`load()`) - see BDOS below.
+`B` asks BDOS to find a file named `CCP.COM` (`BDOS_FIND_FILE`), then
+repeatedly asks for its next 128-byte record (`BDOS_READ_RECORD`), appending
+each one at `BOOTADDR` onward - real CP/M's own cold-loader mechanism, a
+file in the directory rather than a fixed boot area. If `CCP.COM` isn't
+found, `B` prints `?` and returns to the prompt.
 
 **Self-modifying code and real write protection.** `E`'s implementation has
 no way to `JSR` to a runtime-computed address (6502 `JSR` only takes a
-literal operand), so it writes a fresh `JSR <addr>` instruction into a
-small scratch area before calling it - the classic monitor-ROM
-self-modifying-code technique. That scratch area has to live in zero page
-(writable RAM), not inline in the ROM's own code: an earlier version kept
-it inline, which worked back when the whole BIOS loaded into RAM via plain
-bus writes, but broke the instant the monitor became a real ROM (`STA`
-into ROM throws `ROException`, which `CPU.run()` just logs and continues -
-the patch silently never happened).
+literal operand), so it writes a fresh `JSR <addr>` instruction into a small
+scratch area in zero page (writable RAM, not ROM) before calling it - the
+classic monitor-ROM self-modifying-code technique.
 
 **Branch-range safety.** `DISPATCH`'s command-letter comparisons branch to
 small, nearby `JMP` stubs rather than branching to the real handlers
-directly. A direct `BEQ` must reach its target within a single signed byte
-(-128..127); as commands were added, the handler blocks for letters
-checked early in the chain kept landing outside that range (hit twice:
-once in `CMD_DUMP`'s dump loop, once in `DISPATCH` itself). Indirecting
-through one-instruction `JMP` stubs - which have no range limit - closes
-off that whole bug class instead of re-patching it per command.
+directly, since a direct `BEQ` is capped at a single signed byte (-128..127)
+and kept getting exceeded as commands were added.
 
 ### BDOS - filesystem ROM ($A000-$B7FF)
 
-The CP/M filesystem logic (directory scan, find file by name, read a
-file's content record by record) - see CP/M filesystem below for the
-on-disk format itself. Unlike BIOS.asm/MONITOR.asm, this is cc65-compiled C
-(`bdos.c`), not hand assembly - exactly the C toolchain described under
-cc65 below, used for its first real piece of ROM-resident firmware rather
-than just a RAM-loaded program. Exposes its own fixed, frozen jump table at
-`$A000` (`bdos_jumptable.s`), same contract as BIOS's:
+The CP/M filesystem logic (directory scan, find file by name, read/write a
+file's content record by record, rename, run a file as a program) - see CP/M
+filesystem below for the on-disk format itself. Unlike BIOS.asm/MONITOR.asm,
+this is C (`bdos.c`, `modules/cpu/c-shared`) - compiled by cc65 for the 6502
+build, SDCC for the Z80 build, identically except two small `#ifdef`s (see
+c-shared below). Exposes its own fixed, frozen jump table at `$A000`
+(`bdos_jumptable.s` for 6502, `bdos_jumptable.asm` for Z80 - same addresses
+on both CPUs, for easy cross-CPU comparison):
 
 | Address | Routine | Calling convention |
 |---------|---------|---------------------|
@@ -237,263 +241,406 @@ than just a RAM-loaded program. Exposes its own fixed, frozen jump table at
 | `$A00C` | `BDOS_DELETE_FILE` | ADDRLO/ADDRHI = filename (null-terminated); returns A = 1 deleted / 0 not found |
 | `$A00F` | `BDOS_CREATE_FILE` | ADDRLO/ADDRHI = filename (null-terminated); returns A = 1 created / 0 (exists, or directory full) |
 | `$A012` | `BDOS_WRITE_RECORD` | ADDRLO/ADDRHI = 128-byte source; returns A = 1 written / 0 (directory or disk full) |
+| `$A015` | `BDOS_ENTRY_SIZE` | ADDRLO/ADDRHI = the entry `BDOS_NEXT_ENTRY` just filled; returns `unsigned int` total record count across every extent |
+| `$A018` | `BDOS_RENAME_FILE` | ADDRLO/ADDRHI = "NEWNAME\0OLDNAME\0"; returns A = 1 renamed / 0 not found |
+| `$A01B` | `BDOS_RUN_FILE` | ADDRLO/ADDRHI = filename; loads it to `BOOTADDR` and jumps in - does **not** return normally if found (see `bdos.c`'s own comment) |
+| `$A01E` | `BDOS_FREE_BLOCKS` | no parameters; returns `unsigned int` free block count |
 
 Every primitive reuses `ADDRLO`/`ADDRHI` (the same pair `BIOS_READ_SECTOR`/
-`BIOS_WRITE_SECTOR` already use) rather than adding a second pointer ABI -
-input for `BDOS_FIND_FILE`/`BDOS_DELETE_FILE`/`BDOS_CREATE_FILE`, output
-for the rest. `BDOS_FIND_FILE`/`BDOS_READ_RECORD` are stateful across calls
-(BDOS remembers which file is "open for reading" and how far into it
-`BDOS_READ_RECORD` has read); `BDOS_CREATE_FILE`/`BDOS_WRITE_RECORD` are
-*separately* stateful the same way (which file is "open for writing," its
-accumulated block list and record count) - kept as two independent state
-blocks rather than one shared one, so a program could in principle have a
-read and a write open at once, even though `CCP.COM`'s only such caller
-today (`COPY`) happens to fully read before each write. Both pairs,
-plus `BDOS_REWIND_DIR`/`BDOS_NEXT_ENTRY`'s directory scan position, are
-plain C statics in `bdos.c` rather than locals, for the same reason.
-
-`BDOS_CREATE_FILE` builds a used-block bitmap (32 bytes, one bit per
-block, covering all 243 blocks this geometry has) from a single directory
-scan - the same scan that also checks for a name collision and finds a
-free directory entry - then creates a zero-length file immediately
-visible to `BDOS_NEXT_ENTRY`/`BDOS_FIND_FILE`, same as real CP/M's F_MAKE.
-`BDOS_WRITE_RECORD` allocates a new block from that bitmap every 8 records
-(1KB) and rewrites the directory entry after *every* record rather than
-needing a separate "close" primitive - simpler, and crash-resilient (a
-mid-write abort leaves a file a few records short, never a corrupt entry
-pointing at garbage blocks). `BDOS_DELETE_FILE` just flips a status byte -
-a block only counts as "used" by virtue of being referenced from a
-non-empty directory entry, so clearing the entry frees its blocks
-implicitly, with no separate bookkeeping to update.
+`BIOS_WRITE_SECTOR` already use) rather than adding a second pointer ABI.
+Most return `unsigned char` (1/0) via the standard single-byte A return;
+`BDOS_ENTRY_SIZE`/`BDOS_FREE_BLOCKS` return `unsigned int` via the standard
+16-bit return (cc65: A low/X high; SDCC: HL).
 
 **Multi-extent files** (see CP/M filesystem below for what an "extent" is)
 are transparent to a caller of any of these primitives - `BDOS_READ_RECORD`
-and `BDOS_WRITE_RECORD` cross from one extent into the next on their own,
-without the caller ever knowing a boundary was crossed. Each direction
-keeps only *one* extent's state in memory at a time (16 block pointers),
-not every extent up front, so a huge file costs no more RAM than a small
-one: `BDOS_READ_RECORD`, on exhausting the current extent, checks whether
-it was full (128 records - real CP/M's own signal that more extents
-follow) and if so re-scans the directory for `EX + 1` before continuing;
-`BDOS_WRITE_RECORD` does the mirror image, starting a fresh extent (a new
-directory entry, same name, `EX` one higher) once the current one's 16
-blocks are full. `BDOS_NEXT_ENTRY`/`BDOS_DELETE_FILE` both filter to/walk
-only `EX == 0` and beyond respectively, so a multi-extent file shows up
-once in a directory listing, not once per extent, and deleting one frees
-every extent's blocks, not just the first's.
+and `BDOS_WRITE_RECORD` cross from one extent into the next on their own.
+Each direction keeps only *one* extent's state in memory at a time (16 block
+pointers), not every extent up front.
 
-Called two different ways, both external to `bdos.c`'s own compiled
-binary - BDOS.bin is never linked together with a caller, since they're
-separate `cl65` builds:
+**`BDOS_RUN_FILE`** (CP/M's "type a name to run it") loads a named file to
+`BOOTADDR` and jumps in; when the loaded program returns, BDOS reloads
+`CCP.COM` fresh (real CP/M's "warm boot") rather than returning to a caller
+whose own code may no longer exist in memory. On the Z80 side this needed a
+dedicated minimal crt0 (`cpm_crt0.asm`, just `call _main / ret`, no SP reset,
+no BSS zeroing) rather than SDCC's own default one - see the Z80 section
+below.
 
-- `MONITOR.asm` (hand assembly) JSRs straight to the fixed addresses above -
-  this is how `B` finds and loads `CCP.COM` (see Commands above).
-- Any cc65-compiled program calls through `bdos_glue.s`'s thin JSR stubs,
-  declared in `bdos.h` - from that program's own C code (`ccp.c`'s `DIR`/
-  `TYPE`, say), it looks like an ordinary function call.
+**No crt0 for BDOS itself**, on either CPU - nothing ever calls BDOS's
+reset-style entry point, only the jump table's individual slots, so the
+usual startup sequence (init stack pointer, zero BSS, call `main()`) never
+runs. On the 6502 side this meant `MONITOR.asm`'s `DI_BOOT` has to
+initialize cc65's software stack pointer once, at the very first BDOS call
+ever, before any program's own crt0 has run (confirmed the hard way: with
+`sp` garbage, BDOS's own internal division/modulo calls - which touch `sp`
+indirectly via cc65's runtime helpers - corrupted ROM-adjacent memory). The
+Z80 side has no equivalent gotcha: Z80's SP is a real hardware register the
+CPU manages via `CALL`/`RET`, not an emulated software stack pointer.
 
-**Two memory regions, not one.** `bdos.cfg` (the linker config) splits
-BDOS's code (the jump table plus `bdos.c`'s compiled functions - what
-`cl65` actually produces as `bdos.bin`) from its working state (the
-directory-scan position, "currently open file" block list, sector buffer -
-plain C statics that get written to at runtime). The first is real,
-write-protected ROM at `$A000-$B7FF`; the second needs to be writable RAM,
-so it's a separate `$8000-$81FF` region with no corresponding bytes in
-`bdos.bin` at all (`bdos.cfg`'s `BSS` memory area has an empty `file=`) -
-Java's `basicMemory` backing array starts zeroed anyway, which is all a
-BSS region needs. `CPUMain`/`Test_BIOS` register a plain `basicMemory` for
-that RAM and a `basicROM` (loaded via the new `loadBinary()`, not the
-Intel-hex `load()` BIOS.hex/MONITOR.hex use - cc65/`ld65` has no Intel HEX
-output mode) for the ROM.
-
-**No crt0.** Nothing ever JSRs to BDOS's reset-style entry point - only to
-the jump table's individual slots - so cc65's usual startup sequence
-(initialize the software stack pointer `sp` at zero page `$0F`/`$10`, zero
-BSS, call `main()`) never actually runs here. Zeroed BSS falls out of
-Java's array default anyway, but `sp` sitting uninitialized at the *first*
-BDOS call ever (`B`'s boot sequence, before any program's own crt0 has
-run) is a real hazard: nearly everything in `bdos.c` touches `sp`
-indirectly, since `index / SECTORS_PER_TRACK`-style division/modulo by a
-non-power-of-2 constant compiles to a call through cc65's `udiv16`/`umod`
-runtime helpers, which push/pop through it like any other multi-parameter
-call. Confirmed the hard way (2026-11-05): with `sp` garbage, those pushes
-landed on a ROM address, logged as a continuous flood of identical
-"RO Memory Write attempt" errors at the same PC (the CPU doesn't advance;
-it keeps retrying the faulting instruction). Fixed in `MONITOR.asm`'s
-`DI_BOOT`: initialize `sp` to `$8000` (matching `__STACKSTART__`, so
-`CCP.COM`'s own crt0 sets the identical value once it's running) once, at
-the very first BDOS call - never repeated on a later call, since that
-would stomp whatever `CCP.COM` has already pushed onto that same stack by
-then. (`bdos_find_file()` additionally keeps its one local that used to be
-a small array, `fcb_name`, as a file-scope static instead - cheap
-insurance against a local array landing on the stack before it's known to
-be safely initialized, independent of the `sp`-init fix above.)
-
-**A second gotcha, same debugging session:** any BDOS primitive that reads
-a disk sector internally (`BDOS_NEXT_ENTRY`/`BDOS_READ_RECORD`) leaves
-`ADDRLO`/`ADDRHI` pointing at BDOS's own sector buffer when it returns,
-not wherever the caller last set them. A caller looping over multiple
-records (`DI_BOOT` loading a multi-record `CCP.COM`, or `ccp.c`'s
-`cmd_dir`/`cmd_type`/`cmd_copy`) has to track its own running
-pointer/buffer separately and restage `ADDRLO`/`ADDRHI` fresh before
-*every* call - `DI_BOOT` missed this initially (reusing `BYTEVAL`/
-`TRACKVAL`, unused during `B`, to track the real destination now) and
-silently loaded everything past the first record to the wrong address.
+**Two memory regions, not one** (6502 side). `bdos.cfg` (the linker config)
+splits BDOS's code (the jump table plus `bdos.c`'s compiled functions - what
+`cl65` produces as `bdos.bin`) from its working state (directory-scan
+position, open-file block lists, sector buffer - plain C statics written at
+runtime). The first is real, write-protected ROM at `$A000-$B7FF`; the
+second is a separate `$8000-$81FF` RAM region with no corresponding bytes in
+`bdos.bin` at all.
 
 ## Disk subsystem
 
-`FloppyController` (`modules/Disk`) is a WD179x-style register set:
+`FloppyController` (`modules/Disk`, shared unchanged by both CPUs) is a
+WD179x-style register set:
 
 ```
 +0  Status (read) / Command (write)
 +1  Track
 +2  Sector
 +3  Data
-+4  Drive Select (0-3)
++4  Drive Select (0-7 - a real 3-line drive-select field; only as many
+    drives as attachDrive() actually wires up report ready)
 ```
 
 Commands (upper nibble of the command byte): `$0x` Restore, `$1x` Seek,
-`$8x` Read Sector, `$Ax` Write Sector, `$Fx` Format Track. Up to 4
-`FloppyDevice`s can be attached (`attachDrive(0..3, device)`); `IBM3740`
-is the only implementation so far - 1 head, 76 tracks (0-indexed), 26
-sectors/track (1-indexed, matching the real IBM 3740's Rec# field),
+`$8x` Read Sector, `$Ax` Write Sector, `$Fx` Format Track. `IBM3740` is the
+only `FloppyDevice` implementation so far - 1 head, 76 tracks (0-indexed),
+26 sectors/track (1-indexed, matching the real IBM 3740's Rec# field),
 128-byte sectors. Only the sector payload is emulated - gap/sync/AM/CRC
-wire-format bytes are explicitly out of scope.
+wire-format bytes are explicitly out of scope. It takes an `InterruptLine`
+(see above) rather than a hardware-specific interrupt controller, which is
+what let the Z80 side reuse it with zero code changes.
 
 Each drive is backed by a `VirtualDisk` (`FileVirtualDisk` is the only
 implementation): a flat, track-ordered file prefixed with a 16-byte
 self-describing header (`"SCPU"` magic + heads/tracks/sectors/sectorSize).
-`create()` writes this header and truncates-then-extends the file so
-re-formatting an existing image actually blanks it, not just resizes it.
-`open()` validates an existing file's header against the caller's expected
-geometry (validate-only, not geometry-discovering) - a drive type like
-`IBM3740` always knows its own fixed geometry and rejects a mismatched
-image rather than adapting to whatever's on disk.
 
 Read/Write Sector transfer one byte at a time through the Data register,
-raising a VIA interrupt (`FLAG_CB1`) after each byte except the last -
-real interrupt-per-byte DRQ timing. Format Track and Seek/Restore complete
-synchronously within a single register write, with one completion
-interrupt, since there's no actual multi-step BUSY period to emulate.
-`MONITOR.asm`'s `L`/`P` commands don't service these interrupts at all -
-they just drain/feed the Data register in a tight loop, which works
-because the whole transfer is already complete by the time the triggering
-`STA FD_STATUS`/`BIOS_READ_SECTOR` call returns.
+raising an interrupt after each byte except the last - real interrupt-per-
+byte DRQ timing. Format Track and Seek/Restore complete synchronously
+within a single register write, with one completion interrupt.
+
+## Video (the console on both CPUs)
+
+`VideoController` (`modules/Video`) is a CRTC-style display controller -
+register layout and semantics modeled on the real Motorola 6845 (the chip
+real CP/M-era machines like the Kaypro and Osborne actually used), the sole
+console on both CPUs (it fully replaced an earlier `ConsoleDevice`, which no
+longer exists). Genuinely memory-mapped: the CPU pokes ASCII bytes directly
+into a separate character-RAM device at ordinary addresses, and the
+controller itself only holds the registers that say how to interpret that
+RAM.
+
+Five bytes of register space:
+
+```
++0  Address Register (write-only) - selects which of R0-R17 the next
+    access to +1 refers to
++1  Data Register (read/write) - gets/sets the selected register's value
++2  Keyboard Data (read) - dequeues the next keystroke, or 0 if none queued
++3  Keyboard Status (read) - bit 0 set if a keystroke is queued
++4  Mode Control (read/write) - MODE_TEXT (default) or MODE_GRAPHICS; not
+    one of the real 18 6845 registers - real CGA-class hardware kept this
+    switch in a separate latch outside the CRTC too
+```
+
+All 18 real 6845 registers are readable/writable, but only these drive the
+simplified rendering: **R1** Horizontal Displayed, **R6** Vertical
+Displayed, **R10** Cursor Start (used only as an on/off flag), **R12/R13**
+Display Start Address, **R14/R15** Cursor Address (both as RAM offsets, not
+row/col). Everything else is stored and reads back correctly but isn't
+acted on.
+
+**Hardware scrolling**: `DO_PUTCH` (both `BIOS.asm` files) moves Display
+Start Address by one row on scroll instead of copying every row up or
+wrapping back to row 0 - the CRTC's own `R12`/`R13` do the work, matching
+real period hardware. Character RAM is a 2048-byte ring, bigger than the
+1920 bytes actually visible, so there's always at least one spare row to
+scroll into.
+
+**Graphics mode**: a fixed 320x200 1-bit-per-pixel bitmap, addressed
+row-major (`byteOffset = row*40 + col/8`, MSB-first) - not
+register-configurable, same as real CGA's fixed-resolution modes.
+`BIOS_SET_PIXEL`/`bios_set_pixel()` is the only way into it; `bios_putch()`/
+text rendering keep working on the character RAM underneath regardless,
+same as real CGA hardware kept its text framebuffer intact under a graphics
+mode.
+
+Arrow/Page Up/Down keys queue synthetic codes `0x80-0x85` (`AWT`'s
+`keyTyped` never fires for them) - real extended-keyboard firmware
+convention for "a key with no character."
+
+No vertical-sync interrupt is modeled (`raiseInterrupt()` is a no-op) -
+rendering is driven by a periodic Swing `Timer` once `show()` is called, not
+by individual writes.
 
 ## CP/M filesystem (host-side reference implementation)
 
-`CpmFileSystem` (`modules/Disk`) is a CP/M-style filesystem - the obvious,
-well-documented, genuinely simple choice given the IBM 3740 geometry this
-project already emulates *is* the classic CP/M 8" SSSD disk format. It's a
-flat directory (no subdirectories) of 32-byte entries ("FCBs"), 1KB
-allocation blocks (8 sectors each), track 0 reserved for boot/system use
-(see `B` above), tracks 1-75 as the data area with blocks 0-1 of that area
-as a 64-entry directory. A directory entry ("extent") holds 16 block
-pointers (16KB); a file bigger than that gets *multiple* entries sharing
-its name, distinguished by the `EX` (extent) field at byte 12 - real
-CP/M's own mechanism, implemented here (`createFile()`/`readFile()`/
-`deleteFile()` all walk as many extents as a file needs; `listFiles()`
-filters to `EX == 0` so a multi-extent file is listed once, not once per
-extent). Every extent but a file's last is exactly full (128 records); a
-record count below 128 is how a reader knows it just read the last one -
-no separate end-of-file marker needed. No rename, no subdirectories - real
-CP/M didn't have subdirectories either, and rename is a reasonable later
-addition deliberately left out of this pass (`deleteFile()` exists).
-Record counts, and so file lengths read back, are only tracked to the
-nearest 128-byte record, same limitation as real CP/M. `deleteFile()`
-doesn't touch data blocks at all - a block only counts as "used" by being
-referenced from a non-empty entry (see `usedBlocks()`), so clearing an
-entry's status byte frees its blocks implicitly.
+`CpmFileSystem` (`modules/Disk`) is a CP/M-style filesystem - the obvious
+choice given the IBM 3740 geometry this project emulates *is* the classic
+CP/M 8" SSSD disk format. Flat directory (no subdirectories) of 32-byte
+entries ("FCBs"), 1KB allocation blocks, track 0 reserved for boot/system
+use, tracks 1-75 as the data area. A directory entry ("extent") holds 16
+block pointers (16KB); a file bigger than that gets multiple entries sharing
+its name, distinguished by the `EX` (extent) field - real CP/M's own
+mechanism. Supports create/read/write/delete/rename, all extent-aware.
 
-This operates directly on a `FloppyDevice` - no `FloppyController`/VIA
-needed, since it's pure filesystem logic over raw sector read/write, not
-hardware register access. Crucially, **it never runs inside the emulated
-6502** - there's no bridge between the JVM and the CPU's instruction
-stream. It exists to validate the on-disk byte format (especially the one
-genuinely fiddly bit: block<->(track,sector) translation, since 26
-sectors/track isn't divisible by 8 sectors/block, so blocks routinely span
-a track boundary) against something other than hand-written 6502 code, and
-as `CpmDiskTool`'s host-side CLI (`format`/`put`/`get`/`list`/`erase`/
-`bootimage`) for preparing disk images. The real 6502-resident
-implementation of this same format - BDOS (`bdos.c`, see above) -
-independently implements the *same* on-disk layout, the way one
-prototypes an algorithm on a host before porting it to the real embedded
-target. `bootimage` (write a raw binary onto track 0) predates BDOS and
-`B`'s current find-by-name boot sequence - still usable for writing
-something else to the now-otherwise-unused track 0, but no longer part of
-the `CCP.COM` boot path.
+This operates directly on a `FloppyDevice` - no `FloppyController`
+needed, since it's pure filesystem logic over raw sector read/write.
+Crucially, **it never runs inside either emulated CPU** - it exists to
+validate the on-disk byte format against something other than hand-written
+firmware code, and as `CpmDiskTool`'s host-side CLI (`format`/`put`/`get`/
+`list`/`erase`/`bootimage`) for preparing disk images. BDOS (`bdos.c`)
+independently implements the *same* on-disk layout, the way one prototypes
+an algorithm on a host before porting it to the real embedded target.
 
-## cc65 (C on the 6502 side)
+### Reading real period CP/M disk images
 
-More advanced 6502-side work - the DOS layer, chiefly - is written in C via
-`cc65` rather than hand assembly, specifically because the
-block<->(track,sector) division CP/M's layout needs is exactly the kind of
-thing that's natural in C and genuinely awkward in 6502 asm (no divide
-instruction). `modules/cpu/6502/src/main/c/`:
+`modules/Disk/.../Imd/` reads real `.IMD` (ImageDisk, dunfield.com)
+preservation-format disk images, deliberately kept separate from
+`CpmFileSystem`/BDOS:
 
-- **`bios_glue.s`/`bios.h`** bridge C to `BIOS.asm`'s jump table. Multi-
-  parameter primitives (read/write sector, format track) are split into a
-  "stage one value, then trigger" sequence rather than one function taking
-  every parameter at once, since correctly popping more than one cc65
-  software-stack parameter in hand-written glue isn't worth the risk;
-  `__fastcall__` for a single parameter (received directly in A, no
-  software stack involved) is simple and well-documented.
-- **`bdos_glue.s`/`bdos.h`** likewise bridge C to BDOS's jump table (see
-  BDOS above) - simpler than the BIOS glue, since every BDOS primitive
-  takes its input (if any) via `ADDRLO`/`ADDRHI`, already staged by the
-  caller's own `bios_set_buffer()` call, and returns its result directly
-  in A, so there's no parameter-staging step to write at all.
-- **`bdos.c`/`bdos_jumptable.s`/`bdos.cfg`** are BDOS's own implementation,
-  ROM-side jump table, and linker config - see BDOS above for all three.
-- **`simplecpu.cfg`** is the linker config for RAM-loaded programs
-  (`CCP.COM`, `hello.c`) - not a stock cc65 target, since this is fully
-  custom hardware. Its `ZEROPAGE` segment starts at `$09`, right after
-  `MONITOR.asm`'s own `$00-$08`, and must exactly match `bdos.cfg`'s own
-  `ZEROPAGE` segment - cc65's calling convention (the software stack
-  pointer, `ptr1`-`ptr4`, etc.) has to behave consistently whichever
-  program's compiled code is currently running, since BDOS executes
-  nested inside a caller's own call (a true subroutine call, not the
-  monitor/DOS sequential handoff `B` itself is), not as an independent
-  program with its own exclusive zero page.
-- **`ccp.c`** is CCP.COM: the shell loop, drive switching, `DIR`, `TYPE`,
-  `ERA <name>`, `COPY <src> <dst>` - calling into BDOS for all the
-  filesystem logic itself, same as it calls into BIOS for hardware access.
-  `COPY` interleaves a `BDOS_READ_RECORD`/`BDOS_WRITE_RECORD` pair per
-  record rather than reading the whole source into memory first, safe
-  because BDOS's read-side and write-side state are independent (see BDOS
-  above).
-- **`hello.c`** is a build smoke test - compiles and links into a 192-byte
-  binary. That number is also what originally confirmed a since-abandoned
-  boot-image-size cap was a real, near-term problem (see `B` above).
-- **`Makefile`** builds all of the above with `cl65` - a dedicated rule for
-  BDOS (its own linker config, no generic app glue needed) and one generic
-  rule for every other `.c` file ("app"). `make install` copies `bdos.bin`
-  into both resource directories, the same way the hand-assembly
-  `Makefile` already does for `BIOS.hex`/`MONITOR.hex` - the only cc65
-  output Java loads directly; every other app becomes a file on a disk
-  image by hand, via `CpmDiskTool put`.
+- **`ImdImage`** decodes the ImageDisk container format itself - comment
+  header, per-track mode/cylinder/head/sector-size, the sector numbering
+  map, all 8 real sector-data record variants (including compressed
+  fill-byte runs) - CP/M-agnostic, just the physical container.
+- **`DiskParameterBlock`** + **`CpmImageReader`** then read an actual CP/M
+  directory/files against *configurable* reserved-records/records-per-
+  block/directory-blocks/block-pointer-width, rather than this project's
+  own fixed constants - a genuinely separate reader from `CpmFileSystem`,
+  since the only consumer of that configurability is reading real external
+  images, not this project's own disks.
+- **`ImdTool`** is the CLI (`list`/`get`), validated against a real TRS-80
+  Model II CP/M 2.2 8" disk image - its ~60-file directory lists correctly
+  and a real text file reads back byte-for-byte, confirming this project's
+  own CP/M format understanding against independently-created data.
 
-## Console
+## c-shared: one C codebase, two toolchains
 
-`ConsoleDevice` (`modules/Devices`) is a Swing-backed 80x24 text window -
-no polling thread; `KeyListener` pushes keystrokes directly into a queue.
-Window visibility is opt-in (`show()`), never automatic, because
-`CPU_CreateUtil`'s shared test fixture constructs a `ConsoleDevice` for
-~190 unrelated CPU-instruction tests and must never pop up a window (it
-also skips Swing setup entirely under `GraphicsEnvironment.isHeadless()`).
-Only `CPUMain`, the real interactive entry point, calls `show()`. The
-status register's "data available" bit and queue-depth nibble are computed
-live from the input queue's size on every read, not stored, so they can
-never go stale.
+`modules/cpu/c-shared` (not a Maven module, just files) holds every piece of
+C shared unchanged between both CPUs: `bios.h`/`bdos.h` (declarations),
+`bios_util.c` (`bios_putstr`/`bios_clear_eol`/`bios_clrscr` - ordinary C
+built from existing primitives, no new hardware operation), `bdos.c` (BDOS's
+real implementation, see above), `ccp.c` (the shell), `edit.c` (a full-screen
+editor), `graphics.c`/`hello.c` (demos). Compiled by `cc65`/`cl65` for the
+6502 build, `SDCC` for the Z80 build.
+
+**Bridging C to hand-assembled firmware.** `bios_glue.s`/`bdos_glue.s`
+(6502, ca65 syntax) and `bios_glue.asm`/`bdos_glue.asm` (Z80, sdasz80
+syntax) are each CPU's own thin layer turning a jump-table address into an
+ordinary C function call. Multi-parameter BIOS primitives (read/write
+sector, etc.) use a "stage one value, then trigger" sequence rather than one
+function taking every parameter at once - built for cc65's `__fastcall__`
+limit (one parameter, received directly in register, no software stack
+involved), not any real Z80 limitation (`BIOS.asm`'s own hand-written Z80
+callers pass a second/third value directly in `E`/`HL`). SDCC's own default
+`sdcccall(1)` convention already passes a single byte/word argument in a
+register too, so `bios.h`'s `BIOS_FASTCALL` macro is `__fastcall__` under
+cc65, empty under SDCC - confirmed by compiling probes and reading the
+emitted assembly directly, not just trusting docs.
+
+**A deliberately minimal "project's own time_t."** `bios_get_time()`
+(`unsigned long *out`) takes its pointer directly - a true single parameter,
+so no staging split needed at all, same style as `bios_set_buffer()`. There
+is no `<time.h>` dependency on either toolchain; calendar/display conversion
+lives entirely in `ccp.c` (see CCP below), not in this header.
+
+### CCP.COM (`ccp.c`) - the shell
+
+`DIR`, `STAT`, `DATE`, `TYPE <name>`, `ERA <name>`, `COPY <src> <dst>`,
+`REN newname=oldname`, `SAVE <pages> <filename>`, bare `X:` drive
+switching, and "type a name to run it" (defaulting a missing extension to
+`.COM`) - all calling into BDOS for filesystem logic and BIOS for hardware
+access, never touching either directly. `STAT` prints "XXXk used, YYYk
+free, ZZZk total" via a hand-rolled `print_decimal()` (no `sprintf` - no
+libc headers are included anywhere in this shared C layer on either
+toolchain). `DATE` prints `yyyy-MM-dd HH:mm:ss` from `bios_get_time()` - real
+CP/M 2.2 has no built-in DATE command of its own, this is purely this
+project's own addition, same spirit as `STAT`. Its epoch-to-calendar
+conversion (`epoch_to_civil()`) is a plain year-then-month subtraction loop,
+not a closed-form days-since-epoch formula chaining divisions by awkward
+constants - this runs once per typed command, not once per character, so
+easy-to-trace-by-hand code won over a denser one.
+
+### EDIT.COM (`edit.c`) - a full-screen text editor
+
+A minimal nano-style editor, ported from a third-party C64 program
+(AdveditC64, MIT licensed). Required `BIOS_GOTOXY` (the first way to reach
+an arbitrary screen cell from C) and arrow-key support in `VideoController`.
+File I/O goes through the same BDOS record calls `CCP.COM`'s `TYPE`/`COPY`/
+`SAVE` already use. Open/Save/Exit are Ctrl+O/S/X. Pages larger than one
+screen are handled via a page-swap mechanism (`EDITPxx.$$$` temp files) -
+the thing that originally surfaced the shared BDOS `fcb_name`-clobbering bug
+described in project memory.
+
+## Z80 core
+
+`com.mj.z80.Z80CPU` holds the full register file (including the shadow set,
+`IX`/`IY`, `I`/`R`) plus references to both buses (`memoryBus`/`portBus`).
+Deliberately kept a plain, synchronous object - no threading, no run loop of
+its own - since every instruction test uses it directly; `Z80Main` provides
+the real threaded run loop (`serviceInterrupts()` + `step()` in a tight
+loop, on its own daemon thread, same reasoning the 6502 side's own `CPU`
+class extends `Thread` for).
+
+The instruction set is essentially complete. Deliberately out of scope, not
+forgotten: IM0 (every real use is just `RST n` anyway, which IM1 already
+covers), block I/O (`INI`/`OTIR`/etc. - the owner's own call: the port
+address and the loop counter share a register in a way that's awkward to
+model well, and not a priority gap given real first-hand experience writing
+an actual interrupt-driven print spooler instead of using them), the
+undocumented opcodes (`IXH`/`IXL` direct access, doubled `DD`/`FD` prefixes,
+`SLL`), and cycle-accurate timing.
+
+### Interrupts and IM2 vector wiring
+
+`IFF1`/`IFF2`, `EI`/`DI`, `IM 0/1/2`, `RETN`/`RETI` all work the standard
+way. NMI always wins over a maskable interrupt, is serviced regardless of
+`IFF1`, and jumps to the fixed `$0066` (not `$0038`, IM1's own fixed
+vector). IM1 pushes PC and jumps to `$0038`. **IM2** pushes PC and reads a
+real 16-bit pointer from the vector table at `(I<<8)|vector` - the vector
+byte itself comes from a real device, not a placeholder:
+
+- **`InterruptVectorSource`** (`modules/Devices`: `hasPendingInterrupt()`/
+  `vector()`/`acknowledge()`) plus `PBus.registerInterruptVectorSource()`/
+  `acknowledgePendingVector()` - priority-ordered (first pending source
+  wins), and presenting the vector *is* the acknowledgment, same as real
+  hardware's interrupt-acknowledge cycle.
+- **`VectoredInterruptController`** (`implements Device,
+  InterruptVectorSource`) is the first real source - one register (the
+  vector byte, loaded via a plain `OUT`), modeling a small PIO/CTC-like
+  peripheral rather than living on `FloppyController` directly: real
+  WD179x-style FDCs never had a Z80 vector register themselves, a real
+  system routed the FDC's `INTRQ` line into a separate PIO/CTC chip that
+  did. It registers itself as both a vector source *and* an ordinary
+  port-bus device - two deliberately independent registrations.
+- `Z80CPU.serviceInterrupts()`'s IM2 branch asks
+  `portBus.acknowledgePendingVector()` first, falling back to a manual
+  `pendingInterruptVector` field only when nothing's registered (keeps
+  every raw-CPU-level interrupt test working without a whole device graph).
+
+Making `BIOS.asm` actually use IM2 for a real operation (an interrupt-driven
+disk ISR, rather than the polling it does today) was deliberately scoped out
+when this was built - console and disk I/O are both polling-only in
+practice, despite the CPU-level interrupt machinery existing end to end.
+
+### Z80VideoDiskMachine
+
+The real bootable Z80 machine, mirroring `CPUMain`'s role on the 6502 side.
+Memory bus:
+
+```
+$0000-$B7FF   RAM
+$B800-$BFFF   VideoController's character RAM (same address as the 6502 side)
+$C000-$DFFF   VideoController's graphics RAM (same address as the 6502 side)
+$E000-$FFFF   RAM
+```
+
+Port bus:
+
+```
+$00-$04   VideoController's register set
+$05       VectoredInterruptController (the IM2 vector register)
+$06-$09   RTC (big-endian Unix-epoch-seconds, read-only, 4 bytes)
+$10-$14   FloppyController, wholesale
+```
+
+`FloppyController`'s interrupt line is wired through
+`VectoredInterruptController` rather than straight onto the port bus's
+shared line, matching the real-hardware INTRQ-into-PIO/CTC routing
+described above - `FloppyController` itself needed zero changes either way.
+No ROM/firmware-protection concept exists yet on this side (everything is
+`basicMemory`); real write protection is a 6502-only feature so far.
+
+### Z80 BIOS.asm
+
+Same jump-table-at-`$F000` convention as the 6502 side, same addresses for
+every shared primitive, but genuinely idiomatic Z80 where the two CPUs
+differ: `BIOS_READ_SECTOR`/`BIOS_WRITE_SECTOR`/`BIOS_SET_PIXEL` take their
+buffer/column directly in `HL` (a real 16-bit pointer register), no
+zero-page staging trick needed at this level - only the shared C glue layer
+(`bios_glue.asm`) needs its own private staging, to satisfy `bios.h`'s
+cc65-oriented "stage one value, then trigger" convention. Every port access
+goes through the ED-prefixed `IN A,(C)`/`OUT (C),A` forms (`BC` = port
+number, loaded fresh each time), never the unprefixed forms - those put `A`
+itself on the port address's upper byte, a real documented Z80 quirk this
+project's own emulator faithfully reproduces and which would be actively
+wrong for small port numbers like these.
+
+### Z80Main - the real boot sequence
+
+Loads `BIOS.z80` and `bdos.ihx` onto the memory bus, attaches up to 4
+`z80-diskN.img` images from an optional disk-directory CLI argument
+(defaulting to `.`), then loads and jumps into `Boot.z80` - a tiny
+hand-assembled stub that calls `BDOS_RUN_FILE` to find `CCP.COM` on drive 0
+and load-and-jump into it, landing in CCP's own real `A>` prompt. The same
+real cold-boot mechanism `Test_Z80BdosRunFile` proves end to end, not a
+canned demo.
+
+### SDCC and the Z80 C build
+
+SDCC's own crt0 relies on the classic Z80 convention that power-on
+execution starts at address 0 (a real reset vector, `JP $0100` into SP
+init/BSS-zeroing/`CALL _main`) - **not** `--code-loc`'s address, which only
+relocates where the compiled `_CODE` area begins. A hand-written program
+with no crt0 (`Demo.asm`) really does start at its own `org`; an
+SDCC-compiled one must boot at `pc=0` instead (found the hard way - the
+first stray `RETI` corrupted execution when this was gotten wrong).
+
+BDOS and any `BDOS_RUN_FILE`-loadable "app" (`ccp.ihx`, `edit.ihx`) both
+build with `--no-std-crt0`, stripping the reset-vector/crt0 regions
+entirely - required since BDOS and whichever app needs it get loaded into
+the same 64K space at once, and two full crt0s would collide at address 0
+and `$0100`. BDOS needs no crt0 of its own at all (only ever entered through
+its jump table); `ccp.ihx`/`edit.ihx` use `cpm_crt0.asm` - a genuinely
+minimal `call _main / ret`, with no SP reset (Z80's SP is a real hardware
+register BDOS's own `CALL`/already-running code depends on staying intact)
+and no BSS zeroing (that work still has to happen somewhere - SDCC emits it
+into a shared `gsinit` routine regardless of `--no-std-crt0`, which
+`cpm_crt0.asm` calls explicitly, copied verbatim from SDCC's own
+`crt0.s`).
+
+`--data-loc` is pinned explicitly (`$3000`) for every app build - left
+unspecified, SDCC's own default places `_DATA`/`_BSS` at `$8000` with no
+size check against anything else in the address space; `edit.c`'s
+16000-byte `lines[][]` buffer alone pushed `_DATA`'s end into video RAM
+before this was caught.
+
+## RTC
+
+`RTC` (`modules/Devices`) is a plain 4-byte, read-only, big-endian
+Unix-epoch-seconds register block, wired into both real machines (6502
+`$9025-$9028`, Z80 port `$06-$09`) - it previously only existed in test
+scaffolding. Its constructor takes an `InterruptLine` and `AddressRange`
+(matching `FloppyController`/`VectoredInterruptController`'s own pattern),
+and it works in two modes:
+
+- **Started** (`.start()` called on its own `Thread`): ticks once a second,
+  refreshing its register and raising the given interrupt line each time -
+  the original VIA-interrupt-driven design, still used by the 6502's own
+  `Test_RTC`/`RTCInt.asm` fixture.
+- **Never started** (both real machines - neither ever calls
+  `bus.startDevices()` for any device): `read()` self-refreshes on the first
+  byte of a 4-byte read instead, giving a genuinely live clock through plain
+  polling with no interrupt wiring needed at all. Skipped once the thread
+  *is* running, so a caller mid-copy during an ISR can't see a torn read.
+
+`BIOS_GET_TIME` (both `BIOS.asm` files) reads RTC's hardware bytes and
+writes them into the caller's buffer in reversed, little-endian order -
+RTC's own hardware register is big-endian, but both CPUs (and C's own
+`unsigned long`) are little-endian, so the primitive does the conversion
+rather than leaving it to the caller.
 
 ## Where this is headed
 
-- **A real DOS.** `B` now boots a real shell (CCP.COM) that finds itself by
-  name through BDOS rather than a fixed boot image, and that shell has
-  `DIR`/`TYPE`/`ERA`/`COPY` - BDOS can read, write, and delete files of any
-  size (multi-extent, not capped at 16KB), not just read small ones,
-  sitting on top of the primitives ROM's raw sector read/write the same
-  way the whole DOS layer does. Still missing: rename (`CpmFileSystem`,
-  the host-side reference, has no rename either - see CP/M filesystem
-  above).
-- **`modules/Video`** is reserved but unstarted.
+Both CPUs are at full functional and application-suite parity (BIOS/BDOS/
+CCP/EDIT.COM, console/disk/graphics/RTC primitives, real disk boot). Known,
+deliberately-out-of-scope gaps, not forgotten:
+
+- Z80 block I/O instructions, undocumented opcodes, cycle-accurate timing,
+  and IM0 (see Z80 core above).
+- Making `BIOS.asm` actually use IM2 for a real interrupt-driven operation,
+  rather than the polling it does today.
+- `CpmImageReader`/`DiskParameterBlock` don't yet support mixed-density
+  CP/M disks (per-track-varying sector sizes) - several real `.IMD` images
+  on hand use this and aren't yet readable.
+
+No further work has been requested in any of these areas as of this
+writing.
