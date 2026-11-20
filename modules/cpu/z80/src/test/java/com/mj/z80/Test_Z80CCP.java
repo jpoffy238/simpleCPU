@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,6 +106,32 @@ public class Test_Z80CCP {
 		assertTrue(output.contains(usedBlocks + "k used"), "got: [" + output + "]");
 		assertTrue(output.contains(freeBlocks + "k free"), "got: [" + output + "]");
 		assertTrue(output.contains(totalBlocks + "k total"), "got: [" + output + "]");
+	}
+
+	private static String formatEpoch(long epochSeconds) {
+		return Instant.ofEpochSecond(epochSeconds).atZone(ZoneOffset.UTC)
+				.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+	}
+
+	@Test
+	public void dateReportsTheCurrentCalendarDateAndTimeFromTheRealRtc() throws Exception {
+		// Same race-tolerant before/after bracket as the 6502 side's own
+		// dateReportsTheCurrentCalendarDateAndTimeFromTheRealRtc - RTC itself
+		// always ticks UTC (same as System.currentTimeMillis()), matching
+		// cmd_date()'s (ccp.c) own "yyyy-MM-dd HH:mm:ss" shape.
+		long before = System.currentTimeMillis() / 1000L;
+		machine.video().type("DATE\r");
+		runSteps(500_000);
+		long after = System.currentTimeMillis() / 1000L;
+
+		String expectedBefore = formatEpoch(before);
+		String expectedAfter = formatEpoch(after);
+		String output = findRowContaining(expectedBefore);
+		if (output == null) {
+			output = findRowContaining(expectedAfter);
+		}
+		assertTrue(output != null,
+				"DATE output should have matched " + expectedBefore + " or " + expectedAfter);
 	}
 
 	private String findRowContaining(String substring) throws Exception {
