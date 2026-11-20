@@ -36,6 +36,13 @@ hs_err_pid*
 /.apt_generated/
 modules/cpu/6502/testdata/
 
+# Real vintage disk images (.imd, etc.) used to validate ImdImage/CpmImageReader
+# against actual period CP/M disks - copyrighted software of unclear
+# redistribution rights, kept local only, same treatment as the Dormann 6502
+# functional-test binary above. A real-image integration test points at this
+# folder via a system property and skips itself if the file isn't there.
+/images/
+
 # Local JVM/Maven installs (copied in so Claude Code can run mvn directly
 # with a full path, rather than relying on the user's own shell) - not
 # portable (their Debian-style /etc symlinks get fixed up to real file
