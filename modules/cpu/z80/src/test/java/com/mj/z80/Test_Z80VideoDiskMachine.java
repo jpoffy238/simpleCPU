@@ -2,6 +2,7 @@ package com.mj.z80;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -111,5 +112,28 @@ public class Test_Z80VideoDiskMachine {
 		}
 
 		assertArrayEquals(sector, readBack);
+	}
+
+	// ---- port bus: VectoredInterruptController ----
+
+	@Test
+	public void interruptVectorRegisterRoundTripsThroughThePortBus() throws Exception {
+		machine.portBus().write(0x05, (byte) 0x37);
+
+		assertEquals(0x37, machine.portBus().read(0x05) & 0xff);
+		assertEquals(0x37, machine.interruptController().vector());
+	}
+
+	@Test
+	public void aRealFloppyInterruptReachesTheInterruptControllerWithItsLoadedVector() throws Exception {
+		machine.attachDrive(0, tempDir.resolve("z80-disk0.img").toString());
+		machine.portBus().write(0x05, (byte) 0x37); // software loads the vector, the real IM2 setup step
+
+		machine.portBus().write(0x14, (byte) 0); // REG_DRIVE_SELECT
+		machine.portBus().write(0x10, (byte) 0x00); // Restore - seeks to track 0, one completion interrupt
+
+		assertTrue(machine.portBus().IsInterruptRaised());
+		assertTrue(machine.interruptController().hasPendingInterrupt());
+		assertEquals(0x37, machine.interruptController().vector());
 	}
 }
