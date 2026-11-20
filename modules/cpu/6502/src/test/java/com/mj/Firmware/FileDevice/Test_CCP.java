@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +17,7 @@ import org.junit.jupiter.api.io.TempDir;
 import com.mj.Devices.AddressRange;
 import com.mj.Devices.DeviceBus;
 import com.mj.Devices.PBus;
+import com.mj.Devices.RTC;
 import com.mj.Devices.VIA6522;
 import com.mj.Disk.CpmFileSystem;
 import com.mj.Disk.FloppyController;
@@ -70,6 +74,10 @@ public class Test_CCP {
 		video = new VideoController(new AddressRange(0x9020, 0x9024), videoRam, graphicsRam);
 		bus.registerDevice(video);
 
+		// RTC, same as CPUMain/Test_BIOS - right after Video's own range in the
+		// free $90xx MMIO space.
+		bus.registerDevice(new RTC(() -> via.requestInterrupt(VIA6522.FLAG_T1), new AddressRange(0x9025, 0x9028)));
+
 		FloppyController fdc = new FloppyController(() -> via.requestInterrupt(VIA6522.FLAG_CB1), new AddressRange(0x9010, 0x9014));
 		bus.registerDevice(fdc);
 		IBM3740 drive0 = new IBM3740();
@@ -117,6 +125,38 @@ public class Test_CCP {
 		assertTrue(output.contains(usedBlocks + "k used"), "got: [" + output + "]");
 		assertTrue(output.contains(freeBlocks + "k free"), "got: [" + output + "]");
 		assertTrue(output.contains(totalBlocks + "k total"), "got: [" + output + "]");
+	}
+
+	private static String formatEpoch(long epochSeconds) {
+		return Instant.ofEpochSecond(epochSeconds).atZone(ZoneOffset.UTC)
+				.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+	}
+
+	@Test
+	public void dateReportsTheCurrentCalendarDateAndTimeFromTheRealRtc() throws Exception {
+		// cmd_date() (ccp.c) prints the same "yyyy-MM-dd HH:mm:ss" shape as
+		// formatEpoch() below, both built from the same RTC-provided
+		// Unix-epoch-seconds value (RTC itself always ticks UTC, same as
+		// System.currentTimeMillis()) - matching against whichever of
+		// before/after it lands on handles the one-second race the same way
+		// the earlier BIOS_GET_TIME test does.
+		byte[] ccpProgram = Files.readAllBytes(ccpBin());
+		fs.format();
+		bootCcp(ccpProgram);
+
+		long before = System.currentTimeMillis() / 1000L;
+		video.type("DATE\r");
+		runBriefly();
+		long after = System.currentTimeMillis() / 1000L;
+
+		String expectedBefore = formatEpoch(before);
+		String expectedAfter = formatEpoch(after);
+		String output = findRowContaining(expectedBefore);
+		if (output == null) {
+			output = findRowContaining(expectedAfter);
+		}
+		assertTrue(output != null,
+				"DATE output should have matched " + expectedBefore + " or " + expectedAfter);
 	}
 
 	@Test

@@ -1,89 +1,113 @@
 Modules list:
 -------------
 ccp.o:
-    CODE              Offs=000000  Size=00091B  Align=00001  Fill=0000
-    RODATA            Offs=000000  Size=00007A  Align=00001  Fill=0000
+    CODE              Offs=000000  Size=000BB1  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=00008B  Align=00001  Fill=0000
     BSS               Offs=000000  Size=0000A4  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000001  Align=00001  Fill=0000
 bios_glue.o:
-    CODE              Offs=00091B  Size=00003C  Align=00001  Fill=0000
+    CODE              Offs=000BB1  Size=000044  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000001  Align=00001  Fill=0000
 bdos_glue.o:
-    CODE              Offs=000957  Size=000021  Align=00001  Fill=0000
+    CODE              Offs=000BF5  Size=000021  Align=00001  Fill=0000
 bios_util.o:
-    CODE              Offs=000978  Size=0000BD  Align=00001  Fill=0000
+    CODE              Offs=000C16  Size=0000BD  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(addeqsp.o):
-    CODE              Offs=000A35  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=000CD3  Size=000011  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(addysp.o):
-    CODE              Offs=000A46  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000CE4  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(aslax1.o):
-    CODE              Offs=000A54  Size=000008  Align=00001  Fill=0000
+    CODE              Offs=000CF2  Size=000008  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(axlong.o):
+    CODE              Offs=000CFA  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(condes.o):
-    CODE              Offs=000A5C  Size=00000C  Align=00001  Fill=0000
+    CODE              Offs=000D07  Size=00000C  Align=00001  Fill=0000
     DATA              Offs=000001  Size=000025  Align=00001  Fill=0000
     ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(crt0.o):
     STARTUP           Offs=000000  Size=000017  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(decax1.o):
+    CODE              Offs=000D13  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decaxy.o):
-    CODE              Offs=000A68  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=000D1A  Size=000009  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp1.o):
-    CODE              Offs=000A71  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=000D23  Size=000009  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp2.o):
-    CODE              Offs=000A7A  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000D2C  Size=00000D  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(decsp4.o):
+    CODE              Offs=000D39  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp5.o):
-    CODE              Offs=000A87  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000D46  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incax1.o):
-    CODE              Offs=000A94  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=000D53  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incax2.o):
-    CODE              Offs=000A9B  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=000D5A  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incax7.o):
-    CODE              Offs=000AA2  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000D61  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incaxy.o):
-    CODE              Offs=000AA7  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=000D66  Size=00000B  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp1.o):
-    CODE              Offs=000AB2  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=000D71  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp2.o):
-    CODE              Offs=000AB9  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000D78  Size=000016  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp3.o):
-    CODE              Offs=000ACF  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000D8E  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp4.o):
-    CODE              Offs=000AD4  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000D93  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp5.o):
-    CODE              Offs=000AD9  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000D98  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp6.o):
-    CODE              Offs=000ADE  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000D9D  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp8.o):
-    CODE              Offs=000AE3  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000DA2  Size=000005  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(lcmp.o):
+    CODE              Offs=000DA7  Size=00003B  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(ldaxsp.o):
-    CODE              Offs=000AE8  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=000DE2  Size=000009  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(ldeaxysp.o):
+    CODE              Offs=000DEB  Size=000013  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(leaaxsp.o):
-    CODE              Offs=000AF1  Size=00000C  Align=00001  Fill=0000
+    CODE              Offs=000DFE  Size=00000C  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(linc.o):
+    CODE              Offs=000E0A  Size=000011  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(lpush.o):
+    CODE              Offs=000E1B  Size=000021  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(lsubeqsp.o):
+    CODE              Offs=000E3C  Size=000027  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(ludiv.o):
+    CODE              Offs=000E63  Size=00007A  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(lult.o):
+    CODE              Offs=000EDD  Size=000006  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(lumod.o):
+    CODE              Offs=000EE3  Size=000019  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(makebool.o):
-    CODE              Offs=000AFD  Size=00002C  Align=00001  Fill=0000
+    CODE              Offs=000EFC  Size=00002C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(mulax10.o):
-    CODE              Offs=000B29  Size=000019  Align=00001  Fill=0000
+    CODE              Offs=000F28  Size=000019  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(popptr1.o):
-    CODE              Offs=000B42  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000F41  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pusha.o):
-    CODE              Offs=000B50  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000F4F  Size=000016  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pushax.o):
-    CODE              Offs=000B66  Size=00001A  Align=00001  Fill=0000
+    CODE              Offs=000F65  Size=00001A  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pushwsp.o):
-    CODE              Offs=000B80  Size=00001C  Align=00001  Fill=0000
+    CODE              Offs=000F7F  Size=00001C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(shrax3.o):
-    CODE              Offs=000B9C  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000F9B  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(staspidx.o):
-    CODE              Offs=000BAA  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000FA9  Size=000016  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(staxsp.o):
-    CODE              Offs=000BC0  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=000FBF  Size=00000B  Align=00001  Fill=0000
+/home/jpoffen/git/cc65/lib/none.lib(steaxsp.o):
+    CODE              Offs=000FCA  Size=000015  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(subysp.o):
-    CODE              Offs=000BCB  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000FDF  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(udiv.o):
-    CODE              Offs=000BD8  Size=00004F  Align=00001  Fill=0000
+    CODE              Offs=000FEC  Size=00004F  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(umod.o):
-    CODE              Offs=000C27  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=00103B  Size=000011  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(zerobss.o):
-    CODE              Offs=000C38  Size=000023  Align=00001  Fill=0000
+    CODE              Offs=00104C  Size=000023  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(zeropage.o):
     ZEROPAGE          Offs=000001  Size=00001A  Align=00001  Fill=0000
 
@@ -95,52 +119,64 @@ Name                   Start     End    Size  Align
 ZEROPAGE              000011  00002B  00001B  00001
 STARTUP               000300  000316  000017  00001
 ONCE                  000317  000322  00000C  00001
-CODE                  000323  000F7D  000C5B  00001
-RODATA                000F7E  000FF7  00007A  00001
-DATA                  000FF8  00101D  000026  00001
-BSS                   00101E  0010C1  0000A4  00001
+CODE                  000323  001391  00106F  00001
+RODATA                001392  00141C  00008B  00001
+DATA                  00141D  001442  000026  00001
+BSS                   001443  0014E6  0000A4  00001
 
 
 Exports list by name:
 ---------------------
-__BSS_RUN__               00101E RLA    __BSS_SIZE__              0000A4 REA    
+__BSS_RUN__               001443 RLA    __BSS_SIZE__              0000A4 REA    
 __CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     000317 RLA    
 __DESTRUCTOR_COUNT__      000000 REA    __DESTRUCTOR_TABLE__      000317 RLA    
 __STACKSTART__            008000 REA    __STARTUP__               000001 REA    
-_bdos_create_file         000C89 RLA    _bdos_delete_file         000C86 RLA    
-_bdos_entry_size          000C8F RLA    _bdos_find_file           000C80 RLA    
-_bdos_free_blocks         000C98 RLA    _bdos_next_entry          000C7D RLA    
-_bdos_read_record         000C83 RLA    _bdos_rename_file         000C92 RLA    
-_bdos_rewind_dir          000C7A RLA    _bdos_run_file            000C95 RLA    
-_bdos_write_record        000C8C RLA    _bios_getch               000C42 RLA    
-_bios_gotoxy              000C66 RLA    _bios_putch               000C3E RLA    
-_bios_putstr              000C9B RLA    _bios_select              000C45 RLA    
-_bios_set_buffer          000C49 RLA    _bios_set_x               000C4E RLA    
-_main                     000B5E RLA    addeq0sp                  000D58 RLA    
-addeqysp                  000D5A RLA    addysp                    000D6A RLA    
-booleq                    000E26 RLA    decaxy                    000D8B RLA    
-decsp1                    000D94 RLA    decsp2                    000D9D RLA    
-decsp5                    000DAA RLA    donelib                   000D7F RLA    
-incax1                    000DB7 RLA    incax2                    000DBE RLA    
-incax7                    000DC5 RLA    incaxy                    000DCC RLA    
-incsp1                    000DD5 RLA    incsp2                    000DE4 RLA    
-incsp3                    000DF2 RLA    incsp4                    000DF7 RLA    
-incsp5                    000DFC RLA    incsp6                    000E01 RLA    
-incsp8                    000E06 RLA    initlib                   000317 RLA    
-ldax0sp                   000E0B RLA    ldaxysp                   000E0D RLA    
-leaa0sp                   000E14 RLA    leaaxsp                   000E16 RLA    
-mulax10                   000E4C RLA    popptr1                   000E65 RLA    
-ptr1                      00001A RLZ    ptr4                      000020 RLZ    
-push0                     000E89 RLA    pusha                     000E77 RLA    
-pusha0                    000E8B RLA    pushax                    000E8D RLA    
-pushwysp                  000EA5 RLA    shlax1                    000D77 RLA    
-shrax3                    000EBF RLA    sp                        000012 RLZ    
-sreg                      000014 RLZ    staspidx                  000ECD RLA    
-stax0sp                   000EE3 RLA    staxysp                   000EE5 RLA    
-subysp                    000EEE RLA    tmp1                      000022 RLZ    
-tosudiva0                 000EFB RLA    tosumoda0                 000F4A RLA    
-udiv16                    000F0C RLA    zerobss                   000F5B RLA    
-
+_bdos_create_file         000F27 RLA    _bdos_delete_file         000F24 RLA    
+_bdos_entry_size          000F2D RLA    _bdos_find_file           000F1E RLA    
+_bdos_free_blocks         000F36 RLA    _bdos_next_entry          000F1B RLA    
+_bdos_read_record         000F21 RLA    _bdos_rename_file         000F30 RLA    
+_bdos_rewind_dir          000F18 RLA    _bdos_run_file            000F33 RLA    
+_bdos_write_record        000F2A RLA    _bios_get_time            000F10 RLA    
+_bios_getch               000ED8 RLA    _bios_gotoxy              000EFC RLA    
+_bios_putch               000ED4 RLA    _bios_putstr              000F39 RLA    
+_bios_select              000EDB RLA    _bios_set_buffer          000EDF RLA    
+_bios_set_x               000EE4 RLA    _main                     000DE4 RLA    
+addeq0sp                  000FF6 RLA    addeqysp                  000FF8 RLA    
+addysp                    001008 RLA    addysp1                   001007 RLA    
+axulong                   001023 RLA    booleq                    001225 RLA    
+boolult                   00123E RLA    decax1                    001036 RLA    
+decaxy                    00103D RLA    decsp1                    001046 RLA    
+decsp2                    00104F RLA    decsp4                    00105C RLA    
+decsp5                    001069 RLA    donelib                   00102A RLA    
+getlop                    001197 RLA    incax1                    001076 RLA    
+incax2                    00107D RLA    incax7                    001084 RLA    
+incaxy                    00108B RLA    inceaxy                   00112D RLA    
+incsp1                    001094 RLA    incsp2                    0010A3 RLA    
+incsp3                    0010B1 RLA    incsp4                    0010B6 RLA    
+incsp5                    0010BB RLA    incsp6                    0010C0 RLA    
+incsp8                    0010C5 RLA    initlib                   000317 RLA    
+ldax0sp                   001105 RLA    ldaxysp                   001107 RLA    
+ldeaxysp                  001110 RLA    leaa0sp                   001121 RLA    
+leaaxsp                   001123 RLA    lsubeqysp                 001161 RLA    
+mulax10                   00124B RLA    popptr1                   001264 RLA    
+ptr1                      00001A RLZ    ptr2                      00001C RLZ    
+ptr3                      00001E RLZ    ptr4                      000020 RLZ    
+push0                     001288 RLA    pusha                     001276 RLA    
+pusha0                    00128A RLA    pushax                    00128C RLA    
+pusheax                   001147 RLA    pushw0sp                  0012A2 RLA    
+pushwysp                  0012A4 RLA    shlax1                    001015 RLA    
+shrax3                    0012BE RLA    sp                        000012 RLZ    
+sreg                      000014 RLZ    staspidx                  0012CC RLA    
+stax0sp                   0012E2 RLA    staxysp                   0012E4 RLA    
+steaxysp                  0012EF RLA    subysp                    001302 RLA    
+tmp1                      000022 RLZ    tmp3                      000024 RLZ    
+tmp4                      000025 RLZ    toslcmp                   0010CA RLA    
+tosudiv0ax                001186 RLA    tosudiva0                 00130F RLA    
+tosudiveax                00118C RLA    tosulteax                 001200 RLA    
+tosumod0ax                001206 RLA    tosumoda0                 00135E RLA    
+tosumodax                 001360 RLA    tosumodeax                00120C RLA    
+udiv16                    001320 RLA    udiv32                    0011BB RLA    
+zerobss                   00136F RLA    
 
 
 Exports list by value:
@@ -148,41 +184,53 @@ Exports list by value:
 __CONSTRUCTOR_COUNT__     000000 REA    __DESTRUCTOR_COUNT__      000000 REA    
 __STARTUP__               000001 REA    sp                        000012 RLZ    
 sreg                      000014 RLZ    ptr1                      00001A RLZ    
+ptr2                      00001C RLZ    ptr3                      00001E RLZ    
 ptr4                      000020 RLZ    tmp1                      000022 RLZ    
+tmp3                      000024 RLZ    tmp4                      000025 RLZ    
 __BSS_SIZE__              0000A4 REA    __CONSTRUCTOR_TABLE__     000317 RLA    
 __DESTRUCTOR_TABLE__      000317 RLA    initlib                   000317 RLA    
-_main                     000B5E RLA    _bios_putch               000C3E RLA    
-_bios_getch               000C42 RLA    _bios_select              000C45 RLA    
-_bios_set_buffer          000C49 RLA    _bios_set_x               000C4E RLA    
-_bios_gotoxy              000C66 RLA    _bdos_rewind_dir          000C7A RLA    
-_bdos_next_entry          000C7D RLA    _bdos_find_file           000C80 RLA    
-_bdos_read_record         000C83 RLA    _bdos_delete_file         000C86 RLA    
-_bdos_create_file         000C89 RLA    _bdos_write_record        000C8C RLA    
-_bdos_entry_size          000C8F RLA    _bdos_rename_file         000C92 RLA    
-_bdos_run_file            000C95 RLA    _bdos_free_blocks         000C98 RLA    
-_bios_putstr              000C9B RLA    addeq0sp                  000D58 RLA    
-addeqysp                  000D5A RLA    addysp                    000D6A RLA    
-shlax1                    000D77 RLA    donelib                   000D7F RLA    
-decaxy                    000D8B RLA    decsp1                    000D94 RLA    
-decsp2                    000D9D RLA    decsp5                    000DAA RLA    
-incax1                    000DB7 RLA    incax2                    000DBE RLA    
-incax7                    000DC5 RLA    incaxy                    000DCC RLA    
-incsp1                    000DD5 RLA    incsp2                    000DE4 RLA    
-incsp3                    000DF2 RLA    incsp4                    000DF7 RLA    
-incsp5                    000DFC RLA    incsp6                    000E01 RLA    
-incsp8                    000E06 RLA    ldax0sp                   000E0B RLA    
-ldaxysp                   000E0D RLA    leaa0sp                   000E14 RLA    
-leaaxsp                   000E16 RLA    booleq                    000E26 RLA    
-mulax10                   000E4C RLA    popptr1                   000E65 RLA    
-pusha                     000E77 RLA    push0                     000E89 RLA    
-pusha0                    000E8B RLA    pushax                    000E8D RLA    
-pushwysp                  000EA5 RLA    shrax3                    000EBF RLA    
-staspidx                  000ECD RLA    stax0sp                   000EE3 RLA    
-staxysp                   000EE5 RLA    subysp                    000EEE RLA    
-tosudiva0                 000EFB RLA    udiv16                    000F0C RLA    
-tosumoda0                 000F4A RLA    zerobss                   000F5B RLA    
-__BSS_RUN__               00101E RLA    __STACKSTART__            008000 REA    
-
+_main                     000DE4 RLA    _bios_putch               000ED4 RLA    
+_bios_getch               000ED8 RLA    _bios_select              000EDB RLA    
+_bios_set_buffer          000EDF RLA    _bios_set_x               000EE4 RLA    
+_bios_gotoxy              000EFC RLA    _bios_get_time            000F10 RLA    
+_bdos_rewind_dir          000F18 RLA    _bdos_next_entry          000F1B RLA    
+_bdos_find_file           000F1E RLA    _bdos_read_record         000F21 RLA    
+_bdos_delete_file         000F24 RLA    _bdos_create_file         000F27 RLA    
+_bdos_write_record        000F2A RLA    _bdos_entry_size          000F2D RLA    
+_bdos_rename_file         000F30 RLA    _bdos_run_file            000F33 RLA    
+_bdos_free_blocks         000F36 RLA    _bios_putstr              000F39 RLA    
+addeq0sp                  000FF6 RLA    addeqysp                  000FF8 RLA    
+addysp1                   001007 RLA    addysp                    001008 RLA    
+shlax1                    001015 RLA    axulong                   001023 RLA    
+donelib                   00102A RLA    decax1                    001036 RLA    
+decaxy                    00103D RLA    decsp1                    001046 RLA    
+decsp2                    00104F RLA    decsp4                    00105C RLA    
+decsp5                    001069 RLA    incax1                    001076 RLA    
+incax2                    00107D RLA    incax7                    001084 RLA    
+incaxy                    00108B RLA    incsp1                    001094 RLA    
+incsp2                    0010A3 RLA    incsp3                    0010B1 RLA    
+incsp4                    0010B6 RLA    incsp5                    0010BB RLA    
+incsp6                    0010C0 RLA    incsp8                    0010C5 RLA    
+toslcmp                   0010CA RLA    ldax0sp                   001105 RLA    
+ldaxysp                   001107 RLA    ldeaxysp                  001110 RLA    
+leaa0sp                   001121 RLA    leaaxsp                   001123 RLA    
+inceaxy                   00112D RLA    pusheax                   001147 RLA    
+lsubeqysp                 001161 RLA    tosudiv0ax                001186 RLA    
+tosudiveax                00118C RLA    getlop                    001197 RLA    
+udiv32                    0011BB RLA    tosulteax                 001200 RLA    
+tosumod0ax                001206 RLA    tosumodeax                00120C RLA    
+booleq                    001225 RLA    boolult                   00123E RLA    
+mulax10                   00124B RLA    popptr1                   001264 RLA    
+pusha                     001276 RLA    push0                     001288 RLA    
+pusha0                    00128A RLA    pushax                    00128C RLA    
+pushw0sp                  0012A2 RLA    pushwysp                  0012A4 RLA    
+shrax3                    0012BE RLA    staspidx                  0012CC RLA    
+stax0sp                   0012E2 RLA    staxysp                   0012E4 RLA    
+steaxysp                  0012EF RLA    subysp                    001302 RLA    
+tosudiva0                 00130F RLA    udiv16                    001320 RLA    
+tosumoda0                 00135E RLA    tosumodax                 001360 RLA    
+zerobss                   00136F RLA    __BSS_RUN__               001443 RLA    
+__STACKSTART__            008000 REA    
 
 
 Imports list:
@@ -204,27 +252,29 @@ __STACKSTART__ ([linker generated]):
 __STARTUP__ (crt0.o):
     ccp.o                     ../../../../c-shared/ccp.s:13
 _bdos_create_file (bdos_glue.o):
-    ccp.o                     ../../../../c-shared/ccp.s:24
-_bdos_delete_file (bdos_glue.o):
-    ccp.o                     ../../../../c-shared/ccp.s:23
-_bdos_entry_size (bdos_glue.o):
-    ccp.o                     ../../../../c-shared/ccp.s:26
-_bdos_find_file (bdos_glue.o):
-    ccp.o                     ../../../../c-shared/ccp.s:21
-_bdos_free_blocks (bdos_glue.o):
-    ccp.o                     ../../../../c-shared/ccp.s:29
-_bdos_next_entry (bdos_glue.o):
-    ccp.o                     ../../../../c-shared/ccp.s:20
-_bdos_read_record (bdos_glue.o):
-    ccp.o                     ../../../../c-shared/ccp.s:22
-_bdos_rename_file (bdos_glue.o):
-    ccp.o                     ../../../../c-shared/ccp.s:27
-_bdos_rewind_dir (bdos_glue.o):
-    ccp.o                     ../../../../c-shared/ccp.s:19
-_bdos_run_file (bdos_glue.o):
-    ccp.o                     ../../../../c-shared/ccp.s:28
-_bdos_write_record (bdos_glue.o):
     ccp.o                     ../../../../c-shared/ccp.s:25
+_bdos_delete_file (bdos_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:24
+_bdos_entry_size (bdos_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:27
+_bdos_find_file (bdos_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:22
+_bdos_free_blocks (bdos_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:30
+_bdos_next_entry (bdos_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:21
+_bdos_read_record (bdos_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:23
+_bdos_rename_file (bdos_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:28
+_bdos_rewind_dir (bdos_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:20
+_bdos_run_file (bdos_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:29
+_bdos_write_record (bdos_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:26
+_bios_get_time (bios_glue.o):
+    ccp.o                     ../../../../c-shared/ccp.s:19
 _bios_getch (bios_glue.o):
     ccp.o                     ../../../../c-shared/ccp.s:15
 _bios_gotoxy (bios_glue.o):
@@ -244,170 +294,228 @@ _main (ccp.o):
     crt0.o                    none/crt0.s:3
 addeq0sp (addeqsp.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 addeqysp (addeqsp.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 addysp (addysp.o):
     incsp8.o                  runtime/incsp8.s:8
     incsp6.o                  runtime/incsp6.s:8
     incsp5.o                  runtime/incsp5.s:8
     incsp4.o                  runtime/incsp4.s:8
     incsp3.o                  runtime/incsp3.s:8
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+addysp1 (addysp.o):
+    ludiv.o                   runtime/ludiv.s:9
+axulong (axlong.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 booleq (makebool.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+boolult (makebool.o):
+    lult.o                    runtime/lult.s:8
+decax1 (decax1.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 decaxy (decaxy.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 decsp1 (decsp1.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 decsp2 (decsp2.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+decsp4 (decsp4.o):
+    lpush.o                   runtime/lpush.s:12
 decsp5 (decsp5.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 donelib (condes.o):
     crt0.o                    none/crt0.s:4
+getlop (ludiv.o):
+    lumod.o                   runtime/lumod.s:9
 incax1 (incax1.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 incax2 (incax2.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 incax7 (incax7.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 incaxy (incaxy.o):
     incax7.o                  runtime/incax7.s:8
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+inceaxy (linc.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 incsp1 (incsp1.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 incsp2 (incsp2.o):
     popptr1.o                 runtime/popptr1.s:8
     staspidx.o                runtime/staspidx.s:8
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 incsp3 (incsp3.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 incsp4 (incsp4.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    lcmp.o                    runtime/lcmp.s:9
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 incsp5 (incsp5.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 incsp6 (incsp6.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 incsp8 (incsp8.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 initlib (condes.o):
     crt0.o                    none/crt0.s:4
 ldax0sp (ldaxsp.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 ldaxysp (ldaxsp.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+ldeaxysp (ldeaxysp.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 leaa0sp (leaaxsp.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 leaaxsp (leaaxsp.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+lsubeqysp (lsubeqsp.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 mulax10 (mulax10.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 popptr1 (popptr1.o):
     umod.o                    runtime/umod.s:8
     udiv.o                    runtime/udiv.s:9
 ptr1 (zeropage.o):
     popptr1.o                 runtime/popptr1.s:9
+    lcmp.o                    runtime/lcmp.s:10
     zerobss.o                 common/zerobss.s:9
     udiv.o                    runtime/udiv.s:10
     staspidx.o                runtime/staspidx.s:9
     mulax10.o                 runtime/mulax10.s:9
+    ludiv.o                   runtime/ludiv.s:10
     bios_util.o               ../../../../c-shared/bios_util.s:11
     ccp.o                     ../../../../c-shared/ccp.s:11
+ptr2 (zeropage.o):
+    lumod.o                   runtime/lumod.s:10
+    ludiv.o                   runtime/ludiv.s:10
+ptr3 (zeropage.o):
+    ludiv.o                   runtime/ludiv.s:10
 ptr4 (zeropage.o):
     umod.o                    runtime/umod.s:9
     udiv.o                    runtime/udiv.s:10
+    ludiv.o                   runtime/ludiv.s:10
+    linc.o                    runtime/linc.s:8
 push0 (pushax.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 pusha (pusha.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 pusha0 (pushax.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 pushax (pushax.o):
     bios_util.o               ../../../../c-shared/bios_util.s:145
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+pusheax (lpush.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+pushw0sp (pushwsp.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 pushwysp (pushwsp.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 shlax1 (aslax1.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 shrax3 (shrax3.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 sp (zeropage.o):
     popptr1.o                 runtime/popptr1.s:9
+    lcmp.o                    runtime/lcmp.s:10
+    decsp4.o                  runtime/decsp4.s:8
     subysp.o                  runtime/subysp.s:9
+    steaxsp.o                 runtime/steaxsp.s:8
     staxsp.o                  runtime/staxsp.s:8
     staspidx.o                runtime/staspidx.s:9
     pushwsp.o                 runtime/pushwsp.s:8
     pushax.o                  runtime/pushax.s:8
     pusha.o                   runtime/pusha.s:8
+    ludiv.o                   runtime/ludiv.s:10
+    lsubeqsp.o                runtime/lsubeqsp.s:8
+    lpush.o                   runtime/lpush.s:13
     leaaxsp.o                 runtime/leaaxsp.s:8
+    ldeaxysp.o                runtime/ldeaxysp.s:12
     ldaxsp.o                  runtime/ldaxsp.s:8
     incsp2.o                  runtime/incsp2.s:8
     incsp1.o                  runtime/incsp1.s:8
@@ -420,36 +528,74 @@ sp (zeropage.o):
     bios_util.o               ../../../../c-shared/bios_util.s:10
     ccp.o                     ../../../../c-shared/ccp.s:10
 sreg (zeropage.o):
+    lcmp.o                    runtime/lcmp.s:10
     umod.o                    runtime/umod.s:9
     udiv.o                    runtime/udiv.s:10
+    steaxsp.o                 runtime/steaxsp.s:8
+    lumod.o                   runtime/lumod.s:10
+    ludiv.o                   runtime/ludiv.s:10
+    lsubeqsp.o                runtime/lsubeqsp.s:8
+    lpush.o                   runtime/lpush.s:13
+    linc.o                    runtime/linc.s:8
+    ldeaxysp.o                runtime/ldeaxysp.s:12
+    axlong.o                  runtime/axlong.s:9
     ccp.o                     ../../../../c-shared/ccp.s:10
 staspidx (staspidx.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 stax0sp (staxsp.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 staxysp (staxsp.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+steaxysp (steaxsp.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 subysp (subysp.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 tmp1 (zeropage.o):
     staspidx.o                runtime/staspidx.s:9
     shrax3.o                  runtime/shrax3.s:8
     incaxy.o                  runtime/incaxy.s:8
     decaxy.o                  runtime/decaxy.s:8
     aslax1.o                  runtime/aslax1.s:8
+tmp3 (zeropage.o):
+    lumod.o                   runtime/lumod.s:10
+    ludiv.o                   runtime/ludiv.s:10
+tmp4 (zeropage.o):
+    lumod.o                   runtime/lumod.s:10
+    ludiv.o                   runtime/ludiv.s:10
+toslcmp (lcmp.o):
+    lult.o                    runtime/lult.s:8
+tosudiv0ax (ludiv.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 tosudiva0 (udiv.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+tosudiveax (ludiv.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+tosulteax (lult.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+tosumod0ax (lumod.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 tosumoda0 (umod.o):
-    ccp.o                     ../../../../c-shared/ccp.s:1417
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+tosumodax (umod.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
+tosumodeax (lumod.o):
+    ccp.o                     ../../../../c-shared/ccp.s:1782
 udiv16 (udiv.o):
     umod.o                    runtime/umod.s:8
+udiv32 (ludiv.o):
+    lumod.o                   runtime/lumod.s:9
 zerobss (zerobss.o):
     crt0.o                    none/crt0.s:3
 

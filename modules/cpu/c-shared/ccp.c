@@ -229,6 +229,110 @@ static void cmd_stat(void) {
 	bios_putstr("k total\n");
 }
 
+/* Pure calendar math, no BIOS/hardware involvement - bios_get_time() and
+ * RTC.java both deliberately stop at a flat Unix-epoch-seconds counter (see
+ * their own comments), so DATE needs its own civil-calendar breakdown.
+ * Loop-based rather than a closed-form days-since-epoch formula (the kind
+ * that chains several divisions by awkward constants like 146097/36524) -
+ * this runs once per typed command, not once per character the way
+ * DO_PUTCH does, so there's no reason to prefer a denser but harder-to-
+ * verify formula over code that's easy to trace by hand. Only ever sees
+ * epoch values RTC itself can produce (always >= 1970-01-01), so unlike a
+ * general-purpose time library there's no need to handle a negative year
+ * or a pre-epoch value at all. */
+static unsigned char is_leap_year(unsigned int year) {
+	if (year % 4 != 0) {
+		return 0;
+	}
+	if (year % 100 != 0) {
+		return 1;
+	}
+	return (year % 400 == 0);
+}
+
+static unsigned char days_in_month(unsigned int year, unsigned char month) {
+	static const unsigned char DAYS_IN_MONTH[12] =
+			{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+	if (month == 2 && is_leap_year(year)) {
+		return 29;
+	}
+	return DAYS_IN_MONTH[month - 1];
+}
+
+static void epoch_to_civil(unsigned long epoch, unsigned int *year, unsigned char *month,
+		unsigned char *day, unsigned char *hour, unsigned char *minute, unsigned char *second) {
+	unsigned long days;
+	unsigned long secs_of_day;
+	unsigned int y;
+	unsigned char m;
+	unsigned int year_length;
+	unsigned char month_length;
+
+	days = epoch / 86400UL;
+	secs_of_day = epoch % 86400UL;
+	y = 1970;
+
+	for (;;) {
+		year_length = is_leap_year(y) ? 366 : 365;
+		if (days < year_length) {
+			break;
+		}
+		days -= year_length;
+		y++;
+	}
+	*year = y;
+
+	for (m = 1; ; m++) {
+		month_length = days_in_month(y, m);
+		if (days < month_length) {
+			break;
+		}
+		days -= month_length;
+	}
+	*month = m;
+	*day = (unsigned char) (days + 1);
+
+	*hour = (unsigned char) (secs_of_day / 3600UL);
+	*minute = (unsigned char) ((secs_of_day % 3600UL) / 60UL);
+	*second = (unsigned char) (secs_of_day % 60UL);
+}
+
+/* print_decimal() alone never zero-pads, so every calendar field but the
+ * year (always 2 digits here, since RTC only ever produces real
+ * post-1970-01-01 values) needs this wrapper to stay a fixed width. */
+static void print_2digit(unsigned char value) {
+	if (value < 10) {
+		bios_putch('0');
+	}
+	print_decimal(value);
+}
+
+/* Real CP/M 2.2 has no built-in DATE command of its own - this is purely
+ * this project's own addition, same spirit as STAT - but the ISO-ish
+ * YYYY-MM-DD HH:MM:SS format keeps the printing code trivial (every field
+ * but the year is always exactly 2 digits) and unambiguous either way. */
+static void cmd_date(void) {
+	unsigned long epoch;
+	unsigned int year;
+	unsigned char month, day, hour, minute, second;
+
+	bios_get_time(&epoch);
+	epoch_to_civil(epoch, &year, &month, &day, &hour, &minute, &second);
+
+	print_decimal(year);
+	bios_putch('-');
+	print_2digit(month);
+	bios_putch('-');
+	print_2digit(day);
+	bios_putch(' ');
+	print_2digit(hour);
+	bios_putch(':');
+	print_2digit(minute);
+	bios_putch(':');
+	print_2digit(second);
+	bios_putch('\n');
+}
+
 /* Prints a file's contents, one BDOS-supplied 128-byte record at a time.
  * Lengths are only tracked to the nearest 128-byte record, same real
  * limitation as CpmFileSystem/real CP/M - a file whose length isn't a
@@ -495,6 +599,8 @@ int main(void) {
 			cmd_dir();
 		} else if (matches("STAT")) {
 			cmd_stat();
+		} else if (matches("DATE")) {
+			cmd_date();
 		} else if ((arg_start = starts_with("TYPE")) != 0) {
 			cmd_type(&line[arg_start]);
 		} else if ((arg_start = starts_with("ERA")) != 0) {

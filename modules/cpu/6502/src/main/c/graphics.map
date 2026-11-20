@@ -4,50 +4,50 @@ graphics.o:
     CODE              Offs=000000  Size=00008D  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=000005  Align=00001  Fill=0000
 bios_glue.o:
-    CODE              Offs=00008D  Size=00003C  Align=00001  Fill=0000
+    CODE              Offs=00008D  Size=000044  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000001  Align=00001  Fill=0000
 bdos_glue.o:
-    CODE              Offs=0000C9  Size=000021  Align=00001  Fill=0000
+    CODE              Offs=0000D1  Size=000021  Align=00001  Fill=0000
 bios_util.o:
-    CODE              Offs=0000EA  Size=0000BD  Align=00001  Fill=0000
+    CODE              Offs=0000F2  Size=0000BD  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(addeqsp.o):
-    CODE              Offs=0001A7  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=0001AF  Size=000011  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(addysp.o):
-    CODE              Offs=0001B8  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=0001C0  Size=00000E  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(axlong.o):
-    CODE              Offs=0001C6  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=0001CE  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(condes.o):
-    CODE              Offs=0001D3  Size=00000C  Align=00001  Fill=0000
+    CODE              Offs=0001DB  Size=00000C  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000025  Align=00001  Fill=0000
     ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(crt0.o):
     STARTUP           Offs=000000  Size=000017  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp1.o):
-    CODE              Offs=0001DF  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=0001E7  Size=000009  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(decsp4.o):
-    CODE              Offs=0001E8  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=0001F0  Size=00000D  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp1.o):
-    CODE              Offs=0001F5  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=0001FD  Size=000007  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp2.o):
-    CODE              Offs=0001FC  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000204  Size=000016  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(incsp5.o):
-    CODE              Offs=000212  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=00021A  Size=000005  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(ldaxsp.o):
-    CODE              Offs=000217  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=00021F  Size=000009  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(lmul.o):
-    CODE              Offs=000220  Size=00005C  Align=00001  Fill=0000
+    CODE              Offs=000228  Size=00005C  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(lpush.o):
-    CODE              Offs=00027C  Size=000021  Align=00001  Fill=0000
+    CODE              Offs=000284  Size=000021  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(ludiv.o):
-    CODE              Offs=00029D  Size=00007A  Align=00001  Fill=0000
+    CODE              Offs=0002A5  Size=00007A  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pusha.o):
-    CODE              Offs=000317  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=00031F  Size=000016  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(pushax.o):
-    CODE              Offs=00032D  Size=00001A  Align=00001  Fill=0000
+    CODE              Offs=000335  Size=00001A  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(staxsp.o):
-    CODE              Offs=000347  Size=00000B  Align=00001  Fill=0000
+    CODE              Offs=00034F  Size=00000B  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(zerobss.o):
-    CODE              Offs=000352  Size=000023  Align=00001  Fill=0000
+    CODE              Offs=00035A  Size=000023  Align=00001  Fill=0000
 /home/jpoffen/git/cc65/lib/none.lib(zeropage.o):
     ZEROPAGE          Offs=000001  Size=00001A  Align=00001  Fill=0000
 
@@ -59,37 +59,37 @@ Name                   Start     End    Size  Align
 ZEROPAGE              000011  00002B  00001B  00001
 STARTUP               000300  000316  000017  00001
 ONCE                  000317  000322  00000C  00001
-CODE                  000323  000697  000375  00001
-RODATA                000698  00069C  000005  00001
-DATA                  00069D  0006C1  000025  00001
+CODE                  000323  00069F  00037D  00001
+RODATA                0006A0  0006A4  000005  00001
+DATA                  0006A5  0006C9  000025  00001
 
 
 Exports list by name:
 ---------------------
-__BSS_RUN__               0006C2 RLA    __BSS_SIZE__              000000 REA    
+__BSS_RUN__               0006CA RLA    __BSS_SIZE__              000000 REA    
 __CONSTRUCTOR_COUNT__     000000 REA    __CONSTRUCTOR_TABLE__     000317 RLA    
 __DESTRUCTOR_COUNT__      000000 REA    __DESTRUCTOR_TABLE__      000317 RLA    
 __STACKSTART__            008000 REA    __STARTUP__               000001 REA    
 _bios_gotoxy              0003D8 RLA    _bios_graphics_mode       0003DE RLA    
-_bios_putch               0003B0 RLA    _bios_putstr              00040D RLA    
+_bios_putch               0003B0 RLA    _bios_putstr              000415 RLA    
 _bios_set_pixel           0003E6 RLA    _bios_set_pixel_x         0003E1 RLA    
 _bios_set_x               0003C0 RLA    _main                     000323 RLA    
-addeq0sp                  0004CA RLA    addeqysp                  0004CC RLA    
-addysp                    0004DC RLA    addysp1                   0004DB RLA    
-axulong                   0004EF RLA    decsp1                    000502 RLA    
-decsp4                    00050B RLA    donelib                   0004F6 RLA    
-incsp1                    000518 RLA    incsp2                    000527 RLA    
-incsp5                    000535 RLA    initlib                   000317 RLA    
-ldax0sp                   00053A RLA    ldaxysp                   00053C RLA    
+addeq0sp                  0004D2 RLA    addeqysp                  0004D4 RLA    
+addysp                    0004E4 RLA    addysp1                   0004E3 RLA    
+axulong                   0004F7 RLA    decsp1                    00050A RLA    
+decsp4                    000513 RLA    donelib                   0004FE RLA    
+incsp1                    000520 RLA    incsp2                    00052F RLA    
+incsp5                    00053D RLA    initlib                   000317 RLA    
+ldax0sp                   000542 RLA    ldaxysp                   000544 RLA    
 ptr1                      00001A RLZ    ptr2                      00001C RLZ    
 ptr3                      00001E RLZ    ptr4                      000020 RLZ    
-pusha                     00063E RLA    pushax                    000654 RLA    
-pusheax                   0005A8 RLA    sp                        000012 RLZ    
-sreg                      000014 RLZ    stax0sp                   00066A RLA    
-staxysp                   00066C RLA    tmp2                      000023 RLZ    
+pusha                     000646 RLA    pushax                    00065C RLA    
+pusheax                   0005B0 RLA    sp                        000012 RLZ    
+sreg                      000014 RLZ    stax0sp                   000672 RLA    
+staxysp                   000674 RLA    tmp2                      000023 RLZ    
 tmp3                      000024 RLZ    tmp4                      000025 RLZ    
-tosudiv0ax                0005C0 RLA    tosumul0ax                000543 RLA    
-zerobss                   000675 RLA    
+tosudiv0ax                0005C8 RLA    tosumul0ax                00054B RLA    
+zerobss                   00067D RLA    
 
 
 Exports list by value:
@@ -105,18 +105,18 @@ __DESTRUCTOR_TABLE__      000317 RLA    initlib                   000317 RLA
 _main                     000323 RLA    _bios_putch               0003B0 RLA    
 _bios_set_x               0003C0 RLA    _bios_gotoxy              0003D8 RLA    
 _bios_graphics_mode       0003DE RLA    _bios_set_pixel_x         0003E1 RLA    
-_bios_set_pixel           0003E6 RLA    _bios_putstr              00040D RLA    
-addeq0sp                  0004CA RLA    addeqysp                  0004CC RLA    
-addysp1                   0004DB RLA    addysp                    0004DC RLA    
-axulong                   0004EF RLA    donelib                   0004F6 RLA    
-decsp1                    000502 RLA    decsp4                    00050B RLA    
-incsp1                    000518 RLA    incsp2                    000527 RLA    
-incsp5                    000535 RLA    ldax0sp                   00053A RLA    
-ldaxysp                   00053C RLA    tosumul0ax                000543 RLA    
-pusheax                   0005A8 RLA    tosudiv0ax                0005C0 RLA    
-pusha                     00063E RLA    pushax                    000654 RLA    
-stax0sp                   00066A RLA    staxysp                   00066C RLA    
-zerobss                   000675 RLA    __BSS_RUN__               0006C2 RLA    
+_bios_set_pixel           0003E6 RLA    _bios_putstr              000415 RLA    
+addeq0sp                  0004D2 RLA    addeqysp                  0004D4 RLA    
+addysp1                   0004E3 RLA    addysp                    0004E4 RLA    
+axulong                   0004F7 RLA    donelib                   0004FE RLA    
+decsp1                    00050A RLA    decsp4                    000513 RLA    
+incsp1                    000520 RLA    incsp2                    00052F RLA    
+incsp5                    00053D RLA    ldax0sp                   000542 RLA    
+ldaxysp                   000544 RLA    tosumul0ax                00054B RLA    
+pusheax                   0005B0 RLA    tosudiv0ax                0005C8 RLA    
+pusha                     000646 RLA    pushax                    00065C RLA    
+stax0sp                   000672 RLA    staxysp                   000674 RLA    
+zerobss                   00067D RLA    __BSS_RUN__               0006CA RLA    
 __STACKSTART__            008000 REA    
 
 
