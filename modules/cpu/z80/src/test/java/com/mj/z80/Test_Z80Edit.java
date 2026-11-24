@@ -168,7 +168,12 @@ public class Test_Z80Edit {
 		machine.video().type("EDIT\r");
 		machine.video().type(CTRL_O);
 		machine.video().type("TEST.TXT\r");
-		runSteps(5_000_000);
+		// 12M, not the usual 5M - BIOS_READ_SECTOR/BIOS_WRITE_SECTOR are now real
+		// IM2 interrupt-driven transfers (see BIOS.asm's DISK_ISR), which cost
+		// several instructions of ISR overhead per byte instead of one tight-loop
+		// iteration; this test's two full boots plus a save/reopen round trip
+		// push several sectors through that path.
+		runSteps(12_000_000);
 
 		assertTrue(machine.video().getRow(1).startsWith("HELLO"), "reloaded row 1, got: [" + machine.video().getRow(1) + "]");
 		assertTrue(machine.video().getRow(2).startsWith("WORLD"), "reloaded row 2, got: [" + machine.video().getRow(2) + "]");

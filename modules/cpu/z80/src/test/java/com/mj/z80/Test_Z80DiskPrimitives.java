@@ -75,4 +75,51 @@ public class Test_Z80DiskPrimitives {
 		assertEquals('O', peek(0xb800), "expected BIOS_READ_SECTOR to read back exactly what BIOS_WRITE_SECTOR wrote");
 		assertEquals('K', peek(0xb801));
 	}
+
+	/** Counts how many times serviceInterrupts() actually serviced something -
+	 * same loop/termination convention as runToCompletion(), just also
+	 * returning that count instead of discarding it. */
+	private int runToCompletionCountingInterrupts(int maxSteps) throws Exception {
+		int lastPc = -1;
+		int repeatCount = 0;
+		int interruptsServiced = 0;
+		for (int i = 0; i < maxSteps; i++) {
+			int pc = cpu.pc;
+			if (pc == lastPc && ++repeatCount == 3) {
+				return interruptsServiced;
+			}
+			if (pc != lastPc) {
+				repeatCount = 0;
+			}
+			lastPc = pc;
+			if (cpu.serviceInterrupts()) {
+				interruptsServiced++;
+			}
+			cpu.step();
+		}
+		throw new AssertionError("DiskTest.asm never reached its own DONE loop within " + maxSteps + " steps");
+	}
+
+	/** The previous test proves BIOS_READ_SECTOR/BIOS_WRITE_SECTOR's end
+	 * result is correct - this proves *how*: a real IM2 interrupt fires once
+	 * per byte actually transferred through DISK_ISR (BIOS.asm), not a
+	 * synchronous drain loop. DiskTest.asm's Write Sector sends its own
+	 * first byte directly (see DO_WRITE_SECTOR's own comment - real
+	 * WD179x Write Sector never announces byte 0 with an interrupt), so its
+	 * 128-byte sector costs 127 serviced interrupts, not 128; Read Sector
+	 * has no such exception, so its own 128-byte sector costs exactly 128 -
+	 * 255 total, an exact, independently-derived count that could only come
+	 * out right if DISK_ISR is genuinely draining the transfer one byte at a
+	 * time rather than the old loop just happening to still read/write the
+	 * right bytes some other way. */
+	@Test
+	public void writeThenReadSectorAreGenuinelyDrivenByIm2InterruptsNotAPollingLoop() throws Exception {
+		int interruptsServiced = runToCompletionCountingInterrupts(200_000);
+
+		assertEquals('O', peek(0xb800), "expected BIOS_READ_SECTOR to read back exactly what BIOS_WRITE_SECTOR wrote");
+		assertEquals('K', peek(0xb801));
+		assertEquals(2, cpu.interruptMode, "BIOS.asm's lazy disk-interrupt init should have selected IM 2");
+		assertEquals(255, interruptsServiced,
+				"127 (Write Sector, byte 0 sent directly - see DO_WRITE_SECTOR) + 128 (Read Sector) real IM2 interrupts");
+	}
 }

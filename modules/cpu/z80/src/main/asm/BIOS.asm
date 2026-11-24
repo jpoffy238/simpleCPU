@@ -75,6 +75,12 @@ VIDEO_KBD_DATA equ $02
 VIDEO_KBD_STAT equ $03
 DATA_AVAILABLE equ $01
 
+; VectoredInterruptController's one register (see Z80VideoDiskMachine) - the
+; IM2 vector byte DO_READ_SECTOR/DO_WRITE_SECTOR program on first use (see
+; DISK_IM2_INIT below). Nothing else on this machine's firmware touches
+; interrupts at all.
+INT_VECTOR equ $05
+
 ; RTC's own big-endian Unix-epoch-seconds register block (see RTC.java) -
 ; read-only, 4 bytes, registered on the port bus at $06-$09 (see
 ; Z80VideoDiskMachine) - free space between VectoredInterruptController's
@@ -472,12 +478,24 @@ DO_SELECT push bc
 	pop bc
 	ret
 
-; ---- A = track, E = sector, HL = destination buffer. The Read Sector
-;      command loads its whole 128-byte buffer synchronously (this
-;      emulator's own FloppyController has no real per-byte transfer
-;      delay), so this can just drain FD_DATA in a tight loop - no
-;      DRQ/interrupt handling needed for a simple polling reader. ----
-DO_READ_SECTOR push bc
+; ---- A = track, E = sector, HL = destination buffer. Used to just drain
+;      FD_DATA in a tight 128-iteration loop, trusting that FloppyController
+;      had already buffered the whole sector in Java before this even ran -
+;      never a faithful model of real WD179x-era hardware, which transfers
+;      one byte per DRQ/interrupt. Now genuinely interrupt-driven: this
+;      issues the Read Sector command and waits (DRS_WAIT) while DISK_ISR,
+;      a real IM2 handler, drains the bytes in the background - see this
+;      file's own IM2 section below (DISK_IM2_INIT/DISK_ISR) for the whole
+;      mechanism. External contract unchanged - still blocks until the
+;      transfer is genuinely done, still preserves BC/DE/HL. ----
+DO_READ_SECTOR push af
+	push de
+	push hl
+	call DISK_IM2_INIT
+	pop hl
+	pop de
+	pop af
+	push bc
 	push de
 	push hl
 	ld bc,FD_TRACK
@@ -485,25 +503,41 @@ DO_READ_SECTOR push bc
 	ld bc,FD_SECTOR
 	ld a,e
 	out (c),a
+	ld (DISK_BUFFER_PTR),hl
+	ld a,128
+	ld (DISK_BYTES_REMAINING),a
+	xor a
+	ld (DISK_TRANSFER_IS_WRITE),a
+	ld (DISK_TRANSFER_DONE),a
+	ld a,1
+	ld (DISK_TRANSFER_ACTIVE),a
 	ld bc,FD_STATUS
 	ld a,$80
-	out (c),a
-	ld d,128
-DRS_LOOP ld bc,FD_DATA
-	in a,(c)
-	ld (hl),a
-	inc hl
-	dec d
-	jp nz,DRS_LOOP
+	out (c),a		; beginRead(): arms BUSY|DRQ, raises the "byte 0 ready" interrupt
+DRS_WAIT ld a,(DISK_TRANSFER_DONE)
+	or 0
+	jp z,DRS_WAIT
 	pop hl
 	pop de
 	pop bc
 	ret
 
-; ---- A = track, E = sector, HL = source buffer. Mirrors DO_READ_SECTOR
-;      in reverse - feeding FD_DATA drives the controller's Write Sector
-;      transfer, which flushes to the backing file on the 128th byte. ----
-DO_WRITE_SECTOR push bc
+; ---- A = track, E = sector, HL = source buffer. Mirrors DO_READ_SECTOR's
+;      own interrupt-driven design, with one real-hardware wrinkle: Write
+;      Sector's own first byte is never announced by an interrupt
+;      (FloppyController.beginWrite() raises none - "firmware already knows
+;      to start writing once BUSY is set", see its own comment), so this
+;      routine sends byte 0 itself, after staging all of DISK_ISR's
+;      bookkeeping - the very act of sending it raises the "ready for byte
+;      1" interrupt, which DISK_ISR must already be able to see armed. ----
+DO_WRITE_SECTOR push af
+	push de
+	push hl
+	call DISK_IM2_INIT
+	pop hl
+	pop de
+	pop af
+	push bc
 	push de
 	push hl
 	ld bc,FD_TRACK
@@ -513,14 +547,25 @@ DO_WRITE_SECTOR push bc
 	out (c),a
 	ld bc,FD_STATUS
 	ld a,$a0
-	out (c),a
-	ld d,128
-DWS_LOOP ld a,(hl)
-	ld bc,FD_DATA
-	out (c),a
+	out (c),a		; beginWrite(): arms BUSY|DRQ, raises nothing yet
+	push hl
 	inc hl
-	dec d
-	jp nz,DWS_LOOP
+	ld (DISK_BUFFER_PTR),hl	; -> byte 1, the next byte DISK_ISR will send
+	ld a,127
+	ld (DISK_BYTES_REMAINING),a
+	ld a,1
+	ld (DISK_TRANSFER_IS_WRITE),a
+	ld (DISK_TRANSFER_ACTIVE),a
+	xor a
+	ld (DISK_TRANSFER_DONE),a
+	pop hl			; hl -> byte 0 again
+	ld a,(hl)
+	ld bc,FD_DATA
+	out (c),a		; sends byte 0 - arms the "ready for byte 1" interrupt;
+				; all of DISK_ISR's bookkeeping above is already in place
+DWS_WAIT ld a,(DISK_TRANSFER_DONE)
+	or 0
+	jp z,DWS_WAIT
 	pop hl
 	pop de
 	pop bc
@@ -687,3 +732,89 @@ DO_GET_TIME push bc
 	pop hl
 	pop bc
 	ret
+
+; ==== IM2: real interrupt-driven disk I/O =================================
+;
+; DISK_IM2_INIT (called once, lazily, by DO_READ_SECTOR/DO_WRITE_SECTOR on
+; their first use - DISK_IM2_READY guards it) programs
+; VectoredInterruptController's one vector register with DISK_ISR_VECTOR's
+; own low byte, points I at its page (high byte), selects IM 2, and leaves
+; interrupts enabled from here on. No matching DI anywhere - this machine's
+; only other interrupt-raising paths (FloppyController's Restore/Seek/
+; Format completion; RTC, whose own ticking Thread nothing here ever
+; starts) either need no per-byte servicing or never actually fire, so
+; there's nothing to protect firmware's normal flow from by ever turning
+; interrupts back off. ----
+DISK_IM2_INIT ld a,(DISK_IM2_READY)
+	or 0
+	ret nz
+	push bc
+	ld a,DISK_ISR_VECTOR&$ff
+	ld bc,INT_VECTOR
+	out (c),a
+	ld a,DISK_ISR_VECTOR>>8
+	ld i,a
+	im 2
+	ei
+	ld a,1
+	ld (DISK_IM2_READY),a
+	pop bc
+	ret
+
+; ---- The real ISR: fires once per byte FloppyController raises ready
+;      (see its own beginRead/readData/writeData), plus once for every
+;      Restore/Seek/Format completion even though none of those need
+;      per-byte servicing - DISK_TRANSFER_ACTIVE is what tells a real
+;      in-progress transfer's interrupt apart from one of those stray
+;      completions, which just fall straight through to RETI. Must save
+;      and restore everything it touches: a real interrupt can land
+;      between any two instructions of whatever BDOS/CCP/user code happens
+;      to be running at the time, not just inside DO_READ_SECTOR/
+;      DO_WRITE_SECTOR's own wait loop. Re-arms with EI before RETI (real
+;      Z80 hardware clears both IFF1 and IFF2 on interrupt entry and RETI
+;      itself never restores them - the handler has to) - this is also
+;      exactly what lets the next byte's own interrupt, already raised as
+;      a side effect of this same IN/OUT below, actually get serviced
+;      immediately after this one returns, without ever waiting on
+;      DRS_WAIT/DWS_WAIT's own polling to notice. ----
+DISK_ISR push af
+	push bc
+	push hl
+	ld a,(DISK_TRANSFER_ACTIVE)
+	or 0
+	jp z,DISK_ISR_DONE
+	ld hl,(DISK_BUFFER_PTR)
+	ld a,(DISK_TRANSFER_IS_WRITE)
+	or 0
+	jp nz,DISK_ISR_WRITE
+	ld bc,FD_DATA
+	in a,(c)
+	ld (hl),a
+	jp DISK_ISR_ADVANCE
+DISK_ISR_WRITE ld a,(hl)
+	ld bc,FD_DATA
+	out (c),a
+DISK_ISR_ADVANCE inc hl
+	ld (DISK_BUFFER_PTR),hl
+	ld a,(DISK_BYTES_REMAINING)
+	dec a
+	ld (DISK_BYTES_REMAINING),a
+	or 0
+	jp nz,DISK_ISR_DONE
+	xor a
+	ld (DISK_TRANSFER_ACTIVE),a
+	ld a,1
+	ld (DISK_TRANSFER_DONE),a
+DISK_ISR_DONE pop hl
+	pop bc
+	pop af
+	ei
+	reti
+
+DISK_IM2_READY defb 0
+DISK_BUFFER_PTR defw 0
+DISK_BYTES_REMAINING defb 0
+DISK_TRANSFER_ACTIVE defb 0
+DISK_TRANSFER_DONE defb 0
+DISK_TRANSFER_IS_WRITE defb 0
+DISK_ISR_VECTOR defw DISK_ISR
