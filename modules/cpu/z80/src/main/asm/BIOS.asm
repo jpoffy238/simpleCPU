@@ -487,7 +487,11 @@ DO_SELECT push bc
 ;      a real IM2 handler, drains the bytes in the background - see this
 ;      file's own IM2 section below (DISK_IM2_INIT/DISK_ISR) for the whole
 ;      mechanism. External contract unchanged - still blocks until the
-;      transfer is genuinely done, still preserves BC/DE/HL. ----
+;      transfer is genuinely done, still preserves BC/DE/HL. DRS_WAIT uses
+;      HALT, not a bare busy-spin - interrupts are already enabled by the
+;      time this runs, so there's no reason to burn real cycles repeatedly
+;      re-checking DISK_TRANSFER_DONE when the CPU can just sit idle until
+;      DISK_ISR's own EI/RETI wakes it right back up. ----
 DO_READ_SECTOR push af
 	push de
 	push hl
@@ -516,8 +520,10 @@ DO_READ_SECTOR push af
 	out (c),a		; beginRead(): arms BUSY|DRQ, raises the "byte 0 ready" interrupt
 DRS_WAIT ld a,(DISK_TRANSFER_DONE)
 	or 0
-	jp z,DRS_WAIT
-	pop hl
+	jp nz,DRS_DONE
+	halt
+	jp DRS_WAIT
+DRS_DONE pop hl
 	pop de
 	pop bc
 	ret
@@ -565,8 +571,10 @@ DO_WRITE_SECTOR push af
 				; all of DISK_ISR's bookkeeping above is already in place
 DWS_WAIT ld a,(DISK_TRANSFER_DONE)
 	or 0
-	jp z,DWS_WAIT
-	pop hl
+	jp nz,DWS_DONE
+	halt
+	jp DWS_WAIT
+DWS_DONE pop hl
 	pop de
 	pop bc
 	ret
@@ -775,8 +783,8 @@ DISK_IM2_INIT ld a,(DISK_IM2_READY)
 ;      itself never restores them - the handler has to) - this is also
 ;      exactly what lets the next byte's own interrupt, already raised as
 ;      a side effect of this same IN/OUT below, actually get serviced
-;      immediately after this one returns, without ever waiting on
-;      DRS_WAIT/DWS_WAIT's own polling to notice. ----
+;      immediately after this one returns, without DRS_WAIT/DWS_WAIT's own
+;      HALT ever needing to actually wake up and notice in between. ----
 DISK_ISR push af
 	push bc
 	push hl
