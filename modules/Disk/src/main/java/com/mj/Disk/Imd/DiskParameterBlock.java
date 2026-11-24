@@ -90,4 +90,25 @@ public final class DiskParameterBlock {
 	public static DiskParameterBlock trs80ModelIiCpm22() {
 		return new DiskParameterBlock(90, 16, 1, 2);
 	}
+
+	/** A real CompuPro S-100 CP/M Plus (3.0) boot disk (see CpmImageReader's own
+	 * class comment) - double-sided, 1 single-density 128-byte-sector boot track
+	 * (track 0, head 0) plus 1024-byte-sector tracks everywhere else. 218 reserved
+	 * records found empirically, not computed from the boot track alone - CP/M
+	 * Plus's own system (BDOS/BIOS/CCP/RSX) occupies several tracks beyond just
+	 * the boot track, unlike CP/M 2.2's much smaller system (see
+	 * trs80ModelIiCpm22() above) - by scanning the flat byte stream for a dense
+	 * cluster of genuine (non-0xE5, plausible name/extent/record-count)
+	 * directory entries rather than guessing. BLS=2048 (16 records/block), 4
+	 * directory blocks (256 entries - comfortably covers the ~80 real files on
+	 * this disk), 16-bit block pointers (needed well past 255 blocks on a
+	 * 1.2MB-class disk). ImdImage.toFlatBytes()'s own (cylinder, head) ordering -
+	 * already cylinder-major, head-minor - turned out to be exactly the real
+	 * logical order this disk's own CP/M Plus BIOS used: confirmed by reading
+	 * PROFILE.SUB (a 1-record file) and getting back legible text
+	 * ("SETDEF * A: [ORDER=(COM,SUB) DISPLAY UK]"), not binary noise - the
+	 * opposite (head-major) ordering decodes the same file to garbage. */
+	public static DiskParameterBlock compuProCpmPlus() {
+		return new DiskParameterBlock(218, 16, 4, 2);
+	}
 }

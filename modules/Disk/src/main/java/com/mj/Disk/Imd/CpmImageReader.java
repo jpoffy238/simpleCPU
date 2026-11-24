@@ -24,9 +24,31 @@ import com.mj.Disk.exceptions.FileSystemException;
  * Validated 2026-11-20 against a real TRS-80 Model II CP/M 2.2 8" disk image
  * (DiskParameterBlock.trs80ModelIiCpm22()): correctly lists its real directory
  * (MENU.COM, PIP.COM, ED.COM, SAMPLE.TXT, ...) and reads SAMPLE.TXT back byte for
- * byte - confirmed readable VEDIT documentation text, not noise. */
+ * byte - confirmed readable VEDIT documentation text, not noise.
+ * <p>
+ * Validated again 2026-11-24 against a real double-sided CompuPro S-100 CP/M
+ * Plus (3.0) boot disk (DiskParameterBlock.compuProCpmPlus()) - a genuinely
+ * harder case (two heads, a different reserved-area size, CP/M Plus's own
+ * directory format rather than CP/M 2.2's): lists its real ~80-file directory
+ * (CCP.COM, PIP.COM, MBASIC.COM, DATE.COM, ...) and reads PROFILE.SUB back as
+ * legible text ("SETDEF * A: [ORDER=(COM,SUB) DISPLAY UK]") and DATE.COM back
+ * containing its own real embedded copyright string ("CP/M Version 3.0
+ * Copyright 1998, Caldera, Inc."). Needed zero code changes to this class or
+ * ImdImage - just the right DiskParameterBlock constants, found by scanning
+ * the flat byte stream for a real, dense cluster of directory-shaped entries
+ * rather than assuming a reserved-area size the way the simpler TRS-80 case
+ * allowed. */
 public class CpmImageReader {
 	private static final int STATUS_EMPTY = 0xE5;
+	/** CP/M only ever uses 0-15 as a real user-area number for an ordinary file
+	 * entry - anything else that isn't STATUS_EMPTY is a special-purpose entry,
+	 * not a file. CP/M Plus's own date-stamping extension (status 0x21,
+	 * reserved every 4th directory slot when enabled - found on a real
+	 * CompuPro CP/M Plus disk, see DiskParameterBlock.compuProCpmPlus()) and
+	 * disc-label entries (0x20) are the two real-world cases this guards
+	 * against; CP/M 2.2 disks without either feature never hit this at all,
+	 * which is why it went unnoticed until a disk that actually uses them. */
+	private static final int MAX_USER_NUMBER = 15;
 
 	/** Already-deblocked flat bytes (ImdImage.toFlatBytes(), or a caller's own) -
 	 * expected to be a whole multiple of DiskParameterBlock.RECORD_SIZE. */
@@ -49,11 +71,20 @@ public class CpmImageReader {
 		List<String> names = new ArrayList<String>();
 		for (int entry = 0; entry < dpb.directoryEntryCount(); entry++) {
 			byte[] raw = readDirectoryEntry(entry);
-			if ((raw[0] & 0xff) != STATUS_EMPTY && (raw[12] & 0xff) == 0) {
+			if (isFileEntry(raw) && (raw[12] & 0xff) == 0) {
 				names.add(decodeFileName(raw));
 			}
 		}
 		return names;
+	}
+
+	/** True if raw is an ordinary file's directory entry - not empty/deleted,
+	 * and not a special-purpose entry (CP/M Plus date-stamp/password, disc
+	 * label, ...) that happens to not be STATUS_EMPTY either. See
+	 * MAX_USER_NUMBER's own comment. */
+	private boolean isFileEntry(byte[] raw) {
+		int status = raw[0] & 0xff;
+		return status != STATUS_EMPTY && status <= MAX_USER_NUMBER;
 	}
 
 	/** Returns the file's data, length rounded up to the nearest 128-byte record -
@@ -104,7 +135,7 @@ public class CpmImageReader {
 	private int findEntry(byte[] fcbName, int extent) {
 		for (int entry = 0; entry < dpb.directoryEntryCount(); entry++) {
 			byte[] raw = readDirectoryEntry(entry);
-			if ((raw[0] & 0xff) != STATUS_EMPTY && (raw[12] & 0xff) == extent && nameMatches(raw, fcbName)) {
+			if (isFileEntry(raw) && (raw[12] & 0xff) == extent && nameMatches(raw, fcbName)) {
 				return entry;
 			}
 		}
@@ -135,9 +166,18 @@ public class CpmImageReader {
 		return value;
 	}
 
+	/** Masks off bit 7 of each raw name/extension byte before comparing - real
+	 * CP/M (2.2 and Plus alike) uses those high bits as per-character file
+	 * attribute flags (read-only, system, archive, ...), not part of the name
+	 * itself. The TRS-80 disk this class was first validated against happened
+	 * to never set any of them, so this went unnoticed until a real CP/M Plus
+	 * disk (which does) decoded every attribute-flagged name/extension as
+	 * replacement characters instead - US_ASCII has no valid code point above
+	 * 0x7F. encodeFileName()'s own output never sets a high bit, so masking
+	 * only the disk side here is enough to make the two comparable. */
 	private boolean nameMatches(byte[] rawEntry, byte[] fcbName) {
 		for (int i = 0; i < 11; i++) {
-			if (rawEntry[1 + i] != fcbName[i]) {
+			if ((rawEntry[1 + i] & 0x7f) != fcbName[i]) {
 				return false;
 			}
 		}
@@ -167,9 +207,17 @@ public class CpmImageReader {
 		return fcbName;
 	}
 
+	/** Masks off each byte's attribute-flag high bit (see nameMatches()'s own
+	 * comment) before decoding - otherwise an attribute-flagged byte (0x80 or
+	 * above) has no valid US_ASCII code point and decodes to a replacement
+	 * character instead of the real letter underneath it. */
 	private String decodeFileName(byte[] rawEntry) {
-		String name = new String(rawEntry, 1, 8, StandardCharsets.US_ASCII).trim();
-		String ext = new String(rawEntry, 9, 3, StandardCharsets.US_ASCII).trim();
+		byte[] unflagged = new byte[11];
+		for (int i = 0; i < 11; i++) {
+			unflagged[i] = (byte) (rawEntry[1 + i] & 0x7f);
+		}
+		String name = new String(unflagged, 0, 8, StandardCharsets.US_ASCII).trim();
+		String ext = new String(unflagged, 8, 3, StandardCharsets.US_ASCII).trim();
 		return ext.isEmpty() ? name : name + "." + ext;
 	}
 }

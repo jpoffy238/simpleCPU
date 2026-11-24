@@ -72,13 +72,17 @@ public class ImdTool {
 		if ("trs80m2-cpm22".equals(name)) {
 			return DiskParameterBlock.trs80ModelIiCpm22();
 		}
-		throw new IllegalArgumentException("Unknown DPB profile: " + name + " (known: trs80m2-cpm22)");
+		if ("compupro-cpmplus".equals(name)) {
+			return DiskParameterBlock.compuProCpmPlus();
+		}
+		throw new IllegalArgumentException(
+				"Unknown DPB profile: " + name + " (known: trs80m2-cpm22, compupro-cpmplus)");
 	}
 
 	private static void printUsage() {
 		System.err.println("Usage:");
 		System.err.println("  list <image.imd> <dpb-profile>");
 		System.err.println("  get <image.imd> <dpb-profile> <cpm-name> <host-file>");
-		System.err.println("Known DPB profiles: trs80m2-cpm22");
+		System.err.println("Known DPB profiles: trs80m2-cpm22, compupro-cpmplus");
 	}
 }
