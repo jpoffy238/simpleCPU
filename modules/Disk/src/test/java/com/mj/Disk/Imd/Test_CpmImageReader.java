@@ -142,6 +142,52 @@ public class Test_CpmImageReader {
 	}
 
 	@Test
+	public void listFilesAndReadFileIgnoreTheAttributeFlagHighBitOnNameBytes() throws Exception {
+		// Real CP/M (2.2 and Plus alike) uses bit 7 of each name/extension byte
+		// as a per-character file attribute flag (read-only, system, archive) -
+		// found on a real CompuPro CP/M Plus disk (see
+		// DiskParameterBlock.compuProCpmPlus()), which sets it on several
+		// files; a synthetic image built by encodeFileName() alone never sets
+		// it, so this flips it by hand on two bytes to prove both
+		// listFiles()/readFile() tolerate it rather than only working by
+		// accident on a disk that happens to never set it.
+		DiskParameterBlock dpb = new DiskParameterBlock(0, 8, 2, 1);
+		byte[] content = "Hello, CP/M!".getBytes();
+		byte[] image = buildImage(dpb, Map.of("HELLO.TXT", content));
+		image[1] |= 0x80; // 'H' of HELLO
+		image[9] |= 0x80; // 'T' of the TXT extension
+
+		CpmImageReader reader = new CpmImageReader(image, dpb);
+
+		assertEquals(List.of("HELLO.TXT"), reader.listFiles());
+		assertArrayEquals(content, Arrays.copyOf(reader.readFile("HELLO.TXT"), content.length));
+	}
+
+	@Test
+	public void listFilesSkipsCpmPlusSpecialPurposeDirectoryEntries() throws Exception {
+		// CP/M Plus's date-stamping extension reserves periodic directory
+		// slots for timestamp/password metadata (status byte 0x21 on a real
+		// CompuPro CP/M Plus disk - see CpmImageReader's own class comment),
+		// not an ordinary file - a status byte this isn't STATUS_EMPTY (0xE5)
+		// but also isn't a real 0-15 user number. Writes one directly into an
+		// otherwise-empty directory slot, at the same extent (0) a real file
+		// also uses, to prove this is excluded on its own status rather than
+		// by some incidental extent mismatch.
+		DiskParameterBlock dpb = new DiskParameterBlock(0, 8, 2, 1);
+		byte[] image = buildImage(dpb, Map.of("HELLO.TXT", "Hello, CP/M!".getBytes()));
+		int specialOffset = DiskParameterBlock.ENTRY_SIZE; // slot 1 - otherwise still 0xE5
+		image[specialOffset] = 0x21;
+		for (int i = 1; i < 12; i++) {
+			image[specialOffset + i] = 'X';
+		}
+		image[specialOffset + 12] = 0; // extent 0, same as the real file above
+
+		CpmImageReader reader = new CpmImageReader(image, dpb);
+
+		assertEquals(List.of("HELLO.TXT"), reader.listFiles());
+	}
+
+	@Test
 	public void readsBackAFileSpanningMultipleExtents() throws Exception {
 		DiskParameterBlock dpb = new DiskParameterBlock(0, 8, 2, 1); // 16 pointers * 8 records = 128 records/extent
 		byte[] content = new byte[17664]; // 138 records - crosses the extent 0/1 boundary at 128 records
