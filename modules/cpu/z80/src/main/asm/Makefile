@@ -1,6 +1,6 @@
 .SUFFIXES: .z80 .asm
 
-install: BIOS.z80 Demo.z80 DiskTest.z80 GraphicsTest.z80 GetTimeTest.z80 ScrollTest.z80 RunFileTest.z80 Boot.z80 CpmCompat.z80 CpmHello.z80
+install: BIOS.z80 Demo.z80 DiskTest.z80 GraphicsTest.z80 GetTimeTest.z80 ScrollTest.z80 RunFileTest.z80 Boot.z80 CpmCompat.z80 CpmHello.z80 CpmReadFile.z80
 	mkdir -p ../../test/resources ../../main/resources
 	cp *.z80 ../../test/resources
 	cp *.z80 ../../main/resources
@@ -37,3 +37,6 @@ CpmCompat.z80: CpmCompat.asm
 
 CpmHello.z80: CpmHello.asm
 	z80-asm CpmHello.asm 0x0100::CpmHello.z80
+
+CpmReadFile.z80: CpmReadFile.asm
+	z80-asm CpmReadFile.asm 0x0100::CpmReadFile.z80
