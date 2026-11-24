@@ -53,6 +53,14 @@ public class Z80CPU {
 	public int pc;
 	public int sp;
 
+	/** Set by HALT (see that instruction's own comment), cleared by
+	 * serviceInterrupts() exactly when it actually accepts an NMI or
+	 * maskable interrupt - not merely when interrupts get re-enabled with
+	 * nothing pending yet, matching real hardware (HALT only ever breaks on
+	 * a genuine interrupt arriving). While set, step() does nothing at all,
+	 * standing in for real hardware repeating an internal NOP forever. */
+	public boolean halted;
+
 	/** The two interrupt enable flip-flops. IFF1 is the one that actually
 	 * gates whether a maskable interrupt is accepted; IFF2 is just a backup
 	 * copy, restored into IFF1 by RETN after an NMI (which only ever clears
@@ -119,8 +127,14 @@ public class Z80CPU {
 		return value;
 	}
 
-	/** Decodes and executes exactly one instruction. */
+	/** Decodes and executes exactly one instruction - or, while halted
+	 * (see HALT's own comment), nothing at all: real hardware doesn't
+	 * re-read memory on every internally-repeated NOP either, and there's
+	 * nothing to decode anyway since PC never moves during a halt. */
 	public void step() throws illegalOpCodeException, illegalAddressException, DeviceUnavailable, ROException {
+		if (halted) {
+			return;
+		}
 		Z80Instruction instruction = decoder.decode(this);
 		instruction.execute(this);
 	}
@@ -152,6 +166,7 @@ public class Z80CPU {
 			return false;
 		}
 		if (portBus.IsNMInterruptRaised()) {
+			halted = false;
 			pushPC();
 			iff1 = false;
 			pc = 0x0066;
@@ -163,6 +178,7 @@ public class Z80CPU {
 				throw new UnsupportedOperationException(
 						"IM 0 interrupt servicing is not implemented - call IM 1 or IM 2 before raising a maskable interrupt");
 			}
+			halted = false;
 			iff1 = false;
 			iff2 = false;
 			pushPC();

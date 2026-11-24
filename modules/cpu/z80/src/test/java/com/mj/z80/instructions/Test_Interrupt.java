@@ -65,6 +65,70 @@ public class Test_Interrupt {
 		assertFalse(cpu.iff2);
 	}
 
+	// ---- HALT ----
+
+	@Test
+	public void haltSetsTheHaltedFlag() throws Exception {
+		runBase(0x76); // HALT
+
+		assertTrue(cpu.halted);
+	}
+
+	@Test
+	public void stepDoesNothingAtAllWhileHalted() throws Exception {
+		cpu.halted = true;
+		cpu.pc = 0x1000;
+		machine.memoryBus().write(0x1000, (byte) 0x3C); // INC A - would change A/flags if it ran
+		int before = cpu.af.hi();
+
+		cpu.step();
+
+		assertEquals(before, cpu.af.hi(), "a real halted CPU doesn't execute whatever instruction happens to follow");
+		assertEquals(0x1000, cpu.pc, "PC shouldn't move either - there's nothing to fetch");
+		assertTrue(cpu.halted);
+	}
+
+	@Test
+	public void nmiWakesAHaltedCpuAndClearsTheFlag() throws Exception {
+		runBase(0x76); // HALT - PC is already correctly past this opcode, same as any instruction
+		int pcAfterHalt = cpu.pc;
+		cpu.sp = 0x2000;
+		machine.portBus().raiseNMInterupt();
+
+		assertTrue(cpu.serviceInterrupts());
+
+		assertFalse(cpu.halted, "a real interrupt arriving is exactly what wakes a halted CPU");
+		assertEquals(0x0066, cpu.pc);
+		int pushedReturnAddress = (machine.memoryBus().read(0x1FFE) & 0xff) | ((machine.memoryBus().read(0x1FFF) & 0xff) << 8);
+		assertEquals(pcAfterHalt, pushedReturnAddress,
+				"the pushed return address should resume right after HALT, not re-execute it");
+	}
+
+	@Test
+	public void aServicedMaskableInterruptWakesAHaltedCpuToo() throws Exception {
+		runBase(0x76); // HALT
+		cpu.sp = 0x2000;
+		cpu.iff1 = true;
+		cpu.interruptMode = 1;
+		machine.portBus().raiseInterupt();
+
+		assertTrue(cpu.serviceInterrupts());
+
+		assertFalse(cpu.halted);
+		assertEquals(0x0038, cpu.pc);
+	}
+
+	@Test
+	public void anUnservicedMaskableInterruptLeavesAHaltedCpuHaltedWhenIff1IsClear() throws Exception {
+		runBase(0x76); // HALT
+		cpu.iff1 = false;
+		cpu.interruptMode = 1;
+		machine.portBus().raiseInterupt();
+
+		assertFalse(cpu.serviceInterrupts(), "iff1 is clear - this interrupt can't be accepted yet");
+		assertTrue(cpu.halted, "still genuinely stuck - this is the real DI;HALT dead-halt case");
+	}
+
 	// ---- IM 0/1/2 ----
 
 	@Test
