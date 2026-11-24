@@ -69,11 +69,26 @@ public class Z80Main {
 		cpuThread.start();
 	}
 
+	/** DI;HALT (or an equivalent IM 0 HALT with nothing ever going to raise
+	 * a maskable interrupt) is a genuine, real dead halt - nothing in this
+	 * machine model ever raises NMI (see Z80CPU.halted's own comment), so
+	 * once halted with iff1 false there is no device left that could ever
+	 * wake this CPU again. Rather than spin this thread forever doing
+	 * nothing (serviceInterrupts()/step() both become permanent no-ops),
+	 * recognize that and let the whole process exit cleanly - the real
+	 * hardware equivalent of the machine having actually halted, not
+	 * crashed. A halt with interrupts still enabled (e.g. a future
+	 * EI;HALT-based disk wait) is NOT this condition - it's just waiting
+	 * for the next real interrupt, so the loop keeps running normally. */
 	private static void runLoop(Z80CPU cpu) {
 		while (true) {
 			try {
 				cpu.serviceInterrupts();
 				cpu.step();
+				if (cpu.halted && !cpu.iff1) {
+					logger.info("Z80 CPU executed DI;HALT with no way to ever be woken again - exiting");
+					System.exit(0);
+				}
 			} catch (Exception e) {
 				logger.error("Z80 CPU halted", e);
 				break;
